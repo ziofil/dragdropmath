@@ -1,0 +1,421 @@
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-2: #efece4;
+  --ink: #1d1b26;
+  --ink-soft: #5d5a6b;
+  --line: #dcd8cc;
+  --accent: #5b3df5;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6e0ff;
+  --var: #3a2bb8;
+  --good: #0f9d74;
+  --good-soft: #d6f5ea;
+  --warn: #c2410c;
+  --gold: #e6a700;
+  --radius: 14px;
+  --ui: "Space Grotesk", system-ui, sans-serif;
+  --math: "STIX Two Text", "Times New Roman", serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14131a;
+    --surface: #1d1c25;
+    --surface-2: #26252f;
+    --ink: #f1eff8;
+    --ink-soft: #a6a3b8;
+    --line: #34323f;
+    --accent: #8b74ff;
+    --accent-ink: #14131a;
+    --accent-soft: #2c2650;
+    --var: #b7a8ff;
+    --good: #3dd6a5;
+    --good-soft: #163a30;
+    --warn: #fb923c;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.app {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 16px 64px;
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+}
+.topbar a {
+  text-decoration: none;
+  font-weight: 500;
+}
+.logo {
+  font-weight: 700 !important;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+.logo span {
+  color: var(--accent);
+}
+
+/* ---------- buttons ---------- */
+button,
+.button {
+  font: inherit;
+  font-weight: 500;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+button:hover:not(:disabled),
+.button:hover {
+  border-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button[aria-pressed="true"] {
+  background: var(--accent-soft);
+}
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------- home ---------- */
+.hero {
+  padding: 32px 0 24px;
+}
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+}
+/* "feel" in the title: letters you can drag around (FeelWord.tsx). */
+.feel-word {
+  display: inline-block;
+  vertical-align: -0.3em;
+  margin: 0 -0.08em;
+}
+.feel-word svg {
+  display: block;
+}
+.feel-letter {
+  font-family: var(--math);
+  font-style: italic;
+  fill: var(--accent);
+  user-select: none;
+}
+.feel-hit {
+  fill: transparent;
+}
+.hero p {
+  max-width: 560px;
+  color: var(--ink-soft);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.chapter {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+.chapter-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.chapter-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.chapter-head p {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+}
+.chapter-num {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+.exercises {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+}
+.ex-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  text-decoration: none;
+  border: 2px solid transparent;
+}
+.ex-card:hover {
+  border-color: var(--accent);
+}
+.ex-check {
+  color: var(--good);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.ex-num {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.ex-card.solved {
+  background: var(--good-soft);
+}
+.sandbox-link {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sandbox-link p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- puzzle ---------- */
+.puzzle-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0 12px;
+}
+.back {
+  text-decoration: none;
+  color: var(--ink-soft);
+}
+.title {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 4px 16px;
+}
+.goal-label {
+  flex: none;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.static-math {
+  width: 100%;
+  max-height: 90px;
+}
+
+.board {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.board-solved {
+  border-color: var(--good);
+}
+.canvas {
+  width: 100%;
+  touch-action: none;
+}
+.canvas svg {
+  display: block;
+}
+.canvas-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--warn);
+  text-align: center;
+  padding: 0 16px;
+}
+.canvas-error span {
+  color: var(--ink-soft);
+}
+.board-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.hint {
+  margin: 0;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.invariant {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 0.9rem;
+}
+.invariant-label {
+  color: var(--ink-soft);
+}
+.invariant-value {
+  font-family: var(--math);
+  font-size: 1.1rem;
+  color: var(--good);
+}
+.invariant-bad .invariant-value {
+  color: var(--warn);
+}
+
+.result {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--good-soft);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 16px;
+  animation: pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.result-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--good);
+}
+.result-detail {
+  grid-row: 2;
+  color: var(--ink-soft);
+}
+.result .button {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+}
+
+.sandbox-form {
+  display: flex;
+  gap: 8px;
+}
+.sandbox-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-family: var(--math);
+  font-size: 1.2rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.error {
+  color: var(--warn);
+}
+
+/* ---------- math glyphs (SVG) ---------- */
+.m-num,
+.m-var,
+.m-op {
+  font-family: var(--math);
+  fill: var(--ink);
+  user-select: none;
+}
+.m-var {
+  font-style: italic;
+  fill: var(--var);
+}
+.m-const {
+  font-family: var(--math);
+  font-style: italic;
+  fill: var(--ink);
+  user-select: none;
+}
+.m-fn {
+  font-family: var(--math);
+  fill: var(--ink);
+  user-select: none;
+}
+.m-bar {
+  fill: var(--ink);
+}
+.m-root {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.m-hit {
+  fill: transparent;
+}
+.m-node {
+  cursor: grab;
+}
+.m-node:active {
+  cursor: grabbing;
+}
