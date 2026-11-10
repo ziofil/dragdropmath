@@ -156,7 +156,7 @@ export const timesOne: Rule = {
   },
 };
 
-/** x·2 → 2x (tap a product to put its numbers in front, where they're usually written). */
+/** x·2 → 2x, x·1 → x (tap a product to write it the usual way: numbers in front, no ·1). */
 export const numbersFirst: Rule = {
   id: "numbers-first",
   name: "Numbers in front",
@@ -172,10 +172,15 @@ export const numbersFirst: Rule = {
     const P = c.node.kind === "prod" ? c.node : null;
     const loc = c.loc;
     if (!P || !loc) return [];
-    const nums = P.factors.filter((f) => f.kind === "num");
+    const isOne = (f: Expr) => f.kind === "num" && f.value === 1;
+    const nums = P.factors.filter((f) => f.kind === "num" && !isOne(f));
     const rest = P.factors.filter((f) => f.kind !== "num");
+    // A ·1 is just dropped when tidying (x·1 → x, not 1x).
+    const ones = P.factors.filter(isOne);
     const reordered = [...nums, ...rest];
-    if (reordered.every((f, i) => f === P.factors[i])) return [];
-    return [{ rule: "numbers-first", state: replaceIn(state, loc, { ...P, factors: reordered }) }];
+    if (reordered.length === 0) reordered.push(ones[0]);
+    if (reordered.length === P.factors.length && reordered.every((f, i) => f === P.factors[i])) return [];
+    const tidy = reordered.length === 1 ? reordered[0] : { ...P, factors: reordered };
+    return [{ rule: "numbers-first", state: replaceIn(state, loc, tidy) }];
   },
 };

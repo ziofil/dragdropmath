@@ -1,5 +1,11 @@
+import { cloneElement, type ReactElement } from "react";
 import {
   getElementPositionCheap,
+  modifier,
+  Modifier,
+  type DragFrame,
+  type DragSpecData,
+  type LayeredSvgx,
   renderStateReadOnly,
   translate,
   Vec2,
@@ -8,8 +14,8 @@ import {
   type DragSpecBuilder,
   type Svgx,
 } from "dragology";
-import type { Expr, Frac, MathState } from "../expr/types";
-import { rootIndex } from "../expr/key";
+import type { Expr, Frac, Log, MathState } from "../expr/types";
+import { print, rootIndex } from "../expr/key";
 import { candidatesFor, isGrabbable, signId, tapFor, type RuleId } from "../rules";
 import { allNodes, children, locate, nodeAt } from "../expr/tree";
 import { dragCtx } from "../rules/types";
@@ -40,6 +46,8 @@ export type RenderCtx = {
   draggedId: string | null;
   /** Filled in by layout: each node's box, relative to its own origin (baseline-left). */
   sizes?: Map<string, Size>;
+  /** Filled in by layout: each node's font size. */
+  fontSizes?: Map<string, number>;
   /** Filled in by layout: the canvas size it was laid out for. */
   canvas?: { W: number; H: number };
   /** Apply a tap move (e.g. tap the 8 in log₂8 to make it 2³). */
@@ -114,8 +122,20 @@ export function dragSpec(rc: RenderCtx, id: string): DragSpec<MathState> {
       ),
   ]);
 
+  // Pulling a factor out of a log: the piece carries a faint copy of the log
+  // from the start, firming up as it comes out.
+  const split = candidates.find((c) => c.rule === "log-of-product");
+  // Combining logs: the reverse — the carried log's ln( ) fades as it nears
+  // the log it joins, until only what goes inside is left.
+  const joins = candidates.filter((c) => c.rule === "combine-logs").map((c) => c.targetId!);
+  const carried = split
+    ? moves.with(carryLogShell(rc, id, split.state))
+    : joins.length
+      ? moves.with(fadeCarriedLog(rc, id, joins))
+      : moves;
+
   const merges = candidates.filter((c) => c.targetId);
-  if (merges.length === 0) return moves.withFloating();
+  if (merges.length === 0) return carried.withFloating();
   // On a target the carried piece is absorbed: no floating copy, just the
   // result shown where it will stay. Off targets it floats under the pointer.
   // Switching between the two animates (the carried piece flies in; copies
@@ -123,7 +143,7 @@ export function dragSpec(rc: RenderCtx, id: string): DragSpec<MathState> {
   // outside, so `whenFar` with gap 1 = "not on any target".
   return d
     .closest(merges.map((c) => onTarget(rc, id, c.targetId!, c.state)))
-    .whenFar(moves.withFloating(), { gap: 1 })
+    .whenFar(carried.withFloating(), { gap: 1 })
     .withBranchTransition(BRANCH_MS);
 }
 
@@ -236,13 +256,181 @@ function landing(rc: RenderCtx, draggedId: string, result: MathState): DragSpec<
  * goes out to the left, the others to the right.
  */
 function pullOut(rc: RenderCtx, draggedId: string, result: MathState): DragSpec<MathState> {
+  return aimAt(rc, result, (ctx) => pullOutAim(rc, ctx, draggedId));
+}
+
+function pullOutAim(rc: RenderCtx, ctx: DragInitContext<MathState>, draggedId: string): Vec2 {
   const c = dragCtx(rc.state, draggedId)!;
   const containerId = dragCtx(rc.state, c.parent!.id)!.parent!.id;
-  const toLeft = c.index === 0;
-  return aimAt(rc, result, (ctx) => {
-    const b = canvasBox(rc, ctx, containerId);
-    return toLeft ? b.symLeft.sub(Vec2(0.6 * b.h, 0)) : b.symRight.add(Vec2(0.6 * b.h, 0));
-  });
+  const b = canvasBox(rc, ctx, containerId);
+  return c.index === 0 ? b.symLeft.sub(Vec2(0.6 * b.h, 0)) : b.symRight.add(Vec2(0.6 * b.h, 0));
+}
+
+/** How visible the carried log is the moment the piece is picked up. */
+const SHELL_FAINT = 0.2;
+
+/**
+ * ln(2x): the 2 can't leave without a copy of the ln. So from the moment it's
+ * picked up, the carried 2 wears a faint ln( ), which firms up the further it
+ * is pulled out (fully there where the split lands). In the split's preview
+ * the new ln at the destination is hidden: the one being carried is it.
+ */
+class CarryLogShell extends Modifier<MathState> {
+  readonly name = "carryLogShell";
+  private readonly home: Vec2;
+  private readonly aim: Vec2;
+  private readonly bare: unknown[];
+  private readonly hidden: Set<string>;
+  private readonly shell: Svgx[];
+
+  constructor(
+    ctx: DragInitContext<MathState>,
+    inner: DragSpecData<MathState>,
+    readonly rc: RenderCtx,
+    readonly draggedId: string,
+    readonly result: MathState,
+  ) {
+    super(ctx, inner);
+    this.home = canvasBox(rc, ctx, draggedId).centre;
+    this.aim = pullOutAim(rc, ctx, draggedId);
+    // The piece as it looks now (no brackets of its own yet), in every preview.
+    const start = renderStateReadOnly(ctx, rc.state).byId.get(draggedId)?.element as ReactElement<{ children?: unknown }> | undefined;
+    this.bare = ([] as unknown[]).concat(start?.props.children ?? []);
+    // The new log around the piece in the result: its label is what we carry.
+    const newLog = result.sides
+      .flatMap(allNodes)
+      .find((n): n is Log => n.kind === "log" && n.arg.id === draggedId);
+    this.hidden = new Set(newLog ? [newLog.id, ...allNodes(newLog.base).map((n) => n.id)] : []);
+    const log = dragCtx(rc.state, dragCtx(rc.state, draggedId)!.parent!.id)!.parent as Log;
+    this.shell = logShell(log, rc.fontSizes!.get(draggedId)!, rc.sizes!.get(draggedId)!);
+  }
+
+  frame(frame: DragFrame) {
+    const r = this.inner.run(frame);
+    const out = this.aim.sub(this.home);
+    const along = carriedCentre(this.rc, this.ctx, frame.pointer).sub(this.home).dot(out) / out.dot(out);
+    const opacity = SHELL_FAINT + (1 - SHELL_FAINT) * Math.min(1, Math.max(0, along));
+    const onSplit = r.dropState === this.result;
+    return { ...r, preview: () => this.dress(r.preview(), opacity, onSplit) };
+  }
+
+  private dress(layers: LayeredSvgx, opacity: number, onSplit: boolean): LayeredSvgx {
+    const byId = new Map(layers.byId);
+    const me = byId.get(this.draggedId);
+    if (me) {
+      const shell = (
+        <g dragologyKey="carry-shell" opacity={opacity} style={{ pointerEvents: "none" }}>
+          {this.shell}
+        </g>
+      );
+      byId.set(this.draggedId, { ...me, element: cloneElement(me.element, {}, ...(this.bare as Svgx[]), shell) as Svgx });
+    }
+    if (onSplit) {
+      for (const id of this.hidden) {
+        const layer = byId.get(id);
+        if (layer) byId.set(id, { ...layer, element: cloneElement(layer.element, { opacity: 0 }) as Svgx });
+      }
+    }
+    return { ...layers, byId };
+  }
+}
+const carryLogShell = modifier(CarryLogShell);
+
+/**
+ * ln(2) + ln(x): carrying ln(x) onto ln(2), its ln( ) (and a minus in front,
+ * which becomes the fraction bar or joins the other's) fades as it nears the
+ * target, down to faint just before the merge takes over. What stays solid is
+ * the x — the part that actually goes into the other log.
+ */
+class FadeCarriedLog extends Modifier<MathState> {
+  readonly name = "fadeCarriedLog";
+  private readonly home: Vec2;
+  private readonly targets: Vec2[];
+  /** Layers that fade whole (the ln label, a minus), and layers where only some glyphs fade (brackets, "log"). */
+  private readonly whole: string[];
+  private readonly glyphs: [string, Set<string>][];
+
+  constructor(
+    ctx: DragInitContext<MathState>,
+    inner: DragSpecData<MathState>,
+    readonly rc: RenderCtx,
+    draggedId: string,
+    targetIds: string[],
+  ) {
+    super(ctx, inner);
+    this.home = canvasBox(rc, ctx, draggedId).centre;
+    this.targets = targetIds.map((t) => canvasBox(rc, ctx, t).centre);
+    const T = dragCtx(rc.state, draggedId)!.node;
+    const L = (T.kind === "neg" ? T.arg : T) as Log;
+    this.whole = [...allNodes(L.base).map((n) => n.id), ...(T.kind === "neg" ? [signId(T.id)] : [])];
+    this.glyphs = [
+      [L.id, new Set(["log"])],
+      [L.arg.id, new Set(["lp", "rp"])],
+      // Without its own handle, a minus is drawn in the term's layer.
+      ...(T.kind === "neg" ? [[T.id, new Set(["t-sign", "lead-uminus", "lead-minus"])] as [string, Set<string>]] : []),
+    ];
+  }
+
+  frame(frame: DragFrame) {
+    const r = this.inner.run(frame);
+    const c = carriedCentre(this.rc, this.ctx, frame.pointer);
+    const near = Math.max(0, ...this.targets.map((t) => 1 - c.dist(t) / Math.max(1, this.home.dist(t))));
+    const opacity = 1 - (1 - SHELL_FAINT) * Math.min(1, near);
+    return { ...r, preview: () => this.dress(r.preview(), opacity) };
+  }
+
+  private dress(layers: LayeredSvgx, opacity: number): LayeredSvgx {
+    const byId = new Map(layers.byId);
+    for (const id of this.whole) {
+      const layer = byId.get(id);
+      if (layer) byId.set(id, { ...layer, element: cloneElement(layer.element, { opacity }) as Svgx });
+    }
+    for (const [id, keys] of this.glyphs) {
+      const layer = byId.get(id);
+      if (layer) byId.set(id, { ...layer, element: withGlyphOpacity(layer.element, keys, opacity) as Svgx });
+    }
+    return { ...layers, byId };
+  }
+}
+const fadeCarriedLog = modifier(FadeCarriedLog);
+
+/** `el` with the decorations keyed by `keys` (anywhere inside it) at this opacity. */
+function withGlyphOpacity(el: unknown, keys: Set<string>, opacity: number): unknown {
+  if (Array.isArray(el)) return el.map((c) => withGlyphOpacity(c, keys, opacity));
+  if (!el || typeof el !== "object" || !("props" in el)) return el;
+  const e = el as ReactElement<{ dragologyKey?: string; children?: unknown }>;
+  if (e.props.dragologyKey && keys.has(e.props.dragologyKey)) return cloneElement(e as ReactElement<{ opacity?: number }>, { opacity });
+  if (e.props.children === undefined) return e;
+  return cloneElement(e, {}, withGlyphOpacity(e.props.children, keys, opacity) as never);
+}
+
+/** "ln(" and ")" (or "log₂(" and ")") around a piece of the given size, in its own coordinates. */
+function logShell(L: Log, size: number, me: Size): Svgx[] {
+  const pw = textWidth("(", size) + 0.02 * size;
+  const gap = 0.04 * size;
+  const sy = Math.max(1, (me.asc + me.desc) / ((ASC + DESC) * size));
+  const shiftY = (me.desc - me.asc) / 2 + ((ASC - DESC) / 2) * size * sy;
+  const paren = (pkey: string, ch: string, x: number) => (
+    <text dragologyKey={pkey} transform={`${translate(x, shiftY)} scale(1, ${sy})`} fontSize={size} className="m-op">
+      {ch}
+    </text>
+  );
+  const left = me.lead - pw;
+  const parts = [paren("carry-lp", "(", left), paren("carry-rp", ")", me.w)];
+  if (L.base.kind === "const") {
+    const w = textWidth("ln", size) + 0.06 * size;
+    return [glyph("carry-ln", "ln", left - gap - w, 0, size, "m-fn"), ...parts];
+  }
+  const small = size * 0.68;
+  const baseText = print(L.base);
+  const baseW = textWidth(baseText, small);
+  const word = textWidth("log", size) + 0.02 * size;
+  const x0 = left - gap - baseW - word;
+  return [
+    glyph("carry-log", "log", x0, 0, size, "m-fn"),
+    glyph("carry-base", baseText, x0 + word, 0.28 * size, small, "m-num"),
+    ...parts,
+  ];
 }
 
 /** Factoring out: carry the factor out past the left end of its expression. */
@@ -309,6 +497,7 @@ function layoutNode(
   const grabbable = interactive && isGrabbable(rc.state, e.id, rc.rules);
   const tap = grabbable ? tapFor(rc.state, e.id, rc.rules) : null;
   rc.sizes?.set(e.id, { w, asc, desc, lead: leadW });
+  rc.fontSizes?.set(e.id, size);
   // A minus sign is also its own piece (see signHandle); every layout records its size.
   if (e.kind === "neg" && L) rc.sizes?.set(signId(e.id), { w: textWidth(L.glyph, size) + 0.04 * size, asc: ASC * size, desc: DESC * size, lead: 0 });
 
@@ -612,6 +801,7 @@ export const BASE_SIZE = 46;
 /** Lay out a whole expression or equation centred in a W×H canvas. */
 export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
+  rc.fontSizes ??= new Map();
   rc.canvas = { W, H };
   const build = (size: number) => {
     const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null));

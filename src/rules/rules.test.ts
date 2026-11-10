@@ -335,4 +335,18 @@ describe("QA regressions", () => {
     const one = s.sides.flatMap(allNodes).find((n) => n.kind === "num" && n.value === 1)!;
     expect(RULES["move-factor"].apply(s, one.id)).toEqual([]);
   });
+
+  it("tapping x·1 tidies it to x, not 1x", () => {
+    // ·1 can't be typed (the parser drops it), so make it the way a learner would.
+    const tidy = (src: string, logId: (s: ReturnType<typeof parseState>) => string) => {
+      let s = parseState(src);
+      s = RULES["evaluate-log"].apply(s, logId(s))[0].state; // ln(e) → 1, kept visible
+      const P = s.sides.flatMap(allNodes).find((n) => n.kind === "prod")!;
+      return RULES["numbers-first"].apply(s, P.id).map((c) => printState(c.state));
+    };
+    const lnE = (s: ReturnType<typeof parseState>) => s.sides.flatMap(allNodes).find((n) => n.kind === "log")!.id;
+    expect(tidy("x·ln(e)", lnE)).toEqual(["x"]);
+    expect(tidy("ln(e)·x", lnE)).toEqual(["x"]);
+    expect(tidy("x·2·ln(e)", lnE)).toEqual(["2*x"]);
+  });
 });

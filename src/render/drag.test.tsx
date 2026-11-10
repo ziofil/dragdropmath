@@ -17,7 +17,7 @@ import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { printState, stateKey } from "../expr/key";
 import { allNodes } from "../expr/tree";
-import { ALL_RULES, candidatesFor, handles, isGrabbable, signOwner, type RuleId } from "../rules";
+import { ALL_RULES, candidatesFor, handles, isGrabbable, signId, signOwner, type RuleId } from "../rules";
 import { allPuzzles } from "../game/puzzles";
 import { dragSpec, renderState, type RenderCtx } from "./layout";
 
@@ -83,7 +83,9 @@ function setup(state: MathState, rules: readonly RuleId[]) {
     });
   };
   const sizeOf = (id: string) => rc(id).sizes!.get(id)!;
-  return { posOf, dropAt, dragPath, sizeOf };
+  /** The drag behaviour for node `id`, to inspect frame by frame. */
+  const behaviorFor = (id: string, anchor = ANCHOR) => dragSpecToBehavior(dragSpec(rc(id), id), ctxFor(id, anchor));
+  return { posOf, dropAt, dragPath, sizeOf, behaviorFor };
 }
 
 function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
@@ -170,5 +172,116 @@ describe("moves inside small superscripts can be reached too", () => {
 describe("every allowed move can be reached by dragging", () => {
   it.each(allPuzzles().map((r) => [r.puzzle.id, r.puzzle.start, r.rules] as const))("%s: %s", (_, src, rules) => {
     expect(checkAllMovesReachable(src, rules)).toEqual([]);
+  });
+});
+
+describe("pulling a factor out of a log", () => {
+  /** The first element in `el`'s tree with this dragologyKey. */
+  const findKey = (el: unknown, k: string): { props: Record<string, unknown> } | null => {
+    if (!el || typeof el !== "object") return null;
+    if (Array.isArray(el)) return el.map((c) => findKey(c, k)).find(Boolean) ?? null;
+    const props = (el as { props?: Record<string, unknown> }).props;
+    if (!props) return null;
+    if (props.dragologyKey === k) return el as { props: Record<string, unknown> };
+    return findKey(props.children, k);
+  };
+
+  it.each([
+    ["ln(2x)", "2", -1, "ln(2) + ln(x)"],
+    ["ln(2x)", "x", 1, "ln(2) + ln(x)"],
+    ["log_2(8x)", "8", -1, "log_2(8) + log_2(x)"],
+  ] as const)("%s: carrying the %s out, a faint log goes with it and firms up", (src, what, dir, split) => {
+    const state = parseState(src);
+    const { posOf, behaviorFor } = setup(state, ALL_RULES);
+    const piece = state.sides.flatMap(allNodes).find((n) => printState({ sides: [n] }) === what)!;
+    const home = posOf(piece.id, state)!;
+    const b = behaviorFor(piece.id);
+    const frames = Array.from({ length: 31 }, (_, i) => {
+      const r = b({ pointer: home.add(Vec2((dir * 160 * i) / 30, 0)) });
+      const layers = r.preview();
+      const shell = findKey(layers.byId.get(piece.id)?.element, "carry-shell");
+      return { state: printState(r.dropState), opacity: shell?.props.opacity as number | undefined, layers };
+    });
+    // There from the moment it's picked up, faint...
+    expect(frames[0].opacity).toBeCloseTo(0.2);
+    // ...never fading as it comes out...
+    for (let i = 1; i < frames.length; i++) expect(frames[i].opacity!).toBeGreaterThanOrEqual(frames[i - 1].opacity!);
+    // ...and fully there once the split is what dropping would do.
+    const last = frames[frames.length - 1];
+    expect(last.state).toBe(split);
+    expect(last.opacity).toBe(1);
+    // Meanwhile no second log shows up at the destination: the carried one is it.
+    // (Only the log left behind, around the rest, has a visible label.)
+    const labels = [...last.layers.byId]
+      .filter(([id]) => id !== piece.id)
+      .filter(([, l]) => findKey(l.element, "ln") || findKey(l.element, "log"))
+      .filter(([, l]) => (l.element.props as { opacity?: number }).opacity !== 0);
+    expect(labels).toHaveLength(1);
+  });
+
+  it("other drags carry nothing extra", () => {
+    const state = parseState("2x + 3");
+    const { behaviorFor } = setup(state, ALL_RULES);
+    const two = state.sides.flatMap(allNodes).find((n) => n.kind === "num" && n.value === 2)!;
+    const layers = behaviorFor(two.id)({ pointer: Vec2(300, 100) }).preview();
+    expect(findKey(layers.byId.get(two.id)?.element, "carry-shell")).toBeNull();
+  });
+});
+
+describe("combining two logs", () => {
+  /** Opacity of the first element keyed `k` in a layer (or of the layer itself). */
+  const opacityOf = (el: unknown, k?: string): number => {
+    const walk = (e: unknown): number | null => {
+      if (!e || typeof e !== "object") return null;
+      if (Array.isArray(e)) return e.map(walk).find((x) => x !== null) ?? null;
+      const props = (e as { props?: Record<string, unknown> }).props;
+      if (!props) return null;
+      if (k === undefined || props.dragologyKey === k) return (props.opacity as number | undefined) ?? 1;
+      return walk(props.children);
+    };
+    const o = walk(el);
+    if (o === null) throw new Error(`no ${k}`);
+    return o;
+  };
+
+  it.each([
+    ["ln(2) + ln(x)", "ln(x)", "ln(2*x)"],
+    ["ln(12) - ln(3)", "-ln(3)", "ln(12/3)"],
+    ["ln(12) - ln(3)", "ln(12)", "ln(12/3)"],
+  ] as const)("%s: carrying %s, its ln( ) fades on the way to the other log", (src, what, merged) => {
+    const state = parseState(src);
+    const { posOf, sizeOf, behaviorFor } = setup(state, ALL_RULES);
+    const nodes = state.sides.flatMap(allNodes);
+    const T = nodes.find((n) => printState({ sides: [n] }) === what)!;
+    const L = (T.kind === "neg" ? T.arg : T) as Extract<MathState["sides"][number], { kind: "log" }>;
+    const target = candidatesFor(state, T.id, ALL_RULES).find((c) => c.rule === "combine-logs")!.targetId!;
+    const me = sizeOf(T.id);
+    const them = sizeOf(target);
+    const grab = Vec2(me.lead + 4, -10);
+    const start = posOf(T.id, state)!.sub(ANCHOR).add(grab);
+    const centreOf = (id: string, sz: { w: number; lead: number; asc: number; desc: number }) =>
+      posOf(id, state)!.sub(ANCHOR).add(Vec2(sz.lead + (sz.w - sz.lead) / 2, (sz.desc - sz.asc) / 2));
+    const end = centreOf(target, them).sub(centreOf(T.id, me)).add(start);
+    const b = behaviorFor(T.id, grab);
+    const frames = Array.from({ length: 31 }, (_, i) => {
+      const r = b({ pointer: start.add(end.sub(start).mul(i / 30)) });
+      return { state: printState(r.dropState), layers: r.preview() };
+    });
+    const label = (f: (typeof frames)[number]) => opacityOf(f.layers.byId.get(L.base.id)?.element);
+    const bracket = (f: (typeof frames)[number]) => opacityOf(f.layers.byId.get(L.arg.id)?.element, "lp");
+    const inside = (f: (typeof frames)[number]) => opacityOf(f.layers.byId.get(L.arg.id)?.element, L.arg.kind === "num" ? "t-num" : "t-var");
+    // Solid when picked up...
+    expect(label(frames[0])).toBeCloseTo(1);
+    expect(bracket(frames[0])).toBeCloseTo(1);
+    // ...fading steadily while it's still being carried, the inside staying solid...
+    const carried = frames.filter((f) => f.state !== merged);
+    for (let i = 1; i < carried.length; i++) expect(label(carried[i])).toBeLessThanOrEqual(label(carried[i - 1]) + 1e-9);
+    const lastCarried = carried[carried.length - 1];
+    expect(label(lastCarried)).toBeLessThan(0.6);
+    expect(bracket(lastCarried)).toBeCloseTo(label(lastCarried));
+    expect(inside(lastCarried)).toBe(1);
+    if (T.kind === "neg") expect(opacityOf(lastCarried.layers.byId.get(signId(T.id))?.element)).toBeCloseTo(label(lastCarried));
+    // ...and the merge still happens on the target.
+    expect(frames[frames.length - 1].state).toBe(merged);
   });
 });
