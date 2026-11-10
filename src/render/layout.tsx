@@ -3,6 +3,9 @@ import {
   getElementPositionCheap,
   modifier,
   Modifier,
+  operator,
+  Operator,
+  type OpResult,
   type DragFrame,
   type DragSpecData,
   type LayeredSvgx,
@@ -16,7 +19,7 @@ import {
 } from "dragology";
 import type { Expr, Frac, Log, MathState } from "../expr/types";
 import { print, rootIndex } from "../expr/key";
-import { candidatesFor, isGrabbable, signId, tapFor, type RuleId } from "../rules";
+import { candidatesFor, isGrabbable, signId, tapFor, withoutMarks, type RuleId } from "../rules";
 import { allNodes, children, locate, nodeAt } from "../expr/tree";
 import { dragCtx } from "../rules/types";
 import { textWidth } from "./measure";
@@ -127,7 +130,7 @@ export function dragSpec(rc: RenderCtx, id: string): DragSpec<MathState> {
   const split = candidates.find((c) => c.rule === "log-of-product");
   // Combining logs: the reverse — the carried log's ln( ) fades as it nears
   // the log it joins, until only what goes inside is left.
-  const joins = candidates.filter((c) => c.rule === "combine-logs").map((c) => c.targetId!);
+  const joins = candidates.filter((c) => c.rule === "combine-logs");
   const carried = split
     ? moves.with(carryLogShell(rc, id, split.state))
     : joins.length
@@ -136,19 +139,12 @@ export function dragSpec(rc: RenderCtx, id: string): DragSpec<MathState> {
 
   const merges = candidates.filter((c) => c.targetId);
   if (merges.length === 0) return carried.withFloating();
-  // On a target the carried piece is absorbed: no floating copy, just the
-  // result shown where it will stay. Off targets it floats under the pointer.
-  // Switching between the two animates (the carried piece flies in; copies
-  // made by distributing fly out of it). Merge zones have gap 0 inside and ∞
-  // outside, so `whenFar` with gap 1 = "not on any target".
-  return d
-    .closest(merges.map((c) => onTarget(rc, id, c.targetId!, c.state)))
-    .whenFar(carried.withFloating(), { gap: 1 })
-    .withBranchTransition(BRANCH_MS);
+  // Heading for a target, the result forms gradually: the closer the carried
+  // piece gets, the further the picture is blended towards the merge (the
+  // piece flies in, copies from distributing fly out). Nothing snaps while
+  // dragging; let go on the target and the blend finishes into the result.
+  return mergeApproach(carried.withFloating(), rc, id, merges);
 }
-
-/** How long the switch between carrying a piece and merging it takes to animate. */
-const BRANCH_MS = 180;
 
 /**
  * "On" a target = the carried symbol's centre is over the target symbol
@@ -208,6 +204,9 @@ function rowSlot(
     const left = boxes[0].symLeft.x - 0.5 * h;
     const right = boxes[boxes.length - 1].symRight.x + 0.5 * h;
     const midY = boxes[0].centre.y;
+    // Staying put, minus the previous move's "copied from" marks: a copy that
+    // disappears now (merged away) must not fly back into where it came from.
+    const stay = withoutMarks(rc.state);
     const previews = new Map<number, () => ReturnType<typeof renderStateReadOnly>>();
     const previewOf = (slot: number, state: MathState) => {
       if (!previews.has(slot)) {
@@ -219,7 +218,7 @@ function rowSlot(
     return (frame) => {
       const c = carriedCentre(rc, ctx, frame.pointer);
       const slot = others.filter((x) => x < c.x).length;
-      const state = reorders.get(slot) ?? rc.state;
+      const state = reorders.get(slot) ?? stay;
       const dx = Math.max(0, left - c.x, c.x - right);
       const dy = Math.max(0, Math.abs(c.y - midY) - h / 2);
       return { preview: previewOf(reorders.has(slot) ? slot : -1, state), dropState: state, gap: Math.hypot(dx, dy) };
@@ -318,10 +317,11 @@ class CarryLogShell extends Modifier<MathState> {
     const byId = new Map(layers.byId);
     const me = byId.get(this.draggedId);
     if (me) {
-      const shell = (
+      const shell = pathed(
         <g dragologyKey="carry-shell" opacity={opacity} style={{ pointerEvents: "none" }}>
           {this.shell}
-        </g>
+        </g>,
+        `${this.draggedId}/`,
       );
       byId.set(this.draggedId, { ...me, element: cloneElement(me.element, {}, ...(this.bare as Svgx[]), shell) as Svgx });
     }
@@ -355,11 +355,12 @@ class FadeCarriedLog extends Modifier<MathState> {
     inner: DragSpecData<MathState>,
     readonly rc: RenderCtx,
     draggedId: string,
-    targetIds: string[],
+    joins: { state: MathState; targetId?: string }[],
   ) {
     super(ctx, inner);
     this.home = canvasBox(rc, ctx, draggedId).centre;
-    this.targets = targetIds.map((t) => canvasBox(rc, ctx, t).centre);
+    // Faded most where the merge completes (see mergeAim).
+    this.targets = joins.map((c) => mergeAim(rc, ctx, draggedId, c.state, c.targetId!));
     const T = dragCtx(rc.state, draggedId)!.node;
     const L = (T.kind === "neg" ? T.arg : T) as Log;
     this.whole = [...allNodes(L.base).map((n) => n.id), ...(T.kind === "neg" ? [signId(T.id)] : [])];
@@ -445,36 +446,190 @@ function outInFront(rc: RenderCtx, draggedId: string, result: MathState): DragSp
 }
 
 /**
- * A merge zone keyed to where the carried *piece* is, not the pointer: people
- * line up the symbol they carry with the one they aim at, wherever they
- * grabbed it. (Dragology's `dropTarget` is pointer-in-bounds.)
+ * Whether the carried piece is "on" the target, so letting go merges: keyed to
+ * where the carried *piece* is, not the pointer — people line up the symbol
+ * they carry with the one they aim at, wherever they grabbed it. (Dragology's
+ * `dropTarget` is pointer-in-bounds.)
  */
-function onTarget(rc: RenderCtx, draggedId: string, targetId: string, result: MathState): DragSpec<MathState> {
+function onTarget(rc: RenderCtx, ctx: DragInitContext<MathState>, draggedId: string, targetId: string) {
   // A target *inside* the dragged piece (the brackets of −(x − 4)) is always
   // under it, so there the grab point itself must reach it, after a real move.
   const loc = locate(rc.state, draggedId);
   const nested = !!loc && allNodes(nodeAt(rc.state, loc)).some((n) => n.id === targetId);
-  return rc.d!.custom((ctx: DragInitContext<MathState>) => {
-    const preview = renderStateReadOnly(ctx, result);
-    const t = canvasBox(rc, ctx, targetId);
-    const me = canvasBox(rc, ctx, draggedId);
-    const home = getElementPositionCheap(ctx, rc.state);
-    const reachX = Math.max(t.w / 2, ON_TARGET * Math.max(me.w, t.w));
-    const reachY = (me.h + t.h) / 4;
-    return (frame) => {
-      let hit: boolean;
+  const t = canvasBox(rc, ctx, targetId);
+  const me = canvasBox(rc, ctx, draggedId);
+  const home = getElementPositionCheap(ctx, rc.state);
+  const reachX = Math.max(t.w / 2, ON_TARGET * Math.max(me.w, t.w));
+  const reachY = (me.h + t.h) / 4;
+  return {
+    nested,
+    centre: t.centre,
+    h: t.h,
+    hit(pointer: Vec2): boolean {
       if (nested) {
-        const p = frame.pointer;
-        const moved = home ? p.dist(home) > 0.3 * t.h : true;
-        hit = moved && p.x >= t.symLeft.x && p.x <= t.symRight.x && Math.abs(p.y - t.centre.y) <= t.h / 2;
-      } else {
-        const c = carriedCentre(rc, ctx, frame.pointer);
-        hit = Math.abs(c.x - t.centre.x) <= reachX && Math.abs(c.y - t.centre.y) <= reachY;
+        const moved = home ? pointer.dist(home) > 0.3 * t.h : true;
+        return moved && pointer.x >= t.symLeft.x && pointer.x <= t.symRight.x && Math.abs(pointer.y - t.centre.y) <= t.h / 2;
       }
-      return { preview: () => preview, dropState: result, gap: hit ? 0 : Infinity };
-    };
-  });
+      const c = carriedCentre(rc, ctx, pointer);
+      return Math.abs(c.x - t.centre.x) <= reachX && Math.abs(c.y - t.centre.y) <= reachY;
+    },
+  };
 }
+
+/**
+ * Dragology tags every rendered element with its path ("id/key/..."), which
+ * it uses to find and blend elements. Elements added to a preview afterwards
+ * need the same tags.
+ */
+function pathed(el: Svgx, parent: string): Svgx {
+  const props = el.props as { id?: string; dragologyKey?: string; children?: unknown };
+  const path = props.id ? `${props.id}/` : `${parent}${props.dragologyKey ?? "0"}/`;
+  let i = 0;
+  const kids = ([] as unknown[]).concat(props.children ?? []).flat(Infinity).map((c) => {
+    if (!c || typeof c !== "object" || !("props" in c)) return c;
+    const k = (c as Svgx).props as { dragologyKey?: string };
+    const step = k.dragologyKey ?? String(i++);
+    return pathed(cloneElement(c as Svgx, { dragologyKey: step } as never) as Svgx, path);
+  });
+  return cloneElement(el, { "data-path": path } as never, ...(kids as Svgx[])) as Svgx;
+}
+
+/** An invisible marker whose position tells Dragology's `between` how far to blend. */
+const PROBE = "merge-probe";
+const PROBE_SPAN = 100;
+
+function withProbe(layers: LayeredSvgx, x: number): LayeredSvgx {
+  const byId = new Map(layers.byId);
+  byId.set(PROBE, { element: pathed(<g id={PROBE} transform={translate(x, 0)} />, ""), stackingPath: [0] });
+  const descendents = layers.descendents ? new Map(layers.descendents).set(PROBE, new Set<string>()) : null;
+  return { byId, descendents };
+}
+
+/** A branch that shows whatever its owner decided this frame. */
+class Shown extends Operator<MathState> {
+  readonly name = "shown";
+  constructor(ctx: DragInitContext<MathState>, readonly get: () => OpResult<MathState>) {
+    super(ctx);
+  }
+  frame() {
+    return this.get();
+  }
+  treeView() {
+    return null;
+  }
+  overlayVis() {
+    return null;
+  }
+}
+const shown = operator(Shown);
+
+/**
+ * Carrying a piece towards pieces it can merge with. How far along it is —
+ * from where it started (0) to centred on the target (1) — sets how far the
+ * picture is blended from "carrying" to the merged result, using Dragology's
+ * own blending (`between`, steered with an invisible probe). Dropping merges
+ * only when on the target; otherwise it's whatever carrying would do.
+ */
+class MergeApproach extends Operator<MathState> {
+  readonly name = "mergeApproach";
+  private readonly carry;
+  private readonly blend;
+  private readonly home: Vec2;
+  private readonly merges: { state: MathState; preview: LayeredSvgx; zone: ReturnType<typeof onTarget>; aim: Vec2 }[];
+  private a: OpResult<MathState> | null = null;
+  private b: OpResult<MathState> | null = null;
+
+  constructor(
+    ctx: DragInitContext<MathState>,
+    carrySpec: DragSpec<MathState>,
+    readonly rc: RenderCtx,
+    readonly draggedId: string,
+    merges: { state: MathState; targetId?: string }[],
+  ) {
+    super(ctx);
+    this.carry = this.child("carry", carrySpec);
+    this.home = canvasBox(rc, ctx, draggedId).centre;
+    this.merges = merges.map((c) => {
+      const zone = onTarget(rc, ctx, draggedId, c.targetId!);
+      return { state: c.state, preview: withProbe(renderStateReadOnly(ctx, c.state), PROBE_SPAN), zone, aim: mergeAim(rc, ctx, draggedId, c.state, c.targetId!) };
+    });
+    const probeCtx = { ...ctx, draggedId: PROBE, draggedPath: `${PROBE}/`, anchorPos: Vec2(0, 0) };
+    this.blend = this.child("blend", rc.d!.between([shown(() => this.a!), shown(() => this.b!)]), probeCtx);
+  }
+
+  /** 0 → 1 as the carried piece goes from where it started to where it ends up in the result. */
+  private progress(m: (typeof this.merges)[number], pointer: Vec2): number {
+    // A target inside the piece is under it all along: there, all or nothing.
+    if (m.zone.nested) return m.zone.hit(pointer) ? 1 : 0;
+    // Fully there within a few pixels, so a hand can hold it at the result.
+    const c = carriedCentre(this.rc, this.ctx, pointer);
+    const far = Math.max(1, this.home.dist(m.aim));
+    const close = Math.min(SETTLED_PX, far / 4);
+    const t = (far - c.dist(m.aim)) / (far - close);
+    return Math.min(1, Math.max(0, t));
+  }
+
+  frame(frame: DragFrame): OpResult<MathState> {
+    const carried = this.carry.run(frame);
+    let best = this.merges[0];
+    let t = -1;
+    for (const m of this.merges) {
+      const p = this.progress(m, frame.pointer);
+      if (p > t) [best, t] = [m, p];
+    }
+    // Eased: barely anything at first, most of the change near the target.
+    const blend = t * t;
+    // What you see is what you get: letting go merges once the picture is
+    // more than halfway to the result (or right on a target).
+    const hit = this.merges.find((m) => m.zone.hit(frame.pointer)) ?? (blend >= MERGE_AT ? best : undefined);
+    const dropState = hit ? hit.state : carried.dropState;
+    if (blend <= 0) return { ...carried, dropState };
+    this.a = { ...carried, preview: () => withProbe(carried.preview(), 0) };
+    this.b = { preview: () => best.preview, dropState: best.state, gap: 0 };
+    const mixed = this.blend.run({ pointer: Vec2(blend * PROBE_SPAN, 0) });
+    return { ...carried, preview: mixed.preview, dropState, activePath: undefined };
+  }
+
+  treeView() {
+    return null;
+  }
+  overlayVis() {
+    return null;
+  }
+}
+const mergeApproach = operator(MergeApproach);
+
+/**
+ * Where to carry the piece so that, in the merged (and recentred) result,
+ * what you're holding is right under your hand: the part of it that lives on
+ * (the 2 of ln(2) dropped on ln(x)) at its place in the result. If none of it
+ * lives on (2x onto 3x → 5x), the merged term itself. If that's about where
+ * the piece already is (a in a(b + c) → ab + ac), the target: holding still
+ * mustn't look like the move is done.
+ */
+function mergeAim(rc: RenderCtx, ctx: DragInitContext<MathState>, draggedId: string, result: MathState, targetId: string): Vec2 {
+  const target = canvasBox(rc, ctx, targetId);
+  const home = canvasBox(rc, ctx, draggedId).centre;
+  // A minus carried on its own (its own handle, not a node): aim at the target.
+  const loc = locate(rc.state, draggedId);
+  if (!loc) return target.centre;
+  const inResult = new Set(result.sides.flatMap(allNodes).map((n) => n.id));
+  const mine = allNodes(nodeAt(rc.state, loc));
+  const survivor = mine.find((n) => inResult.has(n.id))?.id ?? targetId;
+  const at = (id: string, state: MathState) =>
+    getElementPositionCheap({ ...ctx, draggedId: id, draggedPath: id, anchorPos: Vec2(0, 0) }, state);
+  const before = at(survivor, rc.state);
+  const after = at(survivor, result);
+  if (!before || !after) return target.centre;
+  const aim = (survivor === targetId ? target.centre : home).add(after.sub(before));
+  return aim.dist(home) < target.h ? target.centre : aim;
+}
+
+/** How far the picture must be blended towards a merge for letting go to merge. */
+const MERGE_AT = 0.5;
+
+/** How close to where it ends up counts as "all the way there" while holding. */
+const SETTLED_PX = 6;
 
 function layoutNode(
   e: Expr,

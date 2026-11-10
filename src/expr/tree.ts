@@ -90,3 +90,16 @@ export function allNodes(e: Expr): Expr[] {
 export function mapTree(e: Expr, f: (e: Expr) => Expr): Expr {
   return f(withChildren(e, children(e).map((c) => mapTree(c, f))));
 }
+
+/**
+ * The tree without "copied from" marks. A mark only means something for the
+ * move that made the copy (the copy flies out of its source); left on, a later
+ * move that removes the copy would send it flying back into its source.
+ */
+export function withoutFrom(e: Expr): Expr {
+  const cs = children(e).map(withoutFrom);
+  if (e.from === undefined && cs.every((c, i) => c === children(e)[i])) return e;
+  const { from: _from, ...rest } = e;
+  void _from;
+  return withChildren(rest as Expr, cs);
+}

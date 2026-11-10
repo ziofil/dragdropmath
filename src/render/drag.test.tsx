@@ -8,6 +8,7 @@ import {
   dragSpecToBehavior,
   renderStateReadOnly,
   getElementPositionCheap,
+  getElementPosition,
   Vec2,
   type Draggable,
   type DragInitContext,
@@ -85,7 +86,7 @@ function setup(state: MathState, rules: readonly RuleId[]) {
   const sizeOf = (id: string) => rc(id).sizes!.get(id)!;
   /** The drag behaviour for node `id`, to inspect frame by frame. */
   const behaviorFor = (id: string, anchor = ANCHOR) => dragSpecToBehavior(dragSpec(rc(id), id), ctxFor(id, anchor));
-  return { posOf, dropAt, dragPath, sizeOf, behaviorFor };
+  return { posOf, dropAt, dragPath, sizeOf, behaviorFor, ctxFor };
 }
 
 function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
@@ -172,8 +173,20 @@ describe("moves inside small superscripts can be reached too", () => {
 describe("every allowed move can be reached by dragging", () => {
   it.each(allPuzzles().map((r) => [r.puzzle.id, r.puzzle.start, r.rules] as const))("%s: %s", (_, src, rules) => {
     expect(checkAllMovesReachable(src, rules)).toEqual([]);
-  });
+  }, 20_000); // exhaustive: every move of the exercise, along many drag paths
 });
+
+/**
+ * How far to carry a piece so the part of it that lives on lands where the
+ * merged (recentred) result puts it — where a merge completes under the hand.
+ */
+function endsUpMove(state: MathState, draggedId: string, targetId: string, posOf: (id: string, s: MathState) => Vec2 | null): Vec2 {
+  const merged = candidatesFor(state, draggedId, ALL_RULES).find((c) => c.targetId === targetId)!.state;
+  const inResult = new Set(merged.sides.flatMap(allNodes).map((n) => n.id));
+  const me = state.sides.flatMap(allNodes).find((n) => n.id === draggedId)!;
+  const survivor = allNodes(me).find((n) => inResult.has(n.id))!;
+  return posOf(survivor.id, merged)!.sub(posOf(survivor.id, state)!);
+}
 
 describe("pulling a factor out of a log", () => {
   /** The first element in `el`'s tree with this dragologyKey. */
@@ -261,7 +274,9 @@ describe("combining two logs", () => {
     const start = posOf(T.id, state)!.sub(ANCHOR).add(grab);
     const centreOf = (id: string, sz: { w: number; lead: number; asc: number; desc: number }) =>
       posOf(id, state)!.sub(ANCHOR).add(Vec2(sz.lead + (sz.w - sz.lead) / 2, (sz.desc - sz.asc) / 2));
-    const end = centreOf(target, them).sub(centreOf(T.id, me)).add(start);
+    void them;
+    void centreOf;
+    const end = start.add(endsUpMove(state, T.id, target, posOf));
     const b = behaviorFor(T.id, grab);
     const frames = Array.from({ length: 31 }, (_, i) => {
       const r = b({ pointer: start.add(end.sub(start).mul(i / 30)) });
@@ -283,5 +298,193 @@ describe("combining two logs", () => {
     if (T.kind === "neg") expect(opacityOf(lastCarried.layers.byId.get(signId(T.id))?.element)).toBeCloseTo(label(lastCarried));
     // ...and the merge still happens on the target.
     expect(frames[frames.length - 1].state).toBe(merged);
+  });
+});
+
+describe("merging forms gradually and only snaps on release", () => {
+  /** Opacity of the first element whose dragologyKey starts with `prefix`, anywhere in the preview (absent → 0). */
+  const opacityOfKey = (layers: { byId: Map<string, { element: unknown }> }, prefix: string): number => {
+    const walk = (e: unknown, o: number): number | null => {
+      if (!e || typeof e !== "object") return null;
+      if (Array.isArray(e)) return e.map((c) => walk(c, o)).find((x) => x !== null) ?? null;
+      const props = (e as { props?: Record<string, unknown> }).props;
+      if (!props) return null;
+      const here = o * ((props.opacity as number | undefined) ?? 1);
+      if (typeof props.dragologyKey === "string" && props.dragologyKey.startsWith(prefix)) return here;
+      return walk(props.children, here);
+    };
+    for (const l of layers.byId.values()) {
+      const o = walk(l.element, 1);
+      if (o !== null) return o;
+    }
+    return 0;
+  };
+
+  it("ln(2) + ln(x): carrying ln(x) onto ln(2), the + fades out steadily on the way", () => {
+    const state = parseState("ln(2) + ln(x)");
+    const { posOf, sizeOf, behaviorFor } = setup(state, ALL_RULES);
+    const nodes = state.sides.flatMap(allNodes);
+    const lnx = nodes.find((n) => printState({ sides: [n] }) === "ln(x)")!;
+    const ln2 = nodes.find((n) => printState({ sides: [n] }) === "ln(2)")!;
+    const grab = Vec2(sizeOf(lnx.id).lead + 4, -10);
+    const start = posOf(lnx.id, state)!.sub(ANCHOR).add(grab);
+    const centre = (id: string) => {
+      const z = sizeOf(id);
+      return posOf(id, state)!.sub(ANCHOR).add(Vec2(z.lead + (z.w - z.lead) / 2, 0));
+    };
+    void centre;
+    const end = start.add(endsUpMove(state, lnx.id, ln2.id, posOf));
+    const b = behaviorFor(lnx.id, grab);
+    const frames = Array.from({ length: 21 }, (_, i) => {
+      const r = b({ pointer: start.add(end.sub(start).mul(i / 20)) });
+      return { state: printState(r.dropState), plus: opacityOfKey(r.preview(), "plus-") };
+    });
+    // At the start nothing has changed yet...
+    expect(frames[0].plus).toBeCloseTo(1);
+    expect(frames[0].state).toBe("ln(2) + ln(x)");
+    // ...halfway it's part-way there, and letting go there wouldn't merge...
+    expect(frames[10].plus).toBeGreaterThan(0.2);
+    expect(frames[10].plus).toBeLessThan(0.95);
+    expect(frames[10].state).not.toBe("ln(2*x)");
+    // ...the change only ever goes one way...
+    for (let i = 1; i < frames.length; i++) expect(frames[i].plus).toBeLessThanOrEqual(frames[i - 1].plus + 1e-6);
+    // ...and on the target the picture is the result, and letting go merges.
+    expect(frames[20].plus).toBeCloseTo(0);
+    expect(frames[20].state).toBe("ln(2*x)");
+  });
+});
+
+describe("holding the piece where it ends up shows the result exactly, recentred, under the hand", () => {
+  it.each([
+    ["ln(2) + ln(x)", "ln(x)", "ln(2)", "x"],
+    ["ln(2) + ln(x)", "ln(2)", "ln(x)", "2"],
+    ["3x + 2x + 1", "2*x", "3*x", null],
+  ])("%s: %s onto %s", (src, carried, onto, survivorText) => {
+    const state = parseState(src);
+    const { posOf, sizeOf, behaviorFor, ctxFor } = setup(state, ALL_RULES);
+    const nodes = state.sides.flatMap(allNodes);
+    const me = nodes.find((n) => printState({ sides: [n] }) === carried)!;
+    const target = nodes.find((n) => printState({ sides: [n] }) === onto)!;
+    const merged = candidatesFor(state, me.id, ALL_RULES).find((c) => c.targetId === target.id)!.state;
+    // Follow the part that lives on (or the merged term) to its place in the result.
+    const follow = survivorText ? allNodes(me).find((n) => printState({ sides: [n] }) === survivorText)! : target;
+    const grab = Vec2(sizeOf(me.id).lead + 4, -10);
+    const start = posOf(me.id, state)!.sub(ANCHOR).add(grab);
+    const moveBy = posOf(follow.id, merged)!.sub(posOf(follow.id, state)!);
+    // (A merged term: carry the piece's centre onto it.)
+    const centre = (id: string) => {
+      const z = sizeOf(id);
+      return posOf(id, state)!.sub(ANCHOR).add(Vec2(z.lead + (z.w - z.lead) / 2, (z.desc - z.asc) / 2));
+    };
+    const pointer = survivorText ? start.add(moveBy) : start.add(centre(target.id).sub(centre(me.id))).add(moveBy);
+    const r = behaviorFor(me.id, grab)({ pointer });
+    expect(printState(r.dropState)).toBe(printState(merged));
+    const shown = r.preview();
+    const off: string[] = [];
+    for (const n of r.dropState.sides.flatMap(allNodes)) {
+      const want = posOf(n.id, r.dropState);
+      const got = getElementPosition({ ...ctxFor(n.id), draggedPath: `${n.id}/` }, shown);
+      if (want && (!got || got.dist(want) > 0.5)) off.push(`${printState({ sides: [n] })}: shown at ${got?.x.toFixed(1)}, result at ${want.x.toFixed(1)}`);
+    }
+    expect(off).toEqual([]);
+  });
+});
+
+describe("letting go gives what the picture shows", () => {
+  /** How far the preview is blended towards a merge (0–1), read off the invisible probe that steers it. */
+  const blendOf = (layers: { byId: Map<string, { element: unknown }> }) => {
+    const probe = layers.byId.get("merge-probe")?.element as { props: { transform?: string } } | undefined;
+    const m = probe?.props.transform?.match(/translate\(\s*([-\d.e]+)/);
+    return m ? parseFloat(m[1]) / 100 : 0;
+  };
+
+  it.each([
+    // The case a learner hit: the 1 onto the 2 looked like 3, but letting go gave back 1 + 2.
+    ["4 + x + 1 + 2", "1", "2", "4 + x + 3"],
+    ["ln(2) + ln(x)", "ln(2)", "ln(x)", "ln(2*x)"],
+    ["3x + 2x + 1", "2*x", "3*x", "5*x + 1"],
+  ])("%s: %s towards %s", (src, carried, onto, merged) => {
+    const state = parseState(src);
+    const { posOf, sizeOf, behaviorFor } = setup(state, ALL_RULES);
+    const nodes = state.sides.flatMap(allNodes);
+    const me = nodes.find((n) => printState({ sides: [n] }) === carried)!;
+    const target = nodes.find((n) => printState({ sides: [n] }) === onto)!;
+    const grab = Vec2(sizeOf(me.id).lead + 4, -10);
+    const start = posOf(me.id, state)!.sub(ANCHOR).add(grab);
+    const centre = (id: string) => {
+      const z = sizeOf(id);
+      return posOf(id, state)!.sub(ANCHOR).add(Vec2(z.lead + (z.w - z.lead) / 2, (z.desc - z.asc) / 2));
+    };
+    const b = behaviorFor(me.id, grab);
+    // Sweep a band around the straight path to the target, overshooting it.
+    const to = start.add(centre(target.id).sub(centre(me.id)));
+    const wrong: string[] = [];
+    let sawMerged = false;
+    for (let i = 0; i <= 60; i++) {
+      for (const dy of [-12, 0, 12]) {
+        const p = start.add(to.sub(start).mul((i / 60) * 1.4)).add(Vec2(0, dy));
+        const r = b({ pointer: p });
+        const shows = blendOf(r.preview());
+        const gives = printState(r.dropState);
+        if (gives === merged) sawMerged = true;
+        if (shows >= 0.5 && gives !== merged) wrong.push(`at ${i}/60 (dy ${dy}) shows ${shows.toFixed(2)} of ${merged}, gives ${gives}`);
+      }
+    }
+    expect(wrong).toEqual([]);
+    expect(sawMerged).toBe(true);
+  });
+});
+
+describe("a copy made by distributing is an ordinary piece afterwards", () => {
+  it("2(x + 3) → 2x + 2·3, then the copied 2 onto the 3: no 2 flies back into 2x", () => {
+    // Reach 2x + 2·3 the way a learner does, so the copy still carries its "made from" mark.
+    let state = parseState("2(x + 3)");
+    const first2 = state.sides.flatMap(allNodes).find((n) => n.kind === "num" && n.value === 2)!;
+    state = candidatesFor(state, first2.id, ALL_RULES).find((c) => c.rule === "distribute")!.state;
+    expect(printState(state)).toBe("2*x + 2*3");
+    const nodes = state.sides.flatMap(allNodes);
+    const twos = nodes.filter((n) => n.kind === "num" && n.value === 2);
+    const copy = twos.find((n) => n.from)!;
+    const other = twos.find((n) => n !== copy)!;
+    const three = nodes.find((n) => n.kind === "num" && n.value === 3)!;
+    expect(copy).toBeDefined();
+
+    const { posOf, behaviorFor } = setup(state, ALL_RULES);
+    const sumX = (t: string) => [...t.matchAll(/translate\(\s*([-\d.e]+)/g)].reduce((a, m) => a + parseFloat(m[1]), 0);
+    /** Every "2" drawn in a preview: which layer, where, how visible. */
+    const twosDrawn = (L: { byId: Map<string, { element: unknown }> }) => {
+      const out: { layer: string; x: number; o: number }[] = [];
+      for (const [id, l] of L.byId) {
+        const walk = (e: unknown, x: number, o: number) => {
+          if (!e || typeof e !== "object") return;
+          if (Array.isArray(e)) return e.forEach((c) => walk(c, x, o));
+          const pr = (e as { props?: Record<string, unknown> }).props;
+          if (!pr) return;
+          const nx = x + (typeof pr.transform === "string" ? sumX(pr.transform) : 0);
+          const no = o * ((pr.opacity as number) ?? 1);
+          const kids = ([] as unknown[]).concat(pr.children ?? []);
+          if (kids.length === 1 && String(kids[0]) === "2") out.push({ layer: id, x: nx, o: no });
+          else walk(pr.children, nx, no);
+        };
+        walk(l.element, 0, 1);
+      }
+      return out;
+    };
+    const stray: string[] = [];
+    const grab = Vec2(6, -10);
+    const start = posOf(copy.id, state)!.sub(ANCHOR).add(grab);
+    const to = start.add(posOf(three.id, state)!.sub(posOf(copy.id, state)!));
+    const b = behaviorFor(copy.id, grab);
+    for (let i = 0; i <= 30; i++) {
+      const r = b({ pointer: start.add(to.sub(start).mul((i / 30) * 1.3)) });
+      const otherAt = posOf(other.id, state)!.x - ANCHOR.x;
+      for (const g of twosDrawn(r.preview())) {
+        if (g.layer !== other.id && g.o > 0.05 && Math.abs(g.x - otherAt) < 30) stray.push(`step ${i}: ${g.layer} drawn at ${g.x.toFixed(0)}`);
+      }
+      // The copy's own layer, if still there, carries no "fly back" mark any more.
+      const mine = r.preview().byId.get(copy.id)?.element.props as { dragologyEmergeFrom?: string } | undefined;
+      if (mine?.dragologyEmergeFrom) stray.push(`step ${i}: the copy still says it came from ${mine.dragologyEmergeFrom}`);
+    }
+    expect(stray).toEqual([]);
   });
 });

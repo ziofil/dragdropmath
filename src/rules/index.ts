@@ -1,6 +1,6 @@
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
-import { allNodes } from "../expr/tree";
+import { allNodes, withoutFrom } from "../expr/tree";
 import { dragCtx, type Candidate, type Rule, type RuleId } from "./types";
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, numbersFirst, timesOne } from "./rearrange";
@@ -97,7 +97,9 @@ export function tapFor(state: MathState, nodeId: string, enabled: readonly RuleI
   return collect(state, nodeId, taps)[0] ?? null;
 }
 
-function collect(state: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
+function collect(withMarks: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
+  // Copies made by the previous move are ordinary pieces now (see withoutFrom).
+  const state = withoutMarks(withMarks);
   const seen = new Set([stateKey(state, "exact")]);
   const out: Candidate[] = [];
   for (const id of enabled) {
@@ -140,4 +142,10 @@ export function isGrabbable(state: MathState, id: string, enabled: readonly Rule
     candidatesFor(state, id, enabled).some((c) => !isCosmetic(state, id, c) && !c.secondary) ||
     tapFor(state, id, enabled) !== null
   );
+}
+
+/** The state without "copied from" marks from earlier moves (keeps the object when there are none). */
+export function withoutMarks(state: MathState): MathState {
+  const sides = state.sides.map(withoutFrom);
+  return sides.every((e, i) => e === state.sides[i]) ? state : { ...state, sides };
 }
