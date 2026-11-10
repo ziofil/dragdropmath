@@ -15,11 +15,11 @@ import { allNodes } from "../expr/tree";
 import { candidatesFor, handles, tapFor, type RuleId } from "../rules";
 import { allPuzzles } from "../game/puzzles";
 import { neighbours } from "../game/solver";
-import { renderState } from "./layout";
+import { renderState } from "./typeset";
 
 type El = ReactElement<Record<string, unknown>>;
 
-const render = (state: MathState) => renderState({ state, d: null, rules: [], draggedId: null }, 720, 220) as El;
+const render = (state: MathState) => renderState({ state }, 720, 220) as El;
 
 function kids(e: El): El[] {
   const out: El[] = [];

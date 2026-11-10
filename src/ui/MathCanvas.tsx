@@ -3,7 +3,9 @@ import { stateKey } from "../expr/key";
 import { DraggableRenderer, type Draggable } from "dragology";
 import type { MathState } from "../expr/types";
 import type { RuleId } from "../rules";
-import { renderState } from "../render/layout";
+import { renderState } from "../render/typeset";
+import { interactive, recorded } from "../render/drag";
+import { DebugPanel, noteRecording, useDebug } from "./debug";
 
 /** The interactive surface: drag pieces of the expression around. */
 export function MathCanvas({
@@ -21,18 +23,41 @@ export function MathCanvas({
   // Taps apply like drops; a ref keeps the draggable stable across renders.
   const onDropRef = useRef(onDrop);
   onDropRef.current = onDrop;
+  const debug = useDebug();
   const draggable = useMemo<Draggable<MathState>>(
     () =>
       ({ state, d, draggedId }) =>
-        renderState({ state, d, rules, draggedId, onTap: (next) => onDropRef.current(next) }, width.value, height),
-    [rules, width.value, height],
+        renderState(
+          interactive({
+            state,
+            d,
+            rules,
+            draggedId,
+            onTap: (next) => onDropRef.current(next),
+            // Debug mode records every drag, to replay as a test.
+            wrap: debug ? (spec) => spec.with(recorded(rules, width.value, height, noteRecording)) : undefined,
+          }),
+          width.value,
+          height,
+        ),
+    [rules, width.value, height, debug],
   );
   return (
-    <div ref={width.ref} className="canvas">
-      <CanvasErrorBoundary resetKey={stateKey(state, "exact")} height={height}>
-        <DraggableRenderer draggable={draggable} state={state} onDropState={onDrop} width={width.value} height={height} />
-      </CanvasErrorBoundary>
-    </div>
+    <>
+      <div ref={width.ref} className="canvas">
+        <CanvasErrorBoundary resetKey={stateKey(state, "exact")} height={height}>
+          <DraggableRenderer
+            draggable={draggable}
+            state={state}
+            onDropState={onDrop}
+            width={width.value}
+            height={height}
+            showDebugOverlay={debug}
+          />
+        </CanvasErrorBoundary>
+      </div>
+      {debug && <DebugPanel state={state} rules={rules} />}
+    </>
   );
 }
 
@@ -74,7 +99,7 @@ class CanvasErrorBoundary extends Component<
 export function StaticMath({ state, width = 720, height = 110 }: { state: MathState; width?: number; height?: number }) {
   return (
     <svg className="static-math" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="goal">
-      {renderState({ state, d: null, rules: [], draggedId: null }, width, height)}
+      {renderState({ state }, width, height)}
     </svg>
   );
 }

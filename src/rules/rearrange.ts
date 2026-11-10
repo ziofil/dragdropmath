@@ -3,11 +3,13 @@ import { num, pow, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { allNodes, withChildren } from "../expr/tree";
 import { buildTerm, restKey, splitCoef } from "./monomial";
+import { asPower } from "./shapes";
 import { adopt, dragCtx, moveItem, replaceIn, siblings, without, type Candidate, type Rule } from "./types";
 
 /** a + b → b + a, a·b → b·a (drag a term or factor to a new slot). */
 export const commute: Rule = {
   id: "commute",
+  feel: { carry: "reorder" },
   name: "Swap",
   gesture: "Drag a term or factor past its neighbours — order doesn't matter for + and ×.",
   apply(state, id) {
@@ -97,10 +99,6 @@ export const multiplyNumbers: Rule = {
   },
 };
 
-function asPower(e: Expr): { base: Expr; exp: Expr } {
-  return e.kind === "pow" ? { base: e.base, exp: e.exp } : { base: e, exp: num(1) };
-}
-
 /** x·x → x², x²·x³ → x⁵ (drop a factor onto one with the same base). */
 export const mergePowers: Rule = {
   id: "merge-powers",
@@ -159,6 +157,8 @@ export const timesOne: Rule = {
 /** x·2 → 2x, x·1 → x (tap a product to write it the usual way: numbers in front, no ·1). */
 export const numbersFirst: Rule = {
   id: "numbers-first",
+  // Tidies a whole product, so a more specific tap on the thing tapped (log₂2 → 1 in log₂2·3) comes first.
+  tapOrder: 1,
   name: "Numbers in front",
   gesture: "Tap something like x·2 to write it the usual way, 2x.",
   tap: true,

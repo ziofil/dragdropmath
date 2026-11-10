@@ -30,7 +30,7 @@ describe("rules do what they say", () => {
     ["x·x", "merge-powers", "x", ["x^2"], 1], // the one shortcut: x·x is x²
     ["x·x^2", "merge-powers", "x", ["x^(1 + 2)"]], // otherwise the sum shows first
     ["a(b + c)", "distribute", "a", ["a*b + a*c"]],
-    ["2(x - 1)", "distribute", "2", ["2*x - 2"]],
+    ["2(x - 1)", "distribute", "2", ["2*x - 2*1"]],
     ["-(x - 4)", "distribute-neg", "sign:-(x - 4)", ["-x + 4"]], // carry just the −…
     ["-(x - 4)", "distribute-neg", "-(x - 4)", []], // …not the whole thing
     ["ab + ac", "factor-out", "a", ["a*(b + c)"]],

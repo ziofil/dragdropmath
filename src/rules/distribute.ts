@@ -3,6 +3,7 @@ import { cloneFresh, negate, num, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { adopt, dragCtx, replaceIn, signOwner, without, type Candidate, type Rule } from "./types";
 import { nodeAt, parentLoc } from "../expr/tree";
+import { visibleOne } from "./shapes";
 
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
 export const distribute: Rule = {
@@ -18,10 +19,9 @@ export const distribute: Rule = {
       if (j === c.index || s.kind !== "sum") return [];
       // The dragged factor itself goes into the first term; the others get clones.
       // Each term gets its own copy of the factor (flying out of the carried one).
-      // A ·1 stays visible as 2·1, for the learner to simplify themselves.
-      const keep = (t: Expr): Expr => (t.kind === "num" && t.value === 1 ? { ...t, explicit: true } : t);
+      // A ·1 stays visible as 2·1 (and 2(x − 1) → 2x − 2·1), for the learner to simplify.
       const spread = sum(
-        s.terms.map((t, k) => prod([k === 0 ? f : cloneFresh(f), keep(t)])),
+        s.terms.map((t, k) => prod([k === 0 ? f : cloneFresh(f), visibleOne(t)])),
         s.id,
       );
       const newFactors = factors.slice();
@@ -66,6 +66,7 @@ export const distributeNeg: Rule = {
  */
 export const factorOut: Rule = {
   id: "factor-out",
+  feel: { carry: "out-in-front" },
   name: "Factor out",
   gesture: "Pull a factor that's in every term out in front of brackets.",
   apply(state, id) {

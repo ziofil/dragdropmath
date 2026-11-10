@@ -1,5 +1,5 @@
 import type { Expr, MathState } from "../expr/types";
-import { frac, freshId, neg, prod, sum } from "../expr/build";
+import { frac, neg, prod, sum } from "../expr/build";
 import { evaluate, isConstant } from "../expr/eval";
 import { adopt, dragCtx, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
 
@@ -26,23 +26,24 @@ function withSides(state: MathState, side: number, mine: Expr, theirs: Expr): Ma
 export const moveTerm: Rule = {
   id: "move-term",
   name: "Move a term across",
+  // The carried piece's sign crossfades (− ↔ +) as it crosses the =.
+  feel: { wears: "flip-sign" },
   gesture: "Drag a term to the other side of = — it flips sign on the way.",
   apply(state, id) {
     const c = sideCtx(state, id);
     if (!c || c.loc.path.length !== 1 || c.parent?.kind !== "sum") return [];
     const t = c.node;
-    // Keep the dragged id on whatever glyph group represents the term over there.
-    // The dragged id goes on the *outermost* node of the moved term, sign
-    // included, so the piece you carry itself flips sign as it crosses
-    // (rather than a − appearing on the far side).
-    // (−(y + 1) lands as + y + 1, flattened into the other side, so there the id
-    // goes on its first term.)
+    // The dragged id stays on the term's body over there: −5 lands as + 5 (the
+    // 5 takes the −5's id), 5 lands as − 5 (the 5 keeps its id, inside a new −).
+    // The sign itself is carried by the piece and crossfades as it crosses the
+    // = (see render/drag/sign.tsx). (−(y + 1) lands as + y + 1, flattened into
+    // the other side, so there the id goes on its first term.)
     const flipped: Expr =
       t.kind === "neg"
         ? t.arg.kind === "sum"
           ? { ...t.arg, terms: [adopt(t.arg.terms[0], t.id), ...t.arg.terms.slice(1)] }
           : { ...t.arg, id: t.id }
-        : neg({ ...t, id: freshId() }, t.id);
+        : neg(t);
     const remaining = sum(without(c.parent.terms, c.index), c.parent.id);
     const other = state.sides[c.other];
     const target = sum([...(other.kind === "sum" ? other.terms : [other]), flipped], other.kind === "sum" ? other.id : undefined);

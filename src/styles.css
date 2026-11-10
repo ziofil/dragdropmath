@@ -419,3 +419,85 @@ button[aria-pressed="true"] {
 .m-node:active {
   cursor: grabbing;
 }
+
+/* ---------- debug mode (Shift+D) ---------- */
+
+.debug-badge {
+  font: 600 0.75rem var(--ui);
+  color: var(--warn);
+  background: none;
+  border: 1px dashed var(--warn);
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+.debug-panel {
+  border-top: 1px dashed var(--line);
+  padding: 12px 16px 16px;
+  font: 0.82rem/1.5 var(--ui);
+  color: var(--ink);
+}
+.debug-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.debug-head span,
+.debug-muted {
+  color: var(--ink-soft);
+}
+.debug-block {
+  margin-top: 10px;
+}
+.debug-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+.debug-panel code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+.debug-panel p {
+  margin: 4px 0;
+}
+.debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.debug-tree,
+.debug-tree ul,
+.debug-moves ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.debug-node {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  align-items: baseline;
+}
+.debug-id {
+  color: var(--ink-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+}
+.debug-flag {
+  font-size: 0.72rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.debug-grab {
+  background: var(--good-soft);
+}
+.debug-moves summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+}

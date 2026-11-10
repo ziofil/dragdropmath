@@ -2,8 +2,8 @@ import type { Expr, Log, Pow } from "../expr/types";
 import { cloneFresh, frac, log, neg, negate, num, pow, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
-import { nodeAt, parentLoc } from "../expr/tree";
 import { dragCtx, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { asPower, fractionPart, raise as raiseTo } from "./shapes";
 
 // ---------- helpers ----------
 
@@ -17,10 +17,6 @@ function rootOrder(e: Expr): number | null {
   return e.kind === "frac" && e.num.kind === "num" && e.num.value === 1 && e.den.kind === "num" && e.den.value >= 2 ? e.den.value : null;
 }
 
-/** x → (x, 1); xⁿ → (x, n). */
-function asPower(e: Expr): { base: Expr; exp: Expr } {
-  return e.kind === "pow" ? { base: e.base, exp: e.exp } : { base: e, exp: num(1) };
-}
 
 /** The log being dragged: the log itself, or its base (the "ln" label is the base e). */
 function logAt(c: DragCtx): Log | null {
@@ -114,16 +110,6 @@ export const evaluatePower: Rule = {
   },
 };
 
-/** The fraction a node belongs to, as its top/bottom or a factor of it. */
-function fracCtx(state: Parameters<Rule["apply"]>[0], c: DragCtx) {
-  const partLoc = c.parent?.kind === "prod" ? c.parentLoc! : c.loc;
-  const fracLoc = parentLoc(partLoc);
-  if (!fracLoc) return null;
-  const F = nodeAt(state, fracLoc);
-  if (F.kind !== "frac") return null;
-  return { F, fracLoc, inDen: partLoc.path[partLoc.path.length - 1] === 1 };
-}
-
 /** x⁵/x² → x³ (drop a power on the bottom onto one with the same base on top). */
 export const dividePowers: Rule = {
   id: "divide-powers",
@@ -131,7 +117,7 @@ export const dividePowers: Rule = {
   gesture: "Drop a power from the bottom onto the same base on top — the exponents subtract.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    const fc = c && fracCtx(state, c);
+    const fc = c && fractionPart(state, c);
     if (!c || !fc || !fc.inDen) return [];
     const { F, fracLoc } = fc;
     const mine = asPower(c.node);
@@ -155,7 +141,7 @@ export const flipAcrossBar: Rule = {
   gesture: "Carry a factor across the fraction bar — its exponent changes sign.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    const fc = c && fracCtx(state, c);
+    const fc = c && fractionPart(state, c);
     if (!c || !fc) return [];
     const { F, fracLoc, inDen } = fc;
     const f = c.node;
@@ -190,6 +176,7 @@ export const expOfLog: Rule = {
 /** ln(ab) → ln a + ln b, ln(a/b) → ln a − ln b (drop the ln onto its brackets). */
 export const logOfProduct: Rule = {
   id: "log-of-product",
+  feel: { carry: "pull-out", wears: "grow-log" },
   name: "Split a log",
   gesture: "Pull a factor out of a log's brackets — it takes a copy of the log with it.",
   apply(state, id) {
@@ -268,6 +255,7 @@ export const powerIntoLog: Rule = {
 /** ln a + ln b → ln(ab), ln a − ln b → ln(a/b) (drop one log term onto another). */
 export const combineLogs: Rule = {
   id: "combine-logs",
+  feel: { wears: "shed-log" },
   name: "Combine logs",
   gesture: "Drop a log onto another log with the same base — adding logs multiplies inside, subtracting divides.",
   apply(state, id) {
@@ -472,6 +460,7 @@ export const rootAcross: Rule = {
  */
 export const pullOutOfPower: Rule = {
   id: "pull-out-of-power",
+  feel: { carry: "pull-out" },
   name: "Split a power or root",
   gesture: "Pull a factor out of a root's (or power's) brackets — it takes its own copy of the root.",
   apply(state, id) {
@@ -482,8 +471,7 @@ export const pullOutOfPower: Rule = {
     if (P?.kind !== "pow" || up!.index !== 0) return [];
     const copy = { ...cloneFresh(P.exp), from: P.exp.id };
     // A factor that is already a power multiplies exponents: (x²y)³ → x^(2·3)·y³.
-    const raise = (f: Expr, e: Expr): Expr =>
-      f.kind === "pow" ? pow(f.base, prod([f.exp, e]), f.id) : P.radical ? ({ ...pow(f, e), radical: true } as Expr) : pow(f, e);
+    const raise = (f: Expr, e: Expr) => raiseTo(f, e, P.radical);
     if (c.parent.kind === "frac") {
       // (x/y)² → x²/y²: pulling the top (or bottom) out splits the power over the fraction.
       const F = c.parent;
@@ -515,7 +503,7 @@ export const powerOfProduct: Rule = {
     const B = P.base;
     const n = c.node;
     // A factor that is already a power multiplies exponents: (x²y)³ → x^(2·3)·y³.
-    const raise = (f: Expr, e: Expr): Expr => (f.kind === "pow" ? pow(f.base, prod([f.exp, e]), f.id) : pow(f, e));
+    const raise = (f: Expr, e: Expr) => raiseTo(f, e);
     let spread: Expr;
     if (B.kind === "prod") spread = prod(B.factors.map((f, k) => raise(f, k === 0 ? n : cloneFresh(n))), B.id);
     else if (B.kind === "frac") spread = frac(raise(B.num, n), raise(B.den, cloneFresh(n)), B.id);

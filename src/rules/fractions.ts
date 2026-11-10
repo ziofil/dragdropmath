@@ -3,7 +3,7 @@ import { frac, num, prod } from "../expr/build";
 import { key } from "../expr/key";
 import { buildTerm, splitCoef } from "./monomial";
 import { dragCtx, replaceIn, without, type Candidate, type Rule } from "./types";
-import { parentLoc, nodeAt } from "../expr/tree";
+import { fractionPart } from "./shapes";
 
 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 
@@ -36,14 +36,9 @@ export const cancelFactor: Rule = {
     const c = dragCtx(state, id);
     if (!c) return [];
     // The dragged node is the whole top/bottom, or one factor of it.
-    let partLoc = c.loc;
-    const up = parentLoc(partLoc);
-    if (up && nodeAt(state, up).kind === "prod") partLoc = up;
-    const fracLoc = parentLoc(partLoc);
-    if (!fracLoc) return [];
-    const f = nodeAt(state, fracLoc);
-    if (f.kind !== "frac") return [];
-    const fromBottom = partLoc.path[partLoc.path.length - 1] === 1;
+    const part = fractionPart(state, c);
+    if (!part) return [];
+    const { F: f, fracLoc, inDen: fromBottom } = part;
     const [mine, theirs] = fromBottom ? [f.den, f.num] : [f.num, f.den];
 
     const k = key(c.node);

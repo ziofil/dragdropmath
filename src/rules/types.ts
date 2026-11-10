@@ -69,8 +69,29 @@ export type Rule = {
   gesture: string;
   /** Tap (click) the node instead of dragging it. A tap rule yields at most one candidate. */
   tap?: true;
+  /** When several taps apply, the lowest order wins (default 0). */
+  tapOrder?: number;
+  /** How carrying the piece towards this move feels (see Feel). Merges (with a target) always blend in. */
+  feel?: Feel;
   apply(state: MathState, draggedId: string): Candidate[];
 };
+
+/**
+ * How a move without a target is reached by dragging:
+ *
+ * - `reorder`: slides along its row; the slot is chosen by order, not distance.
+ *   Swapping factors in a product is cosmetic: on its own it doesn't make a
+ *   piece worth grabbing.
+ * - `landing` (default): carry it to where the piece itself will sit afterwards.
+ * - `pull-out`: pull it out past the edge of its container (ln( ), √( ), a fraction's top).
+ * - `out-in-front`: carry it out past the left end of its expression (factoring out).
+ *
+ * `wears` adds a visual on the way: `grow-log` (the piece picks up a faint
+ * copy of its log as it leaves, ln(2x) → ln 2 + ln x), `shed-log` (a carried
+ * log fades its ln( ) as it nears the log it joins), `flip-sign` (a term
+ * carried across = crossfades its sign, − ↔ +, as it crosses).
+ */
+export type Feel = { carry?: "reorder" | "landing" | "pull-out" | "out-in-front"; wears?: "grow-log" | "shed-log" | "flip-sign" };
 
 /** Everything a rule typically wants to know about the dragged node. */
 export type DragCtx = {
@@ -126,14 +147,6 @@ export function adopt(e: Expr, id: string): Expr {
   return { ...e, id };
 }
 
-export function without<T>(xs: T[], i: number): T[] {
-  return xs.filter((_, j) => j !== i);
-}
-
-export function moveItem<T>(xs: T[], from: number, to: number): T[] {
-  const out = without(xs, from);
-  out.splice(to, 0, xs[from]);
-  return out;
-}
+export { moveItem, without } from "../util/array";
 
 export const siblings = (c: DragCtx) => (c.parent ? children(c.parent) : []);

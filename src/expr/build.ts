@@ -5,6 +5,22 @@ let counter = 0;
 /** Globally unique, slash-free ids (Dragology requirement). */
 export const freshId = (): string => `n${(counter++).toString(36)}`;
 
+/**
+ * Make sure fresh ids won't repeat ones already used in `e` — needed when a
+ * state comes from elsewhere (a saved recording) rather than this session.
+ */
+export function reserveIds(e: { id: string } & object): void {
+  const visit = (x: unknown) => {
+    if (!x || typeof x !== "object") return;
+    if (Array.isArray(x)) return x.forEach(visit);
+    const id = (x as { id?: unknown }).id;
+    const m = typeof id === "string" ? id.match(/^n([0-9a-z]+)$/) : null;
+    if (m) counter = Math.max(counter, parseInt(m[1], 36) + 1);
+    Object.values(x).forEach(visit);
+  };
+  visit(e);
+}
+
 export const num = (value: number, id = freshId()): Expr => ({ kind: "num", id, value });
 export const variable = (name: string, id = freshId()): Expr => ({ kind: "var", id, name });
 export const neg = (arg: Expr, id = freshId()): Expr => ({ kind: "neg", id, arg });

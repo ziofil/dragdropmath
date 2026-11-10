@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { DraggableRenderer, translate, type Draggable } from "dragology";
 import { textWidth } from "../render/measure";
+import { moveItem } from "../util/array";
 
 /**
  * The word "feel" in the title, with letters you can pick up and rearrange.
@@ -9,12 +10,6 @@ import { textWidth } from "../render/measure";
 type State = { order: string[] };
 
 const LETTERS: Record<string, string> = { f: "f", e1: "e", e2: "e", l: "l" };
-
-function moveItem<T>(xs: T[], from: number, to: number): T[] {
-  const out = xs.filter((_, i) => i !== from);
-  out.splice(to, 0, xs[from]);
-  return out;
-}
 
 export function FeelWord() {
   const ref = useRef<HTMLSpanElement>(null);

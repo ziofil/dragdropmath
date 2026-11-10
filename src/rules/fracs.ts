@@ -1,16 +1,11 @@
-import type { Expr, Frac } from "../expr/types";
+import type { Expr } from "../expr/types";
 import { cloneFresh, frac, neg, num, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { allNodes } from "../expr/tree";
-import { dragCtx, replaceIn, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { dragCtx, replaceIn, without, type Candidate, type Rule } from "./types";
+import { fractionPart, timesVisible } from "./shapes";
 
 // ---------- helpers ----------
-
-/** A ·1 the learner should see (and simplify themselves). */
-const visibleOnes = (e: Expr): Expr => (e.kind === "num" && e.value === 1 ? { ...e, explicit: true } : e);
-
-/** Product of the given factors, keeping 1s visible. */
-const times = (...fs: Expr[]) => prod(fs.map(visibleOnes));
 
 /** A term of a sum seen as sign × body (−x/3 → −, x/3). */
 function signed(t: Expr): { negative: boolean; body: Expr } {
@@ -18,13 +13,6 @@ function signed(t: Expr): { negative: boolean; body: Expr } {
 }
 
 const withSign = (negative: boolean, e: Expr, id?: string) => (negative ? neg(e, id) : e);
-
-/** The fraction whose denominator holds this node (as the whole denominator, or a factor of it). */
-function denominatorOf(state: Parameters<Rule["apply"]>[0], c: DragCtx): { F: Frac; c: DragCtx } | null {
-  const up = c.parent?.kind === "prod" ? dragCtx(state, c.parent.id) : c;
-  if (up?.parent?.kind !== "frac" || up.index !== 1) return null;
-  return { F: up.parent, c: dragCtx(state, up.parent.id)! };
-}
 
 const smallestPrime = (n: number) => {
   for (let p = 2; p * p <= n; p++) if (n % p === 0) return p;
@@ -63,8 +51,9 @@ export const expandFraction: Rule = {
   gesture: "Drag a factor from one denominator onto another term — it multiplies that term's top and bottom.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    const d = c && denominatorOf(state, c);
-    if (!c || !d) return [];
+    const part = c && fractionPart(state, c);
+    if (!c || !part?.inDen) return [];
+    const d = { F: part.F, c: dragCtx(state, part.F.id)! };
     // The fraction it came from must be a term (or −term) of a sum.
     const termCtx = d.c.parent?.kind === "neg" ? dragCtx(state, d.c.parent.id)! : d.c;
     if (termCtx.parent?.kind !== "sum") return [];
@@ -77,8 +66,8 @@ export const expandFraction: Rule = {
       const copy = () => cloneFresh(f);
       const expanded =
         body.kind === "frac"
-          ? frac(times(body.num, copy()), times(body.den, copy()), body.id)
-          : frac(times(body, copy()), copy());
+          ? frac(timesVisible(body.num, copy()), timesVisible(body.den, copy()), body.id)
+          : frac(timesVisible(body, copy()), copy());
       const newTerms = terms.map((t, k) => (k === j ? withSign(negative, expanded, negative ? T.id : undefined) : t));
       return [
         {
@@ -128,6 +117,7 @@ export const addFractions: Rule = {
 /** (x + 2)/2 → x/2 + 2/2 (pull a term out of the top; it takes a copy of the bottom). */
 export const splitFraction: Rule = {
   id: "split-fraction",
+  feel: { carry: "pull-out" },
   name: "Split a fraction",
   gesture: "Pull a term out of a fraction's top — it takes a copy of the bottom with it.",
   apply(state, id) {
@@ -163,7 +153,7 @@ export const multiplyFractions: Rule = {
       const bottoms = [a.bottom, b.bottom].filter((x): x is Expr => x !== null);
       // The result takes over the target's identity only if the target is the fraction
       // (a number target survives inside it: 3/4 onto 2 → (2·3)/4 keeps that 2).
-      const merged = frac(times(a.top, b.top), bottoms.length === 1 ? bottoms[0] : times(...bottoms), G.kind === "frac" ? G.id : undefined);
+      const merged = frac(timesVisible(a.top, b.top), bottoms.length === 1 ? bottoms[0] : timesVisible(...bottoms), G.kind === "frac" ? G.id : undefined);
       const newFactors = factors.map((f, k) => (k === j ? merged : f));
       return [
         {

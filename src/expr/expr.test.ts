@@ -37,3 +37,13 @@ describe("parser", () => {
     expect(() => parseExpr("(x + 1")).toThrow();
   });
 });
+
+describe("fresh ids after loading a saved state", () => {
+  it("never repeat an id the saved state already uses", async () => {
+    const { freshId, reserveIds } = await import("./build");
+    const saved = { kind: "num", id: `n${(9999).toString(36)}`, value: 2 } as const;
+    reserveIds(saved);
+    const next = freshId();
+    expect(parseInt(next.slice(1), 36)).toBeGreaterThan(9999);
+  });
+});
