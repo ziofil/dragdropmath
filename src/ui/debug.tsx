@@ -15,7 +15,7 @@ import type { Recording } from "../render/testing/recording";
 
 // ---------- on/off ----------
 
-const STORAGE_KEY = "graspable.debug";
+const STORAGE_KEY = "mathbyhand.debug";
 let enabled = initial();
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());

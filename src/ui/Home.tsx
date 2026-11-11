@@ -2,10 +2,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 
 import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
 import { layoutPath, suggested } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, clearSolved, isMastered, loadSolved, solvedCount, TIER_NAMES } from "../game/scoring";
+import { badgeTier, isMastered, loadSolved, solvedCount, TIER_NAMES } from "../game/scoring";
 import { Badge } from "./Badge";
 import { ChapterProgress } from "./ChapterProgress";
-import { useDebug } from "./debug";
 
 /** Height of one row of the path. */
 const ROW = 128;
@@ -20,7 +19,6 @@ export function Home({ at }: { at?: Chapter }) {
   const next = useMemo(() => suggested(solved), [solved]);
   const [selected, setSelected] = useState<Chapter>(at ?? next[0] ?? CHAPTERS[0]);
   const panel = useRef<HTMLElement>(null);
-  const debug = useDebug();
   const pathRef = useRef<HTMLDivElement>(null);
   // Coming back to a chapter: show the path, not the top of the page.
   useEffect(() => {
@@ -71,19 +69,6 @@ export function Home({ at }: { at?: Chapter }) {
         <p>Type any expression or equation and play with every move you've learned.</p>
       </section>
 
-      {debug && (
-        <section className="chapter">
-          <button
-            onClick={() => {
-              if (!confirm("Forget every solved exercise?")) return;
-              clearSolved();
-              location.reload();
-            }}
-          >
-            Clear progress (debug)
-          </button>
-        </section>
-      )}
     </main>
   );
 }

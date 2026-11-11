@@ -73,7 +73,9 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   };
 
   const all = allPuzzles();
-  const next = all[all.findIndex((r) => r.puzzle.id === puzzle.id) + 1];
+  const at = all.findIndex((r) => r.puzzle.id === puzzle.id);
+  const prev = all[at - 1];
+  const next = all[at + 1];
 
   return (
     <main className="puzzle">
@@ -86,7 +88,23 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
             {chapter.title}: lesson
           </a>
         </span>
-        <div className="title">Exercise {pref.label}</div>
+        <nav className="ex-nav" aria-label="Exercises">
+          {prev ? (
+            <a href={`#/p/${prev.puzzle.id}`} className="ex-step" title={`Previous: exercise ${prev.label}`} aria-label={`Previous exercise (${prev.label})`}>
+              ‹
+            </a>
+          ) : (
+            <span className="ex-step" aria-hidden="true" />
+          )}
+          <div className="title">Exercise {pref.label}</div>
+          {next ? (
+            <a href={`#/p/${next.puzzle.id}`} className="ex-step" title={`Next: exercise ${next.label}`} aria-label={`Next exercise (${next.label})`}>
+              ›
+            </a>
+          ) : (
+            <span className="ex-step" aria-hidden="true" />
+          )}
+        </nav>
       </header>
 
       <section className="goal">

@@ -2,14 +2,17 @@
  * Which exercises this viewer has solved. Per-viewer convenience only:
  * storage can be missing or blocked, so every access is guarded.
  */
-const KEY = "graspable.solved.v1";
-const OLD_BEST_KEY = "graspable.best.v1"; // earlier versions stored best move counts
+const KEY = "mathbyhand.solved.v1";
+// Earlier names of the app stored progress here (and once, best move counts): still read, so nothing is lost.
+const OLD_KEY = "graspable.solved.v1";
+const OLD_BEST_KEY = "graspable.best.v1";
 
 export function loadSolved(): Set<string> {
   try {
     const solved: string[] = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const old: string[] = JSON.parse(localStorage.getItem(OLD_KEY) ?? "[]");
     const oldBest: Record<string, number> = JSON.parse(localStorage.getItem(OLD_BEST_KEY) ?? "{}");
-    return new Set([...solved, ...Object.keys(oldBest)]);
+    return new Set([...solved, ...old, ...Object.keys(oldBest)]);
   } catch {
     return new Set();
   }
@@ -22,16 +25,6 @@ export function markSolved(exerciseId: string): void {
     localStorage.setItem(KEY, JSON.stringify([...solved]));
   } catch {
     /* storage unavailable: progress just won't persist */
-  }
-}
-
-/** Forget every solved exercise (debug mode only). */
-export function clearSolved(): void {
-  try {
-    localStorage.removeItem(KEY);
-    localStorage.removeItem(OLD_BEST_KEY);
-  } catch {
-    /* storage unavailable: nothing stored anyway */
   }
 }
 

@@ -35,7 +35,7 @@ export function App() {
     <div className="app">
       <nav className="topbar">
         <a href="#/" className="logo">
-          graspable<span>.</span>
+          math by hand<span>.</span>
         </a>
         <a href="#/sandbox">Sandbox</a>
         {debug && (

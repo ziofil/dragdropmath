@@ -214,12 +214,40 @@ button[aria-pressed="true"] {
 .puzzle-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  gap: 12px;
   padding: 8px 0 12px;
 }
 .back {
   text-decoration: none;
   color: var(--ink-soft);
+}
+/* ‹ Exercise 4.5 ›: step to the previous / next exercise. */
+.ex-nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ex-step {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+a.ex-step:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+span.ex-step {
+  visibility: hidden;
 }
 .title {
   font-weight: 700;
