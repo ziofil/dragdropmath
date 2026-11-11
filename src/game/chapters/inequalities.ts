@@ -9,9 +9,7 @@ export const inequalities: Chapter = {
   lesson: [
     {
       title: "Bigger and smaller",
-      text: [
-        "`x < 7` says x is smaller than 7. The sign opens towards the bigger side.",
-      ],
+      text: ["`x < 7` says x is smaller than 7. The sign opens towards the bigger side."],
       example: {
         start: "x + 2 ≥ 5",
         steps: [
@@ -35,9 +33,7 @@ export const inequalities: Chapter = {
     },
     {
       title: "The same moves as equations",
-      text: [
-        "Adding or taking away the same amount on both sides keeps the order. So does dividing both sides by a positive number.",
-      ],
+      text: ["Adding or taking away the same amount on both sides keeps the order. So does dividing both sides by a positive number."],
       example: {
         start: "2x < 8",
         steps: [
@@ -51,9 +47,7 @@ export const inequalities: Chapter = {
     },
     {
       title: "A minus turns it round",
-      text: [
-        "Multiplying by −1 reverses the order: `2 < 3`, but `−2 > −3`. So when a minus crosses, the sign turns round.",
-      ],
+      text: ["Multiplying by −1 reverses the order: `2 < 3`, but `−2 > −3`. So when a minus crosses, the sign turns round."],
       example: {
         start: "-x < 4",
         steps: [
@@ -62,11 +56,9 @@ export const inequalities: Chapter = {
             then: "x > -4",
           },
         ],
-        after:
-          "Try a number: x = 0 works in −x < 4 (0 < 4), and in x > −4 (0 > −4).",
+        after: "Try a number: x = 0 works in −x < 4 (0 < 4), and in x > −4 (0 > −4).",
       },
-      watch:
-        "Only multiplying or dividing by a negative number turns the sign. Moving a term across never does.",
+      watch: "Only multiplying or dividing by a negative number turns the sign. Moving a term across never does.",
     },
   ],
   unlocks: [],

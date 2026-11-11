@@ -2,30 +2,22 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
-import { allPuzzles, CHAPTERS, routinesFor, type PuzzleRef } from "../game/puzzles";
+import { allPuzzles, CHAPTERS, type PuzzleRef } from "../game/puzzles";
 import { matchesGoal } from "../game/solver";
-import { badgeTier, isMastered, loadSolved, markSolved } from "../game/scoring";
+import { badgeTier, loadSolved, markSolved } from "../game/scoring";
+import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { Badge, tierName } from "./Badge";
-import { autoSteps } from "../game/auto";
 import { MathCanvas, StaticMath } from "./MathCanvas";
 import { checkEnv, Invariant } from "./Invariant";
 
-/** Each automatic step is shown as a move of its own, this long after the one before. */
-const AUTO_STEP_MS = 420;
-
-/** A state reached: by the learner's own move, or done for them (`auto`: what was done). */
-type Entry = { state: MathState; auto?: string };
+/** A state reached: by the learner's own move, or by tidying after it. */
+type Entry = { state: MathState; tidy?: true };
 
 export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   const { puzzle, chapter, rules } = pref;
   const start = useMemo(() => parseState(puzzle.start), [puzzle]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   const env = useMemo(() => checkEnv(start, goal), [start, goal]);
-  // Steps from chapters already mastered are done automatically.
-  const routines = useMemo(() => {
-    const solved = loadSolved();
-    return routinesFor(CHAPTERS.indexOf(chapter), (c) => isMastered(c, solved));
-  }, [chapter]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
     const before = loadSolved();
@@ -33,8 +25,10 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   }, [chapter, puzzle.id]);
   const [history, setHistory] = useState<Entry[]>([{ state: start }]);
   const [showHint, setShowHint] = useState(false);
-  // Pending automatic steps belong to one move: undoing it cancels them.
+  // Pending tidying belongs to one move: undoing it cancels it. A move made
+  // before it's shown takes it over (tidying from where it started).
   const generation = useRef(0);
+  const tidyFrom = useRef<MathState | null>(null);
   useEffect(() => () => void generation.current++, []);
 
   const current = history[history.length - 1].state;
@@ -46,31 +40,38 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   const onDrop = (next: MathState) => {
     if (stateKey(next, "exact") === stateKey(current, "exact")) return;
     const gen = ++generation.current;
+    const from = tidyFrom.current ?? current;
+    tidyFrom.current = null;
     setHistory((h) => [...h, { state: next }]);
     if (matchesGoal(next, goal)) return;
-    const steps = autoSteps(current, next, routines, history.map((e) => e.state));
-    steps.forEach((s, i) =>
+    const steps = tidySteps(from, next, history.map((e) => e.state));
+    // Tidying stops once the goal is reached.
+    const done = steps.findIndex((s) => matchesGoal(s, goal));
+    const shown = done < 0 ? steps : steps.slice(0, done + 1);
+    if (shown.length) tidyFrom.current = from;
+    shown.forEach((state, i) =>
       setTimeout(() => {
-        if (generation.current === gen) setHistory((h) => [...h, { state: s.state, auto: s.routine.id === "tidy" ? "" : s.routine.label }]);
-      }, AUTO_STEP_MS * (i + 1)),
+        if (generation.current !== gen) return;
+        setHistory((h) => [...h, { state, tidy: true }]);
+        if (i === shown.length - 1) tidyFrom.current = null;
+      }, TIDY_STEP_MS * (i + 1)),
     );
   };
 
-  const undo = () => {
+  const cancelTidying = () => {
     generation.current++;
-    // Your last move, with whatever was done for you after it.
-    setHistory((h) => {
-      let n = h.length;
-      while (n > 1 && h[n - 1].auto !== undefined) n--;
-      return n > 1 ? h.slice(0, n - 1) : h;
-    });
+    tidyFrom.current = null;
+  };
+  // Undo takes back your last move, with the tidying after it.
+  const undo = () => {
+    cancelTidying();
+    setHistory((h) => h.slice(0, Math.max(1, lastMove(h))));
   };
   const reset = () => {
-    generation.current++;
+    cancelTidying();
     setHistory([{ state: start }]);
   };
 
-  const doneForYou = [...new Set(history.slice(trailingStart(history)).flatMap((e) => (e.auto ? [e.auto] : [])))];
   const all = allPuzzles();
   const next = all[all.findIndex((r) => r.puzzle.id === puzzle.id) + 1];
 
@@ -111,11 +112,6 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
             </button>
           </div>
         </div>
-        {doneForYou.length > 0 && (
-          <p className="auto-note" role="status">
-            Done for you (you've mastered it): {doneForYou.join("; ")}.
-          </p>
-        )}
         {showHint && puzzle.hint && <p className="hint">{puzzle.hint}</p>}
       </section>
 
@@ -143,10 +139,9 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   );
 }
 
-/** Where the last move (the learner's own, and what was done after it) starts in the history. */
-function trailingStart(h: Entry[]): number {
-  let n = h.length;
-  while (n > 1 && h[n - 1].auto !== undefined) n--;
-  return n - 1;
+/** Where the learner's last move is in the history (tidying after it comes later). */
+function lastMove(h: Entry[]): number {
+  let n = h.length - 1;
+  while (n > 0 && h[n].tidy) n--;
+  return n;
 }
-

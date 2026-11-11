@@ -53,31 +53,19 @@ export const fractions: Chapter = {
           },
         ],
       },
-      watch:
-        "`1/2 + 1/3` is not `2/5`. Tops only add when the bottoms are already the same.",
+      watch: "`1/2 + 1/3` is not `2/5`. Tops only add when the bottoms are already the same.",
     },
     {
       title: "Multiplying fractions",
-      text: [
-        "Multiplying is simpler: tops multiply, bottoms multiply. Half of a third is `(1·1)/(2·3) = 1/6`.",
-      ],
+      text: ["Multiplying is simpler: tops multiply, bottoms multiply. Half of a third is `(1·1)/(2·3) = 1/6`."],
       example: {
         start: "(2/3)·(9/4)",
-        steps: [
-          { say: "Drop one fraction onto the other.", then: "(2·9)/(3·4)" },
-        ],
+        steps: [{ say: "Drop one fraction onto the other.", then: "(2·9)/(3·4)" }],
         after: "Then split and cancel what top and bottom share: it's 3/2.",
       },
     },
   ],
-  unlocks: [
-    "expand-fraction",
-    "add-fractions",
-    "split-fraction",
-    "multiply-fractions",
-    "divide-by-fraction",
-    "times-one",
-  ],
+  unlocks: ["expand-fraction", "add-fractions", "split-fraction", "multiply-fractions", "divide-by-fraction", "times-one"],
   puzzles: [
     { id: "f1", start: "6/8", goal: "3/4", hint: "Drop the 8 onto the 6." },
     {

@@ -24,7 +24,7 @@ export type Neg = Base & { kind: "neg"; arg: Expr };
 export type Sum = Base & { kind: "sum"; terms: Expr[] };
 export type Prod = Base & { kind: "prod"; factors: Expr[] };
 export type Frac = Base & { kind: "frac"; num: Expr; den: Expr };
-/** `radical`: draw x^(1/n) as ⁿ√x (purely notation; keys and values ignore it). */
+/** `radical`: draw x^(1/n) as ⁿ√x (notation: values ignore it; ordered keys count it, see key.ts). */
 export type Pow = Base & { kind: "pow"; base: Expr; exp: Expr; radical?: boolean };
 /** A named constant; only e for now. */
 export type Const = Base & { kind: "const"; name: "e" };

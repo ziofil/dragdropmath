@@ -52,10 +52,6 @@ export function normalize(e: Expr): Expr {
   return mapTree(e, normalizeNode);
 }
 
-export function normalizeState(s: MathState): MathState {
-  return { ...s, sides: s.sides.map(normalize) };
-}
-
 /** The relation of a state ("=" unless it says otherwise). */
 export const relOf = (s: MathState): Rel => s.rel ?? "=";
 
@@ -107,7 +103,7 @@ function normalizeNode(e: Expr): Expr {
       const core: Expr = isNum(d, 1) ? n : { ...e, num: n, den: d };
       return negative ? neg(core) : core;
     }
-    // x¹ stays visible: the learner removes the 1 themselves (power-one).
+    // x¹ isn't simplified here: a move shows it, then tidying (game/tidy.ts) writes x.
     default:
       return e;
   }

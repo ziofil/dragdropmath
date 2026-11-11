@@ -1,6 +1,6 @@
 import type { Expr, Log, Pow } from "../expr/types";
 import { cloneFresh, frac, log, neg, negate, num, pow, prod, sum } from "../expr/build";
-import { key } from "../expr/key";
+import { key, rootOrder } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
 import { dragCtx, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
 import { asPower, fractionPart, raise as raiseTo } from "./shapes";
@@ -13,10 +13,6 @@ export function integer(v: number, id?: string): Expr {
 }
 
 /** n if this exponent is 1/n (a root), else null. */
-function rootOrder(e: Expr): number | null {
-  return e.kind === "frac" && e.num.kind === "num" && e.num.value === 1 && e.den.kind === "num" && e.den.value >= 2 ? e.den.value : null;
-}
-
 
 /** The log being dragged: the log itself, or its base (the "ln" label is the base e). */
 function logAt(c: DragCtx): Log | null {

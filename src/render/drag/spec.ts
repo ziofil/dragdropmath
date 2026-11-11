@@ -23,7 +23,7 @@ export function interactive(opts: {
   draggedId?: string | null;
   onTap?: (next: MathState) => void;
   /** Wraps every drag spec (debug mode uses it to record drags). */
-  wrap?: (spec: DragSpec<MathState>, id: string) => DragSpec<MathState>;
+  wrap?: (spec: DragSpec<MathState>) => DragSpec<MathState>;
 }): RenderCtx {
   const { state, d, rules, draggedId, onTap, wrap } = opts;
   const moves = movesFor(state, rules);
@@ -36,7 +36,7 @@ export function interactive(opts: {
       onTap,
       drag: (id) => {
         const spec = dragSpec({ rc, d, rules }, id);
-        return wrap ? wrap(spec, id) : spec;
+        return wrap ? wrap(spec) : spec;
       },
     },
   };

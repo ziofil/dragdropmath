@@ -24,8 +24,7 @@ export function Sandbox() {
     }
   };
 
-  const onDrop = (dropped: MathState) => {
-    const next = dropped;
+  const onDrop = (next: MathState) => {
     if (stateKey(next, "exact") !== stateKey(current, "exact")) setHistory((h) => [...h, next]);
   };
 
@@ -33,7 +32,7 @@ export function Sandbox() {
     <main className="puzzle">
       <header className="puzzle-head">
         <a href="#/" className="back">
-          ← Map
+          ← Learning path
         </a>
         <div className="title">Sandbox</div>
       </header>

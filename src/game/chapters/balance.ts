@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const balance: Chapter = {
   id: "balance",
   title: "Solving equations",
-  blurb:
-    "An equation is a balance. Whatever crosses the = changes into its opposite.",
+  blurb: "An equation is a balance. Whatever crosses the = changes into its opposite.",
   after: ["distribute"],
   lesson: [
     {
@@ -26,9 +25,7 @@ export const balance: Chapter = {
     },
     {
       title: "Dividing both sides",
-      text: [
-        "A number multiplying a whole side arrives dividing the other side: from `2x = 8`, divide both sides by 2 to get `x = 8/2`.",
-      ],
+      text: ["A number multiplying a whole side arrives dividing the other side: from `2x = 8`, divide both sides by 2 to get `x = 8/2`."],
       example: {
         start: "2x = 8",
         steps: [
@@ -68,15 +65,7 @@ export const balance: Chapter = {
       watch: "Check your answer by putting it back in: 3·4 + 1 = 13. ✓",
     },
   ],
-  unlocks: [
-    "move-term",
-    "swap-sides",
-    "move-factor",
-    "move-denominator",
-    "move-sign",
-    "divide-numbers",
-    "cancel-factor",
-  ],
+  unlocks: ["move-term", "swap-sides", "move-factor", "move-denominator", "move-sign", "divide-numbers", "cancel-factor"],
   puzzles: [
     { id: "b4", start: "-x = 6", goal: "x = -6" },
     {

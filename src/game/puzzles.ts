@@ -1,5 +1,4 @@
 import type { RuleId } from "../rules";
-import { ROUTINES, type Routine } from "./auto";
 import { shuffle } from "./chapters/shuffle";
 import { collect } from "./chapters/collect";
 import { distribute } from "./chapters/distribute";
@@ -53,8 +52,6 @@ export type Chapter = {
    * hand, and sometimes a common mistake to watch out for.
    */
   lesson: LessonPart[];
-  /** Routine steps that happen by themselves in later chapters, once all of this chapter's exercises are solved. */
-  automates?: Routine[];
   /** Rules this chapter unlocks; earlier chapters' rules stay available. */
   unlocks: RuleId[];
   puzzles: Puzzle[];
@@ -83,31 +80,17 @@ export type PuzzleRef = {
 };
 
 /** "Exercise N.M": set N, exercise M within it (both from 1). */
-export const exerciseLabel = (chapterIndex: number, index: number) =>
-  `${chapterIndex + 1}.${index + 1}`;
-
-export function allPuzzles(): PuzzleRef[] {
-  return CHAPTERS.flatMap((chapter, ci) => {
-    const rules = rulesFor(ci);
-    return chapter.puzzles.map((puzzle, index) => ({
-      chapter,
-      puzzle,
-      index,
-      rules,
-      label: exerciseLabel(ci, index),
-    }));
-  });
-}
+export const exerciseLabel = (chapterIndex: number, index: number) => `${chapterIndex + 1}.${index + 1}`;
 
 /**
  * The chapters on the way to chapter `ci`: everything it builds on, directly
  * or not (as indices, in chapter order; `ci` itself excluded).
  */
-export function pathTo(ci: number): number[] {
+function pathTo(ci: number): number[] {
   const seen = new Set<number>();
   const visit = (i: number) => {
     for (const id of CHAPTERS[i].after) {
-      const j = chapterIndex(id);
+      const j = CHAPTERS.findIndex((c) => c.id === id);
       if (!seen.has(j)) {
         seen.add(j);
         visit(j);
@@ -119,21 +102,19 @@ export function pathTo(ci: number): number[] {
 }
 
 /** The moves in chapter `ci`: its own, and those of every chapter on the way to it. */
-export const rulesFor = (ci: number): RuleId[] =>
-  [...pathTo(ci), ci].flatMap((i) => CHAPTERS[i].unlocks);
+export const rulesFor = (ci: number): RuleId[] => [...pathTo(ci), ci].flatMap((i) => CHAPTERS[i].unlocks);
 
-/**
- * What's done automatically in chapter `ci`: tidying products (always), and
- * the routines of the chapters on the way to it that are mastered.
- */
-export const routinesFor = (ci: number, mastered: (c: Chapter) => boolean): Routine[] => [
-  ROUTINES.tidy,
-  ...pathTo(ci).flatMap((i) => (mastered(CHAPTERS[i]) ? (CHAPTERS[i].automates ?? []) : [])),
-];
+export const chapterById = (id: string | undefined): Chapter | undefined => CHAPTERS.find((c) => c.id === id);
 
-export const chapterIndex = (id: string) =>
-  CHAPTERS.findIndex((c) => c.id === id);
+/** The chapters that build directly on this one. */
+export const leadsTo = (chapter: Chapter): Chapter[] => CHAPTERS.filter((c) => c.after.includes(chapter.id));
 
-export function findPuzzle(id: string): PuzzleRef | undefined {
-  return allPuzzles().find((p) => p.puzzle.id === id);
-}
+/** Every exercise, in order, with its chapter, label and moves. */
+const ALL: PuzzleRef[] = CHAPTERS.flatMap((chapter, ci) => {
+  const rules = rulesFor(ci);
+  return chapter.puzzles.map((puzzle, index) => ({ chapter, puzzle, index, rules, label: exerciseLabel(ci, index) }));
+});
+
+export const allPuzzles = (): readonly PuzzleRef[] => ALL;
+
+export const findPuzzle = (id: string): PuzzleRef | undefined => ALL.find((p) => p.puzzle.id === id);

@@ -3,15 +3,12 @@ import type { Chapter } from "../puzzles";
 export const collect: Chapter = {
   id: "collect",
   title: "Like terms",
-  blurb:
-    "3x + 2x = 5x, just as 3 apples + 2 apples = 5 apples. Terms with the same letters combine; opposites cancel.",
+  blurb: "3x + 2x = 5x, just as 3 apples + 2 apples = 5 apples. Terms with the same letters combine; opposites cancel.",
   after: ["shuffle"],
   lesson: [
     {
       title: "What 3x means",
-      text: [
-        "`3x` means `x + x + x`: three x's. So `3x + 2x` is three x's and two more: `5x`.",
-      ],
+      text: ["`3x` means `x + x + x`: three x's. So `3x + 2x` is three x's and two more: `5x`."],
       example: {
         start: "3x + 2x",
         steps: [{ say: "Drop the 2x onto the 3x.", then: "5x" }],
@@ -51,15 +48,12 @@ export const collect: Chapter = {
     },
     {
       title: "Taking away",
-      text: [
-        "A minus term counts down: `5y − 2y` is `3y`. And something minus itself is nothing, so `a + b − a` is just `b`.",
-      ],
+      text: ["A minus term counts down: `5y − 2y` is `3y`. And something minus itself is nothing, so `a + b − a` is just `b`."],
       example: {
         start: "a + b - a",
         steps: [{ say: "Drop the −a onto the a. They cancel.", then: "b" }],
       },
-      watch:
-        "`x + x` is `2x`, not `x²`. Adding x's counts them. Multiplying them is something else, which comes later.",
+      watch: "`x + x` is `2x`, not `x²`. Adding x's counts them. Multiplying them is something else, which comes later.",
     },
   ],
   unlocks: [],

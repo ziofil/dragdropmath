@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const roots: Chapter = {
   id: "roots",
   title: "Roots",
-  blurb:
-    "√x is x to the power ½ — so every power move works on roots, and the fractions do the rest.",
+  blurb: "√x is x to the power ½ — so every power move works on roots, and the fractions do the rest.",
   after: ["powers", "fractions"],
   lesson: [
     {
@@ -12,9 +11,7 @@ export const roots: Chapter = {
       text: ["`√9` asks: what times itself makes 9? It's 3, since `3·3 = 9`."],
       example: {
         start: "√9",
-        steps: [
-          { say: "Tap the 9 to split it into equal factors.", then: "√(3·3)" },
-        ],
+        steps: [{ say: "Tap the 9 to split it into equal factors.", then: "√(3·3)" }],
         after: "Then pull one 3 out of the root and see what's left.",
       },
     },
@@ -30,9 +27,7 @@ export const roots: Chapter = {
     },
     {
       title: "Roots split over products",
-      text: [
-        "Because a root is a power, it splits over a product: `√(4x) = √4·√x = 2√x`.",
-      ],
+      text: ["Because a root is a power, it splits over a product: `√(4x) = √4·√x = 2√x`."],
       example: {
         start: "√(4x)",
         steps: [
@@ -43,14 +38,11 @@ export const roots: Chapter = {
         ],
         after: "And √4 is 2, so it's 2√x.",
       },
-      watch:
-        "A root does not split over a sum: `√(9 + 16)` is `√25 = 5`, not `3 + 4`.",
+      watch: "A root does not split over a sum: `√(9 + 16)` is `√25 = 5`, not `3 + 4`.",
     },
     {
       title: "Undoing a root",
-      text: [
-        "To get x out of `√x = 3`, square both sides. The √ crosses the = and becomes a square on the other side.",
-      ],
+      text: ["To get x out of `√x = 3`, square both sides. The √ crosses the = and becomes a square on the other side."],
       example: {
         start: "√x = 3",
         steps: [

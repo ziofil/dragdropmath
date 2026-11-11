@@ -1,4 +1,3 @@
-export { interactive, dragSpec } from "./spec";
-export type { DragEnv } from "./env";
+export { interactive } from "./spec";
 export { MERGE_AT } from "./merge";
 export { recorded } from "./record";

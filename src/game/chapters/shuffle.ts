@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const shuffle: Chapter = {
   id: "shuffle",
   title: "Rearranging terms",
-  blurb:
-    "Terms can be added in any order, and numbers next to each other can be worked out.",
+  blurb: "Terms can be added in any order, and numbers next to each other can be worked out.",
   after: [],
   lesson: [
     {
@@ -20,9 +19,7 @@ export const shuffle: Chapter = {
     },
     {
       title: "Each term owns its sign",
-      text: [
-        "In `5 − 3 + x` the terms are `5`, `−3` and `x`. The minus belongs to the 3: wherever the 3 goes, its minus goes with it.",
-      ],
+      text: ["In `5 − 3 + x` the terms are `5`, `−3` and `x`. The minus belongs to the 3: wherever the 3 goes, its minus goes with it."],
       example: {
         start: "5 - 3 + x",
         steps: [
@@ -32,8 +29,7 @@ export const shuffle: Chapter = {
           },
         ],
       },
-      watch:
-        "`5 − 3` and `3 − 5` are not the same. You can move the 3, but never leave its minus behind.",
+      watch: "`5 − 3` and `3 − 5` are not the same. You can move the 3, but never leave its minus behind.",
     },
     {
       title: "Numbers can be worked out",

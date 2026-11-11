@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const explog: Chapter = {
   id: "explog",
   title: "Exponentials and logarithms",
-  blurb:
-    "ln asks “e to the what?”. So ln and e^ undo each other — and logs turn × into +.",
+  blurb: "ln asks “e to the what?”. So ln and e^ undo each other — and logs turn × into +.",
   after: ["roots"],
   lesson: [
     {
@@ -15,16 +14,12 @@ export const explog: Chapter = {
       ],
       example: {
         start: "e^(ln(x))",
-        steps: [
-          { say: "Drop the e onto the ln: they undo each other.", then: "x" },
-        ],
+        steps: [{ say: "Drop the e onto the ln: they undo each other.", then: "x" }],
       },
     },
     {
       title: "Logs turn × into +",
-      text: [
-        "Multiplying powers of e adds their exponents. So the log of a product is a sum of logs: `ln(2x) = ln(2) + ln(x)`.",
-      ],
+      text: ["Multiplying powers of e adds their exponents. So the log of a product is a sum of logs: `ln(2x) = ln(2) + ln(x)`."],
       example: {
         start: "ln(2x)",
         steps: [
@@ -45,9 +40,7 @@ export const explog: Chapter = {
     },
     {
       title: "Solving with logs",
-      text: [
-        "To get x out of an exponent, take ln of both sides. From `e^x = 5`, the e crosses the = and becomes ln: `x = ln(5)`.",
-      ],
+      text: ["To get x out of an exponent, take ln of both sides. From `e^x = 5`, the e crosses the = and becomes ln: `x = ln(5)`."],
       example: {
         start: "e^x = 5",
         steps: [{ say: "Drag the e across the =.", then: "x = ln(5)" }],

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
-import { allPuzzles, CHAPTERS, routinesFor, rulesFor } from "./puzzles";
-import { fewestMoves, matchesGoal, neighbours } from "./solver";
+import { allPuzzles, CHAPTERS, rulesFor } from "./puzzles";
+import { fewestMoves, matchesGoal, moves } from "./solver";
+import { tidied } from "./tidy";
 
 describe("goals are matched as shown", () => {
   it("term order matters, factor order and equation sides don't", () => {
@@ -33,25 +34,12 @@ describe("exercises", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it.each(refs.map((r) => [r.puzzle.id, r] as const))("%s can be solved with the moves unlocked so far", (_, ref) => {
+  // As a learner would: with the moves of the chapter and of every chapter on
+  // the way to it, and tidying after each move, as the app does.
+  it.each(refs.map((r) => [r.puzzle.id, r] as const))("%s can be solved", (_, ref) => {
     const { puzzle, rules } = ref;
-    const steps = fewestMoves(parseState(puzzle.start), parseState(puzzle.goal), rules, {
-      maxDepth: 10,
-    });
+    const steps = fewestMoves(parseState(puzzle.start), parseState(puzzle.goal), rules, { maxDepth: 10, maxStates: 120_000 });
     expect(steps, `${puzzle.start} → ${puzzle.goal}`).not.toBeNull();
-  });
-});
-
-describe("with everything earlier mastered", () => {
-  // The most automation a learner can have: every earlier chapter mastered.
-  it.each(allPuzzles().map((r) => [r.puzzle.id, r] as const))("%s can still be solved", (_, ref) => {
-    const ci = CHAPTERS.indexOf(ref.chapter);
-    const steps = fewestMoves(parseState(ref.puzzle.start), parseState(ref.puzzle.goal), ref.rules, {
-      maxDepth: 10,
-      maxStates: 120_000,
-      routines: routinesFor(ci, () => true),
-    });
-    expect(steps, `${ref.puzzle.start} → ${ref.puzzle.goal}`).not.toBeNull();
   }, 30_000); // the longest exercises search a lot of states
 });
 
@@ -72,10 +60,11 @@ describe("guided examples", () => {
     let state = parseState(g.start);
     for (const step of g.steps) {
       const want = parseState(step.then);
-      const options = neighbours(state, rules);
+      // As in the app: the move is checked as made, then tidied.
+      const options = moves(state, rules);
       const next = options.find((n) => matchesGoal(n, want));
       expect(next, `"${step.say}" from ${printState(state)}: one move gives ${options.map(printState).join(" | ")}`).toBeDefined();
-      state = next!;
+      state = tidied(state, next!);
     }
   });
 });

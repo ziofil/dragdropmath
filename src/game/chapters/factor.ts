@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const factor: Chapter = {
   id: "factor",
   title: "Factoring",
-  blurb:
-    "Factoring is multiplying run backwards: find what the terms share, and take it out in front of brackets.",
+  blurb: "Factoring is multiplying run backwards: find what the terms share, and take it out in front of brackets.",
   after: ["brackets"],
   lesson: [
     {
@@ -21,15 +20,12 @@ export const factor: Chapter = {
             then: "x(x + 3)",
           },
         ],
-        after:
-          "Check it: multiply x(x + 3) back out and you're back where you started.",
+        after: "Check it: multiply x(x + 3) back out and you're back where you started.",
       },
     },
     {
       title: "Look inside numbers",
-      text: [
-        "To see what terms share, split numbers into factors. In `2x + 6`, tap the 6 to see `2·3`. Now both terms have a 2.",
-      ],
+      text: ["To see what terms share, split numbers into factors. In `2x + 6`, tap the 6 to see `2·3`. Now both terms have a 2."],
       example: {
         start: "2x + 6",
         steps: [
@@ -45,9 +41,7 @@ export const factor: Chapter = {
       ],
       example: {
         start: "x(x + 2) + 3(x + 2)",
-        steps: [
-          { say: "Carry the (x + 2) out in front.", then: "(x + 2)(x + 3)" },
-        ],
+        steps: [{ say: "Carry the (x + 2) out in front.", then: "(x + 2)(x + 3)" }],
       },
     },
     {
@@ -55,8 +49,7 @@ export const factor: Chapter = {
       text: [
         "With four terms, take something out of the first two, then out of the last two. If the brackets match, that whole bracket is shared and comes out too.",
       ],
-      watch:
-        "Always check a factoring by multiplying it back out. It should give exactly what you started with.",
+      watch: "Always check a factoring by multiplying it back out. It should give exactly what you started with.",
     },
   ],
   unlocks: ["split-number", "factor-shared"],

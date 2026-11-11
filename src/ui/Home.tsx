@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
-import { CHAPTERS, type Chapter } from "../game/puzzles";
+import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
 import { layoutPath, suggested } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, clearSolved, isMastered, loadSolved, TIER_NAMES } from "../game/scoring";
-import { Badge, BadgeNote } from "./Badge";
-import { ExerciseCards } from "./ExerciseCards";
+import { badgeTier, clearSolved, isMastered, loadSolved, solvedCount, TIER_NAMES } from "../game/scoring";
+import { Badge } from "./Badge";
+import { ChapterProgress } from "./ChapterProgress";
+import { useDebug } from "./debug";
 
 /** Height of one row of the path. */
 const ROW = 128;
@@ -19,6 +20,7 @@ export function Home({ at }: { at?: Chapter }) {
   const next = useMemo(() => suggested(solved), [solved]);
   const [selected, setSelected] = useState<Chapter>(at ?? next[0] ?? CHAPTERS[0]);
   const panel = useRef<HTMLElement>(null);
+  const debug = useDebug();
   const pathRef = useRef<HTMLDivElement>(null);
   // Coming back to a chapter: show the path, not the top of the page.
   useEffect(() => {
@@ -69,18 +71,19 @@ export function Home({ at }: { at?: Chapter }) {
         <p>Type any expression or equation and play with every move you've learned.</p>
       </section>
 
-      {/* TEMPORARY (testing): wipe saved progress. */}
-      <section className="chapter">
-        <button
-          onClick={() => {
-            if (!confirm("Forget every solved exercise?")) return;
-            clearSolved();
-            location.reload();
-          }}
-        >
-          Clear progress (temporary)
-        </button>
-      </section>
+      {debug && (
+        <section className="chapter">
+          <button
+            onClick={() => {
+              if (!confirm("Forget every solved exercise?")) return;
+              clearSolved();
+              location.reload();
+            }}
+          >
+            Clear progress (debug)
+          </button>
+        </section>
+      )}
     </main>
   );
 }
@@ -161,7 +164,7 @@ function PathMap({
           {nodes.map((n) => {
             const p = at(n);
             const c = n.chapter;
-            const done = c.puzzles.filter((q) => solved.has(q.id)).length;
+            const done = solvedCount(c, solved);
             const state = isMastered(c, solved) ? "done" : next.includes(c) ? "next" : done > 0 ? "started" : "open";
             return (
               <button
@@ -228,11 +231,11 @@ function ChapterPanel({
   isNext: boolean;
 }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const done = chapter.puzzles.filter((p) => solved.has(p.id)).length;
+  const started = solvedCount(chapter, solved) > 0;
   const mastered = isMastered(chapter, solved);
-  const builds = chapter.after.map((id) => CHAPTERS.find((c) => c.id === id)!);
+  const builds = chapter.after.map((id) => chapterById(id)!);
   const missing = builds.filter((c) => !isMastered(c, solved));
-  const opens = CHAPTERS.filter((c) => c.after.includes(chapter.id));
+  const opens = leadsTo(chapter);
 
   return (
     <section className="chapter path-panel" ref={panelRef}>
@@ -253,18 +256,10 @@ function ChapterPanel({
       )}
 
       <a className="button primary panel-start" href={`#/c/${chapter.id}`}>
-        {done > 0 ? "Back to the idea and examples →" : "Start with the idea →"}
+        {started ? "Back to the idea and examples →" : "Start with the idea →"}
       </a>
 
-      <div className="panel-progress">
-        <Badge tier={badgeTier(chapter, solved)} n={ci + 1} size={30} />
-        <span>
-          {done} of {chapter.puzzles.length} exercises solved
-          <br />
-          <BadgeNote chapter={chapter} solved={solved} />
-        </span>
-      </div>
-      <ExerciseCards chapter={chapter} solved={solved} />
+      <ChapterProgress chapter={chapter} solved={solved} />
 
       {opens.length > 0 && <p className="panel-opens">Leads on to {opens.map((c) => c.title).join(", ")}.</p>}
     </section>
@@ -284,7 +279,7 @@ function Shelf({ solved, onSelect }: { solved: ReadonlySet<string>; onSelect: (c
         {CHAPTERS.map((c, i) => (
           <li key={c.id}>
             <button className="shelf-badge" onClick={() => onSelect(c)} title={`${c.title}: ${tiers[i] ? `${TIER_NAMES[tiers[i]]} badge` : "not earned yet"}`}>
-              <Badge tier={tiers[i]} n={i + 1} size={34} title={`${c.title}: ${tiers[i] ? `${TIER_NAMES[tiers[i]]} badge` : "not earned yet"}`} />
+              <Badge tier={tiers[i]} n={i + 1} size={34} />
             </button>
           </li>
         ))}

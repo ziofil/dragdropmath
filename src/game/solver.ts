@@ -1,15 +1,14 @@
 import type { MathState } from "../expr/types";
 import { withFlippedRel } from "../expr/build";
-import { autoSteps, type Routine } from "./auto";
+import { tidied } from "./tidy";
 import { stateKey } from "../expr/key";
 import { candidatesFor, handles, isGrabbable, tapFor, type RuleId } from "../rules";
 
 /**
  * Has the learner reached the goal? "Make it look like" means the terms must
- * be in the goal's order (7 + x is not x + 7). Factor order is free (6y = y·6,
- * and a tap tidies it), and an equation may be written either way round,
- * since there's no move to swap its sides — an inequality too, read the
- * other way (3 < x is x > 3).
+ * be in the goal's order (7 + x is not x + 7). Factor order is free (tidying
+ * writes y·6 as 6y anyway), and an equation may be either way round (7 = x is
+ * x = 7), an inequality too, read the other way (3 < x is x > 3).
  */
 export function matchesGoal(state: MathState, goal: MathState, ordered = true): boolean {
   if (stateKey(state, ordered) === stateKey(goal, ordered)) return true;
@@ -20,15 +19,18 @@ export function matchesGoal(state: MathState, goal: MathState, ordered = true): 
   return false;
 }
 
-/** Every state one move away (with whatever is automated done after it). */
-export function neighbours(state: MathState, rules: readonly RuleId[], routines: readonly Routine[] = []): MathState[] {
+/** Every state one move away, as the move leaves it (before tidying). */
+export function moves(state: MathState, rules: readonly RuleId[]): MathState[] {
   return handles(state)
     .filter((id) => isGrabbable(state, id, rules)) // only grabs a learner can actually make
     .flatMap((id) => [...candidatesFor(state, id, rules), tapFor(state, id, rules)])
-    .flatMap((c) => (c ? [autoSteps(state, c.state, routines).at(-1)?.state ?? c.state] : []));
+    .flatMap((c) => (c ? [c.state] : []));
 }
 
-type SearchOpts = { ordered?: boolean; maxDepth?: number; maxStates?: number; routines?: readonly Routine[] };
+/** Every state one move away, tidied as the app tidies it. */
+export const neighbours = (state: MathState, rules: readonly RuleId[]): MathState[] => moves(state, rules).map((n) => tidied(state, n));
+
+type SearchOpts = { ordered?: boolean; maxDepth?: number; maxStates?: number };
 
 /**
  * A shortest way from start to goal (breadth-first): every state on the way,
@@ -39,7 +41,7 @@ export function solution(
   start: MathState,
   goal: MathState,
   rules: readonly RuleId[],
-  { ordered = true, maxDepth = 8, maxStates = 50_000, routines = [] }: SearchOpts = {},
+  { ordered = true, maxDepth = 8, maxStates = 50_000 }: SearchOpts = {},
 ): MathState[] | null {
   let frontier = [start];
   const parent = new Map<MathState, MathState>();
@@ -53,7 +55,7 @@ export function solution(
     }
     const next: MathState[] = [];
     for (const s of frontier) {
-      for (const n of neighbours(s, rules, routines)) {
+      for (const n of neighbours(s, rules)) {
         const k = stateKey(n, ordered);
         if (seen.has(k)) continue;
         seen.add(k);

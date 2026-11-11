@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CHAPTERS, findPuzzle } from "../game/puzzles";
+import { chapterById, findPuzzle } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { PuzzleView } from "./PuzzleView";
@@ -24,10 +24,10 @@ export function App() {
   const puzzleId = hash.match(/^#\/p\/([\w-]+)$/)?.[1];
   const ref = puzzleId ? findPuzzle(puzzleId) : undefined;
   const chapterId = hash.match(/^#\/c\/([\w-]+)$/)?.[1];
-  const chapter = CHAPTERS.find((c) => c.id === chapterId);
+  const chapter = chapterById(chapterId);
   // The learning path, with a chapter picked out (coming back from it).
   const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
-  const at = CHAPTERS.find((c) => c.id === atId);
+  const at = chapterById(atId);
   const debug = useDebug();
   useDebugShortcut();
 

@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const distribute: Chapter = {
   id: "distribute",
   title: "The distributive law",
-  blurb:
-    "A factor outside brackets multiplies every term inside — and a factor every term shares can be taken back out.",
+  blurb: "A factor outside brackets multiplies every term inside — and a factor every term shares can be taken back out.",
   after: ["collect"],
   lesson: [
     {
@@ -26,21 +25,16 @@ export const distribute: Chapter = {
     },
     {
       title: "A minus in front",
-      text: [
-        "`−(x − 4)` means `−1` times the brackets. The −1 visits every term too, so every sign inside flips.",
-      ],
+      text: ["`−(x − 4)` means `−1` times the brackets. The −1 visits every term too, so every sign inside flips."],
       example: {
         start: "-(x - 4)",
         steps: [{ say: "Drop the minus onto the brackets.", then: "-x + 4" }],
       },
-      watch:
-        "A common slip is writing `−(x − 4)` as `−x − 4`. The minus has to reach the 4 as well.",
+      watch: "A common slip is writing `−(x − 4)` as `−x − 4`. The minus has to reach the 4 as well.",
     },
     {
       title: "Taking a factor out",
-      text: [
-        "Going backwards is called factoring. If every term has a 3, the 3 can come out in front of brackets: `3x + 3y = 3(x + y)`.",
-      ],
+      text: ["Going backwards is called factoring. If every term has a 3, the 3 can come out in front of brackets: `3x + 3y = 3(x + y)`."],
       example: {
         start: "3x + 3y",
         steps: [

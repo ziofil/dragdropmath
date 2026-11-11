@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const brackets: Chapter = {
   id: "brackets",
   title: "Multiplying brackets",
-  blurb:
-    "When two brackets multiply, every term in one meets every term in the other. Count the meetings and nothing gets lost.",
+  blurb: "When two brackets multiply, every term in one meets every term in the other. Count the meetings and nothing gets lost.",
   after: ["distribute"],
   lesson: [
     {
@@ -23,10 +22,9 @@ export const brackets: Chapter = {
             say: "Now drop the x onto the (x + 1) next to it.",
             then: "x·x + 1·x + (x + 1)·2",
           },
-          { say: "And the 2 onto its (x + 1).", then: "x·x + 1·x + 2x + 2·1" },
+          { say: "And the 2 onto its (x + 1).", then: "x·x + x + 2x + 2·1" },
         ],
-        after:
-          "Four meetings: x·x, 1·x, 2·x, 2·1. Tidy them up and it's x² + 3x + 2.",
+        after: "Four meetings: x·x, 1·x, 2·x, 2·1. Tidy them up and it's x² + 3x + 2.",
       },
     },
     {
@@ -38,9 +36,7 @@ export const brackets: Chapter = {
     },
     {
       title: "Squares are products too",
-      text: [
-        "`(x + 1)²` is `(x + 1)(x + 1)`, so it works the same way. Tap the ² to write it out.",
-      ],
+      text: ["`(x + 1)²` is `(x + 1)(x + 1)`, so it works the same way. Tap the ² to write it out."],
       example: {
         start: "(x + 1)^2",
         steps: [
@@ -50,8 +46,7 @@ export const brackets: Chapter = {
           },
         ],
       },
-      watch:
-        "`(x + 1)²` is not `x² + 1`. Try x = 2: `(2 + 1)² = 9`, but `2² + 1 = 5`. The middle meetings make up the difference.",
+      watch: "`(x + 1)²` is not `x² + 1`. Try x = 2: `(2 + 1)² = 9`, but `2² + 1 = 5`. The middle meetings make up the difference.",
     },
   ],
   unlocks: ["power-to-product"],

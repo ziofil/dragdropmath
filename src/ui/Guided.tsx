@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
 import type { RuleId } from "../rules";
 import type { Guided } from "../game/puzzles";
 import { matchesGoal } from "../game/solver";
-import { autoSteps, ROUTINES } from "../game/auto";
+import { TIDY_STEP_MS, tidied } from "../game/tidy";
 import { MathCanvas } from "./MathCanvas";
 import { MathText } from "./MathText";
 
@@ -26,11 +26,19 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
   const done = step >= example.steps.length;
   const current = detour ?? states[states.length - 1];
 
+  // Tidying (x·2 → 2x) happens on its own here too, just after the move. A
+  // move made before it shows takes it over (tidying from where it started).
+  const tidyFrom = useRef<MathState | null>(null);
   const accept = (next: MathState) => {
+    const from = tidyFrom.current ?? current;
     setStates((ss) => [...ss, next]);
-    // Tidying (x·2 → 2x) happens on its own here too, just after.
-    const tidied = autoSteps(current, next, [ROUTINES.tidy], states).at(-1)?.state;
-    if (tidied) setTimeout(() => setStates((ss) => (ss[ss.length - 1] === next ? [...ss.slice(0, -1), tidied] : ss)), 420);
+    const neat = tidied(from, next);
+    tidyFrom.current = neat === next ? null : from;
+    if (neat === next) return;
+    setTimeout(() => {
+      setStates((ss) => (ss[ss.length - 1] === next ? [...ss.slice(0, -1), neat] : ss));
+      if (tidyFrom.current === from) tidyFrom.current = null;
+    }, TIDY_STEP_MS);
   };
 
   const onDrop = (next: MathState) => {
@@ -65,7 +73,13 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
             ) : `Step ${step + 1} of ${example.steps.length}`}
           </p>
           <div className="actions">
-            <button onClick={() => setStates([start])} disabled={states.length <= 1}>
+            <button
+              onClick={() => {
+                tidyFrom.current = null;
+                setStates([start]);
+              }}
+              disabled={states.length <= 1}
+            >
               Start over
             </button>
           </div>

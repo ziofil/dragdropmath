@@ -3,8 +3,7 @@ import type { Chapter } from "../puzzles";
 export const powers: Chapter = {
   id: "powers",
   title: "Powers",
-  blurb:
-    "x³ is just x·x·x. Count the x's and the rules for exponents write themselves.",
+  blurb: "x³ is just x·x·x. Count the x's and the rules for exponents write themselves.",
   after: ["brackets"],
   lesson: [
     {
@@ -26,9 +25,7 @@ export const powers: Chapter = {
     },
     {
       title: "A power of a power",
-      text: [
-        "`(x²)³` is three lots of `x²` multiplied together: 2 + 2 + 2 = 6 x's. The exponents multiply.",
-      ],
+      text: ["`(x²)³` is three lots of `x²` multiplied together: 2 + 2 + 2 = 6 x's. The exponents multiply."],
       example: {
         start: "(x^2)^3",
         steps: [
@@ -39,9 +36,7 @@ export const powers: Chapter = {
     },
     {
       title: "Dividing cancels",
-      text: [
-        "`x⁵/x²` has five x's on top and two below. Two pairs cancel and three x's are left: the exponents subtract.",
-      ],
+      text: ["`x⁵/x²` has five x's on top and two below. Two pairs cancel and three x's are left: the exponents subtract."],
       example: {
         start: "x^5/x^2",
         steps: [
@@ -60,8 +55,7 @@ export const powers: Chapter = {
         start: "1/x^3",
         steps: [{ say: "Carry the x³ up across the bar.", then: "x^-3" }],
       },
-      watch:
-        "`2x³` is `2·x·x·x`: the power belongs to the x only. `(2x)³` is different: it's `8x³`.",
+      watch: "`2x³` is `2·x·x·x`: the power belongs to the x only. `(2x)³` is different: it's `8x³`.",
     },
   ],
   unlocks: [

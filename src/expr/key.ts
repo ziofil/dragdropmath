@@ -42,12 +42,13 @@ export function stateKey(s: MathState, ordered: Ordering = false): string {
   return s.sides.map((e) => key(e, ordered)).join(` ${s.rel ?? "="} `);
 }
 
-/** n if this is a root drawn as ⁿ√ (x^(1/n) with the radical flag), else null. */
-export function rootIndex(e: Expr): number | null {
-  if (e.kind !== "pow" || !e.radical) return null;
-  const x = e.exp;
-  return x.kind === "frac" && x.num.kind === "num" && x.num.value === 1 && x.den.kind === "num" ? x.den.value : null;
+/** n if this exponent is 1/n (n ≥ 2): a power that can be written as a root. */
+export function rootOrder(x: Expr): number | null {
+  return x.kind === "frac" && x.num.kind === "num" && x.num.value === 1 && x.den.kind === "num" && x.den.value >= 2 ? x.den.value : null;
 }
+
+/** n if this is a root drawn as ⁿ√ (x^(1/n) with the radical flag), else null. */
+export const rootIndex = (e: Expr): number | null => (e.kind === "pow" && e.radical ? rootOrder(e.exp) : null);
 
 /** Plain-text rendering, mostly for tests and debugging. */
 export function print(e: Expr): string {
