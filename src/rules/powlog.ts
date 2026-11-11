@@ -2,7 +2,7 @@ import type { Expr, Log, Pow } from "../expr/types";
 import { cloneFresh, frac, log, neg, negate, num, pow, prod, sum } from "../expr/build";
 import { key, rootOrder } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
-import { dragCtx, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { dragCtx, isEquation, partner, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
 import { asPower, fractionPart, raise as raiseTo } from "./shapes";
 
 // ---------- helpers ----------
@@ -362,12 +362,12 @@ export const expAcross: Rule = {
   name: "Undo a power across =",
   gesture: "Drag the base of a power across = — it becomes a log on the other side.",
   apply(state, id) {
-    if (state.sides.length !== 2) return [];
+    if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
     if (!c || c.loc.path.length !== 1 || c.index !== 0 || c.parent?.kind !== "pow") return [];
     if (!isConstant(c.node) || evaluate(c.node, {}) <= 0 || evaluate(c.node, {}) === 1) return [];
     const sides = state.sides.slice();
-    const other = 1 - c.loc.side;
+    const other = partner(c.loc.side);
     sides[c.loc.side] = c.parent.exp;
     sides[other] = log(c.node, sides[other]);
     return [{ rule: "exp-across", state: setSides(sides) }];
@@ -383,12 +383,12 @@ export const logAcross: Rule = {
   name: "Undo a log across =",
   gesture: "Carry the ln (or log₂) across = — it becomes e^ (or 2^) on the other side.",
   apply(state, id) {
-    if (state.sides.length !== 2) return [];
+    if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
     const L = c && logAt(c);
     if (!c || !L || logLoc(c).path.length !== 0) return [];
     const sides = state.sides.slice();
-    const other = 1 - c.loc.side;
+    const other = partner(c.loc.side);
     sides[c.loc.side] = L.arg;
     sides[other] = pow(L.base, sides[other], c.node.kind === "log" ? L.id : undefined);
     return [{ rule: "log-across", state: setSides(sides) }];
@@ -455,12 +455,12 @@ export const rootAcross: Rule = {
   name: "Undo a root (or square) across =",
   gesture: "Carry a √ across = — it becomes a square on the other side. Carry the square back and it becomes ½ again.",
   apply(state, id) {
-    if (state.sides.length !== 2) return [];
+    if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
     const P = c && exponentOf(c);
     if (!c || !P || c.parentLoc!.path.length !== 0) return [];
     const sides = state.sides.slice();
-    const other = 1 - c.loc.side;
+    const other = partner(c.loc.side);
     const n = rootOrder(c.node);
     // Only when the other side is a number ≥ 0: √x = −3 has no solution, and
     // squaring would invent one (x = 9).

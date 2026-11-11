@@ -96,6 +96,18 @@ export function pullOutAim(rc: RenderCtx, ctx: DragInitContext<MathState>, dragg
   return c.index === 0 ? b.symLeft.sub(Vec2(0.6 * b.h, 0)) : b.symRight.add(Vec2(0.6 * b.h, 0));
 }
 
+/**
+ * Pulling a piece down, away from where it is (a factor out of a product
+ * equal to 0, onto a row of its own): aim straight below it, wherever the
+ * result then draws it.
+ */
+export function below(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
+  return aimAt(env, result, (ctx) => {
+    const b = canvasBox(env.rc, ctx, draggedId);
+    return b.centre.add(Vec2(0, 1.6 * b.h));
+  });
+}
+
 /** Factoring out: carry the factor out past the left end of its expression. */
 export function outInFront(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
   const { rc } = env;

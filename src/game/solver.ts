@@ -12,6 +12,20 @@ import { candidatesFor, handles, isGrabbable, tapFor, type RuleId } from "../rul
  */
 export function matchesGoal(state: MathState, goal: MathState, ordered = true): boolean {
   if (stateKey(state, ordered) === stateKey(goal, ordered)) return true;
+  // Several rows (x = 2; y = 3, or x = 0 | x = 4): the same rows, in any order, each either way round.
+  if (state.sides.length > 2 || goal.sides.length > 2) {
+    const rows = (s: MathState) => {
+      const out: string[] = [];
+      for (let k = 0; k < s.sides.length; k += 2) {
+        const row = { sides: s.sides.slice(k, k + 2), rel: s.rel };
+        const a = stateKey(row, ordered);
+        const b = stateKey(withFlippedRel({ sides: [row.sides[1], row.sides[0]] }, row), ordered);
+        out.push(a < b ? a : b);
+      }
+      return out.sort().join(" & ");
+    };
+    return (state.join ?? "and") === (goal.join ?? "and") && rows(state) === rows(goal);
+  }
   if (state.sides.length === 2) {
     const swapped = withFlippedRel({ sides: [state.sides[1], state.sides[0]] }, state);
     return stateKey(swapped, ordered) === stateKey(goal, ordered);
@@ -75,4 +89,20 @@ export function solution(
 export function fewestMoves(start: MathState, goal: MathState, rules: readonly RuleId[], opts: SearchOpts = {}): number | null {
   const path = solution(start, goal, rules, opts);
   return path ? path.length - 1 : null;
+}
+
+/**
+ * A way through an exercise: from start, by each checkpoint (`via`), to the
+ * goal — the states on the way, or null if a stretch can't be done in
+ * `maxDepth` moves. Without checkpoints, a shortest way.
+ */
+export function solutionVia(start: MathState, goal: MathState, via: readonly MathState[], rules: readonly RuleId[], opts: SearchOpts = {}): MathState[] | null {
+  if (via.length === 0) return solution(start, goal, rules, opts);
+  const out: MathState[] = [start];
+  for (const target of [...via, goal]) {
+    const leg = solution(out[out.length - 1], target, rules, { ...opts, maxDepth: 4 });
+    if (!leg) return null;
+    out.push(...leg.slice(1));
+  }
+  return out;
 }

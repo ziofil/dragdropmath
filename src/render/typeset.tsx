@@ -426,11 +426,11 @@ export function relGlyph(r: Rel): { text: string; facing: 1 | -1 } {
  * round (a half turn about its upright axis: < becomes >), drawn as a
  * horizontal scale through 0 so moving between states blends smoothly.
  */
-export function relation(state: MathState, cx: number, baseline: number, size: number, turn = 0): Svgx {
+export function relation(state: MathState, cx: number, baseline: number, size: number, turn = 0, id = REL): Svgx {
   const { text, facing } = relGlyph(relOf(state));
   const sx = facing * Math.cos(Math.PI * turn);
   return (
-    <g id={REL} transform={`${translate(cx, baseline)} scale(${sx}, 1)`}>
+    <g id={id} transform={`${translate(cx, baseline)} scale(${sx}, 1)`}>
       {glyph("eq", text, -textWidth(text, size) / 2, 0, size, "m-op m-eq")}
     </g>
   );
@@ -441,6 +441,7 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
   rc.fontSizes ??= new Map();
   rc.canvas = { W, H };
+  if (rc.state.sides.length > 2) return renderRows(rc, W, H);
   const build = (size: number) => {
     const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null));
     const eqW = Math.max(textWidth("=", size), textWidth(relGlyph(relOf(rc.state)).text, size));
@@ -487,6 +488,49 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
       {sides[1].draw(xs[1], baseline)}
     </g>
   );
+}
+
+/**
+ * Several equations (rows), stacked with their = signs in one column: a system
+ * (x + y = 5 and x − y = 1) or the answers of one (x = 2 or x = −3, with "or"
+ * between them).
+ */
+function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
+  const n = rc.state.sides.length / 2;
+  const build = (size: number) => ({ sides: rc.state.sides.map((s) => layoutNode(s, rc, size, null)), size });
+  const orW = (size: number) => (rc.state.join === "or" ? 1.4 * size : 0);
+  const fit = (b: ReturnType<typeof build>) => {
+    const eqW = textWidth("=", b.size);
+    const space = 0.35 * b.size;
+    const left = Math.max(...b.sides.filter((_, i) => i % 2 === 0).map((s) => s.w));
+    const right = Math.max(...b.sides.filter((_, i) => i % 2 === 1).map((s) => s.w));
+    const rowH = Math.max(...b.sides.map((s) => s.asc + s.desc)) + 0.35 * b.size;
+    // The = column stays put in the middle, as for one equation (so a term
+    // carried across lands across, whatever the other rows look like).
+    const half = Math.max(left + orW(b.size), right) + space + eqW / 2;
+    return { eqW, space, left, right, rowH, half };
+  };
+  let b = build(BASE_SIZE);
+  let f = fit(b);
+  const scale = Math.min(1, (W / 2 - 16) / f.half, (H - 16) / (n * f.rowH));
+  if (scale < 1) {
+    b = build(BASE_SIZE * scale);
+    f = fit(b);
+  }
+  const { size } = b;
+  const cx = W / 2;
+  const top = H / 2 - (n * f.rowH) / 2;
+  const parts: Svgx[] = [];
+  for (let r = 0; r < n; r++) {
+    const [L, R] = [b.sides[2 * r], b.sides[2 * r + 1]];
+    const baseline = top + r * f.rowH + f.rowH / 2 + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
+    parts.push(L.draw(cx - f.eqW / 2 - f.space - L.w, baseline));
+    parts.push(relation(rc.state, cx, baseline, size, 0, r === 0 ? REL : `${REL}${r}`));
+    parts.push(R.draw(cx + f.eqW / 2 + f.space, baseline));
+    if (r > 0 && rc.state.join === "or") parts.push(glyph(`or${r}`, "or", cx - f.eqW / 2 - f.space - f.left - 1.3 * size, baseline, size * 0.6, "m-or"));
+    if (r === 0) rc.eq = { left: cx - f.eqW / 2, right: cx + f.eqW / 2, centre: cx, baseline, size };
+  }
+  return <g>{parts}</g>;
 }
 
 /** Canvas origin of every id'd element in a drawn tree (following the translates). */

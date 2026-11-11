@@ -39,7 +39,16 @@ export function key(e: Expr, ordered: Ordering = false): string {
 }
 
 export function stateKey(s: MathState, ordered: Ordering = false): string {
-  return s.sides.map((e) => key(e, ordered)).join(` ${s.rel ?? "="} `);
+  return joinRows(s, (e) => key(e, ordered));
+}
+
+/** Each row's sides with their relation, rows joined by ; (and) or | (or). */
+function joinRows(s: MathState, f: (e: Expr) => string): string {
+  const row = (k: number) => s.sides.slice(k, k + 2).map(f).join(` ${s.rel ?? "="} `);
+  if (s.sides.length <= 2) return row(0);
+  const rows = [];
+  for (let k = 0; k < s.sides.length; k += 2) rows.push(row(k));
+  return rows.join(s.join === "or" ? " | " : " ; ");
 }
 
 /** n if this exponent is 1/n (n ≥ 2): a power that can be written as a root. */
@@ -84,5 +93,5 @@ export function print(e: Expr): string {
 }
 
 export function printState(s: MathState): string {
-  return s.sides.map(print).join(` ${s.rel ?? "="} `);
+  return joinRows(s, print);
 }

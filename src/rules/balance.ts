@@ -1,20 +1,20 @@
 import type { Expr, MathState } from "../expr/types";
-import { frac, neg, prod, sum, withFlippedRel } from "../expr/build";
+import { frac, neg, prod, relOf, sum, withFlippedRel } from "../expr/build";
 import { evaluate, isConstant } from "../expr/eval";
-import { adopt, dragCtx, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { adopt, dragCtx, isEquation, partner, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
 
 /**
  * Multiplying or dividing both sides by a negative number turns an
  * inequality round (2 < 3, but −2 > −3); an equation stays as it is.
  */
 const turnedBy = (state: MathState, factor: Expr, result: MathState) =>
-  evaluate(factor, {}) < 0 ? withFlippedRel(result, state) : result;
+  isConstant(factor) && evaluate(factor, {}) < 0 ? withFlippedRel(result, state) : result;
 
 /** Dragging something across `=` (or <, ≤, ...) only makes sense in a 2-sided state. */
 function sideCtx(state: MathState, id: string): (DragCtx & { other: number }) | null {
-  if (state.sides.length !== 2) return null;
+  if (!isEquation(state)) return null;
   const c = dragCtx(state, id);
-  return c && { ...c, other: 1 - c.loc.side };
+  return c && { ...c, other: partner(c.loc.side) };
 }
 
 /** Safe to divide/multiply both sides by: a constant that isn't zero. */
@@ -25,7 +25,7 @@ const usefulFactor = (e: Expr) => nonzeroConstant(e) && evaluate(e, {}) !== 1;
 function withSides(state: MathState, side: number, mine: Expr, theirs: Expr): MathState {
   const sides = state.sides.slice();
   sides[side] = mine;
-  sides[1 - side] = theirs;
+  sides[partner(side)] = theirs;
   return setSides(sides);
 }
 
@@ -40,7 +40,9 @@ export const swapSides: Rule = {
   apply(state, id) {
     const c = sideCtx(state, id);
     if (!c || c.loc.path.length !== 0) return [];
-    const swapped = setSides([state.sides[1], state.sides[0]]);
+    const sides = state.sides.slice();
+    [sides[c.loc.side], sides[c.other]] = [sides[c.other], sides[c.loc.side]];
+    const swapped = setSides(sides);
     return [{ rule: "swap-sides", state: withFlippedRel({ ...swapped, rel: state.rel }, state) }];
   },
 };
@@ -86,36 +88,55 @@ export const moveTerm: Rule = {
   },
 };
 
-/** 2x = 8 → x = 8/2 (drag a number factor across; it becomes a divisor). */
-export const moveFactor: Rule = {
-  id: "move-factor",
-  name: "Divide both sides",
-  gesture: "Drag a number multiplying a whole side across = — it divides the other side.",
-  apply(state, id) {
-    const c = sideCtx(state, id);
-    const side = c && wholeSideParent(state, c);
-    if (!c || !side || c.parent?.kind !== "prod" || !usefulFactor(c.node)) return [];
-    const remaining = side.wrap(prod(without(c.parent.factors, c.index), c.parent.id));
-    const other = state.sides[c.other];
-    const divided = other.kind === "frac" ? frac(other.num, prod([other.den, c.node]), other.id) : frac(other, c.node);
-    return [{ rule: "move-factor", state: turnedBy(state, c.node, withSides(state, c.loc.side, remaining, divided)) } satisfies Candidate];
-  },
-};
+/**
+ * 2x = 8 → x = 8/2: a factor of a whole side carried across divides the other
+ * side. `allowed`: which factors (numbers, or, for formulas, letters too).
+ */
+function moveFactorRule(id: "move-factor" | "move-letter-factor", allowed: (e: Expr, state: MathState) => boolean, gesture: string): Rule {
+  return {
+    id,
+    name: "Divide both sides",
+    gesture,
+    apply(state, dragged) {
+      const c = sideCtx(state, dragged);
+      const side = c && wholeSideParent(state, c);
+      if (!c || !side || c.parent?.kind !== "prod" || !allowed(c.node, state)) return [];
+      const remaining = side.wrap(prod(without(c.parent.factors, c.index), c.parent.id));
+      const other = state.sides[c.other];
+      const divided = other.kind === "frac" ? frac(other.num, prod([other.den, c.node]), other.id) : frac(other, c.node);
+      return [{ rule: id, state: turnedBy(state, c.node, withSides(state, c.loc.side, remaining, divided)) } satisfies Candidate];
+    },
+  };
+}
 
-/** x/3 = 4 → x = 4·3 (drag a denominator across; it multiplies the other side). */
-export const moveDenominator: Rule = {
-  id: "move-denominator",
-  name: "Multiply both sides",
-  gesture: "Drag the bottom of a fraction across = — it multiplies the other side.",
-  apply(state, id) {
-    const c = sideCtx(state, id);
-    const side = c && wholeSideParent(state, c);
-    if (!c || !side || c.parent?.kind !== "frac" || c.index !== 1) return [];
-    if (!nonzeroConstant(c.node)) return [];
-    const other = state.sides[c.other];
-    return [{ rule: "move-denominator", state: turnedBy(state, c.node, withSides(state, c.loc.side, side.wrap(c.parent.num), prod([other, c.node]))) }];
-  },
-};
+/** x/3 = 4 → x = 4·3: the bottom of a whole side's fraction carried across multiplies the other side. */
+function moveDenominatorRule(id: "move-denominator" | "move-letter-denominator", allowed: (e: Expr, state: MathState) => boolean, gesture: string): Rule {
+  return {
+    id,
+    name: "Multiply both sides",
+    gesture,
+    apply(state, dragged) {
+      const c = sideCtx(state, dragged);
+      const side = c && wholeSideParent(state, c);
+      if (!c || !side || c.parent?.kind !== "frac" || c.index !== 1 || !allowed(c.node, state)) return [];
+      const other = state.sides[c.other];
+      return [{ rule: id, state: turnedBy(state, c.node, withSides(state, c.loc.side, side.wrap(c.parent.num), prod([other, c.node]))) }];
+    },
+  };
+}
+
+/**
+ * Letters (and anything with letters in it) can only be carried across an
+ * equation: an inequality would need to know their sign.
+ */
+const letterFactor = (e: Expr, state: MathState) => !isConstant(e) && relOf(state) === "=";
+
+export const moveFactor = moveFactorRule("move-factor", usefulFactor, "Drag a number multiplying a whole side across = — it divides the other side.");
+export const moveDenominator = moveDenominatorRule("move-denominator", nonzeroConstant, "Drag the bottom of a fraction across = — it multiplies the other side.");
+/** Formulas: v − u = at → (v − u)/a = t. */
+export const moveLetterFactor = moveFactorRule("move-letter-factor", letterFactor, "Drag a letter multiplying a whole side across = — it divides the other side.");
+/** Formulas: P = F/A → PA = F. */
+export const moveLetterDenominator = moveDenominatorRule("move-letter-denominator", letterFactor, "Drag a letter on the bottom of a fraction across = — it multiplies the other side.");
 
 /** −x = 6 → x = −6 (drag the minus sign across). */
 export const moveSign: Rule = {

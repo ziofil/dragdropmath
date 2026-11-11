@@ -6,6 +6,9 @@ import { brackets } from "./chapters/brackets";
 import { factor } from "./chapters/factor";
 import { balance } from "./chapters/balance";
 import { inequalities } from "./chapters/inequalities";
+import { formulas } from "./chapters/formulas";
+import { simultaneous } from "./chapters/simultaneous";
+import { quadratics } from "./chapters/quadratics";
 import { fractions } from "./chapters/fractions";
 import { powers } from "./chapters/powers";
 import { roots } from "./chapters/roots";
@@ -16,6 +19,12 @@ export type Puzzle = {
   start: string;
   goal: string;
   hint?: string;
+  /**
+   * Checkpoints along one way to solve it, each a few moves after the one
+   * before. Long exercises (two equations at once) are checked from one to the
+   * next instead of by searching the whole way, which would take too long.
+   */
+  via?: string[];
 };
 
 /**
@@ -65,9 +74,12 @@ export const CHAPTERS: Chapter[] = [
   factor,
   balance,
   inequalities,
+  formulas,
+  simultaneous,
   fractions,
   powers,
   roots,
+  quadratics,
   explog,
 ];
 

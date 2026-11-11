@@ -41,9 +41,16 @@ export type Rel = "=" | "<" | ">" | "≤" | "≥";
 
 /** One side = a plain expression; two sides = an equation (or an inequality). */
 export type MathState = {
+  /**
+   * One expression, or the two sides of an equation. Several equations at once
+   * are rows: sides 2k and 2k + 1 are row k's (a system of equations, or the
+   * possible answers of one).
+   */
   sides: Expr[];
-  /** The relation between two sides (default "="). */
+  /** The relation between two sides (default "="; rows are always equations). */
   rel?: Rel;
+  /** How rows go together: all at once ("and": simultaneous equations), or one of them ("or": x = 2 or x = −3). */
+  join?: "and" | "or";
   /**
    * Previews only: draw the side holding node `id` shifted so that node's
    * symbol starts at canvas x (a merge target staying put while it changes,

@@ -14,8 +14,15 @@ export type RuleId =
   | "power-to-product"
   | "move-term"
   | "swap-sides"
+  | "split-zero"
+  | "move-side"
+  | "root-both-sides"
+  | "substitute"
+  | "add-rows"
   | "move-factor"
   | "move-denominator"
+  | "move-letter-factor"
+  | "move-letter-denominator"
   | "move-sign"
   | "divide-numbers"
   | "cancel-factor"
@@ -102,7 +109,7 @@ export type Rule = {
  * log fades its ln( ) as it nears the log it joins), `flip-sign` (a term
  * carried across = crossfades its sign, − ↔ +, as it crosses).
  */
-export type Feel = { carry?: "reorder" | "landing" | "pull-out" | "out-in-front"; wears?: "grow-log" | "shed-log" | "flip-sign" };
+export type Feel = { carry?: "reorder" | "landing" | "pull-out" | "out-in-front" | "below"; wears?: "grow-log" | "shed-log" | "flip-sign" };
 
 /** Everything a rule typically wants to know about the dragged node. */
 export type DragCtx = {
@@ -136,6 +143,12 @@ export function replaceIn(state: MathState, loc: Loc, e: Expr): MathState {
   sides[loc.side] = normalize(replaceAt(sides[loc.side], loc.path, () => e));
   return { sides };
 }
+
+/** An equation (or several, in rows): an even number of sides. */
+export const isEquation = (state: MathState) => state.sides.length >= 2 && state.sides.length % 2 === 0;
+
+/** The other side of the same row (0 ↔ 1, 2 ↔ 3, …). */
+export const partner = (side: number) => side ^ 1;
 
 export function setSides(sides: Expr[]): MathState {
   return { sides: sides.map(normalize) };

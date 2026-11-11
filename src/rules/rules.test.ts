@@ -275,8 +275,9 @@ describe("what a press picks up", () => {
     ["3x + 2x", SHUFFLE, ["3*x", "2*x"]],
     // The 2 can multiply into the 3, so it's its own handle; the y isn't.
     ["3·y·2 + 1 + x", SHUFFLE, ["3*y*2", "3", "2", "1", "x"]],
-    // The 2 can cross the =; each whole side can too (swapping the sides).
-    ["2x = 8", ALL_RULES, ["2*x", "2", "8"]],
+    // The 2 can cross the =; each whole side can too (swapping the sides); and,
+    // with formulas' moves, so can the x (dividing by a letter).
+    ["2x = 8", ALL_RULES, ["2*x", "2", "x", "8"]],
     // QA #7: in x·2 (from distributing), the 2 can only swap places, so a press picks up the term.
     ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x", "x", "x*2", "-2*x"]],
     // With factoring unlocked, a common factor is its own handle.

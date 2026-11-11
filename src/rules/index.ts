@@ -5,7 +5,8 @@ import { dragCtx, type Candidate, type Feel, type Rule, type RuleId } from "./ty
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
 import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
-import { moveDenominator, moveFactor, moveSign, moveTerm, swapSides } from "./balance";
+import { addRows, moveSide, rootBothSides, splitZero, substitute } from "./rows";
+import { moveDenominator, moveFactor, moveLetterDenominator, moveLetterFactor, moveSign, moveTerm, swapSides } from "./balance";
 import { cancelFactor, divideNumbers } from "./fractions";
 import {
   combineLogs,
@@ -56,6 +57,13 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     powerToProduct,
     moveTerm,
     swapSides,
+    moveLetterFactor,
+    moveLetterDenominator,
+    splitZero,
+    moveSide,
+    rootBothSides,
+    substitute,
+    addRows,
     moveFactor,
     moveDenominator,
     moveSign,
@@ -166,7 +174,9 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   for (const id of enabled) {
     for (const found of RULES[id].apply(state, draggedId)) {
       // Rules rewrite sides; the relation carries over unless the move turns it round.
-      const cand = found.state.rel || !state.rel ? found : { ...found, state: { ...found.state, rel: state.rel } };
+      // …and rows keep how they go together, unless the move says otherwise.
+      const withRel = found.state.rel || !state.rel ? found : { ...found, state: { ...found.state, rel: state.rel } };
+      const cand = withRel.state.join || !state.join ? withRel : { ...withRel, state: { ...withRel.state, join: state.join } };
       const k = stateKey(cand.state, "exact");
       if (seen.has(k)) continue;
       seen.add(k);

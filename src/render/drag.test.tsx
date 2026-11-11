@@ -11,7 +11,7 @@ import { stateKey } from "../expr/key";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, handles, isGrabbable, signId, signOwner, type RuleId } from "../rules";
 import { allPuzzles } from "../game/puzzles";
-import { solution } from "../game/solver";
+import { solutionVia } from "../game/solver";
 import { MERGE_AT } from "./drag";
 import { ANCHOR, Grip, harness, show, type Harness } from "./testing/harness";
 
@@ -119,7 +119,8 @@ describe.runIf(SLOW)("on the way to solving, every move can still be reached by 
   // The starts are checked below; these are the states a learner passes
   // through (as the moves and tidying make them, marks and all).
   it.each(allPuzzles().map((r) => [r.puzzle.id, r] as const))("%s", (_, ref) => {
-    const path = solution(parseState(ref.puzzle.start), parseState(ref.puzzle.goal), ref.rules, { maxDepth: 10, maxStates: 120_000 })!;
+    const via = (ref.puzzle.via ?? []).map((v) => parseState(v));
+    const path = solutionVia(parseState(ref.puzzle.start), parseState(ref.puzzle.goal), via, ref.rules, { maxDepth: 10, maxStates: 120_000 })!;
     const problems = path.slice(1, -1).flatMap((s) => checkAllMovesReachable(s, ref.rules).map((p) => `at ${show(s)}: ${p}`));
     expect(problems).toEqual([]);
   }, 60_000);

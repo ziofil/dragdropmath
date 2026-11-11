@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
 import { allPuzzles, CHAPTERS, rulesFor } from "./puzzles";
-import { fewestMoves, matchesGoal, moves } from "./solver";
+import { matchesGoal, moves, solutionVia } from "./solver";
 import { tidied } from "./tidy";
 
 describe("goals are matched as shown", () => {
@@ -38,8 +38,12 @@ describe("exercises", () => {
   // the way to it, and tidying after each move, as the app does.
   it.each(refs.map((r) => [r.puzzle.id, r] as const))("%s can be solved", (_, ref) => {
     const { puzzle, rules } = ref;
-    const steps = fewestMoves(parseState(puzzle.start), parseState(puzzle.goal), rules, { maxDepth: 10, maxStates: 120_000 });
-    expect(steps, `${puzzle.start} → ${puzzle.goal}`).not.toBeNull();
+    // Long ones are checked checkpoint by checkpoint (see Puzzle.via).
+    const way = solutionVia(parseState(puzzle.start), parseState(puzzle.goal), (puzzle.via ?? []).map(parseState), rules, {
+      maxDepth: 10,
+      maxStates: 120_000,
+    });
+    expect(way, `${puzzle.start} → ${[...(puzzle.via ?? []), puzzle.goal].join(" → ")}`).not.toBeNull();
   }, 30_000); // the longest exercises search a lot of states
 });
 

@@ -669,12 +669,13 @@ span.ex-step {
   fill: var(--ink-soft);
 }
 .node-title {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   line-height: 1.2;
   text-align: center;
   color: var(--ink-soft);
-  overflow-wrap: anywhere;
-  hyphens: auto;
+  /* Wrap between words only ("Inequalitie-s" reads badly); a long word may overhang its slot a little. */
+  overflow-wrap: normal;
+  word-break: normal;
 }
 .node-next .ring-face {
   fill: var(--accent-soft);
@@ -953,4 +954,11 @@ span.ex-step {
 .back-lesson {
   font-size: 0.9rem;
   opacity: 0.8;
+}
+
+/* "or" between the answers of an equation (x = 2 or x = −3). */
+.m-or {
+  fill: var(--ink-soft);
+  font-family: var(--ui);
+  font-style: normal;
 }

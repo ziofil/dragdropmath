@@ -4,7 +4,7 @@ import { children, locate } from "../../expr/tree";
 import { feelOf, movesFor, type Candidate, type RuleId } from "../../rules";
 import { dragCtx } from "../../rules/types";
 import type { RenderCtx } from "../typeset";
-import { landing, outInFront, pullOut, rowSlot } from "./carry";
+import { below, landing, outInFront, pullOut, rowSlot } from "./carry";
 import type { DragEnv } from "./env";
 import { growLog, shedLog } from "./logs";
 import { flipSign } from "./sign";
@@ -76,7 +76,13 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
     rowSlot(env, id, siblings.map((s) => s.id), c0?.index ?? 0, reorders),
     ...away.map((c) => {
       const how = carry(c);
-      return how === "out-in-front" ? outInFront(env, id, c.state) : how === "pull-out" ? pullOut(env, id, c.state) : landing(env, id, c.state);
+      return how === "out-in-front"
+        ? outInFront(env, id, c.state)
+        : how === "pull-out"
+          ? pullOut(env, id, c.state)
+          : how === "below"
+            ? below(env, id, c.state)
+            : landing(env, id, c.state);
     }),
   ]);
 
@@ -89,7 +95,9 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
   else if (flips) moves = moves.with(flipSign(rc, flips.state));
 
   const merges = candidates.filter((c) => c.targetId);
-  const spec = merges.length === 0 ? moves.withFloating() : mergeApproach(moves.withFloating(), env, merges, [...reorders.values()]);
+  // A side swap reorders the equation like a reorder does a row: it mustn't jump past a forming merge either.
+  const swaps = away.filter((c) => c.rule === "swap-sides").map((c) => c.state);
+  const spec = merges.length === 0 ? moves.withFloating() : mergeApproach(moves.withFloating(), env, merges, [...reorders.values(), ...swaps]);
   // A move that turns an inequality round (the − of −x < 6 carried across): the sign turns as it's crossed.
   const turns = candidates.some((c) => relOf(c.state) !== relOf(rc.state));
   return turns ? spec.with(turnRelation(rc)) : spec;
