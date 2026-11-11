@@ -199,16 +199,6 @@ button[aria-pressed="true"] {
 .ex-card.solved {
   background: var(--good-soft);
 }
-.sandbox-link {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.sandbox-link p {
-  margin: 0;
-  color: var(--ink-soft);
-}
 
 /* ---------- puzzle ---------- */
 .puzzle-head {
@@ -336,24 +326,6 @@ span.ex-step {
   color: var(--ink-soft);
 }
 
-.invariant {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  font-size: 0.9rem;
-}
-.invariant-label {
-  color: var(--ink-soft);
-}
-.invariant-value {
-  font-family: var(--math);
-  font-size: 1.1rem;
-  color: var(--good);
-}
-.invariant-bad .invariant-value {
-  color: var(--warn);
-}
-
 .result {
   margin-top: 14px;
   padding: 18px;
@@ -382,22 +354,6 @@ span.ex-step {
   }
 }
 
-.sandbox-form {
-  display: flex;
-  gap: 8px;
-}
-.sandbox-form input {
-  flex: 1;
-  min-width: 0;
-  font: inherit;
-  font-family: var(--math);
-  font-size: 1.2rem;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-}
 .error {
   color: var(--warn);
 }
@@ -437,9 +393,7 @@ span.ex-step {
 .m-hit {
   fill: transparent;
 }
-.m-node {
-  cursor: grab;
-}
+/* Cursor: set per piece (grab, or pointer for one that can only be tapped). */
 .m-node:active {
   cursor: grabbing;
 }

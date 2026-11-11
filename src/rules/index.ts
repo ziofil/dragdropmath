@@ -116,7 +116,10 @@ export const feelOf = (c: Candidate): Feel => RULES[c.rule].feel ?? {};
 export type Moves = {
   drag(id: string): Candidate[];
   tap(id: string): Candidate | null;
+  /** A drag handle: pressing it carries this piece (it has a real move to make). */
   grabbable(id: string): boolean;
+  /** Tapping it does something. A piece that can only be tapped isn't a handle: dragging it carries what encloses it. */
+  tappable(id: string): boolean;
 };
 
 const cache = new WeakMap<MathState, Map<string, Moves>>();
@@ -142,22 +145,15 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
       return m.get(id)!;
     };
   };
-  const drag = memo((id) => collect(state, id, dragRules));
-  // A √ sign with no tap of its own passes a tap on to its root (√x ↔ x^(1/2)).
-  const signOf = new Map(
-    state.sides.flatMap(allNodes).flatMap((n) => (n.kind === "pow" && n.radical ? [[n.exp.id, n.id] as const] : [])),
-  );
-  const tap: (id: string) => Candidate | null = memo((id) => {
-    const own = collect(state, id, tapRules)[0];
-    const root = signOf.get(id);
-    return own ?? (root ? tap(root) : null);
-  });
-  const hiddenIds = hidden(state);
-  const grabbable = memo(
-    (id) =>
-      !hiddenIds.has(id) && (drag(id).some((c) => !isCosmetic(state, id, c) && !c.secondary) || tap(id) !== null),
-  );
-  const moves = { drag, tap, grabbable };
+  // Pieces that are never handles of their own: a root's exponent, drawn as
+  // the √ (and the 1 and n inside it). A root moves as one piece; its ½ is
+  // reached by tapping the root into x^(1/2) first.
+  const inert = rootParts(state);
+  const drag = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
+  const tap = memo((id) => (inert.has(id) ? null : (collect(state, id, tapRules)[0] ?? null)));
+  const grabbable = memo((id) => drag(id).some((c) => !isCosmetic(state, id, c) && !c.secondary));
+  const tappable = memo((id) => tap(id) !== null);
+  const moves = { drag, tap, grabbable, tappable };
   byRules.set(rulesKey, moves);
   return moves;
 }
@@ -180,11 +176,11 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   return out;
 }
 
-/** Nodes not drawn: the 1 and n inside a root's exponent (√ is drawn instead). */
-function hidden(state: MathState): Set<string> {
+/** A root's exponent (drawn as the √) and everything inside it. */
+function rootParts(state: MathState): Set<string> {
   const out = new Set<string>();
   for (const n of state.sides.flatMap(allNodes)) {
-    if (n.kind === "pow" && n.radical) for (const h of allNodes(n.exp).slice(1)) out.add(h.id);
+    if (n.kind === "pow" && n.radical) for (const h of allNodes(n.exp)) out.add(h.id);
   }
   return out;
 }

@@ -62,13 +62,6 @@ export function Home({ at }: { at?: Chapter }) {
         <ChapterPanel panelRef={panel} chapter={selected} solved={solved} isNext={next.includes(selected)} />
       </div>
 
-      <section className="chapter sandbox-link">
-        <a href="#/sandbox" className="button">
-          Open the sandbox →
-        </a>
-        <p>Type any expression or equation and play with every move you've learned.</p>
-      </section>
-
     </main>
   );
 }

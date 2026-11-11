@@ -8,7 +8,6 @@ import { badgeTier, loadSolved, markSolved } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { Badge, tierName } from "./Badge";
 import { MathCanvas, StaticMath } from "./MathCanvas";
-import { checkEnv, Invariant } from "./Invariant";
 
 /** A state reached: by the learner's own move, or by tidying after it. */
 type Entry = { state: MathState; tidy?: true };
@@ -17,7 +16,6 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
   const { puzzle, chapter, rules } = pref;
   const start = useMemo(() => parseState(puzzle.start), [puzzle]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
-  const env = useMemo(() => checkEnv(start, goal), [start, goal]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
     const before = loadSolved();
@@ -115,7 +113,7 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
       <section className={`board ${solved ? "board-solved" : ""}`}>
         <MathCanvas state={current} rules={rules} onDrop={onDrop} />
         <div className="board-bar">
-          <Invariant state={current} env={env} />
+          <span />
           <div className="actions">
             {puzzle.hint && (
               <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint}>

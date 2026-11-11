@@ -21,10 +21,11 @@ export function matchesGoal(state: MathState, goal: MathState, ordered = true): 
 
 /** Every state one move away, as the move leaves it (before tidying). */
 export function moves(state: MathState, rules: readonly RuleId[]): MathState[] {
-  return handles(state)
-    .filter((id) => isGrabbable(state, id, rules)) // only grabs a learner can actually make
-    .flatMap((id) => [...candidatesFor(state, id, rules), tapFor(state, id, rules)])
-    .flatMap((c) => (c ? [c.state] : []));
+  return handles(state).flatMap((id) => [
+    // Only drags a learner can actually make (a handle's), and taps.
+    ...(isGrabbable(state, id, rules) ? candidatesFor(state, id, rules).map((c) => c.state) : []),
+    ...(tapFor(state, id, rules) ? [tapFor(state, id, rules)!.state] : []),
+  ]);
 }
 
 /** Every state one move away, tidied as the app tidies it. */
@@ -61,9 +62,10 @@ export function solution(
         seen.add(k);
         parent.set(n, s);
         next.push(n);
+        // Checked as states come in: one level can be huge (fractions branch a lot).
+        if (seen.size > maxStates) return null;
       }
     }
-    if (seen.size > maxStates) return null;
     frontier = next;
   }
   return null;

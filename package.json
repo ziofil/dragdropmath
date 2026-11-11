@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:all": "SLOW=1 vitest run",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "dragology": "0.2.0",
@@ -24,6 +25,7 @@
     "tsx": "^4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.7",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "wrangler": "^4.160.0"
   }
 }

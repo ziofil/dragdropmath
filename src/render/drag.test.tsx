@@ -108,7 +108,7 @@ function checkAllMovesReachable(src: string | MathState, rules: readonly RuleId[
 
 describe("moves inside small superscripts can be reached too", () => {
   // Mid-puzzle states the puzzle starts don't cover: combining exponents in place.
-  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)"])("%s", (src) => {
+  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)", "(x + 1)(2x + 3)", "(2x - 3)(2x + 3)", "(3 + 2x)(3 - 2x)", "a(a - 3) + 4a - 12"])("%s", (src) => {
     expect(checkAllMovesReachable(src, ALL_RULES)).toEqual([]);
   });
 });
@@ -455,6 +455,12 @@ describe("every merge in every puzzle animates sanely", () => {
         const grip = h.grab(id);
         const frames = grip.path(grip.start.add(h.endsUpOffset(id, c.targetId!, c.rule)), 24);
         const end = frames[frames.length - 1];
+        // Carried over another target on the way (the 2 of 2(x + 1)(x + 2) to
+        // the far bracket), that merge shows as it passes: fine.
+        const [x0, x1] = [h.centreOf(id).x, h.centreOf(c.targetId!).x].sort((a, b) => a - b);
+        const passesOver = h
+          .candidates(id)
+          .some((k) => k.targetId && k.targetId !== c.targetId && h.centreOf(k.targetId).x > x0 && h.centreOf(k.targetId).x < x1);
         // Letting go there gives the move, and the picture is the result.
         if (!same(end.state, c.state)) problems.push(`${label}: ends up giving ${end.drops}`);
         if (end.blend < 0.95) problems.push(`${label}: only ${end.blend.toFixed(2)} formed where it ends up`);
@@ -470,7 +476,7 @@ describe("every merge in every puzzle animates sanely", () => {
           const off = gs.find((g) => g.x < -2 || g.x > h.W);
           if (off) problems.push(`${label}: step ${i}, "${off.text}" drawn off the canvas at ${off.x.toFixed(0)}`);
           // What the move keeps in place doesn't budge.
-          if (c.stays && !atEdge) {
+          if (c.stays && !atEdge && !passesOver) {
             const x = gs.find((g) => g.layer === c.stays)?.x;
             stay0 ??= x;
             if (x !== undefined && stay0 !== undefined && Math.abs(x - stay0) > 1) problems.push(`${label}: step ${i}, the piece that should stay put moved ${(x - stay0).toFixed(0)}px`);

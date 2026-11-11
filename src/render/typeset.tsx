@@ -97,8 +97,11 @@ function layoutNode(
   const interactive = rc.interact !== undefined;
   // Symbols with no real move of their own let presses fall through to the
   // term underneath (pointer-events: none), so 3x + 2x moves as whole terms.
+  // One that can only be tapped (the 4 of √4: tap to split it) takes the tap,
+  // but dragging it carries what encloses it (the whole √4).
   const grabbable = interactive && rc.interact!.grabbable(e.id);
-  const tap = grabbable ? rc.interact!.tap(e.id) : null;
+  const tap = interactive ? rc.interact!.tap(e.id) : null;
+  const onTap = tap && rc.interact!.onTap;
   rc.sizes?.set(e.id, { w, asc, desc, lead: leadW });
   rc.fontSizes?.set(e.id, size);
   // A minus sign is also its own piece (see signHandle); every layout records its size.
@@ -112,15 +115,20 @@ function layoutNode(
       <g
         id={e.id}
         transform={translate(x, y)}
-        className={grabbable ? "m-node" : undefined}
-        style={interactive ? { pointerEvents: grabbable ? "auto" : "none" } : undefined}
-        {...(grabbable
-          ? {
-              dragologyOnDrag: () => rc.interact!.drag(e.id),
-              onClick: tap && rc.interact!.onTap ? () => rc.interact!.onTap!(tap) : undefined,
-              dragologyZIndex: rc.draggedId === e.id ? "/1" : false,
-            }
-          : {})}
+        // (One class for every interactive piece: Dragology can't blend between
+        // two different class names; cursor and pointer-events it switches.)
+        className={grabbable || tap ? "m-node" : undefined}
+        style={interactive ? { pointerEvents: grabbable || tap ? "auto" : "none", cursor: grabbable ? "grab" : tap ? "pointer" : undefined } : undefined}
+        {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(e.id), dragologyZIndex: rc.draggedId === e.id ? "/1" : false } : {})}
+        // The innermost piece with a tap takes it (not also the term around it).
+        onClick={
+          onTap
+            ? (ev: { stopPropagation(): void }) => {
+                ev.stopPropagation();
+                onTap(tap);
+              }
+            : undefined
+        }
         // Copies (from distributing) fly out of their source fully visible —
         // every part of them, grabbable or not (the 2 and x of a copied 2x too).
         dragologyEmergeFrom={e.from}
@@ -161,12 +169,8 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   );
 }
 
-/**
- * Where a root's sign must reach: its overline's height (top), how far below
- * the baseline it dips, and how long its overline is (the bar belongs to the
- * sign: carrying the √ carries its bar).
- */
-type RootGeometry = { top: number; bottom: number; stroke: number; bar: number };
+/** Where a root's sign must reach: its overline's height (top) and how far below the baseline it dips. */
+type RootGeometry = { top: number; bottom: number; stroke: number };
 
 /**
  * The √ sign as a path: a short rising tick, down to the bottom, then up to
@@ -198,13 +202,6 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
         d={d}
         strokeWidth={g.stroke}
         className="m-root"
-      />,
-      <rect
-        dragologyKey="overline"
-        transform={translate(x0 + idx + w - g.stroke / 2, g.top - g.stroke / 2)}
-        width={g.bar}
-        height={g.stroke}
-        className="m-bar"
       />,
       ...(n === 2 ? [] : [glyph("rootidx", String(n), x0, tickY - 0.12 * size, idxSize, "m-num")]),
     ],
@@ -335,18 +332,17 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
     }
     case "pow": {
       if (rootIndex(e) !== null) {
-        // ⁿ√x: the exponent 1/n is drawn as the √ itself, so dragging the √ drags
-        // the exponent. The √ is a stroked path whose top-right corner is exactly
-        // where the overline starts; both use the same stroke, so they join up.
+        // ⁿ√x: the exponent 1/n is drawn as the √ itself. It isn't a handle of its
+        // own (see rules/index.ts movesFor): pressing the √ picks up the whole root.
+        // The √ is a stroked path whose top-right corner is exactly where the
+        // overline starts; both use the same stroke, so they join up.
         const base = layoutNode(e.base, rc, size, null);
         const gap = 0.06 * size;
         const pad = 0.06 * size;
-        const stroke = 0.055 * size;
         const geo: RootGeometry = {
           top: -(base.asc + 0.08 * size),
           bottom: Math.max(base.desc * 0.85, 0.16 * size),
-          stroke,
-          bar: gap + base.w + pad + stroke / 2,
+          stroke: 0.055 * size,
         };
         const sign = layoutNode(e.exp, rc, size, null, { root: geo });
         return {
@@ -355,6 +351,13 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
           desc: Math.max(geo.bottom + geo.stroke, base.desc),
           parts: (x0) => [
             sign.draw(x0, 0),
+            <rect
+              dragologyKey="overline"
+              transform={translate(x0 + sign.w - geo.stroke / 2, geo.top - geo.stroke / 2)}
+              width={gap + base.w + pad + geo.stroke / 2}
+              height={geo.stroke}
+              className="m-bar"
+            />,
             base.draw(x0 + sign.w + gap, 0),
           ],
         };

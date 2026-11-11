@@ -3,7 +3,6 @@ import { chapterById, findPuzzle } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { PuzzleView } from "./PuzzleView";
-import { Sandbox } from "./Sandbox";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
 
 function useHash() {
@@ -37,7 +36,6 @@ export function App() {
         <a href="#/" className="logo">
           math by hand<span>.</span>
         </a>
-        <a href="#/sandbox">Sandbox</a>
         {debug && (
           <button className="debug-badge" onClick={() => setDebug(false)} title="Debug mode is on (Shift+D)">
             debug ✕
@@ -48,8 +46,6 @@ export function App() {
         <PuzzleView key={ref.puzzle.id} puzzleRef={ref} />
       ) : chapter ? (
         <ChapterView key={chapter.id} chapter={chapter} />
-      ) : hash === "#/sandbox" ? (
-        <Sandbox />
       ) : (
         <Home key={at?.id ?? ""} at={at} />
       )}

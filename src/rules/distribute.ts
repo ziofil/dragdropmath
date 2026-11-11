@@ -44,12 +44,23 @@ export const distribute: Rule = {
           rule: "distribute",
           state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
           targetId: s.id,
-          stays: (near.kind === "neg" ? near.arg : near).id,
+          stays: staysPut(near, fromLeft),
         },
       ];
     });
   },
 };
+
+/**
+ * What stays put in the first term the carried factor meets: the term itself
+ * (x), or, as products merge into one ((x + 1)·2x → (x + 1)·2·x, where 2x's own
+ * id is gone), its factor nearest the carried one.
+ */
+function staysPut(near: Expr, fromLeft: boolean): string {
+  const body = near.kind === "neg" ? near.arg : near;
+  if (body.kind !== "prod") return body.id;
+  return body.factors[fromLeft ? 0 : body.factors.length - 1].id;
+}
 
 /** −(a − b) → −a + b (drop the minus sign onto its brackets). */
 export const distributeNeg: Rule = {

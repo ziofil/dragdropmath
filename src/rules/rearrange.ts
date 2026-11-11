@@ -16,11 +16,16 @@ export const commute: Rule = {
     const c = dragCtx(state, id);
     if (!c?.parent || (c.parent.kind !== "sum" && c.parent.kind !== "prod")) return [];
     const items = siblings(c);
-    return items.flatMap((_, j): Candidate[] =>
-      j === c.index
-        ? []
-        : [{ rule: "commute", state: replaceIn(state, c.parentLoc!, withChildren(c.parent!, moveItem(items, c.index, j))) }],
-    );
+    // In a product, numbers stay in front: tidying would put y·2 straight back
+    // to 2y, so such a "move" would only get in the way (of distributing the 2
+    // of 2y(y + 3), say).
+    const numbersFirst = (fs: readonly Expr[]) => !fs.some((f, i) => f.kind === "num" && fs.slice(0, i).some((g) => g.kind !== "num"));
+    const keepsOrder = (fs: readonly Expr[]) => c.parent!.kind !== "prod" || !numbersFirst(items) || numbersFirst(fs);
+    return items.flatMap((_, j): Candidate[] => {
+      if (j === c.index) return [];
+      const moved = moveItem(items, c.index, j);
+      return keepsOrder(moved) ? [{ rule: "commute", state: replaceIn(state, c.parentLoc!, withChildren(c.parent!, moved)) }] : [];
+    });
   },
 };
 

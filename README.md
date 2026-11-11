@@ -20,7 +20,7 @@ src/render/   typeset.tsx (SVG math layout, each node a <g id>), drag/ (what dra
               does: carry.ts, merge.tsx, logs.tsx, spec.ts), preview.tsx (editing
               previews), geometry.ts, testing/harness.ts (headless drags, replays)
 src/game/     chapters + exercises, BFS solver, best scores
-src/ui/       React pages: map, puzzle, sandbox
+src/ui/       React pages: learning path, chapter, exercise
 ```
 
 - **A move is a rule.** `Rule.apply(state, draggedId)` returns `Candidate`s. A candidate without `targetId` keeps the dragged node; how the drag reaches it is the rule's `feel` (`reorder` along the row, `landing` where the piece will sit, `pull-out` of a container, `out-in-front`), plus anything the piece `wears` on the way (`grow-log`, `shed-log`). A candidate with `targetId` merges the dragged node into a target: the result forms gradually as the piece approaches where it ends up, and letting go merges once the picture is mostly the result. `dragSpec` in `src/render/drag/spec.ts` combines them; the renderer never looks at rule ids. What a state allows is computed once per piece (`movesFor`).
