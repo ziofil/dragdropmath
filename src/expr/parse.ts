@@ -17,12 +17,9 @@ import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable 
  * The letter e is the constant e.
  */
 export function parseState(src: string): MathState {
-  // Rows: "x + y = 5; x - y = 1" (both at once), "x = 2 | x = -3" (either).
-  const rows = src.split(/[;|]/);
-  if (rows.length > 1) {
-    const join = src.includes(";") ? "and" : "or";
-    return { sides: rows.flatMap((r) => parseRow(r).sides), join };
-  }
+  // Rows: "x + y = 5; x - y = 1" (both at once).
+  const rows = src.split(";");
+  if (rows.length > 1) return { sides: rows.flatMap((r) => parseRow(r).sides), join: "and" };
   return parseRow(src);
 }
 

@@ -5,6 +5,7 @@ import type { MathState } from "../expr/types";
 import type { RuleId } from "../rules";
 import { renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
+import { thumbLift } from "../render/drag/lift";
 import { DebugPanel, noteRecording, useDebug } from "./debug";
 
 /** The interactive surface: drag pieces of the expression around. */
@@ -34,8 +35,11 @@ export function MathCanvas({
             rules,
             draggedId,
             onTap: (next) => onDropRef.current(next),
-            // Debug mode records every drag, to replay as a test.
-            wrap: debug ? (spec) => spec.with(recorded(rules, width.value, height, noteRecording)) : undefined,
+            // Touch drags ride above the finger. Debug mode also records every drag, to replay as a test.
+            wrap: (spec) => {
+              const seen = debug ? spec.with(recorded(rules, width.value, height, noteRecording)) : spec;
+              return seen.with(thumbLift());
+            },
           }),
           width.value,
           height,

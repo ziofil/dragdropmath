@@ -12,7 +12,7 @@ import { candidatesFor, handles, isGrabbable, tapFor, type RuleId } from "../rul
  */
 export function matchesGoal(state: MathState, goal: MathState, ordered = true): boolean {
   if (stateKey(state, ordered) === stateKey(goal, ordered)) return true;
-  // Several rows (x = 2; y = 3, or x = 0 | x = 4): the same rows, in any order, each either way round.
+  // Several rows (x = 2; y = 3): the same rows, in any order, each either way round.
   if (state.sides.length > 2 || goal.sides.length > 2) {
     const rows = (s: MathState) => {
       const out: string[] = [];

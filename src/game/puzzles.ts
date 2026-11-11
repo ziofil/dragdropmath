@@ -8,7 +8,6 @@ import { balance } from "./chapters/balance";
 import { inequalities } from "./chapters/inequalities";
 import { formulas } from "./chapters/formulas";
 import { simultaneous } from "./chapters/simultaneous";
-import { quadratics } from "./chapters/quadratics";
 import { fractions } from "./chapters/fractions";
 import { powers } from "./chapters/powers";
 import { roots } from "./chapters/roots";
@@ -79,7 +78,6 @@ export const CHAPTERS: Chapter[] = [
   fractions,
   powers,
   roots,
-  quadratics,
   explog,
 ];
 

@@ -5,7 +5,7 @@ import { dragCtx, type Candidate, type Feel, type Rule, type RuleId } from "./ty
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
 import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
-import { addRows, moveSide, rootBothSides, splitZero, substitute } from "./rows";
+import { substitute } from "./rows";
 import { moveDenominator, moveFactor, moveLetterDenominator, moveLetterFactor, moveSign, moveTerm, swapSides } from "./balance";
 import { cancelFactor, divideNumbers } from "./fractions";
 import {
@@ -59,11 +59,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     swapSides,
     moveLetterFactor,
     moveLetterDenominator,
-    splitZero,
-    moveSide,
-    rootBothSides,
     substitute,
-    addRows,
     moveFactor,
     moveDenominator,
     moveSign,

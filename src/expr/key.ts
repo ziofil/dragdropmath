@@ -42,13 +42,13 @@ export function stateKey(s: MathState, ordered: Ordering = false): string {
   return joinRows(s, (e) => key(e, ordered));
 }
 
-/** Each row's sides with their relation, rows joined by ; (and) or | (or). */
+/** Each row's sides with their relation, rows joined by ;. */
 function joinRows(s: MathState, f: (e: Expr) => string): string {
   const row = (k: number) => s.sides.slice(k, k + 2).map(f).join(` ${s.rel ?? "="} `);
   if (s.sides.length <= 2) return row(0);
   const rows = [];
   for (let k = 0; k < s.sides.length; k += 2) rows.push(row(k));
-  return rows.join(s.join === "or" ? " | " : " ; ");
+  return rows.join(" ; ");
 }
 
 /** n if this exponent is 1/n (n ≥ 2): a power that can be written as a root. */

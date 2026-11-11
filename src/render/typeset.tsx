@@ -105,7 +105,8 @@ function layoutNode(
   rc.sizes?.set(e.id, { w, asc, desc, lead: leadW });
   rc.fontSizes?.set(e.id, size);
   // A minus sign is also its own piece (see signHandle); every layout records its size.
-  if (e.kind === "neg" && L) rc.sizes?.set(signId(e.id), { w: textWidth(L.glyph, size) + 0.04 * size, asc: ASC * size, desc: DESC * size, lead: 0 });
+  if (e.kind === "neg" && L)
+    rc.sizes?.set(signId(e.id), { w: textWidth(L.glyph, size) + 0.04 * size, asc: ASC * size, desc: DESC * size, lead: 0 });
 
   return {
     w,
@@ -118,7 +119,11 @@ function layoutNode(
         // (One class for every interactive piece: Dragology can't blend between
         // two different class names; cursor and pointer-events it switches.)
         className={grabbable || tap ? "m-node" : undefined}
-        style={interactive ? { pointerEvents: grabbable || tap ? "auto" : "none", cursor: grabbable ? "grab" : tap ? "pointer" : undefined } : undefined}
+        style={
+          interactive
+            ? { pointerEvents: grabbable || tap ? "auto" : "none", cursor: grabbable ? "grab" : tap ? "pointer" : undefined }
+            : undefined
+        }
         {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(e.id), dragologyZIndex: rc.draggedId === e.id ? "/1" : false } : {})}
         // The innermost piece with a tap takes it (not also the term around it).
         onClick={
@@ -135,7 +140,10 @@ function layoutNode(
         dragologyEmergeMode={e.from ? ("clone" as const) : undefined}
       >
         <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
-        {L && (e.kind === "neg" && interactive ? signHandle(rc, e.id, L, size) : glyph(`lead-${lead}`, L.glyph, L.left * size, 0, size, "m-op"))}
+        {L &&
+          (e.kind === "neg" && interactive
+            ? signHandle(rc, e.id, L, size)
+            : glyph(`lead-${lead}`, L.glyph, L.left * size, 0, size, "m-op"))}
         {content.parts(leadW)}
       </g>
     ),
@@ -159,9 +167,7 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
       transform={translate(L.left * size, 0)}
       className={grabbable ? "m-node" : undefined}
       style={{ pointerEvents: grabbable ? "auto" : "none" }}
-      {...(grabbable
-        ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false }
-        : {})}
+      {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false } : {})}
     >
       <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
       {glyph("t-sign", L.glyph, 0, 0, size, "m-op")}
@@ -196,13 +202,7 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
     asc: -g.top + g.stroke,
     desc: g.bottom + g.stroke,
     parts: (x0) => [
-      <path
-        dragologyKey="root"
-        transform={translate(x0, 0)}
-        d={d}
-        strokeWidth={g.stroke}
-        className="m-root"
-      />,
+      <path dragologyKey="root" transform={translate(x0, 0)} d={d} strokeWidth={g.stroke} className="m-root" />,
       ...(n === 2 ? [] : [glyph("rootidx", String(n), x0, tickY - 0.12 * size, idxSize, "m-num")]),
     ],
   };
@@ -399,11 +399,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
         w: word + base.w + gap + arg.w,
         asc: Math.max(ASC * size, arg.asc),
         desc: Math.max(DESC * size, base.desc + drop, arg.desc),
-        parts: (x0) => [
-          glyph("log", "log", x0, 0, size, "m-fn"),
-          base.draw(x0 + word, drop),
-          arg.draw(x0 + word + base.w + gap, 0),
-        ],
+        parts: (x0) => [glyph("log", "log", x0, 0, size, "m-fn"), base.draw(x0 + word, drop), arg.draw(x0 + word + base.w + gap, 0)],
       };
     }
   }
@@ -451,8 +447,7 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
 
   let size = BASE_SIZE;
   let { sides, eqW, space } = build(size);
-  const halfWidth = (s: typeof sides) =>
-    s.length === 1 ? s[0].w / 2 : Math.max(s[0].w, s[1].w) + space + eqW / 2;
+  const halfWidth = (s: typeof sides) => (s.length === 1 ? s[0].w / 2 : Math.max(s[0].w, s[1].w) + space + eqW / 2);
   const maxHalf = W / 2 - 16;
   if (halfWidth(sides) > maxHalf) {
     size *= maxHalf / halfWidth(sides);
@@ -492,13 +487,11 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
 
 /**
  * Several equations (rows), stacked with their = signs in one column: a system
- * (x + y = 5 and x − y = 1) or the answers of one (x = 2 or x = −3, with "or"
- * between them).
+ * (x + y = 5 and x − y = 1).
  */
 function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const n = rc.state.sides.length / 2;
   const build = (size: number) => ({ sides: rc.state.sides.map((s) => layoutNode(s, rc, size, null)), size });
-  const orW = (size: number) => (rc.state.join === "or" ? 1.4 * size : 0);
   const fit = (b: ReturnType<typeof build>) => {
     const eqW = textWidth("=", b.size);
     const space = 0.35 * b.size;
@@ -507,7 +500,7 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
     const rowH = Math.max(...b.sides.map((s) => s.asc + s.desc)) + 0.35 * b.size;
     // The = column stays put in the middle, as for one equation (so a term
     // carried across lands across, whatever the other rows look like).
-    const half = Math.max(left + orW(b.size), right) + space + eqW / 2;
+    const half = Math.max(left, right) + space + eqW / 2;
     return { eqW, space, left, right, rowH, half };
   };
   let b = build(BASE_SIZE);
@@ -527,7 +520,6 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
     parts.push(L.draw(cx - f.eqW / 2 - f.space - L.w, baseline));
     parts.push(relation(rc.state, cx, baseline, size, 0, r === 0 ? REL : `${REL}${r}`));
     parts.push(R.draw(cx + f.eqW / 2 + f.space, baseline));
-    if (r > 0 && rc.state.join === "or") parts.push(glyph(`or${r}`, "or", cx - f.eqW / 2 - f.space - f.left - 1.3 * size, baseline, size * 0.6, "m-or"));
     if (r === 0) rc.eq = { left: cx - f.eqW / 2, right: cx + f.eqW / 2, centre: cx, baseline, size };
   }
   return <g>{parts}</g>;

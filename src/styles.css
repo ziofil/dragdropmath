@@ -956,9 +956,3 @@ span.ex-step {
   opacity: 0.8;
 }
 
-/* "or" between the answers of an equation (x = 2 or x = −3). */
-.m-or {
-  fill: var(--ink-soft);
-  font-family: var(--ui);
-  font-style: normal;
-}

@@ -49,8 +49,8 @@ export type MathState = {
   sides: Expr[];
   /** The relation between two sides (default "="; rows are always equations). */
   rel?: Rel;
-  /** How rows go together: all at once ("and": simultaneous equations), or one of them ("or": x = 2 or x = −3). */
-  join?: "and" | "or";
+  /** Rows go together: all true at once (simultaneous equations). */
+  join?: "and";
   /**
    * Previews only: draw the side holding node `id` shifted so that node's
    * symbol starts at canvas x (a merge target staying put while it changes,
