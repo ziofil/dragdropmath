@@ -7,9 +7,11 @@ import { Badge } from "./Badge";
 import { ChapterProgress } from "./ChapterProgress";
 
 /** Height of one row of the path. */
-const ROW = 128;
+const ROW = 136;
 /** Radius of a chapter's circle. */
 const R = 28;
+/** Room under a chapter for its title (two lines), before its arrows start. */
+const TITLE_H = 40;
 /** The path is never drawn wider than this. */
 const MAX_W = 620;
 
@@ -78,7 +80,7 @@ function PathMap({
   selected: Chapter;
   onSelect: (c: Chapter) => void;
 }) {
-  const { widths, nodes, edges } = useMemo(() => layoutPath(), []);
+  const { cols, rows, nodes, edges } = useMemo(() => layoutPath(), []);
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   useLayoutEffect(() => {
@@ -92,8 +94,8 @@ function PathMap({
 
   const w = Math.min(width, MAX_W);
   const left = (width - w) / 2;
-  const at = (n: { layer: number; slot: number }) => ({ x: left + ((n.slot + 1) / (widths[n.layer] + 1)) * w, y: R + 12 + n.layer * ROW });
-  const height = widths.length * ROW;
+  const at = (n: { col: number; row: number }) => ({ x: left + ((n.col + 0.5) / cols) * w, y: R + 12 + n.row * ROW });
+  const height = rows * ROW;
 
   return (
     <div className="path" ref={box} style={{ height }}>
@@ -108,26 +110,14 @@ function PathMap({
                 <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow-done" />
               </marker>
             </defs>
-            {edges.map(({ from, to, via }) => {
-              // Down from the chapter, straight through each row it skips (in its own lane), into the next.
+            {edges.map(({ from, to }) => {
+              // From below the chapter's title, curving down into the next chapter.
               const a = at(from);
               const b = at(to);
-              const legs: { x: number; top: number; bottom: number }[] = [
-                { x: a.x, top: a.y, bottom: a.y + R + 4 },
-                ...via.map((v) => {
-                  const p = at(v);
-                  return { x: p.x, top: p.y - R, bottom: p.y + R };
-                }),
-                { x: b.x, top: b.y - R - 8, bottom: b.y },
-              ];
-              let d = `M ${legs[0].x} ${legs[0].bottom}`;
-              for (let i = 1; i < legs.length; i++) {
-                const p = legs[i - 1];
-                const q = legs[i];
-                const mid = (p.bottom + q.top) / 2;
-                d += ` C ${p.x} ${mid}, ${q.x} ${mid}, ${q.x} ${q.top}`;
-                if (i < legs.length - 1) d += ` L ${q.x} ${q.bottom}`;
-              }
+              const top = a.y + R + TITLE_H;
+              const bottom = b.y - R - 8;
+              const mid = (top + bottom) / 2;
+              const d = `M ${a.x} ${top} C ${a.x} ${mid}, ${b.x} ${mid}, ${b.x} ${bottom}`;
               const done = isMastered(from.chapter, solved);
               return (
                 <path
@@ -148,7 +138,7 @@ function PathMap({
               <button
                 key={c.id}
                 className={`path-node node-${state} ${c === selected ? "node-selected" : ""}`}
-                style={{ left: p.x, top: p.y - R, width: Math.min(124, w / (widths[n.layer] + 1) - 6) }}
+                style={{ left: p.x, top: p.y - R, width: Math.min(140, nodes.filter((m) => m.row === n.row).length === 1 ? w / 2 : w / cols - 4) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
                 aria-label={`Chapter ${n.index + 1}: ${c.title}, ${done} of ${c.puzzles.length} solved`}

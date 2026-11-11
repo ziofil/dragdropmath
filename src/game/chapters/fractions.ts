@@ -5,7 +5,7 @@ export const fractions: Chapter = {
   title: "Fractions",
   blurb:
     "You can only add slices of the same size. So first make the bottoms match — multiplying top and bottom by the same thing changes nothing.",
-  after: ["factor", "balance"],
+  after: ["factor", "formulas"],
   lesson: [
     {
       title: "Slices",

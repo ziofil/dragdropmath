@@ -4,7 +4,7 @@ export const simultaneous: Chapter = {
   id: "simultaneous",
   title: "Simultaneous equations",
   blurb: "Two equations, two unknowns, both true at once. Get a letter alone in one, then put what it equals into the other.",
-  after: ["balance"],
+  after: ["formulas"],
   lesson: [
     {
       title: "Two equations at once",
