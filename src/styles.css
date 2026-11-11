@@ -13,6 +13,11 @@
   --good-soft: #d6f5ea;
   --warn: #c2410c;
   --gold: #e6a700;
+  --gold-face: #fff1c2;
+  --silver: #8d96a6;
+  --silver-face: #eef0f4;
+  --bronze: #b8703a;
+  --bronze-face: #f8e3d2;
   --radius: 14px;
   --ui: "Space Grotesk", system-ui, sans-serif;
   --math: "STIX Two Text", "Times New Roman", serif;
@@ -34,6 +39,12 @@
     --good: #3dd6a5;
     --good-soft: #163a30;
     --warn: #fb923c;
+    --gold: #f2c230;
+    --gold-face: #3d3214;
+    --silver: #b9c1cf;
+    --silver-face: #2f333b;
+    --bronze: #d99260;
+    --bronze-face: #3b2a1f;
     color-scheme: dark;
   }
 }
@@ -255,6 +266,17 @@ button[aria-pressed="true"] {
 .static-math {
   width: 100%;
   max-height: 90px;
+}
+/* On a phone, the goal gets the whole width (beside the label it was tiny). */
+@media (max-width: 600px) {
+  .goal {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 12px 4px;
+  }
+  .static-math {
+    max-height: 64px;
+  }
 }
 
 .board {
@@ -500,4 +522,515 @@ button[aria-pressed="true"] {
 .debug-moves summary {
   cursor: pointer;
   color: var(--ink-soft);
+}
+
+/* Chapters: the idea, guided examples, practice */
+.chapter-head h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.chapter-head h2 a:hover {
+  color: var(--accent);
+}
+.chapter-start {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.chapter-mastered {
+  background: var(--good);
+  color: var(--accent-ink);
+}
+.chapter-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px 64px;
+}
+.chapter-title {
+  font-size: 2rem;
+  margin: 8px 0 12px;
+}
+.theory,
+.practice {
+  margin-bottom: 36px;
+}
+.theory h2,
+.practice h2 {
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+.theory p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+.m-inline {
+  font-family: var(--math);
+  font-size: 1.15em;
+  white-space: nowrap;
+  color: var(--var);
+}
+.guided {
+  margin-bottom: 28px;
+}
+.guided-head {
+  margin-bottom: 10px;
+}
+.guided-num {
+  font-weight: 700;
+  color: var(--accent);
+}
+.guided-steps {
+  margin: 6px 0 0;
+  padding-left: 22px;
+  line-height: 1.5;
+}
+.guided-steps li.past {
+  color: var(--ink-soft);
+}
+.guided-steps li.now {
+  font-weight: 600;
+}
+.guided-steps li.later {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+.guided-tick {
+  color: var(--good);
+}
+.guided-done .board {
+  border-color: var(--good);
+}
+.guided-status {
+  margin: 0;
+  color: var(--ink-soft);
+  flex: 1;
+}
+.practice-progress {
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+.mastery {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+.mastery-on {
+  background: var(--good-soft);
+  color: var(--ink);
+}
+.auto-note {
+  margin: 10px 0 0;
+  color: var(--good);
+  font-size: 0.95rem;
+}
+
+/* ---------- home: the learning path ---------- */
+.path-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 16px;
+  align-items: start;
+}
+.path-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 12px 8px;
+  min-width: 0;
+}
+.path-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  padding: 0 4px 12px;
+}
+.path-open {
+  flex-basis: 100%;
+}
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  vertical-align: -1px;
+  margin-right: 2px;
+}
+.dot-next {
+  background: var(--accent);
+}
+.dot-done {
+  background: var(--good);
+}
+.path {
+  position: relative;
+}
+.path-edges {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.edge {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.edge-done {
+  stroke: var(--good);
+}
+.edge-arrow {
+  fill: var(--line);
+}
+.edge-arrow-done {
+  fill: var(--good);
+}
+.path-node {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.path-node:hover,
+.path-node:active,
+.path-node[aria-pressed="true"] {
+  background: none;
+  border: none;
+}
+.path-node:focus-visible {
+  outline: none;
+}
+.path-node:focus-visible .ring-face {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.ring {
+  display: block;
+  transition: transform 0.15s ease;
+}
+.path-node:hover .ring {
+  transform: scale(1.08);
+}
+.ring-face {
+  fill: var(--surface-2);
+  stroke: none;
+}
+.ring-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 4;
+}
+.ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.ring-label {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 18px;
+  fill: var(--ink-soft);
+}
+.node-title {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.node-next .ring-face {
+  fill: var(--accent-soft);
+}
+.node-next .ring-track {
+  stroke: var(--accent);
+  stroke-opacity: 0.35;
+}
+.node-next .ring-label {
+  fill: var(--accent);
+}
+.node-next .node-title,
+.node-started .node-title {
+  color: var(--ink);
+}
+.node-done .ring-face {
+  fill: var(--good-soft);
+}
+.node-done .ring-track,
+.node-done .ring-fill {
+  stroke: var(--good);
+}
+.node-done .ring-label {
+  fill: var(--good);
+}
+.node-done .node-title {
+  color: var(--ink);
+}
+.node-selected .ring {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 0 transparent);
+}
+.node-selected .ring-face {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.node-selected .node-title {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.path-panel {
+  margin-top: 0;
+  position: sticky;
+  top: 16px;
+  scroll-margin-top: 16px;
+}
+.panel-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.tag-next {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tag-done {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.panel-title {
+  margin: 6px 0 0;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+}
+.panel-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.panel-title a:hover {
+  color: var(--accent);
+}
+.panel-blurb,
+.panel-builds,
+.panel-opens {
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+.panel-blurb {
+  margin: 8px 0 0;
+}
+.panel-builds,
+.panel-opens {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.panel-start {
+  display: inline-block;
+  margin-top: 14px;
+  text-decoration: none;
+}
+.panel-progress {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.badge-note {
+  font-weight: 400;
+}
+.path-panel .exercises {
+  margin-top: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
+.path-panel .ex-num {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 860px) {
+  .path-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .path-panel {
+    position: static;
+  }
+}
+
+/* ---------- badges ---------- */
+.badge {
+  display: block;
+  flex: none;
+}
+.badge-rim {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+.badge-face {
+  fill: none;
+}
+.badge-num {
+  font-family: var(--ui);
+  font-weight: 700;
+  fill: var(--line);
+}
+.badge-bronze .badge-rim,
+.badge-silver .badge-rim,
+.badge-gold .badge-rim {
+  stroke-dasharray: none;
+}
+.badge-bronze .badge-rim { fill: var(--bronze); stroke: var(--bronze); }
+.badge-bronze .badge-face { fill: var(--bronze-face); }
+.badge-bronze .badge-num { fill: var(--bronze); }
+.badge-silver .badge-rim { fill: var(--silver); stroke: var(--silver); }
+.badge-silver .badge-face { fill: var(--silver-face); }
+.badge-silver .badge-num { fill: var(--silver); }
+.badge-gold .badge-rim { fill: var(--gold); stroke: var(--gold); }
+.badge-gold .badge-face { fill: var(--gold-face); }
+.badge-gold .badge-num { fill: var(--gold); }
+
+.shelf {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.shelf-head {
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.shelf-head span {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+.shelf-row {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.shelf-badge {
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.shelf-badge:hover,
+.shelf-badge:active {
+  background: none;
+  border: none;
+  transform: scale(1.1);
+}
+.node-ring {
+  position: relative;
+  display: block;
+}
+.node-medal {
+  position: absolute;
+  right: -6px;
+  top: -4px;
+}
+.new-badge {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+/* ---------- chapter page: lesson and exercises ---------- */
+.chapter-blurb {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: -4px 0 8px;
+  max-width: 640px;
+}
+.lesson-part h2 {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.part-num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.watch {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--warn);
+  background: var(--surface-2);
+  border-radius: 0 10px 10px 0;
+}
+.watch strong {
+  color: var(--warn);
+}
+.practice-note {
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+}
+.leads-to {
+  margin-top: 16px;
+  color: var(--ink-soft);
+}
+.back-links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.back-lesson {
+  font-size: 0.9rem;
+  opacity: 0.8;
 }

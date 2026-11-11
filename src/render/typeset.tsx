@@ -1,7 +1,9 @@
 import { translate, type DragSpec, type Svgx } from "dragology";
-import type { Expr, Frac, MathState } from "../expr/types";
+import type { Expr, Frac, MathState, Rel } from "../expr/types";
+import { relOf } from "../expr/build";
 import { rootIndex } from "../expr/key";
 import { signId } from "../rules";
+import { allNodes } from "../expr/tree";
 import { textWidth } from "./measure";
 
 /**
@@ -35,6 +37,8 @@ export type RenderCtx = {
   fontSizes?: Map<string, number>;
   /** Filled in by layout: the canvas size it was laid out for. */
   canvas?: { W: number; H: number };
+  /** Filled in by layout: where the = sign's glyph starts and ends (x), if there is one. */
+  eq?: { left: number; right: number; centre: number; baseline: number; size: number };
 };
 
 export type Interact = {
@@ -115,11 +119,12 @@ function layoutNode(
               dragologyOnDrag: () => rc.interact!.drag(e.id),
               onClick: tap && rc.interact!.onTap ? () => rc.interact!.onTap!(tap) : undefined,
               dragologyZIndex: rc.draggedId === e.id ? "/1" : false,
-              dragologyEmergeFrom: e.from,
-              // Copies (from distributing) fly out of their source fully visible.
-              dragologyEmergeMode: e.from ? ("clone" as const) : undefined,
             }
           : {})}
+        // Copies (from distributing) fly out of their source fully visible —
+        // every part of them, grabbable or not (the 2 and x of a copied 2x too).
+        dragologyEmergeFrom={e.from}
+        dragologyEmergeMode={e.from ? ("clone" as const) : undefined}
       >
         <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
         {L && (e.kind === "neg" && interactive ? signHandle(rc, e.id, L, size) : glyph(`lead-${lead}`, L.glyph, L.left * size, 0, size, "m-op"))}
@@ -156,8 +161,12 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   );
 }
 
-/** Where a root's sign must reach: its overline's height (top) and how far below the baseline it dips. */
-type RootGeometry = { top: number; bottom: number; stroke: number };
+/**
+ * Where a root's sign must reach: its overline's height (top), how far below
+ * the baseline it dips, and how long its overline is (the bar belongs to the
+ * sign: carrying the √ carries its bar).
+ */
+type RootGeometry = { top: number; bottom: number; stroke: number; bar: number };
 
 /**
  * The √ sign as a path: a short rising tick, down to the bottom, then up to
@@ -189,6 +198,13 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
         d={d}
         strokeWidth={g.stroke}
         className="m-root"
+      />,
+      <rect
+        dragologyKey="overline"
+        transform={translate(x0 + idx + w - g.stroke / 2, g.top - g.stroke / 2)}
+        width={g.bar}
+        height={g.stroke}
+        className="m-bar"
       />,
       ...(n === 2 ? [] : [glyph("rootidx", String(n), x0, tickY - 0.12 * size, idxSize, "m-num")]),
     ],
@@ -323,27 +339,22 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
         // the exponent. The √ is a stroked path whose top-right corner is exactly
         // where the overline starts; both use the same stroke, so they join up.
         const base = layoutNode(e.base, rc, size, null);
+        const gap = 0.06 * size;
+        const pad = 0.06 * size;
+        const stroke = 0.055 * size;
         const geo: RootGeometry = {
           top: -(base.asc + 0.08 * size),
           bottom: Math.max(base.desc * 0.85, 0.16 * size),
-          stroke: 0.055 * size,
+          stroke,
+          bar: gap + base.w + pad + stroke / 2,
         };
         const sign = layoutNode(e.exp, rc, size, null, { root: geo });
-        const gap = 0.06 * size;
-        const pad = 0.06 * size;
         return {
           w: sign.w + gap + base.w + pad,
           asc: -geo.top + geo.stroke,
           desc: Math.max(geo.bottom + geo.stroke, base.desc),
           parts: (x0) => [
             sign.draw(x0, 0),
-            <rect
-              dragologyKey="overline"
-              transform={translate(x0 + sign.w - geo.stroke / 2, geo.top - geo.stroke / 2)}
-              width={gap + base.w + pad + geo.stroke / 2}
-              height={geo.stroke}
-              className="m-bar"
-            />,
             base.draw(x0 + sign.w + gap, 0),
           ],
         };
@@ -397,14 +408,39 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
 
 export const BASE_SIZE = 46;
 
-/** Lay out a whole expression or equation centred in a W×H canvas. */
+/** Id of the relation sign's layer (=, <, ≤, ...): its own layer, so it can turn round. */
+export const REL = "rel";
+
+/** How a relation is drawn: < and > are one glyph facing either way (as are ≤ and ≥). */
+export function relGlyph(r: Rel): { text: string; facing: 1 | -1 } {
+  if (r === "<" || r === ">") return { text: "<", facing: r === "<" ? 1 : -1 };
+  if (r === "≤" || r === "≥") return { text: "≤", facing: r === "≤" ? 1 : -1 };
+  return { text: "=", facing: 1 };
+}
+
+/**
+ * The relation sign, centred at x. `turn` (0–1) is how far it has turned
+ * round (a half turn about its upright axis: < becomes >), drawn as a
+ * horizontal scale through 0 so moving between states blends smoothly.
+ */
+export function relation(state: MathState, cx: number, baseline: number, size: number, turn = 0): Svgx {
+  const { text, facing } = relGlyph(relOf(state));
+  const sx = facing * Math.cos(Math.PI * turn);
+  return (
+    <g id={REL} transform={`${translate(cx, baseline)} scale(${sx}, 1)`}>
+      {glyph("eq", text, -textWidth(text, size) / 2, 0, size, "m-op m-eq")}
+    </g>
+  );
+}
+
+/** Lay out a whole expression or equation centred in a W×H canvas (or with a piece pinned: see MathState.pin). */
 export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
   rc.fontSizes ??= new Map();
   rc.canvas = { W, H };
   const build = (size: number) => {
     const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null));
-    const eqW = textWidth("=", size);
+    const eqW = Math.max(textWidth("=", size), textWidth(relGlyph(relOf(rc.state)).text, size));
     const space = 0.35 * size;
     return { sides, eqW, space };
   };
@@ -423,16 +459,48 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   const desc = Math.max(...sides.map((s) => s.desc));
   const baseline = H / 2 + (asc - desc) / 2;
   const cx = W / 2;
+  const xs = sides.length === 1 ? [cx - sides[0].w / 2] : [cx - eqW / 2 - space - sides[0].w, cx + eqW / 2 + space];
+
+  // A pinned piece: shift its side so the piece's symbol starts where asked.
+  const pin = rc.state.pin;
+  const pinSide = pin ? rc.state.sides.findIndex((s) => allNodes(s).some((n) => n.id === pin.id)) : -1;
+  if (pin && pinSide >= 0) {
+    const at = originsOf(sides[pinSide].draw(xs[pinSide], baseline)).get(pin.id);
+    if (at) xs[pinSide] += pin.x - (at.x + (rc.sizes.get(pin.id)?.lead ?? 0));
+    // Never pushed off the canvas: near an edge, the pinned piece gives way instead.
+    const margin = 4;
+    xs[pinSide] = Math.min(Math.max(xs[pinSide], margin), W - margin - sides[pinSide].w);
+  }
 
   if (sides.length === 1) {
-    return <g>{sides[0].draw(cx - sides[0].w / 2, baseline)}</g>;
+    return <g>{sides[0].draw(xs[0], baseline)}</g>;
   }
   // The = sign stays put in the middle, like the pivot of a balance.
+  rc.eq = { left: cx - eqW / 2, right: cx + eqW / 2, centre: cx, baseline, size };
   return (
     <g>
-      {sides[0].draw(cx - eqW / 2 - space - sides[0].w, baseline)}
-      {glyph("eq", "=", cx - eqW / 2, baseline, size, "m-op m-eq")}
-      {sides[1].draw(cx + eqW / 2 + space, baseline)}
+      {sides[0].draw(xs[0], baseline)}
+      {relation(rc.state, cx, baseline, size)}
+      {sides[1].draw(xs[1], baseline)}
     </g>
   );
+}
+
+/** Canvas origin of every id'd element in a drawn tree (following the translates). */
+function originsOf(el: unknown, x = 0, y = 0, out = new Map<string, { x: number; y: number }>()) {
+  if (Array.isArray(el)) {
+    for (const c of el) originsOf(c, x, y, out);
+    return out;
+  }
+  if (!el || typeof el !== "object" || !("props" in el)) return out;
+  const props = (el as { props: { id?: string; transform?: string; children?: unknown } }).props;
+  let nx = x;
+  let ny = y;
+  for (const m of props.transform?.matchAll(/translate\(\s*([-+\d.eE]+)[\s,]+([-+\d.eE]+)/g) ?? []) {
+    nx += parseFloat(m[1]);
+    ny += parseFloat(m[2]);
+  }
+  if (props.id) out.set(props.id, { x: nx, y: ny });
+  originsOf(props.children, nx, ny, out);
+  return out;
 }

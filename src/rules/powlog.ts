@@ -94,6 +94,29 @@ export const zeroPower: Rule = {
   },
 };
 
+/**
+ * x² → x·x, (x + 2)² → (x + 2)(x + 2) (tap a small whole-number exponent).
+ * A power is just repeated multiplication; written out, its pieces can be
+ * distributed, shared and factored like any others. The copies fly out of
+ * the base.
+ */
+export const powerToProduct: Rule = {
+  id: "power-to-product",
+  name: "Write a power out",
+  gesture: "Tap a small exponent to write the power out as a product: x² → x·x.",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    const P = c && exponentOf(c);
+    // Numbers have their own move (2³ → 8); roots are fractions of a power.
+    if (!c || !P || P.radical || P.base.kind === "num" || c.node.kind !== "num") return [];
+    const n = c.node.value;
+    if (!Number.isInteger(n) || n < 2 || n > 4) return [];
+    const copies = Array.from({ length: n - 1 }, () => cloneFresh(P.base));
+    return [{ rule: "power-to-product", state: replaceIn(state, c.parentLoc!, prod([P.base, ...copies], P.id)) }];
+  },
+};
+
 /** 2³ → 8 (drop the exponent onto a number base). */
 export const evaluatePower: Rule = {
   id: "evaluate-power",
@@ -124,6 +147,9 @@ export const dividePowers: Rule = {
     return factorsOf(F.num).flatMap((t): Candidate[] => {
       const theirs = asPower(t);
       if (key(theirs.base) !== key(mine.base)) return [];
+      // Plain numbers on both sides are just divided (6/2 → 3, 2/2 → 1), not
+      // treated as powers of themselves (2/2 → 2^(1−1)).
+      if (t.kind === "num" && c.node.kind === "num") return [];
       // Show the operation: x⁵/x² → x^(5−2); the learner subtracts themselves.
       const exp = sum([theirs.exp, negate(mine.exp)]);
       const merged = t.kind === "pow" ? pow(t.base, exp, t.id) : pow(t, exp);
@@ -387,6 +413,10 @@ export const rootNotation: Rule = {
     const P = c.node.kind === "pow" ? c.node : exponentOf(c);
     const loc = c.node.kind === "pow" ? c.loc : c.parentLoc;
     if (!P || !loc || rootOrder(P.exp) === null) return [];
+    // A √ sign isn't a handle of its own for this: tapping it falls through to
+    // the root, and pressing it picks up the whole root (√3 carried onto √3),
+    // unless the sign has a move of its own (carried across =).
+    if (P.radical && c.node.kind !== "pow") return [];
     return [{ rule: "root-notation", state: replaceIn(state, loc, { ...P, radical: !P.radical }) }];
   },
 };

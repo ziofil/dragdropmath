@@ -3,9 +3,9 @@ import { stateKey } from "../expr/key";
 import { allNodes, withoutFrom } from "../expr/tree";
 import { dragCtx, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 export { handles, signId, signOwner } from "./types";
-import { combine, commute, mergePowers, multiplyNumbers, numbersFirst, timesOne } from "./rearrange";
-import { distribute, distributeNeg, factorOut } from "./distribute";
-import { moveDenominator, moveFactor, moveSign, moveTerm } from "./balance";
+import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
+import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
+import { moveDenominator, moveFactor, moveSign, moveTerm, swapSides } from "./balance";
 import { cancelFactor, divideNumbers } from "./fractions";
 import {
   combineLogs,
@@ -24,6 +24,7 @@ import {
   powerOne,
   pullOutOfPower,
   powerOfProduct,
+  powerToProduct,
   rootAcross,
   rootNotation,
   splitSquare,
@@ -40,6 +41,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     multiplyNumbers,
     timesOne,
     numbersFirst,
+    multiplyOut,
     splitNumber,
     expandFraction,
     addFractions,
@@ -50,7 +52,10 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     distribute,
     distributeNeg,
     factorOut,
+    factorShared,
+    powerToProduct,
     moveTerm,
+    swapSides,
     moveFactor,
     moveDenominator,
     moveSign,
@@ -138,7 +143,15 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
     };
   };
   const drag = memo((id) => collect(state, id, dragRules));
-  const tap = memo((id) => collect(state, id, tapRules)[0] ?? null);
+  // A √ sign with no tap of its own passes a tap on to its root (√x ↔ x^(1/2)).
+  const signOf = new Map(
+    state.sides.flatMap(allNodes).flatMap((n) => (n.kind === "pow" && n.radical ? [[n.exp.id, n.id] as const] : [])),
+  );
+  const tap: (id: string) => Candidate | null = memo((id) => {
+    const own = collect(state, id, tapRules)[0];
+    const root = signOf.get(id);
+    return own ?? (root ? tap(root) : null);
+  });
   const hiddenIds = hidden(state);
   const grabbable = memo(
     (id) =>
@@ -155,7 +168,9 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   const seen = new Set([stateKey(state, "exact")]);
   const out: Candidate[] = [];
   for (const id of enabled) {
-    for (const cand of RULES[id].apply(state, draggedId)) {
+    for (const found of RULES[id].apply(state, draggedId)) {
+      // Rules rewrite sides; the relation carries over unless the move turns it round.
+      const cand = found.state.rel || !state.rel ? found : { ...found, state: { ...found.state, rel: state.rel } };
       const k = stateKey(cand.state, "exact");
       if (seen.has(k)) continue;
       seen.add(k);

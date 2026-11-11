@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { findPuzzle } from "../game/puzzles";
+import { CHAPTERS, findPuzzle } from "../game/puzzles";
+import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { PuzzleView } from "./PuzzleView";
 import { Sandbox } from "./Sandbox";
@@ -22,6 +23,11 @@ export function App() {
   const hash = useHash();
   const puzzleId = hash.match(/^#\/p\/([\w-]+)$/)?.[1];
   const ref = puzzleId ? findPuzzle(puzzleId) : undefined;
+  const chapterId = hash.match(/^#\/c\/([\w-]+)$/)?.[1];
+  const chapter = CHAPTERS.find((c) => c.id === chapterId);
+  // The learning path, with a chapter picked out (coming back from it).
+  const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
+  const at = CHAPTERS.find((c) => c.id === atId);
   const debug = useDebug();
   useDebugShortcut();
 
@@ -38,7 +44,15 @@ export function App() {
           </button>
         )}
       </nav>
-      {ref ? <PuzzleView key={ref.puzzle.id} puzzleRef={ref} /> : hash === "#/sandbox" ? <Sandbox /> : <Home />}
+      {ref ? (
+        <PuzzleView key={ref.puzzle.id} puzzleRef={ref} />
+      ) : chapter ? (
+        <ChapterView key={chapter.id} chapter={chapter} />
+      ) : hash === "#/sandbox" ? (
+        <Sandbox />
+      ) : (
+        <Home key={at?.id ?? ""} at={at} />
+      )}
     </div>
   );
 }

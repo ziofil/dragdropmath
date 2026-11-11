@@ -113,6 +113,21 @@ export const mergePowers: Rule = {
       if (j === c.index || f.kind === "num") return [];
       const theirs = asPower(f);
       if (key(theirs.base) !== key(mine.base)) return [];
+      // A square root times itself gives back what's inside: √2·√2 → 2. That's
+      // what a square root is (like x·x → x² below), not arithmetic to show.
+      if (f.kind === "pow" && f.radical && c.node.kind === "pow" && c.node.radical && key(f) === key(c.node)) {
+        const newFactors = factors.slice();
+        newFactors[j] = theirs.base;
+        return [
+          {
+            rule: "merge-powers",
+            state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+            targetId: f.id,
+            // What's inside stays where it is while its √ fades away.
+            stays: theirs.base.id,
+          },
+        ];
+      }
       // Show the operation, not the answer: x³·x² → x^(3+2), and the learner
       // combines 3 + 2 themselves — keeping the factors' left-to-right order.
       // The exception is x·x → x², which is just what "squared" means.
@@ -163,16 +178,12 @@ export const numbersFirst: Rule = {
   gesture: "Tap something like x·2 to write it the usual way, 2x.",
   tap: true,
   apply(state, id) {
-    // Tapping the product itself, or any factor of it.
+    // Tapping the product itself: a press on a factor with nothing else to do
+    // falls through to it anyway, and offering it on factors would make them
+    // grabbable alone (then x·2's term couldn't be picked up to combine with −2x).
     const c = dragCtx(state, id);
-    if (!c) return [];
-    // On the product itself: a press on a factor with nothing else to do falls
-    // through to it anyway, and offering it on factors would make them grabbable
-    // alone (then x·2's term couldn't be picked up to combine with −2x).
-    const P = c.node.kind === "prod" ? c.node : null;
-    const loc = c.loc;
-    if (!P || !loc) return [];
-    const isOne = (f: Expr) => f.kind === "num" && f.value === 1;
+    const P = c?.node.kind === "prod" ? c.node : null;
+    if (!P || !c?.loc) return [];
     const nums = P.factors.filter((f) => f.kind === "num" && !isOne(f));
     const rest = P.factors.filter((f) => f.kind !== "num");
     // A ·1 is just dropped when tidying (x·1 → x, not 1x).
@@ -181,6 +192,34 @@ export const numbersFirst: Rule = {
     if (reordered.length === 0) reordered.push(ones[0]);
     if (reordered.length === P.factors.length && reordered.every((f, i) => f === P.factors[i])) return [];
     const tidy = reordered.length === 1 ? reordered[0] : { ...P, factors: reordered };
-    return [{ rule: "numbers-first", state: replaceIn(state, loc, tidy) }];
+    return [{ rule: "numbers-first", state: replaceIn(state, c.loc, tidy) }];
+  },
+};
+
+const isOne = (f: Expr) => f.kind === "num" && f.value === 1;
+
+/** 2·3 → 6, 3·2·x → 6x (tap the product, or one of its numbers: the numbers in it are multiplied out). */
+export const multiplyOut: Rule = {
+  id: "multiply-out",
+  // After tidying: x·2·3 is first written 2·3·x.
+  tapOrder: 2,
+  name: "Multiply out",
+  gesture: "Tap a product of numbers, like 2·3, to work it out.",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    if (!c) return [];
+    const nums = (p: Expr) => (p.kind === "prod" ? (p.factors.filter((f) => f.kind === "num") as Extract<Expr, { kind: "num" }>[]) : []);
+    // The product itself, or one of its numbers (grabbable anyway: they can be dropped on each other).
+    const P = c.node.kind === "prod" ? c.node : c.node.kind === "num" && c.parent?.kind === "prod" ? c.parent : null;
+    const loc = c.node.kind === "prod" ? c.loc : c.parentLoc;
+    if (!P || P.kind !== "prod" || !loc || nums(P).length < 2) return [];
+    const ns = nums(P);
+    const value = num(
+      ns.reduce((a, f) => a * f.value, 1),
+      ns[0].id,
+    );
+    const factors = P.factors.flatMap((f) => (f === ns[0] ? [value] : f.kind === "num" ? [] : [f]));
+    return [{ rule: "multiply-out", state: replaceIn(state, loc, factors.length === 1 ? factors[0] : { ...P, factors }) }];
   },
 };

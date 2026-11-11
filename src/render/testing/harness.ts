@@ -22,6 +22,8 @@ import { printState } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
 import { ALL_RULES, candidatesFor, type Candidate, type RuleId } from "../../rules";
 import { interactive } from "../drag";
+import { mergePlan } from "../drag/merge";
+import { canvasBox } from "../geometry";
 import { probeBlend } from "../preview";
 import { renderState, type RenderCtx, type Size } from "../typeset";
 import type { Recording } from "./recording";
@@ -228,17 +230,18 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
       return c.state;
     },
     /**
-     * How far to carry `id` so the part of it that lives on lands where the
-     * merged (recentred) result puts it — where the merge completes under
-     * the hand. (If nothing of it lives on, its centre onto the merged term.)
+     * How far to carry `id` so the merge completes under the hand: the part
+     * of it that lives on to where the merged (recentred) result puts it
+     * (around whatever the move keeps in place); if
+     * nothing of it lives on, its centre onto the target (which stays put).
      */
-    endsUpOffset(id: string, targetId: string): Vec2 {
-      const result = h.merged(id, targetId);
-      const inResult = new Set(result.sides.flatMap(allNodes).map((n) => n.id));
-      const me = nodes().find((n) => n.id === id)!;
-      const survivor = allNodes(me).find((n) => inResult.has(n.id));
-      if (survivor) return h.originOf(survivor.id, result)!.sub(h.originOf(survivor.id)!);
-      return h.centreOf(targetId).sub(h.centreOf(id)).add(h.originOf(targetId, result)!.sub(h.originOf(targetId)!));
+    endsUpOffset(id: string, targetId: string, rule?: string): Vec2 {
+      // Exactly what the app aims for (see mergePlan), from where the piece's centre starts.
+      // (`rule`: which move, when two share the target.)
+      const c = h.candidates(id).find((k) => k.targetId === targetId && (!rule || k.rule === rule))!;
+      const rc = h.rc(id);
+      const ctx = ctxFor(id);
+      return mergePlan(rc, ctx, id, c.state, targetId, c.stays).aim.sub(canvasBox(rc, ctx, id).centre);
     },
     /** Pick up node `id` (or the first piece printing as `text`) at a point on it (default: near its symbol's start). */
     grab(idOrText: string, at?: Vec2): Grip {

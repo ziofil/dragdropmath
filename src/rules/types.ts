@@ -10,7 +10,10 @@ export type RuleId =
   | "distribute"
   | "distribute-neg"
   | "factor-out"
+  | "factor-shared"
+  | "power-to-product"
   | "move-term"
+  | "swap-sides"
   | "move-factor"
   | "move-denominator"
   | "move-sign"
@@ -23,6 +26,7 @@ export type RuleId =
   | "flip-across-bar"
   | "times-one"
   | "numbers-first"
+  | "multiply-out"
   | "split-number"
   | "expand-fraction"
   | "add-fractions"
@@ -60,7 +64,14 @@ export type RuleId =
  * `secondary`: offered when the node is already being dragged for another
  * reason, but never on its own a reason to make the node grabbable.
  */
-export type Candidate = { rule: RuleId; state: MathState; targetId?: string; secondary?: boolean };
+export type Candidate = {
+  rule: RuleId;
+  state: MathState;
+  targetId?: string;
+  secondary?: boolean;
+  /** A piece that stays where it is on screen while the move is previewed (the rest is laid out around it). */
+  stays?: string;
+};
 
 export type Rule = {
   id: RuleId;

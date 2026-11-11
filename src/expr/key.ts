@@ -39,7 +39,7 @@ export function key(e: Expr, ordered: Ordering = false): string {
 }
 
 export function stateKey(s: MathState, ordered: Ordering = false): string {
-  return s.sides.map((e) => key(e, ordered)).join(" = ");
+  return s.sides.map((e) => key(e, ordered)).join(` ${s.rel ?? "="} `);
 }
 
 /** n if this is a root drawn as ⁿ√ (x^(1/n) with the radical flag), else null. */
@@ -83,5 +83,5 @@ export function print(e: Expr): string {
 }
 
 export function printState(s: MathState): string {
-  return s.sides.map(print).join(" = ");
+  return s.sides.map(print).join(` ${s.rel ?? "="} `);
 }

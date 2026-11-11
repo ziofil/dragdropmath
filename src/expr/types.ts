@@ -33,5 +33,21 @@ export type Log = Base & { kind: "log"; base: Expr; arg: Expr };
 
 export type Expr = Num | Var | Neg | Sum | Prod | Frac | Pow | Const | Log;
 
-/** One side = a plain expression; two sides = an equation. */
-export type MathState = { sides: Expr[] };
+/**
+ * How the two sides compare. `<` and `>` (and `≤`, `≥`) are the same sign
+ * facing the other way — the renderer draws them so, and turns it round.
+ */
+export type Rel = "=" | "<" | ">" | "≤" | "≥";
+
+/** One side = a plain expression; two sides = an equation (or an inequality). */
+export type MathState = {
+  sides: Expr[];
+  /** The relation between two sides (default "="). */
+  rel?: Rel;
+  /**
+   * Previews only: draw the side holding node `id` shifted so that node's
+   * symbol starts at canvas x (a merge target staying put while it changes,
+   * until the drop moves it where it belongs). Ignored by keys and rules.
+   */
+  pin?: { id: string; x: number };
+};

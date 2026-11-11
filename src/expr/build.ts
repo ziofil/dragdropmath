@@ -1,4 +1,4 @@
-import type { Expr, MathState, Neg, Num } from "./types";
+import type { Expr, MathState, Neg, Num, Rel } from "./types";
 import { children, mapTree, withChildren } from "./tree";
 
 let counter = 0;
@@ -53,8 +53,22 @@ export function normalize(e: Expr): Expr {
 }
 
 export function normalizeState(s: MathState): MathState {
-  return { sides: s.sides.map(normalize) };
+  return { ...s, sides: s.sides.map(normalize) };
 }
+
+/** The relation of a state ("=" unless it says otherwise). */
+export const relOf = (s: MathState): Rel => s.rel ?? "=";
+
+/** The relation read the other way round / after multiplying both sides by −1: < ↔ >, ≤ ↔ ≥. */
+export function flipRel(r: Rel): Rel {
+  return ({ "=": "=", "<": ">", ">": "<", "≤": "≥", "≥": "≤" } as const)[r];
+}
+
+/** `s` with its relation turned round (an equation stays an equation). */
+export const withFlippedRel = (s: MathState, from: MathState): MathState => {
+  const r = flipRel(relOf(from));
+  return r === "=" ? s : { ...s, rel: r };
+};
 
 function normalizeNode(e: Expr): Expr {
   switch (e.kind) {

@@ -55,6 +55,12 @@ function lerpProblems(a: El, b: El, where: string): string[] {
       if (x && y && transformShape(x) !== transformShape(y)) problems.push(`${where}: transform ${x} vs ${y}`);
       continue;
     }
+    // Paths blend point by point (Dragology interpolates "d"), as long as they're drawn with the same commands.
+    if (k === "d" && typeof x === "string" && typeof y === "string") {
+      const cmds = (p: string) => p.replace(/[^a-zA-Z]/g, "");
+      if (cmds(x) !== cmds(y)) problems.push(`${where}: d "${x}" vs "${y}"`);
+      continue;
+    }
     if (typeof x === "string" && typeof y === "string" && x !== y && (isNaN(parseFloat(x)) || isNaN(parseFloat(y)))) {
       problems.push(`${where}: ${k} "${x}" vs "${y}"`);
     }

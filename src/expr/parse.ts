@@ -1,11 +1,11 @@
-import type { Expr, MathState } from "./types";
+import type { Expr, MathState, Rel } from "./types";
 import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable } from "./build";
 
 /**
  * Parses things like `3x + 2(x - 1) = 10`, `x^2/4`, `-a·b`.
  * Variables are single letters; juxtaposition means multiplication.
  *
- *   equation := expr ('=' expr)?
+ *   equation := expr (rel expr)?        rel := '=' | '<' | '>' | '<=' | '>=' | '≤' | '≥'
  *   expr     := ('-')? term (('+' | '-') term)*
  *   term     := unary (('*' | '·' | '/' | <juxtaposed>) unary)*
  *   unary    := '-' unary | power
@@ -19,10 +19,14 @@ import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable 
 export function parseState(src: string): MathState {
   const p = new Parser(src);
   const sides = [p.expr()];
-  if (p.eat("=")) sides.push(p.expr());
+  const rel = p.rel();
+  if (rel) sides.push(p.expr());
   p.end();
-  return { sides: sides.map(normalize) };
+  const state: MathState = { sides: sides.map(normalize) };
+  return rel && rel !== "=" ? { ...state, rel } : state;
 }
+
+const RELS: Record<string, Rel> = { "=": "=", "<": "<", ">": ">", "<=": "≤", ">=": "≥", "≤": "≤", "≥": "≥" };
 
 export function parseExpr(src: string): Expr {
   const s = parseState(src);
@@ -35,7 +39,7 @@ class Parser {
   private i = 0;
 
   constructor(private src: string) {
-    this.tokens = src.match(/sqrt|root|ln|log|exp|\d+|[a-zA-Z]|[-+*·×/^()=_√]/g) ?? [];
+    this.tokens = src.match(/sqrt|root|ln|log|exp|\d+|[a-zA-Z]|<=|>=|[-+*·×/^()=<>≤≥_√]/g) ?? [];
     if (this.tokens.join("") !== src.replace(/\s+/g, "")) {
       throw new Error(`Unexpected character in: ${src}`);
     }
@@ -51,6 +55,13 @@ class Parser {
 
   private expect(t: string) {
     if (!this.eat(t)) throw new Error(`Expected '${t}' at token ${this.i} in: ${this.src}`);
+  }
+
+  /** A relation sign, if one comes next. */
+  rel(): Rel | null {
+    const r = RELS[this.peek() ?? ""];
+    if (r) this.i++;
+    return r ?? null;
   }
 
   end() {
@@ -83,7 +94,9 @@ class Parser {
         acc.push(this.unary());
       } else break;
     }
-    return acc.length === 1 ? acc[0] : prod(acc);
+    // A 1 written as a factor (2·1) is meant to be seen: it stays until simplified.
+    const kept = acc.map((f) => (acc.length > 1 && f.kind === "num" && f.value === 1 ? { ...f, explicit: true } : f));
+    return kept.length === 1 ? kept[0] : prod(kept);
   }
 
   private unary(): Expr {

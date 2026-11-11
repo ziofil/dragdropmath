@@ -99,8 +99,11 @@ export function pullOutAim(rc: RenderCtx, ctx: DragInitContext<MathState>, dragg
 /** Factoring out: carry the factor out past the left end of its expression. */
 export function outInFront(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
   const { rc } = env;
-  let loc = locate(rc.state, draggedId);
-  while (loc && nodeAt(rc.state, loc).kind !== "sum") loc = loc.path.length ? { ...loc, path: loc.path.slice(0, -1) } : null;
+  // The sum it's taken out of: the nearest one *around* it (a bracket being taken out is a sum itself).
+  const up = (l: NonNullable<ReturnType<typeof locate>>) => (l.path.length ? { ...l, path: l.path.slice(0, -1) } : null);
+  const at = locate(rc.state, draggedId);
+  let loc = at && up(at);
+  while (loc && nodeAt(rc.state, loc).kind !== "sum") loc = up(loc);
   const first = loc && (nodeAt(rc.state, loc) as { terms: { id: string }[] }).terms[0].id;
   return aimAt(env, result, (ctx) => {
     const b = canvasBox(rc, ctx, first ?? draggedId);

@@ -21,18 +21,25 @@ const smallestPrime = (n: number) => {
 
 // ---------- rules ----------
 
-/** 6 → 2·3 (tap a number in a fraction to split it into factors). */
+/**
+ * 6 → 2·3 (tap a number to split it into factors) — to find what terms
+ * share (2x + 6 → 2x + 2·3 → 2(x + 3)) or what cancels in a fraction. Works
+ * on a number in a fraction, a term of a sum, or a factor of a product.
+ */
 export const splitNumber: Rule = {
   id: "split-number",
   name: "Split a number",
-  gesture: "Tap a number in a fraction to split it into two factors (6 → 2·3).",
+  gesture: "Tap a number to split it into two factors (6 → 2·3).",
   tap: true,
   apply(state, id) {
     const c = dragCtx(state, id);
     if (c?.node.kind !== "num") return [];
-    // Only inside a fraction: as its top or bottom, or a factor of one.
+    // In a fraction (its top or bottom, or a factor of one), a sum or a product —
+    // not alone on a side, in an exponent, or inside a log or root.
     const holder = c.parent?.kind === "prod" ? dragCtx(state, c.parent.id) : c;
-    if (holder?.parent?.kind !== "frac") return [];
+    const term = c.parent?.kind === "neg" ? dragCtx(state, c.parent.id) : c; // −6 is a term too
+    const inPlace = holder?.parent?.kind === "frac" || term?.parent?.kind === "sum" || c.parent?.kind === "prod";
+    if (!inPlace) return [];
     const n = c.node.value;
     const p = smallestPrime(n);
     if (n < 4 || p === n) return [];

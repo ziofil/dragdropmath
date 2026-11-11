@@ -31,6 +31,16 @@ describe("rules do what they say", () => {
     ["x·x^2", "merge-powers", "x", ["x^(1 + 2)"]], // otherwise the sum shows first
     ["a(b + c)", "distribute", "a", ["a*b + a*c"]],
     ["2(x - 1)", "distribute", "2", ["2*x - 2*1"]],
+    ["x^2 + 3x", "power-to-product", "2", ["x*x + 3*x"]], // a square is something times itself
+    ["(x + 2)^2", "power-to-product", "2", ["(x + 2)*(x + 2)"], 1], // the exponent (the first 2 is in the brackets)
+    ["x^3", "power-to-product", "3", ["x*x*x"]],
+    ["2^3", "power-to-product", "3", []], // numbers are worked out instead
+    ["x·x + 2x + 3x + 6", "factor-shared", "x", ["x*(x + 2) + 3*x + 6", "x*(x + 3) + 2*x + 6"]], // the first x, onto 2x or 3x
+    ["x(x + 2) + 3x + 3·2", "factor-shared", "3", ["x*(x + 2) + 3*(x + 2)"]],
+    ["x·x - 3x + 1", "factor-shared", "x", ["x*(x - 3) + 1"]],
+    ["2x + 6 + y", "split-number", "6", ["2*x + 2*3 + y"]],
+    ["x - 6", "split-number", "6", ["x - 2*3"]],
+    ["x = 6", "split-number", "6", []], // alone on a side: nothing to share it with
     ["-(x - 4)", "distribute-neg", "sign:-(x - 4)", ["-x + 4"]], // carry just the −…
     ["-(x - 4)", "distribute-neg", "-(x - 4)", []], // …not the whole thing
     ["ab + ac", "factor-out", "a", ["a*(b + c)"]],
@@ -79,7 +89,8 @@ describe("rules do what they say", () => {
     ["√(4x)", "pull-out-of-power", "x", ["√(4)*√(x)"]], // …or the x
     ["(2x)^3", "pull-out-of-power", "2", ["2^3*x^3"]],
     ["(x^2·y)^3", "pull-out-of-power", "y", ["x^(2*3)*y^3"]],
-    ["√x·√x", "merge-powers", "√(x)", ["x^(1/2 + 1/2)"], 1], // fractions in exponents
+    ["√x·√x", "merge-powers", "√(x)", ["x"], 1], // a root times itself: what's inside
+    ["√x·x^(1/2)", "merge-powers", "√(x)", ["x^(1/2 + 1/2)"]], // otherwise exponents add (fractions in exponents)
     ["√(x^2)", "power-of-power", "1/2", ["x^(2*(1/2))"]],
     ["√x = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x^(1/2) = 3", "root-across", "1/2", ["x = 3^2"]],
@@ -264,8 +275,8 @@ describe("what a press picks up", () => {
     ["3x + 2x", SHUFFLE, ["3*x", "2*x"]],
     // The 2 can multiply into the 3, so it's its own handle; the y isn't.
     ["3·y·2 + 1 + x", SHUFFLE, ["3*y*2", "3", "2", "1", "x"]],
-    // The 2 can cross the =.
-    ["2x = 8", ALL_RULES, ["2"]],
+    // The 2 can cross the =; each whole side can too (swapping the sides).
+    ["2x = 8", ALL_RULES, ["2*x", "2", "8"]],
     // QA #7: in x·2 (from distributing), the 2 can only swap places, so a press picks up the term.
     ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x", "x", "x*2", "-2*x"]],
     // With factoring unlocked, a common factor is its own handle.
@@ -295,23 +306,30 @@ describe("ln(eˣ) step by step", () => {
 });
 
 describe("√9 step by step", () => {
-  it("√9 → √(3·3) → √3·√3 → 3^(1/2 + 1/2) → 3^((1 + 1)/2) → 3^(2/2) → 3^1 → 3", () => {
-    const find = (state: MathState, text: string, occ = 0) => {
-      const n = state.sides.flatMap(allNodes).filter((m) => printState({ sides: [m] }) === text)[occ];
-      expect(n, `${text} in ${printState(state)}`).toBeDefined();
-      return n!.id;
-    };
-    const step = (state: MathState, rule: RuleId, text: string, occ = 0) => {
-      const [c] = RULES[rule].apply(state, find(state, text, occ));
-      expect(c, `${rule} on ${text} in ${printState(state)}`).toBeDefined();
-      return c.state;
-    };
+  const find = (state: MathState, text: string, occ = 0) => {
+    const n = state.sides.flatMap(allNodes).filter((m) => printState({ sides: [m] }) === text)[occ];
+    expect(n, `${text} in ${printState(state)}`).toBeDefined();
+    return n!.id;
+  };
+  const step = (state: MathState, rule: RuleId, text: string, occ = 0) => {
+    const [c] = RULES[rule].apply(state, find(state, text, occ));
+    expect(c, `${rule} on ${text} in ${printState(state)}`).toBeDefined();
+    return c.state;
+  };
+
+  it("√9 → √(3·3) → √3·√3 → 3 (a root dropped on the same root gives what's inside)", () => {
     let s = parseState("√9");
     s = step(s, "split-square", "9");
     expect(printState(s)).toBe("√(3*3)");
     s = step(s, "pull-out-of-power", "3");
     expect(printState(s)).toBe("√(3)*√(3)");
     s = step(s, "merge-powers", "√(3)", 1);
+    expect(printState(s)).toBe("3");
+  });
+
+  it("written as powers, the exponents add: 3^(1/2)·3^(1/2) → 3^(1/2 + 1/2) → 3^((1 + 1)/2) → 3^(2/2) → 3^1 → 3", () => {
+    let s = parseState("3^(1/2)·3^(1/2)");
+    s = step(s, "merge-powers", "3^(1/2)", 1);
     expect(printState(s)).toBe("3^(1/2 + 1/2)");
     s = step(s, "add-fractions", "1/2", 1);
     expect(printState(s)).toBe("3^((1 + 1)/2)");
@@ -337,7 +355,7 @@ describe("QA regressions", () => {
   });
 
   it("tapping x·1 tidies it to x, not 1x", () => {
-    // ·1 can't be typed (the parser drops it), so make it the way a learner would.
+    // Made the way a learner would: ln(e) → 1, kept visible.
     const tidy = (src: string, logId: (s: ReturnType<typeof parseState>) => string) => {
       let s = parseState(src);
       s = RULES["evaluate-log"].apply(s, logId(s))[0].state; // ln(e) → 1, kept visible
@@ -348,5 +366,37 @@ describe("QA regressions", () => {
     expect(tidy("x·ln(e)", lnE)).toEqual(["x"]);
     expect(tidy("ln(e)·x", lnE)).toEqual(["x"]);
     expect(tidy("x·2·ln(e)", lnE)).toEqual(["2*x"]);
+  });
+});
+
+describe("inequalities", () => {
+  /** Every result of dragging the piece printed `text` (or its minus, "sign:…"), through the real move list. */
+  const moves = (src: string, text: string) => {
+    const state = parseState(src);
+    const sign = text.startsWith("sign:");
+    const t = sign ? text.slice(5) : text;
+    const node = state.sides.flatMap(allNodes).find((n) => printState({ sides: [n] }) === t)!;
+    return candidatesFor(state, sign ? signId(node.id) : node.id, ALL_RULES).map((c) => printState(c.state));
+  };
+
+  it.each([
+    // Adding, subtracting, dividing by a positive number: the sign stays as it is.
+    ["x + 3 < 10", "3", "x < 10 - 3"],
+    ["2x ≥ 8", "2", "x ≥ 8/2"],
+    ["x/3 > 2", "3", "x > 2*3"],
+    // Multiplying both sides by −1: it turns round.
+    ["-x < 4", "sign:-x", "x > -4"],
+    ["-x ≤ -6", "sign:-x", "x ≥ 6"],
+    ["-x > 0", "sign:-x", "x < 0"],
+    ["4 ≥ -x", "sign:-x", "-4 ≤ x"],
+    // An equation stays an equation.
+    ["-x = 4", "sign:-x", "x = -4"],
+  ])("%s: carrying %s across gives %s", (src, what, expected) => {
+    expect(moves(src, what)).toContain(expected);
+  });
+
+  it("moves that don't cross keep the relation", () => {
+    expect(moves("3x + 2x < 10", "2*x")).toContain("5*x < 10");
+    expect(moves("2(x + 1) ≥ 4", "2")).toContain("2*x + 2*1 ≥ 4");
   });
 });

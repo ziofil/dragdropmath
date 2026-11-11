@@ -9,6 +9,8 @@ import type { DragEnv } from "./env";
 import { growLog, shedLog } from "./logs";
 import { flipSign } from "./sign";
 import { mergeApproach } from "./merge";
+import { turnRelation } from "./relation";
+import { relOf } from "../../expr/build";
 
 /**
  * A canvas whose pieces respond to the pointer under these rules: what can
@@ -87,6 +89,8 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
   else if (flips) moves = moves.with(flipSign(rc, flips.state));
 
   const merges = candidates.filter((c) => c.targetId);
-  if (merges.length === 0) return moves.withFloating();
-  return mergeApproach(moves.withFloating(), env, merges);
+  const spec = merges.length === 0 ? moves.withFloating() : mergeApproach(moves.withFloating(), env, merges, [...reorders.values()]);
+  // A move that turns an inequality round (the − of −x < 6 carried across): the sign turns as it's crossed.
+  const turns = candidates.some((c) => relOf(c.state) !== relOf(rc.state));
+  return turns ? spec.with(turnRelation(rc)) : spec;
 }

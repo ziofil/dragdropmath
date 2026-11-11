@@ -97,8 +97,15 @@ class CanvasErrorBoundary extends Component<
 
 /** A non-interactive rendering, e.g. for showing the goal. */
 export function StaticMath({ state, width = 720, height = 110 }: { state: MathState; width?: number; height?: number }) {
+  // Fitted to what's drawn, so a short expression isn't shrunk to fit an empty strip.
+  const ref = useRef<SVGSVGElement>(null);
+  const [view, setView] = useState(`0 0 ${width} ${height}`);
+  useLayoutEffect(() => {
+    const g = ref.current?.getBBox();
+    if (g && g.width > 0) setView(`${g.x - 8} 0 ${g.width + 16} ${height}`);
+  }, [state, width, height]);
   return (
-    <svg className="static-math" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="goal">
+    <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label="goal">
       {renderState({ state }, width, height)}
     </svg>
   );

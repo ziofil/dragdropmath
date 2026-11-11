@@ -5,12 +5,13 @@
  */
 import { describe, expect, it } from "vitest";
 import { Vec2 } from "dragology";
-import type { Expr, Log } from "../expr/types";
+import type { Expr, Log, MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, handles, isGrabbable, signId, signOwner, type RuleId } from "../rules";
-import { allPuzzles } from "../game/puzzles";
+import { allPuzzles, CHAPTERS, routinesFor } from "../game/puzzles";
+import { solution } from "../game/solver";
 import { MERGE_AT } from "./drag";
 import { ANCHOR, Grip, harness, show, type Harness } from "./testing/harness";
 
@@ -26,7 +27,7 @@ const AROUND = Array.from({ length: 41 * 21 }, (_, i) => Vec2((i % 41) * 8 - 160
 /** Drop piece `id` (grabbed at ANCHOR, fresh drag each time) with the pointer at `p`. */
 const dropAt = (h: Harness, id: string, p: Vec2) => new Grip(h, id, ANCHOR).at(p).state;
 
-function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
+function checkAllMovesReachable(src: string | MathState, rules: readonly RuleId[]) {
   const h = harness(src, rules);
   const { state } = h;
   const problems: string[] = [];
@@ -38,6 +39,7 @@ function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
     const origin = h.originOf(id);
     if (!origin) continue;
     const home = origin.add(ANCHOR);
+    const merges = candidatesFor(state, id, rules).filter((k) => k.targetId);
     for (const c of candidatesFor(state, id, rules)) {
       const label = `drag ${what} [${c.rule}] → ${show(c.state)}`;
       if (c.targetId) {
@@ -50,6 +52,15 @@ function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
         const myCentre = Vec2(me.lead + (me.w - me.lead) / 2, (me.desc - me.asc) / 2);
         // A target inside the piece (the brackets of −(x − 4)) is reached by carrying the sign onto it.
         const nested = !owner && allNodes(node).some((n) => n.id === c.targetId);
+        // Two moves on one target ((x + 1) onto (x + 1): multiply out or square):
+        // each is reached where it completes (see mergePlan), not by centring.
+        const shared = merges.some((m) => m !== c && m.targetId === c.targetId && m.rule !== c.rule);
+        if (shared) {
+          const grip = h.grab(id);
+          const got = grip.path(grip.start.add(h.endsUpOffset(id, c.targetId, c.rule)), 30).at(-1)!;
+          if (!same(got.state, c.state)) problems.push(`${label}: carried to where it completes, got ${got.drops}`);
+          continue;
+        }
         for (const fx of nested ? [0.02] : [0.1, 0.5, 0.9]) {
           const grab = Vec2(me.w * fx, -me.asc * 0.4);
           const grip = new Grip(h, id, grab);
@@ -68,7 +79,9 @@ function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
             const pc = f.pointer.sub(grab).x + me.lead + (me.w - me.lead) / 2;
             return (tc - pc) * dir > -((them.w - them.lead) / 2);
           };
-          const fled = nested ? undefined : frames.find((f) => !same(f.state, c.state) && !ahead(f));
+          // (Passing over another piece it can merge with, on the way, is fine: that's a merge, not a swap.)
+          const otherMerge = (f: (typeof frames)[number]) => merges.some((m) => same(m.state, f.state));
+          const fled = nested ? undefined : frames.find((f) => !same(f.state, c.state) && !otherMerge(f) && !ahead(f));
           if (fled) problems.push(`${label}: grabbed at ${fx * 100}%, target ended up behind the piece (preview ${fled.drops})`);
         }
         continue;
@@ -95,9 +108,24 @@ function checkAllMovesReachable(src: string, rules: readonly RuleId[]) {
 
 describe("moves inside small superscripts can be reached too", () => {
   // Mid-puzzle states the puzzle starts don't cover: combining exponents in place.
-  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)"])("%s", (src) => {
+  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)"])("%s", (src) => {
     expect(checkAllMovesReachable(src, ALL_RULES)).toEqual([]);
   });
+});
+
+describe("on the way to solving, every move can still be reached by dragging", () => {
+  // The starts are checked below; these are the states a learner passes
+  // through (as the moves and tidying make them, marks and all).
+  it.each(allPuzzles().map((r) => [r.puzzle.id, r] as const))("%s", (_, ref) => {
+    const ci = CHAPTERS.indexOf(ref.chapter);
+    const path = solution(parseState(ref.puzzle.start), parseState(ref.puzzle.goal), ref.rules, {
+      maxDepth: 10,
+      maxStates: 120_000,
+      routines: routinesFor(ci, () => false),
+    })!;
+    const problems = path.slice(1, -1).flatMap((s) => checkAllMovesReachable(s, ref.rules).map((p) => `at ${show(s)}: ${p}`));
+    expect(problems).toEqual([]);
+  }, 60_000);
 });
 
 describe("every allowed move can be reached by dragging", () => {
@@ -198,7 +226,6 @@ describe("holding the piece where it ends up shows the result exactly, recentred
   it.each([
     ["ln(2) + ln(x)", "ln(x)", "ln(2)"],
     ["ln(2) + ln(x)", "ln(2)", "ln(x)"],
-    ["3x + 2x + 1", "2*x", "3*x"],
   ])("%s: %s onto %s", (src, carried, onto) => {
     const h = harness(src);
     const me = h.find(carried);
@@ -245,7 +272,7 @@ describe("letting go gives what the picture shows", () => {
 });
 
 describe("a copy made by distributing is an ordinary piece afterwards", () => {
-  it("2(x + 3) → 2x + 2·3, then the copied 2 onto the 3: no 2 flies back into 2x", () => {
+  it("2(x + 3) → 2x + 2·3, then the 2 of 2·3 onto the 3: no 2 flies between it and 2x", () => {
     // Reach 2x + 2·3 the way a learner does, so the copy still carries its "made from" mark.
     let state = parseState("2(x + 3)");
     const first2 = state.sides.flatMap(allNodes).find((n) => n.kind === "num" && n.value === 2)!;
@@ -253,9 +280,11 @@ describe("a copy made by distributing is an ordinary piece afterwards", () => {
     expect(show(state)).toBe("2*x + 2*3");
     const h = harness(state);
     const twos = state.sides.flatMap(allNodes).filter((n): n is Expr => n.kind === "num" && n.value === 2);
-    const copy = twos.find((n) => n.from)!;
+    expect(twos.some((n) => n.from)).toBe(true);
+    // The 2 next to the 3 (the carried one: it went in on the far side), and the one in 2x (its copy).
+    const term = (n: Expr) => state.sides.flatMap(allNodes).find((p) => p.kind === "prod" && p.factors.includes(n))!;
+    const copy = twos.find((n) => show({ sides: [term(n)] }) === "2*3")!;
     const other = twos.find((n) => n !== copy)!;
-    expect(copy).toBeDefined();
 
     const stray: string[] = [];
     const grip = h.grab(copy.id, Vec2(6, -10));
@@ -313,5 +342,182 @@ describe("a term carried across = changes sign on the piece itself", () => {
       return g ? g.x - f.pointer.x : NaN;
     });
     for (const o of offsets) expect(o).toBeCloseTo(offsets[0], 1);
+  });
+});
+
+describe("the sign changes exactly while the cursor crosses the = sign", () => {
+  it.each(["x - 5 = 2", "2 = x - 5"])("%s", (src) => {
+    const h = harness(src);
+    const piece = h.find("-5");
+    const grip = h.grab(piece.id);
+    const rc = h.rc(piece.id);
+    const { left, right } = rc.eq!;
+    const fromLeft = h.state.sides[0].kind === "sum";
+    const [near, far] = fromLeft ? [left, right] : [right, left];
+    const at = (x: number) => grip.at(Vec2(x, grip.start.y)).keyOpacity("carry-sign", piece.id);
+    const step = fromLeft ? 1 : -1;
+    // Up to the near edge: still the old sign; at or past the far edge: fully the new one.
+    expect(at(near - step * 1)).toBe(0);
+    expect(at(near)).toBe(0);
+    expect(at((near + far) / 2)).toBeCloseTo(0.5);
+    expect(at(far)).toBe(1);
+    expect(at(far + step * 5)).toBe(1);
+  });
+});
+
+describe("a piece absorbed into its target: the target stays put and changes there", () => {
+  it.each([
+    // The 2 onto the 5: the 5 becomes 7 where it is; only letting go moves it (to where the 2 was).
+    ["x = 2 + 5", "2", "5", "x = 7", "7"],
+    ["3x + 2x + 1", "3*x", "2*x", "5*x + 1", "5"],
+    ["3x + 2x + 1", "2*x", "3*x", "5*x + 1", "5"],
+    ["4 + x + 1 + 2", "1", "2", "4 + x + 3", "3"],
+  ])("%s: %s onto %s", (src, carried, onto, merged, shows) => {
+    const h = harness(src);
+    const me = h.find(carried);
+    const target = h.find(onto);
+    const grip = h.grab(me.id);
+    const frames = grip.path(grip.centreOn(h.centreOf(target.id)), 30);
+    const home = h.originOf(target.id)!;
+    // All the way there, the target doesn't move...
+    const moved = frames.filter((f) => {
+      const at = f.positionOf(target.id);
+      return at && at.dist(home) > 0.5;
+    });
+    expect(moved.map((f) => `${f.drops} at ${f.positionOf(target.id)!.x.toFixed(1)}`)).toEqual([]);
+    // ...and on it, it has become the result in place, and letting go merges.
+    const last = frames[frames.length - 1];
+    expect(last.drops).toBe(merged);
+    // (Drawn where the target was: in its layer or one inside it, e.g. the 5 of 5x.)
+    const there = last.glyphs().filter((g) => g.opacity > 0.9 && Math.abs(g.x - home.x) < 6).map((g) => g.text);
+    expect(there).toContain(shows);
+  });
+});
+
+describe("multiplying brackets: the carried bracket goes in, a copy splits off", () => {
+  it.each([
+    // [start, carried, stays put (nth match), makes room (nth match), result]
+    ["(x + 4)(x - 1)", "x + 4", ["x", 1], ["1", 0], "(x + 4)*x - (x + 4)*1"],
+    // Carried in from the right, it goes after each term.
+    ["(x - 1)(x + 4)", "x + 4", ["1", 0], ["x", 0], "x*(x + 4) - 1*(x + 4)"],
+    ["(2x + 1)(x + 3)", "x + 3", ["1", 0], ["2", 0], "2*x*(x + 3) + 1*(x + 3)"],
+    ["2(x + 1)", "2", ["x", 0], ["1", 0], "2*x + 2*1"],
+  ] as const)("%s: carrying %s in, one term stays put, the other makes room", (src, what, [stays, si], [moves, mi], result) => {
+    const h = harness(src);
+    const piece = h.find(what);
+    const target = h.candidates(piece.id).find((c) => c.rule === "distribute")!;
+    expect(show(target.state)).toBe(result);
+    const still = h.find(stays, si);
+    const room = h.find(moves, mi);
+    const grip = h.grab(piece.id);
+    const frames = grip.path(grip.start.add(h.endsUpOffset(piece.id, target.targetId!)), 30);
+    const glyphX = (f: (typeof frames)[number], id: string) => f.glyphs().find((g) => g.layer === id)!.x;
+    const x0 = glyphX(frames[0], still.id);
+    const wrong: string[] = [];
+    let last = glyphX(frames[0], room.id);
+    const dir = Math.sign(glyphX(frames[30], room.id) - last);
+    frames.forEach((f, i) => {
+      // The near term doesn't budge…
+      if (Math.abs(glyphX(f, still.id) - x0) > 1) wrong.push(`step ${i}: ${stays} at ${glyphX(f, still.id).toFixed(0)}, was ${x0.toFixed(0)}`);
+      // …the far one only ever moves aside one way (no jumping back and forth).
+      const x = glyphX(f, room.id);
+      if ((x - last) * dir < -1) wrong.push(`step ${i}: ${moves} went back from ${last.toFixed(0)} to ${x.toFixed(0)}`);
+      last = x;
+    });
+    expect(wrong).toEqual([]);
+    expect(frames[30].drops).toBe(result);
+    expect(frames[30].blend).toBeGreaterThan(0.95);
+  });
+});
+
+describe("a bracket onto the same bracket", () => {
+  // (x + 1)(x + 1): carried to the first term inside, it multiplies out; carried right over its twin, it's a square.
+  it.each([
+    ["distribute", "(x + 1)*x + (x + 1)*1"],
+    ["merge-powers", "(x + 1)^2"],
+  ] as const)("%s: carried to where that move completes, it drops as %s", (rule, result) => {
+    const h = harness("(x + 1)(x + 1)");
+    const piece = h.find("x + 1", 0);
+    const target = h.candidates(piece.id).find((c) => c.rule === rule)!;
+    const grip = h.grab(piece.id);
+    const frames = grip.path(grip.start.add(h.endsUpOffset(piece.id, target.targetId!, rule)), 30);
+    expect(frames[30].drops).toBe(result);
+  });
+});
+
+describe("every merge in every puzzle animates sanely", () => {
+  // Carry each mergeable piece, like a hand, to where it ends up in the result.
+  it.each(allPuzzles().map((r) => [r.puzzle.id, r.puzzle.start, r.rules] as const))("%s: %s", (_, src, rules) => {
+    const h = harness(src, rules as RuleId[]);
+    const nodes = h.state.sides.flatMap(allNodes);
+    const problems: string[] = [];
+    for (const id of handles(h.state).filter((x) => isGrabbable(h.state, x, h.rules))) {
+      if (!nodes.some((n) => n.id === id)) continue; // a minus carried alone: covered elsewhere
+      for (const c of h.candidates(id).filter((k) => k.targetId)) {
+        const label = `${show({ sides: [nodes.find((n) => n.id === id)!] })} [${c.rule}] → ${show(c.state)}`;
+        const grip = h.grab(id);
+        const frames = grip.path(grip.start.add(h.endsUpOffset(id, c.targetId!, c.rule)), 24);
+        const end = frames[frames.length - 1];
+        // Letting go there gives the move, and the picture is the result.
+        if (!same(end.state, c.state)) problems.push(`${label}: ends up giving ${end.drops}`);
+        if (end.blend < 0.95) problems.push(`${label}: only ${end.blend.toFixed(2)} formed where it ends up`);
+        const resultNodes = new Map(c.state.sides.flatMap(allNodes).map((n) => [n.id, n]));
+        const firstSeen = new Set<string>();
+        let stay0: number | undefined;
+        // Unless the result ends up against the canvas edge: then it gives way rather than go off it.
+        const endGlyphs = end.glyphs().filter((g) => g.opacity > 0.5);
+        const atEdge = endGlyphs.some((g) => g.x < 20) || endGlyphs.some((g) => g.x > h.W - 40);
+        frames.forEach((f, i) => {
+          const gs = f.glyphs().filter((g) => g.opacity > 0.05);
+          // Nothing leaves the canvas.
+          const off = gs.find((g) => g.x < -2 || g.x > h.W);
+          if (off) problems.push(`${label}: step ${i}, "${off.text}" drawn off the canvas at ${off.x.toFixed(0)}`);
+          // What the move keeps in place doesn't budge.
+          if (c.stays && !atEdge) {
+            const x = gs.find((g) => g.layer === c.stays)?.x;
+            stay0 ??= x;
+            if (x !== undefined && stay0 !== undefined && Math.abs(x - stay0) > 1) problems.push(`${label}: step ${i}, the piece that should stay put moved ${(x - stay0).toFixed(0)}px`);
+          }
+          // Copies fly out of their source fully drawn: they never fade in where they end up.
+          for (const g of gs) {
+            if (firstSeen.has(g.layer)) continue;
+            firstSeen.add(g.layer);
+            if (i > 0 && resultNodes.get(g.layer)?.from && g.opacity < 0.9) problems.push(`${label}: step ${i}, the copied "${g.text}" fades in instead of flying out`);
+          }
+        });
+      }
+    }
+    expect([...new Set(problems)].slice(0, 8)).toEqual([]);
+  });
+});
+
+describe("an inequality sign turns round as a minus is carried across it", () => {
+  /** The relation sign's horizontal scale in a frame: 1 facing as drawn, −1 turned round. */
+  const facing = (f: { preview: { byId: Map<string, { element: { props: { transform?: string } } }> } }) => {
+    const m = f.preview.byId.get("rel")!.element.props.transform!.match(/scale\(\s*([-\d.eE]+)/);
+    return parseFloat(m![1]);
+  };
+  it.each([
+    ["-x < 4", "x > -4"],
+    ["-x ≤ -6", "x ≥ 6"],
+    ["4 ≥ -x", "-4 ≤ x"],
+  ])("%s → %s", (src, result) => {
+    const h = harness(src);
+    const owner = h.state.sides.flatMap(allNodes).find((n) => n.kind === "neg" && allNodes(h.state.sides[0]).includes(n) === src.startsWith("-"))!;
+    const grip = h.grab(signId(owner.id));
+    const rc = h.rc(signId(owner.id));
+    const across = (rc.eq!.right - rc.eq!.left) * (src.startsWith("-") ? 1 : -1);
+    const to = Vec2((src.startsWith("-") ? rc.eq!.right : rc.eq!.left) + across * 2, grip.start.y);
+    const frames = grip.path(to, 40);
+    // Relative to how it faces at the start (≥ is ≤ drawn facing the other way).
+    const s0 = facing(frames[0]);
+    expect(Math.abs(s0)).toBeCloseTo(1);
+    const scales = frames.map((f) => facing(f) / s0);
+    // It only ever turns one way: no flicking back and forth.
+    for (let i = 1; i < scales.length; i++) expect(scales[i]).toBeLessThanOrEqual(scales[i - 1] + 1e-9);
+    expect(scales[scales.length - 1]).toBeCloseTo(-1);
+    // Part-way through, it's edge-on: really turning, not swapping.
+    expect(scales.some((s) => Math.abs(s) < 0.3)).toBe(true);
+    expect(frames[frames.length - 1].drops).toBe(result);
   });
 });

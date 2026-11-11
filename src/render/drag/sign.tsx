@@ -2,7 +2,8 @@
  * flip-sign: a term carried across = changes sign on the way, and you see it
  * happen on the piece itself. Carrying −5 from x − 5 = 2, its − fades into a
  * + as it crosses the = (x = 2 + 5); carrying 5 from x + 5 = 2 (its + stays in
- * the row), a − fades in on it (x = 2 − 5). The sign waiting at the
+ * the row), a − fades in on it (x = 2 − 5). The change happens while the
+ * cursor crosses the = sign itself, from its near edge to its far edge. The sign waiting at the
  * destination stays hidden while dragging — the carried one is it; on
  * release the two crossfade in the same spot.
  */
@@ -20,7 +21,7 @@ import type { MathState } from "../../expr/types";
 import { allNodes, children } from "../../expr/tree";
 import { signId } from "../../rules";
 import { dragCtx } from "../../rules/types";
-import { carriedCentre, clamp01 } from "../geometry";
+import { clamp01 } from "../geometry";
 import { textWidth } from "../measure";
 import { fadeGlyphs, fadeGlyphsEverywhere, fadeLayer, layerChildren, redrawLayer, transplant } from "../preview";
 import { glyph, LEAD, type RenderCtx } from "../typeset";
@@ -29,9 +30,9 @@ class FlipSign extends Modifier<MathState> {
   readonly name = "flipSign";
   private readonly start: LayeredSvgx;
   private readonly negative: boolean;
-  private readonly eqX: number;
-  private readonly dir: number;
-  private readonly band: number;
+  /** The = sign's glyph, from the side the piece starts on to the other. */
+  private readonly from: number;
+  private readonly to: number;
   private readonly newSign: ReturnType<typeof glyph>;
   /** The sign waiting at the destination in the result: a "+" glyph in the row, or a new − (its layer and its own handle). */
   private readonly waiting: { glyphs?: Set<string>; layers: string[] };
@@ -49,11 +50,10 @@ class FlipSign extends Modifier<MathState> {
     this.start = renderStateReadOnly(ctx, rc.state);
     const c = dragCtx(rc.state, id)!;
     this.negative = c.node.kind === "neg";
-    this.eqX = rc.canvas!.W / 2; // the = stays put in the middle
-    this.dir = c.loc.side === 0 ? 1 : -1;
+    const eq = rc.eq!;
+    [this.from, this.to] = c.loc.side === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
     const size = rc.fontSizes!.get(id)!;
     const me = rc.sizes!.get(id)!;
-    this.band = 0.5 * (me.asc + me.desc);
     // The new sign sits where the row will draw it: right before the term's body.
     const L = this.negative ? LEAD.plus : LEAD.minus;
     const ch = L.glyph;
@@ -68,9 +68,8 @@ class FlipSign extends Modifier<MathState> {
 
   frame(frame: DragFrame) {
     const r = this.inner.run(frame);
-    // 0 on the home side, 1 past the =, crossfading over about a glyph's height around it.
-    const x = carriedCentre(this.rc, this.ctx, frame.pointer).x;
-    const t = (this.t = clamp01(0.5 + (this.dir * (x - this.eqX)) / (2 * this.band)));
+    // The sign changes while the cursor crosses the = itself: old sign before it, new sign past it.
+    const t = (this.t = clamp01((frame.pointer.x - this.from) / (this.to - this.from)));
     const onMove = r.dropState === this.result;
     return { ...r, preview: () => this.dress(r.preview(), t, onMove) };
   }
