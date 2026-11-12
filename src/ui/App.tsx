@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { chapterById, findPuzzle } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
-import { PuzzleView } from "./PuzzleView";
+import { exerciseOfPath, PuzzleView } from "./PuzzleView";
+import { SetMaker, SetRoute } from "./SetView";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
 
 function useHash() {
@@ -27,6 +28,9 @@ export function App() {
   // The learning path, with a chapter picked out (coming back from it).
   const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
   const at = chapterById(atId);
+  // Sets of one's own: making one, or one opened from its link (and its exercises).
+  const making = hash === "#/sets/new";
+  const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
 
@@ -42,8 +46,12 @@ export function App() {
           </button>
         )}
       </nav>
-      {ref ? (
-        <PuzzleView key={ref.puzzle.id} puzzleRef={ref} />
+      {making ? (
+        <SetMaker />
+      ) : setLink ? (
+        <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />
+      ) : ref ? (
+        <PuzzleView key={ref.puzzle.id} exercise={exerciseOfPath(ref)} />
       ) : chapter ? (
         <ChapterView key={chapter.id} chapter={chapter} />
       ) : (

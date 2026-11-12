@@ -10,10 +10,13 @@ import { DECOYS } from "./decoys";
 
 export type Guess = "right" | "wrong" | "revealed";
 
-/** The three answers for an exercise, in a fixed shuffled order (the same each visit), or null if it isn't guessed first. */
-export function choicesFor(puzzle: { id: string; goal: string }): string[] | null {
-  const decoys = DECOYS[puzzle.id];
-  if (!decoys) return null;
+/**
+ * The three answers for an exercise, in a fixed shuffled order (the same each
+ * visit), or null if it isn't guessed first. `decoys`: its two wrong answers
+ * (by default, the built-in ones).
+ */
+export function choicesFor(puzzle: { id: string; goal: string }, decoys: readonly string[] | undefined = DECOYS[puzzle.id]): string[] | null {
+  if (!decoys || decoys.length < 2) return null;
   const all = [puzzle.goal, ...decoys];
   // Where the right answer goes depends on the exercise, not on chance: stable across visits.
   const at = [...puzzle.id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % 3;

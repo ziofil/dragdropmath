@@ -7,7 +7,8 @@ Built on [Dragology](https://declarative-dragging.github.io/) (declarative dragg
 ```sh
 npm install
 npm run dev        # http://localhost:5173
-npm test           # parser, rule soundness, drag + animation checks, every exercise solvable
+npm test           # parser, rule soundness, drag + animation checks, every exercise solvable (~3 min)
+npm run test:quick # the same without the per-exercise drag and solvability checks (~10 s)
 npm run typecheck
 ```
 
@@ -38,4 +39,5 @@ Turn on debug mode with `?debug` in the address or Shift+D. Dragology's overlay 
 ## Adding things
 
 - **A move:** write a `Rule` in `src/rules/` (ask `roleOf` what the dragged piece is rather than climbing the tree) (shared shape helpers are in `shapes.ts`; give it a `feel` if it isn't reached by carrying the piece to where it lands) and register it in `src/rules/index.ts`. Add an example row to `rules.test.ts`. The soundness test then checks it against the corpus with random values. If it's a step people do by hand in many shapes, state the promise in `coverage.test.ts` ("every bottom can multiply both sides"), which checks it on every exercise and a list of awkward shapes — and that every term can still be picked up whole.
+- **Sets of one's own:** a teacher writes exercises in YAML (`#/sets/new`, format in `src/game/sets.ts`), they're checked (the goal follows from the start, wrong answers are really wrong, it can be solved with the chosen chapter's moves), and the whole set is packed into a link (`#/set/<code>`): nothing is stored online. Without `wrong:`, wrong answers for guessing are made from classic slips (`autoDecoys.ts`).
 - **An exercise:** add it to `src/game/puzzles.ts`. `npm test` fails if it can't be solved with the moves unlocked so far.

@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
-import { allPuzzles, CHAPTERS, type PuzzleRef } from "../game/puzzles";
+import { allPuzzles, CHAPTERS, type Chapter, type PuzzleRef } from "../game/puzzles";
+import type { RuleId } from "../rules";
 import { matchesGoal } from "../game/solver";
-import { badgeTier, loadSolved, markSolved } from "../game/scoring";
+import { badgeTier, loadSolved, markSolved, type Tier } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { choicesFor, loadGuesses, saveGuess } from "../game/guess";
 import { Badge, tierName } from "./Badge";
@@ -13,17 +14,63 @@ import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
 /** A state reached: by the learner's own move, or by tidying after it. */
 type Entry = { state: MathState; tidy?: true };
 
-export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
-  const { puzzle, chapter, rules } = pref;
+/** A link: where to, and what it says. */
+type Link = { href: string; text: string };
+
+/**
+ * Everything the exercise screen needs, wherever the exercise comes from: the
+ * learning path (exerciseOfPath) or a set of one's own (ui/SetView.tsx).
+ */
+export type Exercise = {
+  puzzle: { id: string; start: string; goal: string; hint?: string };
+  rules: readonly RuleId[];
+  /** "6.26", "3". */
+  label: string;
+  /** The three answers to guess between, or null to solve it straight away. */
+  choices: string[] | null;
+  back: Link[];
+  prev?: Link;
+  next?: Link;
+  /** Once solved: where to go on. */
+  onward: Link;
+  /** The chapter whose badge solving it counts towards. */
+  badgeOf?: Chapter;
+};
+
+/** A learning-path exercise, as the exercise screen shows it. */
+export function exerciseOfPath(pref: PuzzleRef): Exercise {
+  const { puzzle, chapter } = pref;
+  const all = allPuzzles();
+  const at = all.findIndex((r) => r.puzzle.id === puzzle.id);
+  const [prev, next] = [all[at - 1], all[at + 1]];
+  return {
+    puzzle,
+    rules: pref.rules,
+    label: pref.label,
+    choices: choicesFor(puzzle),
+    back: [
+      { href: `#/at/${chapter.id}`, text: "← Learning path" },
+      { href: `#/c/${chapter.id}`, text: `${chapter.title}: lesson` },
+    ],
+    prev: prev && { href: `#/p/${prev.puzzle.id}`, text: prev.label },
+    next: next && { href: `#/p/${next.puzzle.id}`, text: next.label },
+    onward: next && next.chapter === chapter ? { href: `#/p/${next.puzzle.id}`, text: "Next exercise →" } : { href: `#/at/${chapter.id}`, text: "Back to the learning path" },
+    badgeOf: chapter,
+  };
+}
+
+export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
+  const { puzzle, rules, badgeOf: chapter } = ex;
   const start = useMemo(() => parseState(puzzle.start), [puzzle]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
+    if (!chapter) return { before: 0 as Tier, after: 0 as Tier };
     const before = loadSolved();
     return { before: badgeTier(chapter, before), after: badgeTier(chapter, new Set([...before, puzzle.id])) };
   }, [chapter, puzzle.id]);
   // Guess first (the chapter's last exercises): pick what it becomes before solving it.
-  const choices = useMemo(() => choicesFor(puzzle), [puzzle]);
+  const choices = ex.choices;
   const [guessed, setGuessed] = useState<string | null>(null);
   const guessedBefore = useMemo(() => loadGuesses()[puzzle.id] !== undefined, [puzzle.id]);
   const pick = (choice: string) => {
@@ -86,33 +133,29 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
     setHistory([{ state: start }]);
   };
 
-  const all = allPuzzles();
-  const at = all.findIndex((r) => r.puzzle.id === puzzle.id);
-  const prev = all[at - 1];
-  const next = all[at + 1];
+  const { prev, next } = ex;
 
   return (
     <main className="puzzle">
       <header className="puzzle-head">
         <span className="back-links">
-          <a href={`#/at/${chapter.id}`} className="back">
-            ← Learning path
-          </a>
-          <a href={`#/c/${chapter.id}`} className="back back-lesson">
-            {chapter.title}: lesson
-          </a>
+          {ex.back.map((b, i) => (
+            <a key={b.href} href={b.href} className={i === 0 ? "back" : "back back-lesson"}>
+              {b.text}
+            </a>
+          ))}
         </span>
         <nav className="ex-nav" aria-label="Exercises">
           {prev ? (
-            <a href={`#/p/${prev.puzzle.id}`} className="ex-step" title={`Previous: exercise ${prev.label}`} aria-label={`Previous exercise (${prev.label})`}>
+            <a href={prev.href} className="ex-step" title={`Previous: exercise ${prev.text}`} aria-label={`Previous exercise (${prev.text})`}>
               ‹
             </a>
           ) : (
             <span className="ex-step" aria-hidden="true" />
           )}
-          <div className="title">Exercise {pref.label}</div>
+          <div className="title">Exercise {ex.label}</div>
           {next ? (
-            <a href={`#/p/${next.puzzle.id}`} className="ex-step" title={`Next: exercise ${next.label}`} aria-label={`Next exercise (${next.label})`}>
+            <a href={next.href} className="ex-step" title={`Next: exercise ${next.text}`} aria-label={`Next exercise (${next.text})`}>
               ›
             </a>
           ) : (
@@ -194,21 +237,15 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
       {solved && (
         <section className="result" role="status">
           <div className="result-name">Solved!</div>
-          {tiers.after > tiers.before && (
+          {chapter && tiers.after > tiers.before && (
             <div className="new-badge">
               <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
               {tierName(tiers.after)} badge for {chapter.title}!
             </div>
           )}
-          {next && next.chapter === chapter ? (
-            <a className="button primary" href={`#/p/${next.puzzle.id}`}>
-              Next exercise →
-            </a>
-          ) : (
-            <a className="button primary" href={`#/at/${chapter.id}`}>
-              Back to the learning path
-            </a>
-          )}
+          <a className="button primary" href={ex.onward.href}>
+            {ex.onward.text}
+          </a>
         </section>
       )}
     </main>
