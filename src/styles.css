@@ -291,6 +291,9 @@ span.ex-step {
 }
 .canvas svg {
   display: block;
+  /* Its own compositing layer: WebKit (iOS) otherwise leaves trails of
+     moving pieces behind, repainting only part of an SVG drawn outside its box. */
+  transform: translateZ(0);
 }
 .canvas-error {
   display: flex;

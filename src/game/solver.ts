@@ -1,16 +1,16 @@
 import type { MathState } from "../expr/types";
 import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
-import { stateKey } from "../expr/key";
+import { stateKey, type Ordering } from "../expr/key";
 import { candidatesFor, forgetMoves, handles, isGrabbable, tapFor, type RuleId } from "../rules";
 
 /**
- * Has the learner reached the goal? "Make it look like" means the terms must
- * be in the goal's order (7 + x is not x + 7). Factor order is free (tidying
- * writes y·6 as 6y anyway), and an equation may be either way round (7 = x is
- * x = 7), an inequality too, read the other way (3 < x is x > 3).
+ * Has the learner reached the goal? "Make it look like" means it must look
+ * like it: terms in the goal's order (7 + x is not x + 7), and factors too
+ * (a·6b is not 6ab). An equation may be either way round (7 = x is x = 7),
+ * an inequality too, read the other way (3 < x is x > 3).
  */
-export function matchesGoal(state: MathState, goal: MathState, ordered = true): boolean {
+export function matchesGoal(state: MathState, goal: MathState, ordered: Ordering = "exact"): boolean {
   if (stateKey(state, ordered) === stateKey(goal, ordered)) return true;
   // Several rows (x = 2; y = 3): the same rows, in any order, each either way round.
   if (state.sides.length > 2 || goal.sides.length > 2) {
@@ -45,7 +45,7 @@ export function moves(state: MathState, rules: readonly RuleId[]): MathState[] {
 /** Every state one move away, tidied as the app tidies it. */
 export const neighbours = (state: MathState, rules: readonly RuleId[]): MathState[] => moves(state, rules).map((n) => tidied(state, n));
 
-type SearchOpts = { ordered?: boolean; maxDepth?: number; maxStates?: number };
+type SearchOpts = { ordered?: Ordering; maxDepth?: number; maxStates?: number };
 
 /**
  * A shortest way from start to goal (breadth-first): every state on the way,
@@ -56,7 +56,7 @@ export function solution(
   start: MathState,
   goal: MathState,
   rules: readonly RuleId[],
-  { ordered = true, maxDepth = 8, maxStates = 50_000 }: SearchOpts = {},
+  { ordered = "exact", maxDepth = 8, maxStates = 50_000 }: SearchOpts = {},
 ): MathState[] | null {
   let frontier = [start];
   const parent = new Map<MathState, MathState>();

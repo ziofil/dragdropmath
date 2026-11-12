@@ -52,10 +52,16 @@ export function rowSlot(
       const state = reorders.get(slot) ?? stay;
       const dx = Math.max(0, left - c.x, c.x - right);
       const dy = Math.max(0, Math.abs(c.y - midY) - h / 2);
-      return { preview: previewOf(reorders.has(slot) ? slot : -1, state), dropState: state, gap: Math.hypot(dx, dy) };
+      const at = reorders.has(slot) ? slot : -1;
+      // Naming the slot lets the engine animate a change of slot: the
+      // neighbours slide out of the way instead of jumping there.
+      return { preview: previewOf(at, state), dropState: state, gap: Math.hypot(dx, dy), activePath: `slot${at}`, activePathTransition: SLIDE };
     };
   });
 }
+
+/** How the rest of the expression moves when the preview changes under a drag: a short slide. */
+export const SLIDE = { easing: "cubic-out", duration: 160 } as const;
 
 /** Distance from the carried symbol's centre to `aim` (computed once per drag). */
 function aimAt({ rc, d }: DragEnv, result: MathState, aim: (ctx: DragInitContext<MathState>) => Vec2): DragSpec<MathState> {

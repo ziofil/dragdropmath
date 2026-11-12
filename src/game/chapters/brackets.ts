@@ -20,7 +20,7 @@ export const brackets: Chapter = {
           },
           {
             say: "Now drop the x onto the (x + 1) next to it.",
-            then: "x·x + 1·x + (x + 1)·2",
+            then: "x·x + 1·x + 2(x + 1)",
           },
           { say: "And the 2 onto its (x + 1).", then: "x·x + x + 2x + 2·1" },
         ],

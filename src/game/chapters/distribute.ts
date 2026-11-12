@@ -55,7 +55,7 @@ export const distribute: Chapter = {
         start: "x(x + 2)",
         steps: [
           { say: "Drop the x onto the brackets.", then: "x·x + x·2" },
-          { say: "Drop one x onto the other.", then: "x^2 + x·2" },
+          { say: "Drop one x onto the other.", then: "x^2 + 2x" },
         ],
       },
     },

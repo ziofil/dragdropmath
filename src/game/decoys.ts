@@ -224,24 +224,24 @@ export const DECOYS: Record<string, [string, string]> = {
     "a + 2b + c + 5", // dropped the minus on c
   ],
   c25: [
-    "6x + 7y + 10", // dropped the minus in front of y·3
-    "5x + y + 10", // added 2 and 3 instead of multiplying
+    "3ab + 2a + 2b", // took − ab as + ab
+    "ab + 4a + 2b", // took − a as + a
   ],
   c26: [
-    "4a + 3b + 12", // 2b − 5b taken as +3b
-    "4a - 3b + 7", // added 3 and 4 instead of multiplying
+    "10x + y", // took − 5x as + 5x
+    "7y", // took − 3y as + 3y
   ],
   c28: [
-    "3a + b - c + 6", // took − a as + a
-    "a + b - c + 5", // added 2 and 3 instead of multiplying
+    "5xy + 3x", // took − 2xy as + 2xy
+    "xy + 7x", // took − 2x as + 2x
   ],
   c29: [
-    "4x + 7y + 9", // dropped the minus in front of y·2
-    "4x + 3y + 6", // added 3 and 3 instead of multiplying
+    "5a + 2b + 8c", // took − 3c as + 3c
+    "4a + 2b + 2c", // didn't count the lone a as 1a
   ],
   c30: [
-    "7x + y - z + 6", // took − x as + x
-    "4x + y - z + 6", // added 2 and 3 instead of multiplying
+    "7x^2 + 3x - 5", // took − 2x² as + 2x²
+    "3x^2 + 3x + 5", // lost the minus on 5
   ],
 
   // distribute

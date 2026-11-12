@@ -4,7 +4,7 @@ import { children, locate } from "../../expr/tree";
 import { feelOf, movesFor, operatorTap, type Candidate, type RuleId } from "../../rules";
 import { dragCtx } from "../../rules/types";
 import type { RenderCtx } from "../typeset";
-import { below, farEnd, landing, outInFront, pullOut, rowSlot } from "./carry";
+import { below, farEnd, landing, outInFront, pullOut, rowSlot, SLIDE } from "./carry";
 import type { DragEnv } from "./env";
 import { growLog, shedLog } from "./logs";
 import { flipSign } from "./sign";
@@ -96,6 +96,9 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
   if (grows) moves = moves.with(growLog(rc, grows.state));
   else if (sheds.length) moves = moves.with(shedLog(rc, sheds));
   else if (flips) moves = moves.with(flipSign(rc, flips.state));
+
+  // Switching between moves (staying in the row, across the =, out in front …) slides too.
+  moves = moves.withBranchTransition(SLIDE);
 
   const merges = candidates.filter((c) => c.targetId);
   // A side swap reorders the equation like a reorder does a row: it mustn't jump past a forming merge either.
