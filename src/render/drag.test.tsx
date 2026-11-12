@@ -9,7 +9,7 @@ import type { Expr, Log } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, signId } from "../rules";
-import { allPuzzles } from "../game/puzzles";
+import { allPuzzles, findPuzzle } from "../game/puzzles";
 import { solutionVia } from "../game/solver";
 import { MERGE_AT } from "./drag";
 import { ANCHOR, harness, show } from "./testing/harness";
@@ -398,5 +398,15 @@ describe("substituting: the letter there turns into the value in place (11.6)", 
         const there = Math.abs(d.y - at.y) < 20 && Math.abs(d.x - (at.x - h.sizeOf(target.id).w / 2)) < 20;
         expect(home || there, `a 4 at ${d.x.toFixed(0)},${d.y.toFixed(0)}`).toBe(true);
       }
+  });
+});
+
+describe("a square carried across = turns into ½ (13.30)", () => {
+  it("(2^x)^2 = 48/3: the ² can be carried across, by hand", () => {
+    const r = findPuzzle("l30")!;
+    const h = harness("(2^x)^2 = 48/3", r.rules);
+    const square = (h.state.sides[0] as Extract<Expr, { kind: "pow" }>).exp;
+    expect(candidatesFor(h.state, square.id, r.rules).map((c) => show(c.state))).toContain("2^x = (48/3)^(1/2)");
+    expect(checkAllMovesReachable(h.state, r.rules)).toEqual([]);
   });
 });

@@ -104,6 +104,8 @@ describe("rules do what they say", () => {
     ["x^(1/2) = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x = 3^2", "root-across", "2", ["x^(1/2) = 3"]], // and back again
     ["x^2 = 9", "root-across", "2", []], // not when it could lose x = −3
+    ["(2^x)^2 = 16", "root-across", "2", ["2^x = 16^(1/2)"], 1], // 2ˣ is never negative: nothing lost (13.30)
+    ["(x - 1)^2 = 16", "root-across", "2", []],
     ["√x = -3", "root-across", "1/2", []], // no solution: squaring would invent x = 9 (QA #4)
     ["x^(1/2) = y", "root-across", "1/2", []], // y might be negative
     ["-x = 0", "move-sign", "sign:-x", ["x = 0"]], // the − is absorbed by the 0 (QA #5)

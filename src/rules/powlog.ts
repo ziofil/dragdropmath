@@ -453,6 +453,12 @@ export const splitSquare: Rule = {
  * Backwards only when the squared thing is a positive number, so no solution
  * is lost (x² = 9 → x = 9^(1/2) would drop x = −3).
  */
+/** Positive whatever its letters are: a positive number, or a power of one (2ˣ, eˣ). */
+function alwaysPositive(e: Expr): boolean {
+  if (isConstant(e)) return evaluate(e, {}) > 0;
+  return e.kind === "pow" && !e.radical && alwaysPositive(e.base);
+}
+
 export const rootAcross: Rule = {
   id: "root-across",
   name: "Undo a root (or square) across =",
@@ -473,8 +479,10 @@ export const rootAcross: Rule = {
       sides[other] = pow(sides[other], num(n, c.node.id));
       return [{ rule: "root-across", state: setSides(sides) }];
     }
-    if (c.node.kind === "num" && c.node.value >= 2 && isConstant(P.base) && evaluate(P.base, {}) > 0) {
-      // …and the carried ² turns back into a ½ exponent.
+    if (c.node.kind === "num" && c.node.value >= 2 && alwaysPositive(P.base)) {
+      // …and the carried ² turns back into a ½ exponent: (2ˣ)² = 16 → 2ˣ = 16^(1/2).
+      // Only when what's squared can't be negative, or a solution would be
+      // lost (x² = 9 → x = 3, but x = −3 too).
       sides[c.loc.side] = P.base;
       sides[other] = pow(sides[other], frac(num(1), num(c.node.value), c.node.id));
       return [{ rule: "root-across", state: setSides(sides) }];
