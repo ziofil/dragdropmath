@@ -85,16 +85,15 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
     setGuessed(choice);
     saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
   };
-  // The answers to show as answered: this visit's pick, or an earlier one.
-  const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
-  const shownPick = guessed ?? before.pick ?? (before.guess === "right" ? puzzle.goal : null);
-  const answered = choices !== null && (guessed !== null || earlier);
-  // Skip the guess: just show what it becomes (no star).
+  // Skip predicting: the right answer turns green, as if picked (no star, nothing said).
   const [revealed, setRevealed] = useState(false);
   const reveal = () => {
     setRevealed(true);
     saveGuess(puzzle.id, "revealed");
   };
+  // The answers to show as answered: this visit's pick or reveal, or an earlier one.
+  const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
+  const shownPick = guessed ?? (revealed ? null : (before.pick ?? (before.guess === "right" ? puzzle.goal : null)));
   const mustGuess = choices !== null && !guessedBefore && guessed === null && !revealed;
   const [history, setHistory] = useState<Entry[]>([{ state: start }]);
   const [showHint, setShowHint] = useState(false);
@@ -176,34 +175,11 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
         </nav>
       </header>
 
-      {mustGuess ? (
+      {choices ? (
+        // Predicting first: one panel that stays put. Picking (or revealing)
+        // colours the cards in place; the green one is the goal.
         <section className="goal guess">
-          <span className="goal-label">{t().guessPrompt}</span>
-          <div className="choices">
-            {choices.map((c) => (
-              <button key={c} className="choice" onClick={() => pick(c)}>
-                <StaticMath state={parseState(c)} height={90} />
-              </button>
-            ))}
-          </div>
-          <button className="reveal" onClick={reveal}>
-            {t().reveal}
-          </button>
-        </section>
-      ) : (
-        <section className={`goal ${answered ? "guess" : ""}`}>
-          {earlier && (
-            <div className={`guess-result ${before.guess}`}>
-              {before.guess === "right" ? (
-                <>
-                  <span className="star" aria-hidden="true">★</span> {t().guessedBeforeRight}
-                </>
-              ) : (
-                <>{t().guessedBeforeWrong(!!before.pick)}</>
-              )}
-            </div>
-          )}
-          {guessed !== null && choices && (
+          {guessed !== null ? (
             <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
               {guessed === puzzle.goal ? (
                 <>
@@ -213,8 +189,28 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
                 <>{t().notQuite}</>
               )}
             </div>
+          ) : earlier ? (
+            <div className={`guess-result ${before.guess}`}>
+              {before.guess === "right" ? (
+                <>
+                  <span className="star" aria-hidden="true">★</span> {t().guessedBeforeRight}
+                </>
+              ) : (
+                <>{t().guessedBeforeWrong(!!before.pick)}</>
+              )}
+            </div>
+          ) : (
+            <span className="goal-label">{t().guessPrompt}</span>
           )}
-          {answered && (
+          {mustGuess ? (
+            <div className="choices">
+              {choices.map((c) => (
+                <button key={c} className="choice" onClick={() => pick(c)}>
+                  <StaticMath state={parseState(c)} height={90} />
+                </button>
+              ))}
+            </div>
+          ) : (
             // The three answers stay: the right one green, a wrong pick red.
             <div className="choices answered">
               {choices.map((c) => (
@@ -224,6 +220,15 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
               ))}
             </div>
           )}
+          {/* Once answered it keeps its place, so nothing below moves. */}
+          <button className={`reveal ${mustGuess ? "" : "is-spent"}`} onClick={reveal} disabled={!mustGuess} aria-hidden={!mustGuess}>
+            {t().reveal}
+          </button>
+          {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
+          {ex.positiveLetters && <p className="assume">{t().positiveLetters}</p>}
+        </section>
+      ) : (
+        <section className="goal">
           {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
           <span className="goal-label">{t().makeItLookLike}</span>
           <StaticMath state={goal} />

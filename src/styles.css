@@ -971,6 +971,8 @@ span.ex-step {
 .goal.guess .goal-label,
 .guess-result {
   flex-basis: 100%;
+  /* The same height, so the answers don't shift when one replaces the other. */
+  line-height: 1.5rem;
 }
 /* After the guess, the goal below the answers gets a row of its own. */
 .goal.guess > .static-math {
@@ -1034,6 +1036,9 @@ button.choice:focus-visible {
 
 .reveal {
   margin-left: auto;
+}
+.reveal.is-spent {
+  visibility: hidden;
 }
 /* Guessing first: the board shows the start, but waits for the guess. */
 .still {
