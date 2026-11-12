@@ -58,13 +58,16 @@ export function App() {
           <a href="#/sets/new" className="top-link" aria-current={making ? "page" : undefined}>
             {t().makeExercises}
           </a>
-          <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
-            {LANGS.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.name}
-              </option>
-            ))}
-          </select>
+          {/* The select's own arrow sits too far right: it's drawn by .lang-wrap instead. */}
+          <span className="lang-wrap">
+            <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
+              {LANGS.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </span>
         </span>
       </nav>
       {making ? (

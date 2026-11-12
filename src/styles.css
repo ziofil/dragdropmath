@@ -1060,6 +1060,7 @@ button.choice:focus-visible {
   gap: 12px;
 }
 .topbar .top-link {
+  white-space: nowrap;
   color: var(--ink-soft);
   font-size: 0.95rem;
   padding: 6px 12px;
@@ -1071,24 +1072,55 @@ button.choice:focus-visible {
   color: var(--ink);
   border-color: var(--accent);
 }
+.lang-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.lang-wrap::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid var(--ink-soft);
+  border-bottom: 1.5px solid var(--ink-soft);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
 .lang-pick {
+  appearance: none;
+  -webkit-appearance: none;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  line-height: inherit;
   color: var(--ink-soft);
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 6px 28px 6px 12px;
   cursor: pointer;
 }
 @media (max-width: 480px) {
+  /* Where the buttons' words are long, they go on a line of their own. */
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
   .top-right {
     gap: 6px;
+    margin-left: auto;
   }
-  .topbar .top-link,
-  .lang-pick {
+  .topbar .top-link {
     font-size: 0.8rem;
     padding: 4px 8px;
+  }
+  .lang-pick {
+    font-size: 0.8rem;
+    padding: 5px 22px 5px 8px;
+  }
+  .lang-wrap::after {
+    right: 10px;
   }
 }
 .lang-pick:hover,
