@@ -2,8 +2,8 @@ import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, type 
 import { stateKey } from "../expr/key";
 import { DraggableRenderer, type Draggable } from "dragology";
 import type { MathState } from "../expr/types";
-import type { RuleId } from "../rules";
-import { renderState } from "../render/typeset";
+import { movesFor, operatorTap, type RuleId } from "../rules";
+import { OP_TAP, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
 import { thumbLift } from "../render/drag/lift";
 import { DebugPanel, noteRecording, useDebug } from "./debug";
@@ -47,6 +47,13 @@ export function MathCanvas({
         ),
     [rules, width.value, height, debug],
   );
+  // Taps go by position (see useTaps).
+  const now = useRef({ state, rules });
+  now.current = { state, rules };
+  useTaps(width.ref, (x, y) => {
+    const next = tapAt(width.ref.current, now.current.state, now.current.rules, x, y);
+    if (next) onDropRef.current(next);
+  });
   return (
     <>
       <div ref={width.ref} className="canvas">
@@ -126,6 +133,60 @@ export function StaticMath({ state, width = 720, height = 110 }: { state: MathSt
       {renderState({ state }, width, height)}
     </svg>
   );
+}
+
+/**
+ * A tap is a press let go within a few pixels of where it started. Browsers
+ * send no click for a press on a piece that can be dragged (the drag engine
+ * takes the press), so taps are watched here instead, whatever is pressed.
+ */
+function useTaps(ref: RefObject<HTMLElement | null>, onTap: (x: number, y: number) => void) {
+  const handler = useRef(onTap);
+  handler.current = onTap;
+  useEffect(() => {
+    let down: PointerEvent | null = null;
+    const onDown = (e: PointerEvent) => {
+      if (e.isTrusted && ref.current?.contains(e.target as Node)) down = e;
+    };
+    const onUp = (e: PointerEvent) => {
+      const d = down;
+      down = null;
+      if (!d || !e.isTrusted || e.pointerId !== d.pointerId) return;
+      // After the drag engine has let go of the press too: a press on a piece
+      // it could drag ends with it putting back the state it started from.
+      if (Math.hypot(e.clientX - d.clientX, e.clientY - d.clientY) <= 5) setTimeout(() => handler.current(d.clientX, d.clientY), 0);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("pointerup", onUp, true);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("pointerup", onUp, true);
+    };
+  }, [ref]);
+}
+
+/**
+ * What tapping at a point gives: a + or − there that works its sum out
+ * (3 + 4 → 7), else the innermost piece there with a tap (the smallest whose
+ * box holds the point: 2·3 → 6, √9 → 3, 6 → 2·3), or null.
+ */
+function tapAt(canvas: HTMLElement | null, state: MathState, rules: readonly RuleId[], x: number, y: number): MathState | null {
+  if (!canvas) return null;
+  const inside = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom ? r.width * r.height : null;
+  };
+  for (const el of canvas.querySelectorAll(`svg [${OP_TAP}]`)) {
+    if (inside(el) !== null) return operatorTap(state, el.getAttribute(OP_TAP)!, rules);
+  }
+  const moves = movesFor(state, rules);
+  let best: { id: string; area: number } | null = null;
+  for (const g of canvas.querySelectorAll("svg g[id]")) {
+    if (!moves.tappable(g.id)) continue;
+    const area = inside(g);
+    if (area !== null && (!best || area < best.area)) best = { id: g.id, area };
+  }
+  return best ? (moves.tap(best.id)?.state ?? null) : null;
 }
 
 /**

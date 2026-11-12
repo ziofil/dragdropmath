@@ -103,7 +103,6 @@ function layoutNode(
   // but dragging it carries what encloses it (the whole √4).
   const grabbable = interactive && rc.interact!.grabbable(e.id);
   const tap = interactive ? rc.interact!.tap(e.id) : null;
-  const onTap = tap && rc.interact!.onTap;
   rc.sizes?.set(e.id, { w, asc, desc, lead: leadW });
   rc.fontSizes?.set(e.id, size);
   // A minus sign is also its own piece (see signHandle); every layout records its size.
@@ -121,21 +120,11 @@ function layoutNode(
         // (One class for every interactive piece: Dragology can't blend between
         // two different class names; cursor and pointer-events it switches.)
         className={grabbable || tap ? "m-node" : undefined}
-        style={
-          interactive
-            ? { pointerEvents: grabbable || tap ? "auto" : "none", cursor: grabbable ? "grab" : tap ? "pointer" : undefined }
-            : undefined
-        }
+        // Only pieces you can carry take presses. One you can only tap lets
+        // them through to what it's part of, so 2√x is grabbed anywhere; taps
+        // are found by position instead (ui/MathCanvas.tsx, tapAt).
+        style={interactive ? { pointerEvents: grabbable ? "auto" : "none", cursor: grabbable ? "grab" : undefined } : undefined}
         {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(e.id), dragologyZIndex: rc.draggedId === e.id ? "/1" : false } : {})}
-        // The innermost piece with a tap takes it (not also the term around it).
-        onClick={
-          onTap
-            ? (ev: { stopPropagation(): void }) => {
-                ev.stopPropagation();
-                onTap(tap);
-              }
-            : undefined
-        }
         // Copies (from distributing) fly out of their source fully visible —
         // every part of them, grabbable or not (the 2 and x of a copied 2x too).
         dragologyEmergeFrom={e.from}
@@ -163,18 +152,17 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   const asc = ASC * size;
   const desc = DESC * size;
   const grabbable = rc.interact!.grabbable(id);
-  // 10 − 4: tapping the − works it out (dragging still carries the term).
-  const onTap = opTapOf(rc, negId);
+  // 10 − 4: tapping the − works it out (dragging still carries the term). Found by position (OP_TAP).
+  const tappable = hasOpTap(rc, negId);
   return (
     <g
       id={id}
       transform={translate(L.left * size, 0)}
-      className={grabbable || onTap ? "m-node" : undefined}
-      style={{ pointerEvents: grabbable || onTap ? "auto" : "none", cursor: onTap && !grabbable ? "pointer" : undefined }}
-      onClick={onTap ? (ev: { stopPropagation(): void }) => (ev.stopPropagation(), onTap()) : undefined}
+      className={grabbable ? "m-node" : undefined}
+      style={{ pointerEvents: grabbable ? "auto" : "none" }}
       {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false } : {})}
     >
-      <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
+      <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" {...(tappable ? { [OP_TAP]: negId } : {})} />
       {glyph("t-sign", L.glyph, 0, 0, size, "m-op")}
     </g>
   );
@@ -215,10 +203,11 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
 
 /**
  * An operator glyph that belongs to its row (keyed by the item after it, so
- * it moves with that slot). `onTap`: tapping it works the operation out
- * (3 + 4 → 7), like tapping a product of numbers.
+ * it moves with that slot). `tapFor`: the term whose + this is, when tapping
+ * it works the operation out (3 + 4 → 7): marked for the canvas to find
+ * (OP_TAP), as taps go by position.
  */
-function separator(kind: "plus" | "dot", key: string, size: number, onTap?: (() => void) | null): Box {
+function separator(kind: "plus" | "dot", key: string, size: number, tapFor?: string | null): Box {
   const L = LEAD[kind];
   const w = (L.left + L.right) * size + textWidth(L.glyph, size);
   return {
@@ -226,9 +215,9 @@ function separator(kind: "plus" | "dot", key: string, size: number, onTap?: (() 
     asc: ASC * size,
     desc: DESC * size,
     draw: (x, y) =>
-      onTap ? (
-        <g dragologyKey={`tap-${key}`} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={(ev: { stopPropagation(): void }) => (ev.stopPropagation(), onTap())}>
-          <rect dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" />
+      tapFor ? (
+        <g dragologyKey={`tap-${key}`}>
+          <rect dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" {...{ [OP_TAP]: tapFor }} />
           {glyph(key, L.glyph, x + L.left * size, y, size, "m-op")}
         </g>
       ) : (
@@ -237,12 +226,11 @@ function separator(kind: "plus" | "dot", key: string, size: number, onTap?: (() 
   };
 }
 
-/** Tapping the + or − in front of term `termId`, if it does something. */
-function opTapOf(rc: RenderCtx, termId: string): (() => void) | null {
-  const next = rc.interact?.opTap(termId);
-  const apply = rc.interact?.onTap;
-  return next && apply ? () => apply(next) : null;
-}
+/** Does tapping the + or − in front of term `termId` do something? */
+const hasOpTap = (rc: RenderCtx, termId: string) => !!rc.interact?.opTap(termId);
+
+/** Marks the + or − whose tap works out the sum in front of a term (the term's id). */
+export const OP_TAP = "data-optap";
 
 function withParens(c: Content, size: number, parens: boolean): Content {
   if (!parens) return c;
@@ -318,7 +306,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.terms.flatMap((t, i) =>
           i > 0 && t.kind !== "neg"
-            ? [separator("plus", `plus-${t.id}`, size, opTapOf(rc, t.id)), layoutNode(t, rc, size, null)]
+            ? [separator("plus", `plus-${t.id}`, size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null)]
             : [layoutNode(t, rc, size, i > 0 ? "minus" : null)],
         ),
       );
