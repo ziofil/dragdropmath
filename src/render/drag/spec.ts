@@ -1,10 +1,10 @@
 import type { DragSpec, DragSpecBuilder } from "dragology";
 import type { MathState } from "../../expr/types";
 import { children, locate } from "../../expr/tree";
-import { feelOf, movesFor, type Candidate, type RuleId } from "../../rules";
+import { feelOf, movesFor, operatorTap, type Candidate, type RuleId } from "../../rules";
 import { dragCtx } from "../../rules/types";
 import type { RenderCtx } from "../typeset";
-import { below, landing, outInFront, pullOut, rowSlot } from "./carry";
+import { below, farEnd, landing, outInFront, pullOut, rowSlot } from "./carry";
 import type { DragEnv } from "./env";
 import { growLog, shedLog } from "./logs";
 import { flipSign } from "./sign";
@@ -32,6 +32,7 @@ export function interactive(opts: {
     draggedId,
     interact: {
       grabbable: moves.grabbable,
+      opTap: (termId) => operatorTap(state, termId, rules),
       tap: (id) => moves.tap(id)?.state ?? null,
       onTap,
       drag: (id) => {
@@ -82,6 +83,8 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
           ? pullOut(env, id, c.state)
           : how === "below"
             ? below(env, id, c.state)
+            : how === "far-end"
+              ? farEnd(env, id, c.state)
             : landing(env, id, c.state);
     }),
   ]);

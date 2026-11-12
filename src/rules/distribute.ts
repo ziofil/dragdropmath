@@ -2,10 +2,10 @@ import type { Expr } from "../expr/types";
 import { cloneFresh, neg, negate, num, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { adopt, dragCtx, replaceIn, signOwner, without, type Candidate, type Rule } from "./types";
-import { nodeAt, parentLoc, type Loc } from "../expr/tree";
+import { nodeAt, type Loc } from "../expr/tree";
+import { roleOf } from "./view";
 import type { MathState } from "../expr/types";
 import { restKey, splitCoef } from "./monomial";
-import type { DragCtx } from "./types";
 import { visibleOne } from "./shapes";
 
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
@@ -86,18 +86,14 @@ export const distributeNeg: Rule = {
 };
 
 /**
- * Climb from a dragged factor to the sum whose term it's in:
- * node → [prod] → [neg] → sum. Null if it isn't a factor of a term.
+ * The sum whose term a dragged factor is in (see view.ts): the term itself,
+ * its body under a minus, or a factor of it — not part of a fraction.
  */
-function termOf(state: MathState, c: DragCtx): { termLoc: Loc; sumLoc: Loc; s: Extract<Expr, { kind: "sum" }>; index: number } | null {
-  let termLoc = c.loc;
-  let up = parentLoc(termLoc);
-  if (up && nodeAt(state, up).kind === "prod") [termLoc, up] = [up, parentLoc(up)];
-  if (up && nodeAt(state, up).kind === "neg") [termLoc, up] = [up, parentLoc(up)];
-  if (!up) return null;
-  const s = nodeAt(state, up);
-  if (s.kind !== "sum") return null;
-  return { termLoc, sumLoc: up, s, index: termLoc.path[termLoc.path.length - 1] };
+function termOf(state: MathState, id: string): { sumLoc: Loc; s: Extract<Expr, { kind: "sum" }>; index: number } | null {
+  const r = roleOf(state, id);
+  if (!r || r.term.frac || !(r.part === "term" || r.part === "body" || r.part === "top-factor")) return null;
+  const s = nodeAt(state, r.holderLoc);
+  return s.kind === "sum" ? { sumLoc: r.holderLoc, s, index: r.index } : null;
 }
 
 /**
@@ -131,7 +127,7 @@ export const factorOut: Rule = {
   gesture: "Pull a factor that's in every term out in front of brackets.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    const at = c && termOf(state, c);
+    const at = c && termOf(state, id);
     if (!c || !at) return [];
     const f = c.node;
     const stripped = at.s.terms.map((t, i) => stripFactor(t, f, i === at.index));
@@ -152,7 +148,7 @@ export const factorShared: Rule = {
   gesture: "Drop a factor onto another term that has it too — the two terms share it: x·x + 2x → x(x + 2).",
   apply(state, id) {
     const c = dragCtx(state, id);
-    const at = c && termOf(state, c);
+    const at = c && termOf(state, id);
     if (!c || !at || at.s.terms.length < 3) return []; // two terms: that's factoring out the whole thing
     const f = c.node;
     const terms = at.s.terms;

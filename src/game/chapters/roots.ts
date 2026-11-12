@@ -114,8 +114,8 @@ export const roots: Chapter = {
     { id: "r25", start: "√(x + 1)/2 = 2", goal: "x = 15" },
     { id: "r26", start: "√12 + √3", goal: "3√3" },
     { id: "r27", start: "√(2x + 5) = 3", goal: "x = 2" },
-    { id: "r28", start: "2√(x - 1) = 6", goal: "x = 10" },
+    { id: "r28", start: "2√(x - 1) = 6", goal: "x = 10", via: ["x - 1 = (6/2)^2"] },
     { id: "r29", start: "√(8x^2)", goal: "2x√2", hint: "Split the 8 to find a perfect square inside." },
-    { id: "r30", start: "√(9x^2) = 6", goal: "x = 2" },
+    { id: "r30", start: "√(9x^2) = 6", goal: "x = 2", via: ["x^(2/2) = 6/√(9)", "x = 6/(√(3)*√(3))"] },
   ],
 };

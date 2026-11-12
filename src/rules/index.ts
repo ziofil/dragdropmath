@@ -2,6 +2,7 @@ import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { allNodes, withoutFrom } from "../expr/tree";
 import { dragCtx, type Candidate, type Feel, type Rule, type RuleId } from "./types";
+import { roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
 import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
@@ -113,6 +114,22 @@ export function isGrabbable(state: MathState, id: string, enabled: readonly Rule
   return movesFor(state, enabled).grabbable(id);
 }
 
+
+/**
+ * Tapping the + or − in front of a term, when it and the term before it are
+ * plain numbers (3 + 4, 10 − 4): they're added up, as dropping one on the
+ * other would (like tapping 2·3 multiplies it out).
+ */
+export function operatorTap(state: MathState, termId: string, enabled: readonly RuleId[]): MathState | null {
+  if (!enabled.includes("combine")) return null;
+  const c = dragCtx(state, termId);
+  if (c?.parent?.kind !== "sum" || c.index === 0) return null;
+  const plain = (e: { kind: string; arg?: { kind: string } }) => e.kind === "num" || (e.kind === "neg" && e.arg?.kind === "num");
+  const prev = c.parent.terms[c.index - 1];
+  if (!plain(c.node) || !plain(prev)) return null;
+  return movesFor(state, enabled).drag(termId).find((k) => k.rule === "combine" && k.targetId === prev.id)?.state ?? null;
+}
+
 /** How a candidate's move feels to drag (see Feel). */
 export const feelOf = (c: Candidate): Feel => RULES[c.rule].feel ?? {};
 
@@ -192,11 +209,28 @@ function rootParts(state: MathState): Set<string> {
 }
 
 /**
- * Swapping factors inside a product (2x → x·2) changes nothing that matters,
- * so on its own it doesn't make a symbol worth grabbing.
+ * Swapping factors inside a term that has company (2x in 2x + 3x → x·2)
+ * changes nothing that matters, and a press there must pick up the term (to
+ * combine it, carry it across, …): on its own it doesn't make a symbol worth
+ * grabbing. Elsewhere — a product that is a whole side or expression,
+ * (x²y)³·y⁻¹ — there's no bigger term to pick up, and a factor you can see
+ * should come along when you grab it.
  */
 export function isCosmetic(state: MathState, draggedId: string, c: Candidate): boolean {
-  return feelOf(c).carry === "reorder" && dragCtx(state, draggedId)?.parent?.kind === "prod";
+  if (feelOf(c).carry !== "reorder") return false;
+  const P = dragCtx(state, draggedId)?.parent;
+  if (P?.kind !== "prod") return false;
+  const r = roleOf(state, P.id);
+  return r !== null && r.terms.length >= 2;
+}
+
+/**
+ * Let go of what was worked out for a state. The app keeps a handful of
+ * states; a search keeps thousands, and their move lists (each move a whole
+ * expression) would otherwise live as long as the states do.
+ */
+export function forgetMoves(state: MathState): void {
+  cache.delete(state);
 }
 
 /** The state without "copied from" marks from earlier moves (keeps the object when there are none). */

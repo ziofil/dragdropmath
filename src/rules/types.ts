@@ -99,13 +99,15 @@ export type Rule = {
  * - `landing` (default): carry it to where the piece itself will sit afterwards.
  * - `pull-out`: pull it out past the edge of its container (ln( ), √( ), a fraction's top).
  * - `out-in-front`: carry it out past the left end of its expression (factoring out).
+ * - `far-end`: carry it past the far end of the other side (swapping the sides:
+ *   just over the = is where a term alone on its side lands when it crosses as a term).
  *
  * `wears` adds a visual on the way: `grow-log` (the piece picks up a faint
  * copy of its log as it leaves, ln(2x) → ln 2 + ln x), `shed-log` (a carried
  * log fades its ln( ) as it nears the log it joins), `flip-sign` (a term
  * carried across = crossfades its sign, − ↔ +, as it crosses).
  */
-export type Feel = { carry?: "reorder" | "landing" | "pull-out" | "out-in-front" | "below"; wears?: "grow-log" | "shed-log" | "flip-sign" };
+export type Feel = { carry?: "reorder" | "landing" | "pull-out" | "out-in-front" | "far-end" | "below"; wears?: "grow-log" | "shed-log" | "flip-sign" };
 
 /** Everything a rule typically wants to know about the dragged node. */
 export type DragCtx = {

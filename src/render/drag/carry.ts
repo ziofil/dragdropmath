@@ -122,3 +122,18 @@ export function outInFront(env: DragEnv, draggedId: string, result: MathState): 
     return b.symLeft.sub(Vec2(0.9 * b.h, 0));
   });
 }
+
+/**
+ * Swapping the sides: carry a whole side past the far end of the other side
+ * (past its left end, coming from the right, and the other way round).
+ */
+export function farEnd(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
+  const { rc } = env;
+  const at = locate(rc.state, draggedId)!;
+  const other = rc.state.sides[at.side ^ 1];
+  return aimAt(env, result, (ctx) => {
+    const b = canvasBox(rc, ctx, other.id);
+    // At the far edge itself: past it, a long side would put the aim out of reach.
+    return at.side % 2 === 1 ? b.symLeft : b.symRight;
+  });
+}

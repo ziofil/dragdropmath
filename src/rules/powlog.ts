@@ -4,6 +4,8 @@ import { key, rootOrder } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
 import { dragCtx, isEquation, partner, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
 import { asPower, fractionPart, raise as raiseTo } from "./shapes";
+import { roleOf, viewTerm } from "./view";
+import { nodeAt } from "../expr/tree";
 
 // ---------- helpers ----------
 
@@ -283,14 +285,15 @@ export const combineLogs: Rule = {
   apply(state, id) {
     // Works whichever one is carried: ln 12 − ln 3 → ln(12/3) either way. The
     // + log's inside goes on top; the result takes the target's place.
-    const c = dragCtx(state, id);
-    if (c?.parent?.kind !== "sum") return [];
-    const T = c.node;
-    const mine = T.kind === "neg" ? T.arg : T;
+    const r = roleOf(state, id);
+    if (r?.part !== "term" || r.terms.length < 2) return [];
+    const c = { index: r.index, parent: nodeAt(state, r.holderLoc), parentLoc: r.holderLoc };
+    const T = r.node;
+    const mine = r.term.body;
     if (mine.kind !== "log") return [];
-    const terms = c.parent.terms;
+    const terms = r.terms;
     return terms.flatMap((U, j): Candidate[] => {
-      const theirs = U.kind === "neg" ? U.arg : U;
+      const theirs = viewTerm(U).body;
       if (j === c.index || theirs.kind !== "log" || key(theirs.base) !== key(mine.base)) return [];
       if (key(theirs.arg) === key(mine.arg)) return []; // that's combining like terms (2 ln x)
       const myNeg = T.kind === "neg";

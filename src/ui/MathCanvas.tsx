@@ -99,6 +99,18 @@ class CanvasErrorBoundary extends Component<
   }
 }
 
+/** The board as the canvas draws it (same size and place), but nothing can be moved yet: guessing first. */
+export function StillBoard({ state, height = 220 }: { state: MathState; height?: number }) {
+  const width = useContainerWidth();
+  return (
+    <div ref={width.ref} className="canvas">
+      <svg width={width.value} height={height} role="img" aria-label="the exercise">
+        {renderState({ state }, width.value, height)}
+      </svg>
+    </div>
+  );
+}
+
 /** A non-interactive rendering, e.g. for showing the goal. */
 export function StaticMath({ state, width = 720, height = 110 }: { state: MathState; width?: number; height?: number }) {
   // Fitted to what's drawn, so a short expression isn't shrunk to fit an empty strip.

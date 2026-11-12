@@ -44,6 +44,8 @@ export type RenderCtx = {
 export type Interact = {
   /** Can this piece (a node id, or a minus sign's handle) be picked up by itself? */
   grabbable(id: string): boolean;
+  /** What tapping the + or − in front of this term does (two plain numbers: add them up). */
+  opTap(termId: string): MathState | null;
   /** What tapping it gives, if anything. */
   tap(id: string): MathState | null;
   /** Apply a tap's result. */
@@ -161,12 +163,15 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   const asc = ASC * size;
   const desc = DESC * size;
   const grabbable = rc.interact!.grabbable(id);
+  // 10 − 4: tapping the − works it out (dragging still carries the term).
+  const onTap = opTapOf(rc, negId);
   return (
     <g
       id={id}
       transform={translate(L.left * size, 0)}
-      className={grabbable ? "m-node" : undefined}
-      style={{ pointerEvents: grabbable ? "auto" : "none" }}
+      className={grabbable || onTap ? "m-node" : undefined}
+      style={{ pointerEvents: grabbable || onTap ? "auto" : "none", cursor: onTap && !grabbable ? "pointer" : undefined }}
+      onClick={onTap ? (ev: { stopPropagation(): void }) => (ev.stopPropagation(), onTap()) : undefined}
       {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false } : {})}
     >
       <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
@@ -208,15 +213,35 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
   };
 }
 
-/** An operator glyph that belongs to its row (keyed by the item after it, so it moves with that slot). */
-function separator(kind: "plus" | "dot", key: string, size: number): Box {
+/**
+ * An operator glyph that belongs to its row (keyed by the item after it, so
+ * it moves with that slot). `onTap`: tapping it works the operation out
+ * (3 + 4 → 7), like tapping a product of numbers.
+ */
+function separator(kind: "plus" | "dot", key: string, size: number, onTap?: (() => void) | null): Box {
   const L = LEAD[kind];
+  const w = (L.left + L.right) * size + textWidth(L.glyph, size);
   return {
-    w: (L.left + L.right) * size + textWidth(L.glyph, size),
+    w,
     asc: ASC * size,
     desc: DESC * size,
-    draw: (x, y) => glyph(key, L.glyph, x + L.left * size, y, size, "m-op"),
+    draw: (x, y) =>
+      onTap ? (
+        <g dragologyKey={`tap-${key}`} style={{ pointerEvents: "auto", cursor: "pointer" }} onClick={(ev: { stopPropagation(): void }) => (ev.stopPropagation(), onTap())}>
+          <rect dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" />
+          {glyph(key, L.glyph, x + L.left * size, y, size, "m-op")}
+        </g>
+      ) : (
+        glyph(key, L.glyph, x + L.left * size, y, size, "m-op")
+      ),
   };
+}
+
+/** Tapping the + or − in front of term `termId`, if it does something. */
+function opTapOf(rc: RenderCtx, termId: string): (() => void) | null {
+  const next = rc.interact?.opTap(termId);
+  const apply = rc.interact?.onTap;
+  return next && apply ? () => apply(next) : null;
 }
 
 function withParens(c: Content, size: number, parens: boolean): Content {
@@ -293,7 +318,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.terms.flatMap((t, i) =>
           i > 0 && t.kind !== "neg"
-            ? [separator("plus", `plus-${t.id}`, size), layoutNode(t, rc, size, null)]
+            ? [separator("plus", `plus-${t.id}`, size, opTapOf(rc, t.id)), layoutNode(t, rc, size, null)]
             : [layoutNode(t, rc, size, i > 0 ? "minus" : null)],
         ),
       );

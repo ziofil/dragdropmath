@@ -126,8 +126,8 @@ export const explog: Chapter = {
     { id: "l25", start: "log_3(n) + log_3(9) = 3", goal: "n = 3" },
     { id: "l26", start: "2·3^x = 54", goal: "x = 3", hint: "Get the power on its own first." },
     { id: "l27", start: "(2^x)^2 = 64", goal: "x = 3" },
-    { id: "l28", start: "2^y·2^3 = 32", goal: "y = 2" },
+    { id: "l28", start: "2^y·2^3 = 32", goal: "y = 2", via: ["y = log_2(32) - 3"] },
     { id: "l29", start: "2^(2x - 1) = 8", goal: "x = 2" },
-    { id: "l30", start: "3(2^x)^2 = 48", goal: "x = 2" },
+    { id: "l30", start: "3(2^x)^2 = 48", goal: "x = 2", via: ["2*x = log_2(48/3)", "x = log_2(2^4)/2"] },
   ],
 };

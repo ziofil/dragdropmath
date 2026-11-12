@@ -2,7 +2,7 @@ import type { MathState } from "../expr/types";
 import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
 import { stateKey } from "../expr/key";
-import { candidatesFor, handles, isGrabbable, tapFor, type RuleId } from "../rules";
+import { candidatesFor, forgetMoves, handles, isGrabbable, tapFor, type RuleId } from "../rules";
 
 /**
  * Has the learner reached the goal? "Make it look like" means the terms must
@@ -70,7 +70,10 @@ export function solution(
     }
     const next: MathState[] = [];
     for (const s of frontier) {
-      for (const n of neighbours(s, rules)) {
+      const ns = neighbours(s, rules);
+      // Expanded: its moves aren't needed again (the search keeps the state itself, for the path).
+      forgetMoves(s);
+      for (const n of ns) {
         const k = stateKey(n, ordered);
         if (seen.has(k)) continue;
         seen.add(k);

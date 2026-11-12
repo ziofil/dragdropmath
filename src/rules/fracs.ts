@@ -1,16 +1,15 @@
 import type { Expr } from "../expr/types";
 import { cloneFresh, frac, neg, num, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
-import { allNodes } from "../expr/tree";
+import { allNodes, nodeAt } from "../expr/tree";
+import { roleOf, viewTerm } from "./view";
 import { dragCtx, replaceIn, without, type Candidate, type Rule } from "./types";
 import { fractionPart, timesVisible } from "./shapes";
 
 // ---------- helpers ----------
 
-/** A term of a sum seen as sign × body (−x/3 → −, x/3). */
-function signed(t: Expr): { negative: boolean; body: Expr } {
-  return t.kind === "neg" ? { negative: true, body: t.arg } : { negative: false, body: t };
-}
+/** A term of a sum seen as sign × body (−x/3 → −, x/3); see view.ts. */
+const signed = viewTerm;
 
 const withSign = (negative: boolean, e: Expr, id?: string) => (negative ? neg(e, id) : e);
 
@@ -37,8 +36,9 @@ export const splitNumber: Rule = {
     // In a fraction (its top or bottom, or a factor of one), a sum or a product —
     // not alone on a side, in an exponent, or inside a log or root.
     const holder = c.parent?.kind === "prod" ? dragCtx(state, c.parent.id) : c;
-    const term = c.parent?.kind === "neg" ? dragCtx(state, c.parent.id) : c; // −6 is a term too
-    const inPlace = holder?.parent?.kind === "frac" || term?.parent?.kind === "sum" || c.parent?.kind === "prod";
+    const r = roleOf(state, id);
+    const termOfSum = (r?.part === "term" || r?.part === "body") && r.terms.length >= 2; // −6 is a term too
+    const inPlace = holder?.parent?.kind === "frac" || termOfSum || c.parent?.kind === "prod";
     if (!inPlace) return [];
     const n = c.node.value;
     const p = smallestPrime(n);
@@ -60,11 +60,12 @@ export const expandFraction: Rule = {
     const c = dragCtx(state, id);
     const part = c && fractionPart(state, c);
     if (!c || !part?.inDen) return [];
-    const d = { F: part.F, c: dragCtx(state, part.F.id)! };
     // The fraction it came from must be a term (or −term) of a sum.
-    const termCtx = d.c.parent?.kind === "neg" ? dragCtx(state, d.c.parent.id)! : d.c;
-    if (termCtx.parent?.kind !== "sum") return [];
-    const terms = termCtx.parent.terms;
+    const r = roleOf(state, part.F.id);
+    if (!r || (r.part !== "term" && r.part !== "body") || r.terms.length < 2) return [];
+    const S = nodeAt(state, r.holderLoc);
+    const termCtx = { index: r.index, parent: S, parentLoc: r.holderLoc };
+    const terms = r.terms;
     const f = c.node;
     return terms.flatMap((T, j): Candidate[] => {
       if (j === termCtx.index) return [];
@@ -93,12 +94,13 @@ export const addFractions: Rule = {
   name: "Add fractions",
   gesture: "Drop a fraction onto another with the same denominator — the tops add up.",
   apply(state, id) {
-    const c = dragCtx(state, id);
-    if (c?.parent?.kind !== "sum") return [];
+    const r = roleOf(state, id);
+    if (r?.part !== "term" || r.terms.length < 2) return [];
+    const c = { node: r.node, index: r.index, parent: nodeAt(state, r.holderLoc), parentLoc: r.holderLoc };
     const mine = signed(c.node);
     if (mine.body.kind !== "frac") return [];
     const myFrac = mine.body;
-    const terms = c.parent.terms;
+    const terms = r.terms;
     return terms.flatMap((U, j): Candidate[] => {
       if (j === c.index) return [];
       const theirs = signed(U);

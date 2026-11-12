@@ -1,7 +1,8 @@
 import type { Expr } from "../expr/types";
 import { num, pow, sum } from "../expr/build";
 import { key } from "../expr/key";
-import { allNodes, withChildren } from "../expr/tree";
+import { allNodes, nodeAt, withChildren } from "../expr/tree";
+import { roleOf } from "./view";
 import { buildTerm, restKey, splitCoef } from "./monomial";
 import { asPower } from "./shapes";
 import { adopt, dragCtx, moveItem, replaceIn, siblings, without, type Candidate, type Rule } from "./types";
@@ -35,23 +36,17 @@ export const combine: Rule = {
   name: "Combine like terms",
   gesture: "Drop a term onto a term of the same kind to add them up.",
   apply(state, id) {
-    const node = dragCtx(state, id);
-    if (!node) return [];
     // Holding the symbol part of a term (the ln(x) in 3ln(x) or −ln(x)) and
     // dropping it on a like term combines the whole terms. Marked secondary:
     // it never makes that symbol grabbable by itself, so in 3x + 2x a press on
     // the x still picks up the term.
-    let c = node;
-    let secondary = false;
-    if (c.parent?.kind === "prod" && splitCoef(c.parent).rest.length === 1 && splitCoef(c.parent).rest[0].id === c.node.id) {
-      c = dragCtx(state, c.parent.id)!;
-      secondary = true;
-    }
-    if (c.parent?.kind === "neg") {
-      c = dragCtx(state, c.parent.id)!;
-      secondary = secondary || c.node.id !== node.node.id;
-    }
-    if (c.parent?.kind !== "sum") return [];
+    const r = roleOf(state, id);
+    if (!r || r.term.frac || r.terms.length < 2) return [];
+    const sole = r.part === "top-factor" && splitCoef(r.term.body).rest.length === 1 && splitCoef(r.term.body).rest[0].id === id;
+    if (!(r.part === "term" || r.part === "body" || sole)) return [];
+    const secondary = r.part !== "term";
+    const S = nodeAt(state, r.holderLoc) as Extract<Expr, { kind: "sum" }>;
+    const c = { node: r.term.term, index: r.index, parent: S, parentLoc: r.holderLoc };
     const terms = c.parent.terms;
     const mine = splitCoef(c.node);
     const isFraction = (m: { rest: Expr[] }) => m.rest.length === 1 && m.rest[0].kind === "frac";

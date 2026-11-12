@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
+import { findPuzzle } from "../game/puzzles";
 import { evaluate, variables } from "../expr/eval";
 import { allNodes } from "../expr/tree";
-import { ALL_RULES, candidatesFor, handles, isGrabbable, RULES, signId, signOwner, tapFor, type RuleId } from ".";
+import { ALL_RULES, candidatesFor, handles, isGrabbable, operatorTap, RULES, signId, signOwner, tapFor, type RuleId } from ".";
 
 /** Apply one rule to one node (found by its printed form) and print the results. */
 /** `nodeText` names a node by its printed form; "sign:…" means that node's minus-sign handle. */
@@ -51,6 +52,13 @@ describe("rules do what they say", () => {
     ["2x = 8", "move-factor", "2", ["x = 8/2"]],
     ["xy = 8", "move-factor", "x", []], // never divide by something that might be 0
     ["x/3 = 4", "move-denominator", "3", ["x = 4*3"]],
+    ["x + 2 = -6", "move-term", "-6", ["x + 2 + 6 = 0"]], // a term alone on its side is a term too
+    ["x/3 + 1 = 5", "move-denominator", "3", ["x + 1*3 = 5*3"]], // every term on its side is multiplied
+    ["1 - x/3 = 5 - x", "move-denominator", "3", ["1*3 - x = (5 - x)*3"]],
+    ["x/3 = y/2 + 1", "move-denominator", "2", ["(x/3)*2 = y + 1*2"]],
+    ["x/(2·3) = 4", "move-denominator", "3", ["x/2 = 4*3"]], // one factor of a bottom
+    ["2x/3 = 4", "move-factor", "2", ["x/3 = 4/2"]], // a factor on top of a side's fraction
+    ["2x + 1 = 7", "move-factor", "2", []], // not on a side of several terms: a press there picks up 2x
     ["-x = 6", "move-sign", "sign:-x", ["x = -6"]], // carry just the −…
     ["-x = 6", "move-sign", "-x", []], // …not the whole −x
     ["8/2", "divide-numbers", "2", ["4"]],
@@ -194,6 +202,14 @@ const CORPUS = [
   "e^x = 5",
   "ln(x) = 2",
   "e^(2x) = 7 + x",
+  "x + 2 = -6",
+  "x/3 + 1 = 5",
+  "1 - x/3 = 5 - x",
+  "x/3 = y/2 + 1",
+  "x/(2·3) = 4",
+  "-2x/3 = 4 + x",
+  "x/3 + 1 < 5",
+  "P = F/A + c",
 ];
 
 function randomEnv(state: MathState, seed: number) {
@@ -355,6 +371,17 @@ describe("QA regressions", () => {
     expect(RULES["move-factor"].apply(s, one.id)).toEqual([]);
   });
 
+  it("exercise 6.21: after bringing y up as y⁻¹, the pieces can still be grabbed", () => {
+    const ref = findPuzzle("w9")!;
+    let s = parseState(ref.puzzle.start); // (x²·y)³/y
+    const y = s.sides.flatMap(allNodes).filter((n) => n.kind === "var" && n.name === "y").at(-1)!;
+    s = candidatesFor(s, y.id, ref.rules).find((c) => c.rule === "flip-across-bar")!.state;
+    expect(printState(s)).toBe("(x^2*y)^3*y^(-1)");
+    const grabbed = s.sides.flatMap(allNodes).filter((n) => isGrabbable(s, n.id, ref.rules)).map((n) => printState({ sides: [n] }));
+    // y⁻¹ can move next to the y it will meet; x² and y can be pulled out of the brackets.
+    expect(grabbed).toEqual(expect.arrayContaining(["y^(-1)", "x^2", "y"]));
+  });
+
   it("tapping x·1 tidies it to x, not 1x", () => {
     // Made the way a learner would: ln(e) → 1, kept visible.
     const tidy = (src: string, logId: (s: ReturnType<typeof parseState>) => string) => {
@@ -399,5 +426,25 @@ describe("inequalities", () => {
   it("moves that don't cross keep the relation", () => {
     expect(moves("3x + 2x < 10", "2*x")).toContain("5*x < 10");
     expect(moves("2(x + 1) ≥ 4", "2")).toContain("2*x + 2*1 ≥ 4");
+  });
+});
+
+describe("tapping + or − between two numbers works it out", () => {
+  /** Tap the operator in front of the term printed `text`. */
+  const tapOp = (src: string, text: string) => {
+    const state = parseState(src);
+    const term = state.sides.flatMap(allNodes).find((n) => printState({ sides: [n] }) === text)!;
+    const next = operatorTap(state, term.id, ["commute", "combine", "multiply-numbers"]);
+    return next && printState(next);
+  };
+  it.each([
+    ["3 + 4 + x", "4", "7 + x"],
+    ["10 - 4", "-4", "6"],
+    ["x + 2 - 5", "-5", "x - 3"],
+    ["x + 3", "3", null], // x isn't a number
+    ["2x + 3", "3", null],
+    ["3 + 4", "3", null], // nothing in front of the first term
+  ])("%s, tapping in front of %s", (src, text, expected) => {
+    expect(tapOp(src, text)).toBe(expected);
   });
 });
