@@ -4,45 +4,45 @@ export const fractions: Chapter = {
   id: "fractions",
   title: "Fractions",
   blurb:
-    "You can only add slices of the same size. So first make the bottoms match — multiplying top and bottom by the same thing changes nothing.",
+    "To add fractions, first make the bottoms the same. Multiplying the top and bottom by the same number doesn't change a fraction's value.",
   after: ["factor", "formulas"],
   lesson: [
     {
-      title: "Slices",
+      title: "Adding fractions",
       text: [
-        "`3/4` means 3 slices, each a quarter of a whole. Slices can only be counted together when they're the same size: `1/5 + 2/5 = 3/5`.",
+        "`3/4` means 3 quarters. When the bottoms are the same, you just add the tops: 1 fifth plus 2 fifths is 3 fifths, so `1/5 + 2/5 = 3/5`.",
       ],
       example: {
         start: "1/5 + 2/5",
         steps: [
           {
-            say: "Same size slices: drop one fraction onto the other.",
+            say: "The bottoms are the same. Drop one fraction onto the other.",
             then: "(1 + 2)/5",
           },
-          { say: "Count the slices.", then: "3/5" },
+          { say: "Work it out.", then: "3/5" },
         ],
       },
     },
     {
-      title: "Same amount, different slices",
+      title: "Equivalent fractions",
       text: [
-        "Dividing top and bottom by the same number gives fewer, bigger slices but the same amount: `6/8 = 3/4`.",
-        "It works the other way too. Multiplying top and bottom by the same number gives more, smaller slices: `1/2 = 2/4 = 3/6`.",
+        "Dividing the top and bottom by the same number doesn't change the value: `6/8 = 3/4`.",
+        "Multiplying the top and bottom by the same number doesn't change it either: `1/2 = 2/4 = 3/6`.",
       ],
       example: {
         start: "6/8",
         steps: [
           {
-            say: "Drop the 8 onto the 6: both are divided by what they share.",
+            say: "Drop the 8 onto the 6. Both are divided by their common factor, 2.",
             then: "3/4",
           },
         ],
       },
     },
     {
-      title: "Making the bottoms match",
+      title: "Making the bottoms the same",
       text: [
-        "To add `1/2 + 1/3`, cut both into sixths first. Multiply the top and bottom of `1/2` by 3, and of `1/3` by 2. Now the slices are the same size.",
+        "To add `1/2 + 1/3`, turn both into sixths first. Multiply the top and bottom of `1/2` by 3, and the top and bottom of `1/3` by 2. Now both bottoms are 6.",
       ],
       example: {
         start: "1/2 + 1/3",
@@ -57,11 +57,11 @@ export const fractions: Chapter = {
     },
     {
       title: "Multiplying fractions",
-      text: ["Multiplying is simpler: tops multiply, bottoms multiply. Half of a third is `(1·1)/(2·3) = 1/6`."],
+      text: ["Multiplying is simpler: multiply the tops, and multiply the bottoms. Half of a third is `(1·1)/(2·3) = 1/6`."],
       example: {
         start: "(2/3)·(9/4)",
         steps: [{ say: "Drop one fraction onto the other.", then: "(2·9)/(3·4)" }],
-        after: "Then split and cancel what top and bottom share: it's 3/2.",
+        after: "Then cancel the common factors of the top and bottom to get 3/2.",
       },
     },
   ],
@@ -103,7 +103,7 @@ export const fractions: Chapter = {
       id: "f8",
       start: "(1/2)/(3/4)",
       goal: "2/3",
-      hint: "Carry ¾ up across the bar.",
+      hint: "Drag ¾ up across the bar.",
     },
     { id: "f23", start: "(3y + 3)/(y^2 + y)", goal: "3/y" },
     {
@@ -116,13 +116,13 @@ export const fractions: Chapter = {
       id: "f4",
       start: "1/3 + 1/6",
       goal: "1/2",
-      hint: "Tap the 6 to split it — you only need part of it.",
+      hint: "Tap the 6 to split it into factors.",
     },
     {
       id: "f17",
       start: "1/2 + 1/4",
       goal: "3/4",
-      hint: "Tap the 4: a quarter is half of a half.",
+      hint: "Tap the 4 to split it. 4 is 2·2.",
     },
     { id: "f18", start: "x/2 + x/3", goal: "(5x)/6" },
     { id: "f24", start: "2/3 - 1/4", goal: "5/12" },

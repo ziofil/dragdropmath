@@ -3,54 +3,54 @@ import type { Chapter } from "../puzzles";
 export const shuffle: Chapter = {
   id: "shuffle",
   title: "Rearranging terms",
-  blurb: "Terms can be added in any order, and numbers next to each other can be worked out.",
+  blurb: "Terms can be added in any order, and plain numbers can be worked out.",
   after: [],
   lesson: [
     {
       title: "Order doesn't matter",
       text: [
-        "A sum is a pile of things added together, and the order you add them in doesn't change the total. `2 + x` and `x + 2` are the same amount.",
-        "Every piece of a sum is called a term. You can slide terms past each other as much as you like.",
+        "The order you add things in doesn't change the total. `2 + x` and `x + 2` are the same.",
+        "Each part of a sum is called a term. You can drag terms into any order.",
       ],
       example: {
         start: "2 + x",
-        steps: [{ say: "Grab the 2 and slide it past the x.", then: "x + 2" }],
+        steps: [{ say: "Drag the 2 past the x.", then: "x + 2" }],
       },
     },
     {
-      title: "Each term owns its sign",
-      text: ["In `5 − 3 + x` the terms are `5`, `−3` and `x`. The minus belongs to the 3: wherever the 3 goes, its minus goes with it."],
+      title: "Each term keeps its sign",
+      text: ["In `5 − 3 + x` the terms are `5`, `−3` and `x`. The minus belongs to the 3. When the 3 moves, its minus moves with it."],
       example: {
         start: "5 - 3 + x",
         steps: [
           {
-            say: "Slide the x all the way to the front. The −3 keeps its minus.",
+            say: "Drag the x to the front. The 3 keeps its minus.",
             then: "x + 5 - 3",
           },
         ],
       },
-      watch: "`5 − 3` and `3 − 5` are not the same. You can move the 3, but never leave its minus behind.",
+      watch: "`5 − 3` and `3 − 5` are not the same. When you move the 3, its minus must go with it.",
     },
     {
-      title: "Numbers can be worked out",
+      title: "Adding numbers",
       text: [
-        "Two plain numbers in the same sum can become one. Drop one on the other and they add up. The x is an amount we don't know yet, so it stays as it is.",
+        "Two numbers in the same sum can be added together. Drop one onto the other. The x is a number we don't know yet, so it stays as it is.",
       ],
       example: {
         start: "3 + x + 4",
         steps: [
           {
-            say: "Drop the 4 onto the 3: two numbers become one.",
+            say: "Drop the 4 onto the 3.",
             then: "7 + x",
           },
         ],
-        after: "The x never moved. Only the numbers were worked out.",
+        after: "3 + 4 = 7. The x stays as it is.",
       },
     },
     {
-      title: "Products work the same way",
+      title: "Multiplying in any order",
       text: [
-        "In a product, the order of the factors doesn't matter either: `2·x·5` is `2·5·x`. So the 2 and the 5 can meet and become 10.",
+        "The order doesn't matter when you multiply either: `2·x·5` is `2·5·x`. So you can multiply the 2 and the 5 to get 10.",
         "We usually write the number first and leave out the dot: `10·x` is written `10x`.",
       ],
       example: {
@@ -65,7 +65,7 @@ export const shuffle: Chapter = {
       id: "s1",
       start: "2 + x",
       goal: "x + 2",
-      hint: "Grab the 2 and slide it past the x.",
+      hint: "Drag the 2 past the x.",
     },
     {
       id: "s2",
@@ -78,13 +78,13 @@ export const shuffle: Chapter = {
       id: "s3",
       start: "2·x·5",
       goal: "10x",
-      hint: "Numbers that multiply can be dropped on each other.",
+      hint: "Drop one number onto the other.",
     },
     {
       id: "s8",
       start: "10 - x - 4",
       goal: "6 - x",
-      hint: "The 4 takes its minus with it.",
+      hint: "The 4 keeps its minus.",
     },
     { id: "s9", start: "2·a·3·b", goal: "6ab" },
     { id: "s14", start: "10 - 2·3·y", goal: "10 - 6y" },
@@ -96,7 +96,7 @@ export const shuffle: Chapter = {
       id: "s17",
       start: "2 - 7 + x",
       goal: "x - 5",
-      hint: "Taking away 7 from 2 goes below zero.",
+      hint: "2 − 7 is less than zero.",
     },
     { id: "s18", start: "3·x·2·y + 5 - 1", goal: "6xy + 4" },
     { id: "s10", start: "5 + a + 2 + b", goal: "a + b + 7" },
@@ -113,7 +113,7 @@ export const shuffle: Chapter = {
       id: "s24",
       start: "4 - 6c + 5b + a·2·2",
       goal: "4a + 5b - 6c + 4",
-      hint: "Everything is in the wrong order: put the a-term first and the plain number last.",
+      hint: "Put the a-term first and the plain number last.",
     },
     { id: "s25", start: "2·4 - z + y·3 + x·3·3", goal: "9x + 3y - z + 8" },
     { id: "s27", start: "2·3 - c + 2·b·4 + 3a", goal: "3a + 8b - c + 6" },

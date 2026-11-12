@@ -3,49 +3,49 @@ import type { Chapter } from "../puzzles";
 export const formulas: Chapter = {
   id: "formulas",
   title: "Rearranging formulas",
-  blurb: "A formula is an equation full of letters. Get the letter you want on its own, with the same moves as for x.",
+  blurb: "A formula is an equation with several letters. Use the same moves as for x to get one letter on its own.",
   after: ["balance"],
   lesson: [
     {
       title: "Making a letter the subject",
       text: [
-        "`v = u + at` gives a speed `v` from a start speed `u`, an acceleration `a` and a time `t`. Turned round, it tells you the time instead: `t = (v − u)/a`.",
-        "Getting one letter alone on one side is called making it the subject. It works exactly like solving for x: the other letters are just numbers you don't know.",
+        "`v = u + at` gives a speed `v` from a start speed `u`, an acceleration `a` and a time `t`. Rearranged, it gives the time instead: `t = (v − u)/a`.",
+        "Getting one letter on its own is called making it the subject. It works like solving for x. Treat the other letters as numbers.",
       ],
       example: {
         start: "v = u + at",
         steps: [
-          { say: "The t is buried in at. First carry the u across.", then: "v - u = at" },
-          { say: "Now carry the a across: it divides the other side.", then: "(v - u)/a = t" },
+          { say: "The t is multiplied by a. First drag the u across.", then: "v - u = at" },
+          { say: "Now drag the a across. It divides the other side.", then: "(v - u)/a = t" },
         ],
-        after: "t = (v − u)/a, with the sides read the other way round.",
+        after: "Read it from right to left: t = (v − u)/a.",
       },
     },
     {
-      title: "Letters cross like numbers",
+      title: "Letters move like numbers",
       text: [
-        "A letter multiplying a whole side can cross the `=` and divide the other side, just as `2x = 8` became `x = 8/2`. (Dividing by a letter only makes sense when it isn't 0. In formulas like these it never is.)",
+        "A letter that multiplies a whole side can move across the `=` and divide the other side, just as `2x = 8` became `x = 8/2`. (You can only divide by a letter that isn't 0. In these formulas it never is.)",
       ],
-      example: { start: "F = ma", steps: [{ say: "Carry the m across.", then: "F/m = a" }] },
-      watch: "Only a factor of the whole side can cross. In `u + at` the `a` multiplies the `t` alone: move the `u` away first.",
+      example: { start: "F = ma", steps: [{ say: "Drag the m across.", then: "F/m = a" }] },
+      watch: "Only a factor of the whole side can move across. In `u + at` the `a` multiplies only the `t`, so move the `u` first.",
     },
     {
-      title: "Bottoms cross too",
+      title: "Letters on the bottom",
       text: [
-        "A letter on the bottom of a fraction that is a whole side crosses to multiply the other side, like `x/3 = 4` became `x = 4·3`.",
+        "If a whole side is a fraction, the letter on the bottom can move across and multiply the other side, just as `x/3 = 4` became `x = 4·3`.",
       ],
-      example: { start: "P = F/A", steps: [{ say: "Carry the A across: it multiplies.", then: "PA = F" }] },
+      example: { start: "P = F/A", steps: [{ say: "Drag the A across. It multiplies the other side.", then: "PA = F" }] },
     },
     {
       title: "When the letter is in two places",
       text: [
-        "In `ax + bx = c`, x appears twice, so neither term can be moved to free it. Take the x out in front first: then everything it's multiplied by is one bracket, and that can cross.",
+        "In `ax + bx = c`, x appears twice, so moving one term won't get x on its own. Take the x out as a factor first. Then the bracket it's multiplied by can move across.",
       ],
       example: {
         start: "ax + bx = c",
         steps: [
-          { say: "Both terms have an x. Carry one x out in front.", then: "x(a + b) = c" },
-          { say: "Now carry the whole (a + b) across.", then: "x = c/(a + b)" },
+          { say: "Both terms have an x. Drag one x out in front.", then: "x(a + b) = c" },
+          { say: "Now drag the whole (a + b) across.", then: "x = c/(a + b)" },
         ],
       },
     },
@@ -57,7 +57,7 @@ export const formulas: Chapter = {
     { id: "q3", start: "d = st", goal: "t = d/s" },
     { id: "q4", start: "y = x + c", goal: "x = y - c" },
     { id: "q5", start: "a = b - c", goal: "b = a + c" },
-    { id: "q6", start: "P = F/A", goal: "F = PA", hint: "The A is on the bottom: carry it across." },
+    { id: "q6", start: "P = F/A", goal: "F = PA", hint: "The A is on the bottom. Drag it across." },
     { id: "q7", start: "E = mc^2", goal: "m = E/c^2" },
     { id: "q8", start: "v = u + at", goal: "t = (v - u)/a", hint: "Move the u away first, then the a." },
     { id: "q9", start: "y = mx + c", goal: "x = (y - c)/m" },
@@ -67,7 +67,7 @@ export const formulas: Chapter = {
     { id: "q13", start: "T = 2(a + b)", goal: "a = T/2 - b" },
     { id: "q14", start: "m(v - u) = I", goal: "v = I/m + u" },
     { id: "q15", start: "P = V^2/R", goal: "R = V^2/P" },
-    { id: "q16", start: "px + qx = r", goal: "x = r/(p + q)", hint: "x is in two places: take it out in front first." },
+    { id: "q16", start: "px + qx = r", goal: "x = r/(p + q)", hint: "x is in two places. Take it out as a factor first." },
     { id: "q17", start: "A = P + Prt", goal: "P = A/(1 + rt)", hint: "P is in both terms." },
     { id: "q18", start: "F = (9C)/5 + 32", goal: "C = (5(F - 32))/9" },
     { id: "q19", start: "v^2 = u^2 + 2as", goal: "s = (v^2 - u^2)/(2a)" },

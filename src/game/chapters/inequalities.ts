@@ -4,17 +4,17 @@ export const inequalities: Chapter = {
   id: "inequalities",
   title: "Inequalities",
   blurb:
-    "An inequality is a balance that tips. Adding or dividing by a positive number keeps it tipped the same way. Multiplying by −1 swaps which side is heavier, so the sign turns round.",
+    "Solve inequalities like equations, with one difference: multiplying or dividing by a negative number turns the sign round.",
   after: ["balance"],
   lesson: [
     {
-      title: "Bigger and smaller",
-      text: ["`x < 7` says x is smaller than 7. The sign opens towards the bigger side."],
+      title: "Less than and greater than",
+      text: ["`x < 7` says x is less than 7. The open side of the sign faces the bigger number."],
       example: {
         start: "x + 2 ≥ 5",
         steps: [
           {
-            say: "Just like an equation: carry the 2 across.",
+            say: "As with an equation, drag the 2 across.",
             then: "x ≥ 5 - 2",
           },
           { say: "Work it out.", then: "x ≥ 3" },
@@ -22,23 +22,23 @@ export const inequalities: Chapter = {
       },
     },
     {
-      title: "Reading from either end",
+      title: "Swapping the sides",
       text: [
-        "`3 > x` and `x < 3` say the same thing, read from opposite ends: x is smaller than 3. So the two sides can change places, as long as the sign turns round to keep pointing the same way.",
+        "`3 > x` and `x < 3` say the same thing: x is less than 3. So you can swap the two sides, as long as you turn the sign round too.",
       ],
       example: {
         start: "3 > x",
-        steps: [{ say: "Drag the 3 across to the other side. Watch the sign as it passes.", then: "x < 3" }],
+        steps: [{ say: "Drag the 3 to the other side. The sign turns round.", then: "x < 3" }],
       },
     },
     {
       title: "The same moves as equations",
-      text: ["Adding or taking away the same amount on both sides keeps the order. So does dividing both sides by a positive number."],
+      text: ["Adding or subtracting the same amount on both sides keeps the sign the same. So does multiplying or dividing both sides by a positive number."],
       example: {
         start: "2x < 8",
         steps: [
           {
-            say: "Carry the 2 across. It's positive, so the sign stays as it is.",
+            say: "Drag the 2 across. It's positive, so the sign stays the same.",
             then: "x < 8/2",
           },
           { say: "Work it out.", then: "x < 4" },
@@ -46,17 +46,17 @@ export const inequalities: Chapter = {
       },
     },
     {
-      title: "A minus turns it round",
-      text: ["Multiplying by −1 reverses the order: `2 < 3`, but `−2 > −3`. So when a minus crosses, the sign turns round."],
+      title: "A minus turns the sign round",
+      text: ["Multiplying by −1 reverses the order: `2 < 3`, but `−2 > −3`. So when a minus moves across, the sign turns round."],
       example: {
         start: "-x < 4",
         steps: [
           {
-            say: "Carry just the minus across. Keep an eye on the < as you pass it.",
+            say: "Drag just the minus across. The < turns round.",
             then: "x > -4",
           },
         ],
-        after: "Try a number: x = 0 works in −x < 4 (0 < 4), and in x > −4 (0 > −4).",
+        after: "Check with a number: x = 0 fits both −x < 4 and x > −4.",
       },
       watch: "Only multiplying or dividing by a negative number turns the sign. Moving a term across never does.",
     },
@@ -67,13 +67,13 @@ export const inequalities: Chapter = {
       id: "i3",
       start: "-x < 4",
       goal: "x > -4",
-      hint: "Carry the minus across, and watch the sign as it passes.",
+      hint: "Drag the minus across. The sign turns round.",
     },
     {
       id: "i1",
       start: "x + 3 < 10",
       goal: "x < 7",
-      hint: "Just like an equation: carry the 3 across.",
+      hint: "As with an equation, drag the 3 across.",
     },
     { id: "i2", start: "2x ≥ 8", goal: "x ≥ 4" },
     { id: "i4", start: "x - 5 > 2", goal: "x > 7" },
@@ -91,7 +91,7 @@ export const inequalities: Chapter = {
       id: "i5",
       start: "-2x ≤ 6",
       goal: "x ≥ -3",
-      hint: "Deal with the minus first, then the 2.",
+      hint: "Move the minus first, then the 2.",
     },
     { id: "i19", start: "-3a < 12", goal: "a > -4" },
     { id: "i6", start: "3 - x > 1", goal: "x < 2" },
@@ -112,7 +112,7 @@ export const inequalities: Chapter = {
       id: "i26",
       start: "3(x + 1) < x + 9",
       goal: "x < 3",
-      hint: "Open the bracket first, then gather the x's on one side.",
+      hint: "Expand the bracket first, then get the x-terms on one side.",
     },
     { id: "i27", start: "-(x + 2) ≤ 2x - 5", goal: "x ≥ 1" },
     { id: "i28", start: "5(n - 1) ≥ 2(n + 2)", goal: "n ≥ 3", via: ["5*n ≥ 2*n + 2*2 + 5", "n ≥ (2*2 + 5)/3"] },

@@ -66,9 +66,9 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
         <MathCanvas state={current} rules={rules} onDrop={onDrop} height={160} />
         <div className="board-bar">
           <p className="guided-status" role="status">
-            {detour ? "That's a real move, but not the one this example is about. Back it goes." : done ? (
+            {detour ? "That move works, but it isn't the one for this step. Putting it back." : done ? (
               <>
-                <MathText text={example.after ?? "Done."} /> <span className="guided-free">Keep going if you like: any move works now.</span>
+                <MathText text={example.after ?? "Done."} /> <span className="guided-free">You can keep going: any move is allowed now.</span>
               </>
             ) : `Step ${step + 1} of ${example.steps.length}`}
           </p>

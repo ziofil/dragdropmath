@@ -40,8 +40,8 @@ export function Home({ at }: { at?: Chapter }) {
           Algebra you can <FeelWord />.
         </h1>
         <p>
-          Grab a piece of an equation and drag it. It only goes where the maths lets it go. Work it into the shape
-          each exercise asks for.
+          Drag any part of an equation. It can only move in ways the maths allows. Rearrange it until it matches
+          the goal.
         </p>
       </section>
 
@@ -56,7 +56,7 @@ export function Home({ at }: { at?: Chapter }) {
             <span>
               <i className="dot dot-done" /> mastered
             </span>
-            <span className="path-open">Every chapter is open. The arrows are just a suggested order.</span>
+            <span className="path-open">Every chapter is open. The arrows show a suggested order.</span>
           </div>
           <PathMap solved={solved} next={next} selected={selected} onSelect={select} />
         </section>
@@ -224,7 +224,7 @@ function ChapterPanel({
       )}
 
       <a className="button primary panel-start" href={`#/c/${chapter.id}`}>
-        {started ? "Back to the idea and examples →" : "Start with the idea →"}
+        {started ? "Back to the lesson →" : "Start the lesson →"}
       </a>
 
       <ChapterProgress chapter={chapter} solved={solved} />

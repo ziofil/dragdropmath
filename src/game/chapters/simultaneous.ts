@@ -3,47 +3,47 @@ import type { Chapter } from "../puzzles";
 export const simultaneous: Chapter = {
   id: "simultaneous",
   title: "Simultaneous equations",
-  blurb: "Two equations, two unknowns, both true at once. Get a letter alone in one, then put what it equals into the other.",
+  blurb: "Two equations with two unknowns, both true at the same time. Get one letter on its own in one equation, then substitute it into the other.",
   after: ["formulas"],
   lesson: [
     {
       title: "Two equations at once",
       text: [
-        "`y = 2x` and `x + y = 9` are two facts about the same x and y. One equation with two unknowns has many answers; two equations together usually pin down just one pair.",
-        "The trick is to get rid of one letter, so you're back to one equation with one unknown, which you already know how to solve.",
+        "`y = 2x` and `x + y = 9` are two equations about the same x and y. One equation with two unknowns has many solutions. Two equations together usually have just one.",
+        "To solve them, get rid of one letter. That leaves one equation with one unknown, which you already know how to solve.",
       ],
     },
     {
       title: "Substituting",
-      text: ["`y = 2x` says y and 2x are the same amount. So wherever y appears in the other equation, you can put 2x instead."],
+      text: ["`y = 2x` says y and 2x are equal. So you can replace y with 2x in the other equation. This is called substituting."],
       example: {
         start: "y = 2x; x + y = 9",
         steps: [
           { say: "Drag the y of y = 2x onto the y in the other equation.", then: "y = 2x; x + 2x = 9" },
-          { say: "Now it's an equation in x alone. Collect the x's.", then: "y = 2x; 3x = 9" },
+          { say: "Now the equation only has x in it. Collect the x's.", then: "y = 2x; 3x = 9" },
         ],
-        after: "Solve it: x = 3. Then put x = 3 into y = 2x to get y.",
+        after: "Solve it: x = 3. Then put x = 3 into y = 2x to find y.",
       },
     },
     {
-      title: "Getting a letter alone",
+      title: "Getting a letter on its own",
       text: [
-        "Substituting needs one equation that says what a letter is: `y = …` or `x = …`. If neither equation is like that yet, make one: in `x − y = 1`, carry the −y across to get `x = 1 + y`.",
+        "To substitute, you need an equation like `y = …` or `x = …`. If you don't have one, make one: in `x − y = 1`, drag the −y across to get `x = 1 + y`.",
       ],
       example: {
         start: "x + y = 7; x - y = 1",
         steps: [
-          { say: "Carry the −y across the = in the second equation.", then: "x + y = 7; x = 1 + y" },
-          { say: "Now x is alone: drag it onto the x in the first equation.", then: "1 + y + y = 7; x = 1 + y" },
+          { say: "Drag the −y across the = in the second equation.", then: "x + y = 7; x = 1 + y" },
+          { say: "Now x is on its own. Drag it onto the x in the first equation.", then: "1 + y + y = 7; x = 1 + y" },
         ],
-        after: "That's one equation in y alone: 2y + 1 = 7, so y = 3.",
+        after: "Now the first equation only has y: 2y + 1 = 7, so y = 3.",
       },
-      watch: "Put in the whole of what the letter equals. If x = 1 + y, then 2x is 2(1 + y), not 2 + y.",
+      watch: "Substitute the whole expression. If x = 1 + y, then 2x is 2(1 + y), not 2 + y.",
     },
     {
-      title: "Finishing off",
+      title: "Finding the other letter",
       text: [
-        "Once you know one letter, say `x = 3`, put it back into either equation to find the other: drag the x of `x = 3` onto an x in the other equation.",
+        "Once you know one letter, say `x = 3`, substitute it into the other equation to find the other letter. Drag the x of `x = 3` onto an x in the other equation.",
       ],
     },
   ],
@@ -76,7 +76,7 @@ export const simultaneous: Chapter = {
       id: "e18",
       start: "x + y = 7; x - y = 1",
       goal: "x = 4; y = 3",
-      hint: "Neither letter is alone yet: carry the −y across, so x = 1 + y. Then substitute.",
+      hint: "Neither letter is on its own yet. Drag the −y across to get x = 1 + y. Then substitute.",
       via: ["x + y = 7; x = 1 + y", "2y + 1 = 7; x = 1 + y", "y = 3; x = 1 + y"],
     },
     { id: "e19", start: "x + y = 10; x - y = 4", goal: "x = 7; y = 3", via: ["x + y = 10; x = 4 + y", "2y + 4 = 10; x = 4 + y", "y = 3; x = 4 + y"] },
@@ -85,7 +85,7 @@ export const simultaneous: Chapter = {
       id: "e21",
       start: "x + y = 5; 2x + y = 8",
       goal: "x = 3; y = 2",
-      hint: "Get y alone in the first equation: y = 5 − x.",
+      hint: "Get y on its own in the first equation: y = 5 − x.",
       via: ["y = 5 - x; 2x + y = 8", "y = 5 - x; x + 5 = 8", "y = 5 - x; x = 3"],
     },
     { id: "e22", start: "y - x = 1; x + y = 5", goal: "x = 2; y = 3", via: ["y = 1 + x; x + y = 5", "y = 1 + x; 2x + 1 = 5", "y = 1 + x; x = 2"] },
@@ -97,7 +97,7 @@ export const simultaneous: Chapter = {
       id: "e27",
       start: "2x + y = 11; x - y = 1",
       goal: "x = 4; y = 3",
-      hint: "x = 1 + y, so 2x becomes 2(1 + y): put in the whole bracket.",
+      hint: "x = 1 + y, so 2x becomes 2(1 + y). Use the whole bracket.",
       via: ["2x + y = 11; x = 1 + y", "2(1 + y) + y = 11; x = 1 + y", "3y + 2 = 11; x = 1 + y", "y = 3; x = 1 + y"],
     },
     {

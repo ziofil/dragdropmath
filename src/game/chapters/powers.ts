@@ -3,14 +3,14 @@ import type { Chapter } from "../puzzles";
 export const powers: Chapter = {
   id: "powers",
   title: "Powers",
-  blurb: "x³ is just x·x·x. Count the x's and the rules for exponents write themselves.",
+  blurb: "x³ means x·x·x. Count the x's and you can work out the rules for powers.",
   after: ["brackets"],
   lesson: [
     {
-      title: "Counting factors",
+      title: "Multiplying powers",
       text: [
-        "`x³` is `x·x·x`: the small number, the exponent, counts how many x's are multiplied.",
-        "So `x²·x³` is two x's, then three more: five in all. When you multiply powers of the same thing, the exponents add.",
+        "`x³` means `x·x·x`. The small number is the exponent. It tells you how many x's are multiplied.",
+        "So `x²·x³` is two x's times three x's: five x's in all. When you multiply powers of the same base, you add the exponents.",
       ],
       example: {
         start: "x^2·x^3",
@@ -19,13 +19,13 @@ export const powers: Chapter = {
             say: "Same base: drop one power onto the other.",
             then: "x^(2 + 3)",
           },
-          { say: "Now count them up.", then: "x^5" },
+          { say: "Work it out.", then: "x^5" },
         ],
       },
     },
     {
       title: "A power of a power",
-      text: ["`(x²)³` is three lots of `x²` multiplied together: 2 + 2 + 2 = 6 x's. The exponents multiply."],
+      text: ["`(x²)³` is `x²·x²·x²`. That's 2 + 2 + 2 = 6 x's, so you multiply the exponents."],
       example: {
         start: "(x^2)^3",
         steps: [
@@ -35,8 +35,8 @@ export const powers: Chapter = {
       },
     },
     {
-      title: "Dividing cancels",
-      text: ["`x⁵/x²` has five x's on top and two below. Two pairs cancel and three x's are left: the exponents subtract."],
+      title: "Dividing powers",
+      text: ["`x⁵/x²` has five x's on top and two on the bottom. Two x's cancel from each, leaving three x's on top. When you divide, you subtract the exponents."],
       example: {
         start: "x^5/x^2",
         steps: [
@@ -46,14 +46,14 @@ export const powers: Chapter = {
       },
     },
     {
-      title: "Zero and below",
+      title: "Zero and negative powers",
       text: [
         "`x³/x³` is 1, and it's also `x^(3 − 3) = x⁰`. So anything to the power 0 is 1.",
-        "Cancel more x's than you have and the count goes below zero: `x⁻²` means `1/x²`. Carrying a power across the fraction bar flips the sign of its exponent.",
+        "If there are more x's on the bottom than on top, the exponent goes below zero: `x⁻²` means `1/x²`. Moving a power across the fraction bar changes the sign of its exponent.",
       ],
       example: {
         start: "1/x^3",
-        steps: [{ say: "Carry the x³ up across the bar.", then: "x^-3" }],
+        steps: [{ say: "Drag the x³ up across the bar.", then: "x^-3" }],
       },
       watch: "`2x³` is `2·x·x·x`: the power belongs to the x only. `(2x)³` is different: it's `8x³`.",
     },
@@ -70,7 +70,7 @@ export const powers: Chapter = {
   ],
   puzzles: [
     { id: "w10", start: "2^3", goal: "8" },
-    { id: "w6", start: "1/x^3", goal: "x^-3", hint: "Carry the x³ up across the fraction bar." },
+    { id: "w6", start: "1/x^3", goal: "x^-3", hint: "Drag the x³ up across the fraction bar." },
     {
       id: "w1",
       start: "x^2·x^3",
@@ -88,13 +88,13 @@ export const powers: Chapter = {
     },
     { id: "w19", start: "(a^3)^4", goal: "a^12" },
     { id: "w8", start: "x^0 + 4", goal: "5" },
-    { id: "w5", start: "x^3/x^5", goal: "x^-2", hint: "Exponents can go below zero." },
+    { id: "w5", start: "x^3/x^5", goal: "x^-2", hint: "The answer has a negative exponent." },
     { id: "w7", start: "x^-2·x^5", goal: "x^3" },
     {
       id: "w3",
       start: "(2x)^3",
       goal: "8x^3",
-      hint: "Pull the 2 out of the brackets — it takes its own ³.",
+      hint: "Pull the 2 out of the brackets. It is cubed too.",
     },
     { id: "w20", start: "(3y)^2", goal: "9y^2" },
     { id: "w15", start: "x^2·x^-2", goal: "1" },
@@ -109,10 +109,10 @@ export const powers: Chapter = {
     { id: "w23", start: "(3x^2)^2 - 4x^4", goal: "5x^4" },
     { id: "w26", start: "3x^2(x^3 - 2) + 6x^2", goal: "3x^5" },
     { id: "w24", start: "2x(x^2 + 1) - x^3", goal: "x^3 + 2x" },
-    { id: "w25", start: "x^-1·(x^3 + x)", goal: "x^2 + 1", hint: "x⁻¹ meets each term: x⁻¹ times x is x⁰." },
+    { id: "w25", start: "x^-1·(x^3 + x)", goal: "x^2 + 1", hint: "Multiply each term by x⁻¹. x⁻¹ times x is x⁰." },
     { id: "w27", start: "(x^2 + x)(x - 1)", goal: "x^3 - x" },
     { id: "w28", start: "(a^2 + b)(a^2 - b)", goal: "a^4 - b^2", via: ["a^4 - a^2*b + b*(a^2 - b)"] },
     { id: "w29", start: "(2x^2)^2 + x(x^3 - 1)", goal: "5x^4 - x" },
-    { id: "w30", start: "(x^2 + 3)^2", goal: "x^4 + 6x^2 + 9", hint: "Write it as (x² + 3)(x² + 3) and let every term meet every term." },
+    { id: "w30", start: "(x^2 + 3)^2", goal: "x^4 + 6x^2 + 9", hint: "Write it as (x² + 3)(x² + 3), then multiply each term by each term." },
   ],
 };

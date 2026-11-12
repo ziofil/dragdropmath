@@ -99,7 +99,7 @@ class CanvasErrorBoundary extends Component<
     if (!this.state.error) return this.props.children;
     return (
       <div className="canvas-error" style={{ height: this.props.height }} role="alert">
-        <strong>Oops — that move broke the board.</strong>
+        <strong>Something went wrong with that move.</strong>
         <span>Details are in the browser console.</span>
         <button onClick={() => this.setState({ error: null })}>Try again</button>
       </div>

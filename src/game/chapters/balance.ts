@@ -3,20 +3,20 @@ import type { Chapter } from "../puzzles";
 export const balance: Chapter = {
   id: "balance",
   title: "Solving equations",
-  blurb: "An equation is a balance. Whatever crosses the = changes into its opposite.",
+  blurb: "Do the same thing to both sides and the equation stays true. A term that moves across the = does the opposite on the other side.",
   after: ["distribute"],
   lesson: [
     {
-      title: "An equation is a balance",
+      title: "The same on both sides",
       text: [
-        "An equation says two amounts are equal, like a balance that's level. Do the same thing to both sides and it stays level.",
-        "Moving a term across `=` is exactly that. From `x + 3 = 10`, take 3 from both sides: `x = 10 − 3`. That's why the `+3` arrives as `−3`.",
+        "An equation says two things are equal. If you do the same thing to both sides, they stay equal.",
+        "Moving a term across the `=` does exactly that. From `x + 3 = 10`, take 3 from both sides: `x = 10 − 3`. That's why `+3` becomes `−3` on the other side.",
       ],
       example: {
         start: "x + 3 = 10",
         steps: [
           {
-            say: "Carry the 3 across the =. Watch its sign as it crosses.",
+            say: "Drag the 3 across the =. Its sign changes.",
             then: "x = 10 - 3",
           },
           { say: "Drop the −3 onto the 10.", then: "x = 7" },
@@ -25,12 +25,12 @@ export const balance: Chapter = {
     },
     {
       title: "Dividing both sides",
-      text: ["A number multiplying a whole side arrives dividing the other side: from `2x = 8`, divide both sides by 2 to get `x = 8/2`."],
+      text: ["If a number multiplies a whole side, moving it across makes it divide the other side. From `2x = 8`, divide both sides by 2: `x = 8/2`."],
       example: {
         start: "2x = 8",
         steps: [
           {
-            say: "Carry the 2 across: it divides the other side.",
+            say: "Drag the 2 across the =. It divides the other side.",
             then: "x = 8/2",
           },
           { say: "Drop the 2 onto the 8.", then: "x = 4" },
@@ -38,28 +38,28 @@ export const balance: Chapter = {
       },
     },
     {
-      title: "Bottoms and minuses",
+      title: "Fractions and minus signs",
       text: [
-        "Dividing goes the other way too: from `x/3 = 4`, multiply both sides by 3. The bottom 3 arrives on the other side multiplying.",
-        "A minus in front of a whole side can cross as well: `−x = 6` becomes `x = −6`.",
+        "It works for dividing too. From `x/3 = 4`, multiply both sides by 3. The 3 on the bottom moves across and multiplies the other side.",
+        "A minus in front of a whole side can move across too: `−x = 6` becomes `x = −6`.",
       ],
       example: {
         start: "x/3 = 4",
-        steps: [{ say: "Carry the 3 across the =.", then: "x = 4·3" }],
+        steps: [{ say: "Drag the 3 across the =.", then: "x = 4·3" }],
       },
     },
     {
-      title: "Undo the outside first",
+      title: "Undo in reverse order",
       text: [
-        "In `3x + 1`, the x was multiplied by 3 first, then 1 was added. To get x alone, undo in reverse: the 1 leaves first, then the 3.",
+        "In `3x + 1`, x is multiplied by 3, then 1 is added. To get x on its own, undo these in reverse order: move the 1 first, then the 3.",
       ],
       example: {
         start: "3x + 1 = 13",
         steps: [
-          { say: "Carry the 1 across.", then: "3x = 13 - 1" },
+          { say: "Drag the 1 across.", then: "3x = 13 - 1" },
           { say: "Work it out.", then: "3x = 12" },
-          { say: "Carry the 3 across.", then: "x = 12/3" },
-          { say: "And work that out.", then: "x = 4" },
+          { say: "Drag the 3 across.", then: "x = 12/3" },
+          { say: "Work it out.", then: "x = 4" },
         ],
       },
       watch: "Check your answer by putting it back in: 3·4 + 1 = 13. ✓",
@@ -91,26 +91,26 @@ export const balance: Chapter = {
       id: "b21",
       start: "2x + 1 = 4",
       goal: "x = 3/2",
-      hint: "Not every answer is a whole number: a fraction is fine.",
+      hint: "The answer can be a fraction.",
     },
     {
       id: "b22",
       start: "(x + 3)/2 = 4",
       goal: "x = 5",
-      hint: "The whole top is divided by 2. Carry the 2 across first.",
+      hint: "The whole top is divided by 2. Drag the 2 across first.",
     },
     { id: "b6", start: "3x + 1 = 13", goal: "x = 4" },
     {
       id: "b7",
       start: "2(x + 1) = 10",
       goal: "x = 4",
-      hint: "There's a shortcut: deal with the 2 first.",
+      hint: "Quicker: drag the 2 across before you expand.",
     },
     {
       id: "b12",
       start: "x/2 + 1 = 5",
       goal: "x = 8",
-      hint: "Undo the outside first: the + 1.",
+      hint: "Move the + 1 first.",
     },
     { id: "b13", start: "x/3 - 2 = 1", goal: "x = 9" },
     { id: "b14", start: "3(x - 1) = 6", goal: "x = 3" },
@@ -118,7 +118,7 @@ export const balance: Chapter = {
       id: "b23",
       start: "5 - (x - 1) = 2",
       goal: "x = 4",
-      hint: "A minus in front of brackets flips every sign inside.",
+      hint: "A minus in front of brackets changes every sign inside.",
     },
     { id: "b15", start: "2x + 3 + x = 15", goal: "x = 4" },
     { id: "b16", start: "5x - 2 - 2x = 2x + 3", goal: "x = 5" },

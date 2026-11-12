@@ -45,7 +45,7 @@ export function ChapterView({ chapter }: { chapter: Chapter }) {
 
       <section className="practice" id="exercises">
         <h2>Exercises</h2>
-        <p className="practice-note">They start easy and get harder. The later ones mix in what you learned on the way here.</p>
+        <p className="practice-note">They start easy and get harder. Later ones also use what you learned in earlier chapters.</p>
         <ChapterProgress chapter={chapter} solved={solved} />
         {next.length > 0 && (
           <p className="leads-to">

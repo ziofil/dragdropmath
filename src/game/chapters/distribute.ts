@@ -3,53 +3,53 @@ import type { Chapter } from "../puzzles";
 export const distribute: Chapter = {
   id: "distribute",
   title: "The distributive law",
-  blurb: "A factor outside brackets multiplies every term inside — and a factor every term shares can be taken back out.",
+  blurb: "A number outside brackets multiplies every term inside. A factor that every term shares can be taken back out.",
   after: ["collect"],
   lesson: [
     {
-      title: "A factor visits every term",
+      title: "Multiply every term inside",
       text: [
-        "`2(x + 3)` means 2 lots of `(x + 3)`. That's 2 lots of x, plus 2 lots of 3: `2x + 2·3`. The factor outside visits every term inside.",
-        "Picture a rectangle 2 tall and `x + 3` wide. Cut it in two: one part is `2·x`, the other `2·3`. Together they make the whole thing.",
+        "`2(x + 3)` means 2 lots of `(x + 3)`. That's 2 lots of x plus 2 lots of 3: `2x + 2·3`. The number outside multiplies every term inside.",
+        "Think of a rectangle 2 tall and `x + 3` wide. Split it into two parts: one has area `2·x`, the other `2·3`. Together they make the whole rectangle.",
       ],
       example: {
         start: "2(x + 3)",
         steps: [
           {
-            say: "Drop the 2 onto the brackets. Watch it visit both terms.",
+            say: "Drop the 2 onto the brackets. It multiplies both terms.",
             then: "2x + 2·3",
           },
-          { say: "Now drop the 2 of 2·3 onto the 3.", then: "2x + 6" },
+          { say: "Now drop the 2 in 2·3 onto the 3.", then: "2x + 6" },
         ],
       },
     },
     {
       title: "A minus in front",
-      text: ["`−(x − 4)` means `−1` times the brackets. The −1 visits every term too, so every sign inside flips."],
+      text: ["`−(x − 4)` means `−1` times the brackets. The −1 multiplies every term, so every sign inside changes."],
       example: {
         start: "-(x - 4)",
         steps: [{ say: "Drop the minus onto the brackets.", then: "-x + 4" }],
       },
-      watch: "A common slip is writing `−(x − 4)` as `−x − 4`. The minus has to reach the 4 as well.",
+      watch: "A common mistake is writing `−(x − 4)` as `−x − 4`. The minus multiplies the 4 too.",
     },
     {
       title: "Taking a factor out",
-      text: ["Going backwards is called factoring. If every term has a 3, the 3 can come out in front of brackets: `3x + 3y = 3(x + y)`."],
+      text: ["Going backwards is called factoring. If every term has a factor of 3, you can take the 3 out in front of brackets: `3x + 3y = 3(x + y)`."],
       example: {
         start: "3x + 3y",
         steps: [
           {
-            say: "Both terms have a 3. Carry one 3 out in front, past the left end.",
+            say: "Both terms have a 3. Drag one 3 out in front, past the left end.",
             then: "3(x + y)",
           },
         ],
-        after: "Multiply it back out and you get 3x + 3y again.",
+        after: "Expand it again and you get 3x + 3y.",
       },
     },
     {
-      title: "When x meets x",
+      title: "x times x",
       text: [
-        "Sometimes a letter meets itself: `x(x + 2)` gives `x·x`. It has a shorter name, `x²` (x squared). Picture a square with sides x: its area is x·x.",
+        "Sometimes a letter is multiplied by itself: `x(x + 2)` gives `x·x`. We write this as `x²` (x squared). A square with sides x has area `x·x`.",
       ],
       example: {
         start: "x(x + 2)",
@@ -101,7 +101,7 @@ export const distribute: Chapter = {
       id: "d14",
       start: "-(2x + 3) + 5",
       goal: "-2x + 2",
-      hint: "The minus reaches every term in the brackets.",
+      hint: "The minus multiplies every term in the brackets.",
     },
     { id: "d15", start: "3(2x + 1) + x", goal: "7x + 3" },
     { id: "d8", start: "x(x + 2) - 2x", goal: "x^2" },
@@ -113,7 +113,7 @@ export const distribute: Chapter = {
       id: "d18",
       start: "4(x + 1) - 2(x + 3)",
       goal: "2x - 2",
-      hint: "The −2 visits both terms of its brackets.",
+      hint: "The −2 multiplies both terms in its brackets.",
     },
     { id: "d24", start: "x(x + 2) + 3(x + 2)", goal: "x^2 + 5x + 6" },
     { id: "d25", start: "2(3a + b) - 3(a - b)", goal: "3a + 5b" },
@@ -122,7 +122,7 @@ export const distribute: Chapter = {
       id: "d27",
       start: "2y(y + 3) - y(y + 4)",
       goal: "y^2 + 2y",
-      hint: "Each factor in front visits both terms of its brackets. Then gather the y² terms and the y terms.",
+      hint: "Each factor in front multiplies both terms in its brackets. Then add the y² terms and the y terms.",
     },
     { id: "d28", start: "a(a + b) - b(a - b) - b^2", goal: "a^2" },
     { id: "d29", start: "3x(x + 2) - 2x(x + 1)", goal: "x^2 + 4x" },
