@@ -9,7 +9,7 @@ import type { Expr, Log } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, signId } from "../rules";
-import { allPuzzles, findPuzzle } from "../game/puzzles";
+import { allPuzzles, findPuzzle, startOf } from "../game/puzzles";
 import { solutionVia } from "../game/solver";
 import { MERGE_AT } from "./drag";
 import { ANCHOR, harness, show } from "./testing/harness";
@@ -407,6 +407,19 @@ describe("a square carried across = turns into ½ (13.30)", () => {
     const h = harness("(2^x)^2 = 48/3", r.rules);
     const square = (h.state.sides[0] as Extract<Expr, { kind: "pow" }>).exp;
     expect(candidatesFor(h.state, square.id, r.rules).map((c) => show(c.state))).toContain("2^x = (48/3)^(1/2)");
+    expect(checkAllMovesReachable(h.state, r.rules)).toEqual([]);
+  });
+});
+
+describe("undoing a square by hand, where nothing can be lost (12.23, 12.30)", () => {
+  it.each([
+    ["r23", "(2√x)^2 = 12", "2*√(x) = 12^(1/2)"],
+    ["r30", "x^2 = 4", "x = 4^(1/2)"], // letters stand for positive numbers in the roots chapter
+  ])("%s: %s", (id, src, expected) => {
+    const r = findPuzzle(id)!;
+    const h = harness(startOf(src, r.chapter), r.rules);
+    const square = (h.state.sides[0] as Extract<Expr, { kind: "pow" }>).exp;
+    expect(candidatesFor(h.state, square.id, r.rules).map((c) => show(c.state))).toContain(expected.replace(/\*/g, "*"));
     expect(checkAllMovesReachable(h.state, r.rules)).toEqual([]);
   });
 });

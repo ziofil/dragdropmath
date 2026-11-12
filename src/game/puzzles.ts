@@ -1,4 +1,6 @@
 import type { RuleId } from "../rules";
+import type { MathState } from "../expr/types";
+import { parseState } from "../expr/parse";
 import { shuffle } from "./chapters/shuffle";
 import { collect } from "./chapters/collect";
 import { distribute } from "./chapters/distribute";
@@ -113,6 +115,19 @@ function pathTo(ci: number): number[] {
 
 /** The moves in chapter `ci`: its own, and those of every chapter on the way to it. */
 export const rulesFor = (ci: number): RuleId[] => [...pathTo(ci), ci].flatMap((i) => CHAPTERS[i].unlocks);
+
+/**
+ * Chapters where letters stand for positive numbers (said on screen): there
+ * x² = 4 can become x = 4^(1/2), and √(x²) is x. See rules/signs.ts.
+ */
+const POSITIVE_LETTERS = new Set(["powers", "roots", "explog"]);
+export const lettersPositive = (chapter: Chapter) => POSITIVE_LETTERS.has(chapter.id);
+
+/** An exercise's start, with what its letters stand for. */
+export function startOf(start: string, chapter?: Chapter): MathState {
+  const s = parseState(start);
+  return chapter && lettersPositive(chapter) ? { ...s, letters: "positive" } : s;
+}
 
 export const chapterById = (id: string | undefined): Chapter | undefined => CHAPTERS.find((c) => c.id === id);
 

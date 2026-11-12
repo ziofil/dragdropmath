@@ -46,6 +46,12 @@ export function chapterNamed(name: string): Chapter | undefined {
   return CHAPTERS.find((c, i) => c.id === s || String(i + 1) === s || c.title.toLowerCase() === s);
 }
 
+/** The chapter whose moves an exercise in a set uses, if one is named. */
+export function chapterOf(set: ExerciseSet, ex: SetExercise): Chapter | undefined {
+  const name = ex.moves ?? set.moves;
+  return name === undefined ? undefined : chapterNamed(name);
+}
+
 /** The moves of an exercise in a set: its own chapter's, else the set's, else all. */
 export function movesOf(set: ExerciseSet, ex: SetExercise): RuleId[] {
   const name = ex.moves ?? set.moves;

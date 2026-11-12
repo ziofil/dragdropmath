@@ -5,6 +5,7 @@ import { evaluate, isConstant } from "../expr/eval";
 import { dragCtx, isEquation, partner, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
 import { asPower, fractionPart, raise as raiseTo } from "./shapes";
 import { roleOf, viewTerm } from "./view";
+import { assumeOf, canBeNegative } from "./signs";
 import { nodeAt } from "../expr/tree";
 
 // ---------- helpers ----------
@@ -477,12 +478,6 @@ export const splitSquare: Rule = {
  * Backwards only when the squared thing is a positive number, so no solution
  * is lost (x² = 9 → x = 9^(1/2) would drop x = −3).
  */
-/** Positive whatever its letters are: a positive number, or a power of one (2ˣ, eˣ). */
-function alwaysPositive(e: Expr): boolean {
-  if (isConstant(e)) return evaluate(e, {}) > 0;
-  return e.kind === "pow" && !e.radical && alwaysPositive(e.base);
-}
-
 export const rootAcross: Rule = {
   id: "root-across",
   name: "Undo a root (or square) across =",
@@ -495,18 +490,19 @@ export const rootAcross: Rule = {
     const sides = state.sides.slice();
     const other = partner(c.loc.side);
     const n = rootOrder(c.node);
-    // Only when the other side is a number ≥ 0: √x = −3 has no solution, and
-    // squaring would invent one (x = 9).
-    if (n && isConstant(sides[other]) && evaluate(sides[other], {}) >= 0) {
+    // Only when the other side can't be negative: √x = −3 has no solution,
+    // and squaring would invent one (x = 9).
+    if (n && !canBeNegative(sides[other], assumeOf(state))) {
       // The carried √ itself turns into the ² (same identity).
       sides[c.loc.side] = P.base;
       sides[other] = pow(sides[other], num(n, c.node.id));
       return [{ rule: "root-across", state: setSides(sides) }];
     }
-    if (c.node.kind === "num" && c.node.value >= 2 && alwaysPositive(P.base)) {
-      // …and the carried ² turns back into a ½ exponent: (2ˣ)² = 16 → 2ˣ = 16^(1/2).
-      // Only when what's squared can't be negative, or a solution would be
-      // lost (x² = 9 → x = 3, but x = −3 too).
+    if (c.node.kind === "num" && c.node.value >= 2 && !canBeNegative(P.base, assumeOf(state))) {
+      // …and the carried ² turns back into a ½ exponent: (2ˣ)² = 16 → 2ˣ = 16^(1/2),
+      // (2√x)² = 12 → 2√x = 12^(1/2). Only when what's squared can't be
+      // negative, or a solution would be lost (x² = 9: x = 3, but x = −3 too),
+      // unless the exercise says letters are positive.
       sides[c.loc.side] = P.base;
       sides[other] = pow(sides[other], frac(num(1), num(c.node.value), c.node.id));
       return [{ rule: "root-across", state: setSides(sides) }];

@@ -52,6 +52,12 @@ export type MathState = {
   /** Rows go together: all true at once (simultaneous equations). */
   join?: "and";
   /**
+   * What the letters stand for: "positive" where the exercise says so (the
+   * powers, roots and logs chapters), else any number. Moves whose correctness
+   * depends on a sign ask rules/signs.ts, which reads this.
+   */
+  letters?: "positive";
+  /**
    * Previews only: draw the side holding node `id` shifted so that node's
    * symbol starts at canvas x (a merge target staying put while it changes,
    * until the drop moves it where it belongs). Ignored by keys and rules.

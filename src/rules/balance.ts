@@ -4,13 +4,13 @@ import { evaluate, isConstant } from "../expr/eval";
 import { adopt, dragCtx, isEquation, partner, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
 import { fromTerms, rebuildTerm, roleOf, termsOf, viewTerm, type Role } from "./view";
 import { visibleOne } from "./shapes";
+import { assumeOf, isNegative, isPositive } from "./signs";
 
 /**
  * Multiplying or dividing both sides by a negative number turns an
  * inequality round (2 < 3, but −2 > −3); an equation stays as it is.
  */
-const turnedBy = (state: MathState, factor: Expr, result: MathState) =>
-  isConstant(factor) && evaluate(factor, {}) < 0 ? withFlippedRel(result, state) : result;
+const turnedBy = (state: MathState, factor: Expr, result: MathState) => (isNegative(factor, assumeOf(state)) ? withFlippedRel(result, state) : result);
 
 /** Dragging something across `=` (or <, ≤, ...) only makes sense in a 2-sided state. */
 function sideCtx(state: MathState, id: string): (DragCtx & { other: number }) | null {
@@ -157,9 +157,10 @@ function moveDenominatorRule(id: "move-denominator" | "move-letter-denominator",
 
 /**
  * Letters (and anything with letters in it) can only be carried across an
- * equation: an inequality would need to know their sign.
+ * equation: an inequality would need to know their sign — unless the
+ * exercise says letters are positive (see signs.ts).
  */
-const letterFactor = (e: Expr, state: MathState) => !isConstant(e) && relOf(state) === "=";
+const letterFactor = (e: Expr, state: MathState) => !isConstant(e) && (relOf(state) === "=" || isPositive(e, assumeOf(state)));
 
 export const moveFactor = moveFactorRule("move-factor", usefulFactor, "Drag a number multiplying a whole side across = — it divides the other side.");
 export const moveDenominator = moveDenominatorRule("move-denominator", nonzeroConstant, "Drag the bottom of a fraction across = — it multiplies the other side.");

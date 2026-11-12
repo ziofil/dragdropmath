@@ -191,7 +191,9 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
       // Rules rewrite sides; the relation carries over unless the move turns it round.
       // …and rows keep how they go together, unless the move says otherwise.
       const withRel = found.state.rel || !state.rel ? found : { ...found, state: { ...found.state, rel: state.rel } };
-      const cand = withRel.state.join || !state.join ? withRel : { ...withRel, state: { ...withRel.state, join: state.join } };
+      const withJoin = withRel.state.join || !state.join ? withRel : { ...withRel, state: { ...withRel.state, join: state.join } };
+      // …and what the letters stand for.
+      const cand = withJoin.state.letters || !state.letters ? withJoin : { ...withJoin, state: { ...withJoin.state, letters: state.letters } };
       const k = stateKey(cand.state, "exact");
       if (seen.has(k)) continue;
       seen.add(k);

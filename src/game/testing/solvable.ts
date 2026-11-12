@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { parseState } from "../../expr/parse";
-import { allPuzzles } from "../puzzles";
+import { allPuzzles, startOf } from "../puzzles";
 import { solutionVia } from "../solver";
 
 /** Every `n`th exercise from the `k`th. */
@@ -15,7 +15,7 @@ export function solvableShard(k: number, n: number) {
     it.each(mine.map((r) => [r.puzzle.id, r] as const))("%s can be solved", (_, ref) => {
       const { puzzle, rules } = ref;
       // Long ones are checked checkpoint by checkpoint (see Puzzle.via).
-      const way = solutionVia(parseState(puzzle.start), parseState(puzzle.goal), (puzzle.via ?? []).map(parseState), rules, {
+      const way = solutionVia(startOf(puzzle.start, ref.chapter), parseState(puzzle.goal), (puzzle.via ?? []).map(parseState), rules, {
         maxDepth: 10,
         maxStates: 120_000,
       });
