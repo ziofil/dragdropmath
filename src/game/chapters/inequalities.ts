@@ -116,7 +116,7 @@ export const inequalities: Chapter = {
     },
     { id: "i27", start: "-(x + 2) ≤ 2x - 5", goal: "x ≥ 1" },
     { id: "i28", start: "5(n - 1) ≥ 2(n + 2)", goal: "n ≥ 3", via: ["5*n ≥ 2*n + 2*2 + 5", "n ≥ (2*2 + 5)/3"] },
-    { id: "i29", start: "3(2 - p) > 2(p - 2)", goal: "p < 2", via: ["-3p - 2p > -2·2 - 3·2"] },
+    { id: "i29", start: "3(2 - p) > 2(p - 2)", goal: "p < 2", via: ["3*2 > 2*p - 2*2 + 3*p", "10 > 5*p"] },
     { id: "i30", start: "2(3x - 1) > 4(x + 1) - x", goal: "x > 2", via: ["2*3*x > 4*x + 4 - x + 2", "2*3*x - 3*x > 6"] },
   ],
 };

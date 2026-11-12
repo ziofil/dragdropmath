@@ -93,7 +93,7 @@ describe("every hand step across = is a move", () => {
  * no symbol left that picks up the whole term. Open design question.
  */
 const KNOWN_STUCK: Record<string, string[]> = {
-  "x(x + 2) + 3(x + 2)": ["x*(x + 2)", "3*(x + 2)"],
+  "x(x + 2) + 3(x + 2)": ["x*(x + 2)"],
   "(x + 1)(x - 1) + 1": ["(x + 1)*(x - 1)"],
   "(a + 1)(a + 2) - a^2": ["(a + 1)*(a + 2)"],
   "(a + 3)(a - 1) - 2a": ["(a + 3)*(a - 1)"],

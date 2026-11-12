@@ -172,7 +172,7 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   const inert = rootParts(state);
   const drag = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
   const tap = memo((id) => (inert.has(id) ? null : (collect(state, id, tapRules)[0] ?? null)));
-  const grabbable = memo((id) => drag(id).some((c) => !isCosmetic(state, id, c) && !c.secondary));
+  const grabbable = memo((id) => !partOfUnit(state, id) && drag(id).some((c) => !isCosmetic(state, id, c) && !c.secondary));
   const tappable = memo((id) => tap(id) !== null);
   const moves = { drag, tap, grabbable, tappable };
   byRules.set(rulesKey, moves);
@@ -231,6 +231,28 @@ export function isCosmetic(state: MathState, draggedId: string, c: Candidate): b
  */
 export function forgetMoves(state: MathState): void {
   cache.delete(state);
+}
+
+/**
+ * In a term like 3ln(x), 5x, −2√y or −ln(x) among other terms, the thing the
+ * number (or minus) counts is one unit with it: a press on it carries the whole
+ * term — to move it, combine it, carry it across — never the thing alone. (The
+ * number stays a handle of its own: it can go into the log, multiply, ….)
+ */
+function partOfUnit(state: MathState, id: string): boolean {
+  const c = dragCtx(state, id);
+  const P = c?.parent;
+  if (!c || c.node.kind === "num") return false;
+  // −ln(x): what the minus negates goes with its term too.
+  if (P?.kind === "neg") {
+    const r = roleOf(state, P.id);
+    return r !== null && r.part === "term" && r.terms.length >= 2;
+  }
+  if (P?.kind !== "prod") return false;
+  const things = P.factors.filter((f) => f.kind !== "num");
+  if (things.length !== 1 || things.length === P.factors.length) return false;
+  const r = roleOf(state, P.id);
+  return r !== null && r.terms.length >= 2;
 }
 
 /** The state without "copied from" marks from earlier moves (keeps the object when there are none). */
