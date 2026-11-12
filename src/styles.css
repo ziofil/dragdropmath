@@ -1198,3 +1198,17 @@ button.choice:focus-visible {
 .set-own {
   margin-top: 24px;
 }
+
+.solved-before {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  color: var(--good);
+  font-size: 0.9rem;
+}
+.assume {
+  flex-basis: 100%;
+  margin: 0 0 6px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}

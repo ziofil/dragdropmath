@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
-import { allPuzzles, CHAPTERS, type Chapter, type PuzzleRef } from "../game/puzzles";
+import { allPuzzles, CHAPTERS, lettersPositive, type Chapter, type PuzzleRef } from "../game/puzzles";
 import type { RuleId } from "../rules";
 import { matchesGoal } from "../game/solver";
 import { badgeTier, loadSolved, markSolved, type Tier } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
-import { choicesFor, loadGuesses, saveGuess } from "../game/guess";
+import { choicesFor, loadGuesses, loadPicks, saveGuess } from "../game/guess";
 import { Badge, tierName } from "./Badge";
 import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
 
@@ -35,6 +35,8 @@ export type Exercise = {
   onward: Link;
   /** The chapter whose badge solving it counts towards. */
   badgeOf?: Chapter;
+  /** Its letters stand for positive numbers (said on screen; see rules/signs.ts). */
+  positiveLetters?: boolean;
 };
 
 /** A learning-path exercise, as the exercise screen shows it. */
@@ -56,12 +58,13 @@ export function exerciseOfPath(pref: PuzzleRef): Exercise {
     next: next && { href: `#/p/${next.puzzle.id}`, text: next.label },
     onward: next && next.chapter === chapter ? { href: `#/p/${next.puzzle.id}`, text: "Next exercise →" } : { href: `#/at/${chapter.id}`, text: "Back to the learning path" },
     badgeOf: chapter,
+    positiveLetters: lettersPositive(chapter),
   };
 }
 
 export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const { puzzle, rules, badgeOf: chapter } = ex;
-  const start = useMemo(() => parseState(puzzle.start), [puzzle]);
+  const start = useMemo((): MathState => ({ ...parseState(puzzle.start), ...(ex.positiveLetters ? { letters: "positive" as const } : {}) }), [puzzle, ex.positiveLetters]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
@@ -72,11 +75,17 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   // Guess first (the chapter's last exercises): pick what it becomes before solving it.
   const choices = ex.choices;
   const [guessed, setGuessed] = useState<string | null>(null);
-  const guessedBefore = useMemo(() => loadGuesses()[puzzle.id] !== undefined, [puzzle.id]);
+  // What was done on an earlier visit: shown again, and it can all be done again.
+  const before = useMemo(() => ({ guess: loadGuesses()[puzzle.id], pick: loadPicks()[puzzle.id], solved: loadSolved().has(puzzle.id) }), [puzzle.id]);
+  const guessedBefore = before.guess !== undefined;
   const pick = (choice: string) => {
     setGuessed(choice);
-    saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong");
+    saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
   };
+  // The answers to show as answered: this visit's pick, or an earlier one.
+  const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
+  const shownPick = guessed ?? before.pick ?? (before.guess === "right" ? puzzle.goal : null);
+  const answered = choices !== null && (guessed !== null || earlier);
   // Skip the guess: just show what it becomes (no star).
   const [revealed, setRevealed] = useState(false);
   const reveal = () => {
@@ -179,30 +188,43 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           </button>
         </section>
       ) : (
-        <section className={`goal ${guessed !== null && choices ? "guess" : ""}`}>
-          {guessed !== null && choices && (
-            <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
-              {guessed === puzzle.goal ? (
+        <section className={`goal ${answered ? "guess" : ""}`}>
+          {earlier && (
+            <div className={`guess-result ${before.guess}`}>
+              {before.guess === "right" ? (
                 <>
-                  <span className="star" aria-hidden="true">★</span> Right first time! Now show it.
+                  <span className="star" aria-hidden="true">★</span> You guessed this one right first time.
                 </>
               ) : (
-                <>Not quite: the green one is what it becomes. Solving it will show where yours went wrong.</>
+                <>Your first guess was {before.pick ? "the red one" : "wrong"}. The green one is right.</>
               )}
             </div>
           )}
           {guessed !== null && choices && (
+            <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
+              {guessed === puzzle.goal ? (
+                <>
+                  <span className="star" aria-hidden="true">★</span> Right first time. Now solve it.
+                </>
+              ) : (
+                <>Not quite. The green one is right. Solve it to see where yours went wrong.</>
+              )}
+            </div>
+          )}
+          {answered && (
             // The three answers stay: the right one green, a wrong pick red.
             <div className="choices answered">
               {choices.map((c) => (
-                <div key={c} className={`choice ${c === puzzle.goal ? "is-right" : c === guessed ? "is-picked" : ""}`}>
+                <div key={c} className={`choice ${c === puzzle.goal ? "is-right" : c === shownPick ? "is-picked" : ""}`}>
                   <StaticMath state={parseState(c)} height={90} />
                 </div>
               ))}
             </div>
           )}
+          {before.solved && !solved && <p className="solved-before">✓ You've solved this one before. You can solve it again.</p>}
           <span className="goal-label">Make it look like</span>
           <StaticMath state={goal} />
+          {ex.positiveLetters && <p className="assume">Here, letters stand for positive numbers.</p>}
         </section>
       )}
 
@@ -240,7 +262,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           {chapter && tiers.after > tiers.before && (
             <div className="new-badge">
               <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
-              {tierName(tiers.after)} badge for {chapter.title}!
+              {tierName(tiers.after)} badge for {chapter.title}.
             </div>
           )}
           <a className="button primary" href={ex.onward.href}>

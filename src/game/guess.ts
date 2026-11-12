@@ -35,13 +35,25 @@ export function loadGuesses(): Record<string, Guess> {
   }
 }
 
-/** Remember the first guess for an exercise (later ones don't count). */
-export function saveGuess(id: string, guess: Guess): void {
+const PICKS = "mathbyhand.picks.v1";
+
+/** Which answer was picked first, per exercise (to show it again on a later visit). */
+export function loadPicks(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(PICKS) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+/** Remember the first guess for an exercise, and the answer picked (later ones don't count). */
+export function saveGuess(id: string, guess: Guess, pick?: string): void {
   const all = loadGuesses();
   if (all[id]) return;
   all[id] = guess;
   try {
     localStorage.setItem(KEY, JSON.stringify(all));
+    if (pick !== undefined) localStorage.setItem(PICKS, JSON.stringify({ ...loadPicks(), [id]: pick }));
   } catch {
     /* storage unavailable: the star just won't persist */
   }

@@ -8,7 +8,8 @@ import { parseState } from "../expr/parse";
 import { choicesFor, loadGuesses } from "../game/guess";
 import { loadSolved } from "../game/scoring";
 import { autoDecoys } from "../game/autoDecoys";
-import { decodeSet, encodeSet, EXAMPLE_SET, movesOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
+import { chapterOf, decodeSet, encodeSet, EXAMPLE_SET, movesOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
+import { lettersPositive } from "../game/puzzles";
 import type { SolveAnswer, SolveRequest } from "../game/solveWorker";
 import { StaticMath } from "./MathCanvas";
 import { PuzzleView, type Exercise } from "./PuzzleView";
@@ -71,8 +72,8 @@ export function SetMaker() {
       </a>
       <h1>Your own exercises</h1>
       <p>
-        Write a set of exercises (for your students, say) and share it as a link. Each one is guessed first, then
-        solved by hand. Nothing is stored online: the whole set travels inside the link.
+        Write a set of exercises, for example for your students, and share it as a link. For each exercise, students
+        guess the answer first, then solve it by hand. Nothing is stored online: the whole set is saved in the link.
       </p>
       <div className="maker-actions">
         <button onClick={() => file.current?.click()}>Upload a .yaml file</button>
@@ -130,7 +131,7 @@ export function SetMaker() {
                       {s === "checking"
                         ? "Checking it can be solved with these moves…"
                         : s === null
-                          ? "Couldn't find a way to solve it with these moves in 10 steps: it may need moves of a later chapter (`moves:`)."
+                          ? "Couldn't solve it in 10 steps with these moves. It may need moves from a later chapter (`moves:`)."
                           : `Can be solved in ${s} move${s === 1 ? "" : "s"}.`}
                     </span>
                   )}
@@ -220,6 +221,7 @@ function exerciseOfSet(set: ExerciseSet, code: string, n: number): Exercise | nu
     prev: n > 1 ? { href: at(n - 1), text: `${n - 1}` } : undefined,
     next: n < count ? { href: at(n + 1), text: `${n + 1}` } : undefined,
     onward: n < count ? { href: at(n + 1), text: "Next exercise →" } : { href: `#/set/${code}`, text: `Back to ${set.title}` },
+    positiveLetters: chapterOf(set, ex) ? lettersPositive(chapterOf(set, ex)!) : false,
   };
 }
 
@@ -256,7 +258,7 @@ function SetPage({ set, code }: { set: ExerciseSet; code: string }) {
       <h1>{set.title}</h1>
       <p>
         {done} of {set.exercises.length} solved · <span className="star">★</span> {stars} guessed right first time. For each one,
-        guess what it becomes first, then show it by hand.
+        guess the answer first, then solve it by hand.
       </p>
       <ol className="exercises set-exercises">
         {set.exercises.map((ex, i) => {
