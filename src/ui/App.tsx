@@ -40,11 +40,17 @@ export function App() {
         <a href="#/" className="logo">
           math by hand<span>.</span>
         </a>
-        {debug && (
-          <button className="debug-badge" onClick={() => setDebug(false)} title="Debug mode is on (Shift+D)">
-            debug ✕
-          </button>
-        )}
+        <span className="top-right">
+          {debug && (
+            <button className="debug-badge" onClick={() => setDebug(false)} title="Debug mode is on (Shift+D)">
+              debug ✕
+            </button>
+          )}
+          {/* For teachers (or anyone): write exercises and share them as a link. */}
+          <a href="#/sets/new" className="top-link" aria-current={making ? "page" : undefined}>
+            Make exercises
+          </a>
+        </span>
       </nav>
       {making ? (
         <SetMaker />

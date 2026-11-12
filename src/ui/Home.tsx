@@ -47,10 +47,6 @@ export function Home({ at }: { at?: Chapter }) {
 
       <Shelf solved={solved} onSelect={select} />
 
-      <p className="own-sets">
-        Teaching? <a href="#/sets/new">Make a set of exercises of your own</a> and share it as a link.
-      </p>
-
       <div className="path-layout" ref={pathRef}>
         <section className="path-card" aria-label="Learning path">
           <div className="path-legend">
