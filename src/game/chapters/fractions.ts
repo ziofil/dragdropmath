@@ -126,7 +126,7 @@ export const fractions: Chapter = {
     },
     { id: "f18", start: "x/2 + x/3", goal: "(5x)/6" },
     { id: "f24", start: "2/3 - 1/4", goal: "5/12" },
-    { id: "f25", start: "(n^2 - 4n)/(2n - 8)", goal: "n/2" },
+    { id: "f25", start: "(n^2 - 4n)/(2n - 8)", goal: "n/2", via: ["(n*(n - 4))/(2*n - 8)"] },
     { id: "f26", start: "(2x + 6)/3 = 4", goal: "x = 3" },
     { id: "f27", start: "x/2 = 1 + 1/2", goal: "x = 3" },
     { id: "f29", start: "(k^2 + 2k)/k = 5", goal: "k = 3" },

@@ -21,7 +21,8 @@ import type { MathState } from "../../expr/types";
 import { allNodes, children } from "../../expr/tree";
 import { signId } from "../../rules";
 import { dragCtx } from "../../rules/types";
-import { clamp01 } from "../geometry";
+import { canvasBox, carriedCentre, clamp01 } from "../geometry";
+import { stateKey } from "../../expr/key";
 import { textWidth } from "../measure";
 import { fadeGlyphs, fadeGlyphsEverywhere, fadeLayer, layerChildren, redrawLayer, transplant } from "../preview";
 import { glyph, LEAD, type RenderCtx } from "../typeset";
@@ -37,12 +38,18 @@ class FlipSign extends Modifier<MathState> {
   /** The sign waiting at the destination in the result: a "+" glyph in the row, or a new − (its layer and its own handle). */
   private readonly waiting: { glyphs?: Set<string>; layers: string[] };
   t = 0;
+  /** The row the piece is carried along (its symbol's middle), and how far off it still counts as in it. */
+  private readonly rowY: number;
+  private readonly rowBand: number;
+  /** What letting go into a merge would give: then it's not crossing. */
+  private readonly merges: Set<string>;
 
   constructor(
     ctx: DragInitContext<MathState>,
     inner: DragSpecData<MathState>,
     readonly rc: RenderCtx,
     readonly result: MathState,
+    merges: readonly MathState[] = [],
   ) {
     super(ctx, inner);
     const id = ctx.draggedId!;
@@ -51,8 +58,12 @@ class FlipSign extends Modifier<MathState> {
     const c = dragCtx(rc.state, id)!;
     this.negative = c.node.kind === "neg";
     const eq = rc.eq!;
-    [this.from, this.to] = c.loc.side === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
+    // Even sides are left sides (rows: 0 = 1, 2 = 3, …).
+    [this.from, this.to] = c.loc.side % 2 === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
     const size = rc.fontSizes!.get(id)!;
+    this.rowY = canvasBox(rc, ctx, id).centre.y;
+    this.rowBand = 0.5 * size;
+    this.merges = new Set(merges.map((m) => stateKey(m, "exact")));
     const me = rc.sizes!.get(id)!;
     // The new sign sits where the row will draw it: right before the term's body.
     const L = this.negative ? LEAD.plus : LEAD.minus;
@@ -69,8 +80,13 @@ class FlipSign extends Modifier<MathState> {
   frame(frame: DragFrame) {
     const r = this.inner.run(frame);
     // The sign changes while the cursor crosses the = itself: old sign before it, new sign past it.
-    const t = (this.t = clamp01((frame.pointer.x - this.from) / (this.to - this.from)));
     const onMove = r.dropState === this.result;
+    // Only while it's carried along its own row, and letting go would cross
+    // it or put it back: heading anywhere else (into a merge, into another
+    // equation) the piece keeps its own sign.
+    const inRow = Math.abs(carriedCentre(this.rc, this.ctx, frame.pointer).y - this.rowY) < this.rowBand;
+    const crossing = inRow && (onMove || !this.merges.has(stateKey(r.dropState, "exact")));
+    const t = (this.t = crossing ? clamp01((frame.pointer.x - this.from) / (this.to - this.from)) : 0);
     return { ...r, preview: () => this.dress(r.preview(), t, onMove) };
   }
 

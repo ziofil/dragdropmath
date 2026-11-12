@@ -12,6 +12,7 @@
   --good: #0f9d74;
   --good-soft: #d6f5ea;
   --warn: #c2410c;
+  --warn-soft: #fde4d6;
   --gold: #e6a700;
   --gold-face: #fff1c2;
   --silver: #8d96a6;
@@ -39,6 +40,7 @@
     --good: #3dd6a5;
     --good-soft: #163a30;
     --warn: #fb923c;
+    --warn-soft: #3d2216;
     --gold: #f2c230;
     --gold-face: #3d3214;
     --silver: #b9c1cf;
@@ -961,14 +963,16 @@ span.ex-step {
 
 
 /* ---------- guess first ---------- */
-.goal.guess,
-.goal:has(.guess-result) {
+.goal.guess {
   flex-wrap: wrap;
   padding: 12px 16px;
 }
 .goal.guess .goal-label,
-.guess-result,
-.guess-missed {
+.guess-result {
+  flex-basis: 100%;
+}
+/* After the guess, the goal below the answers gets a row of its own. */
+.goal.guess > .static-math {
   flex-basis: 100%;
 }
 .choices {
@@ -990,9 +994,20 @@ span.ex-step {
   color: var(--ink);
   cursor: pointer;
 }
-.choice:hover,
-.choice:focus-visible {
+button.choice:hover,
+button.choice:focus-visible {
   border-color: var(--accent);
+}
+.choices.answered .choice {
+  cursor: default;
+}
+.choice.is-right {
+  border-color: var(--good);
+  background: var(--good-soft);
+}
+.choice.is-picked {
+  border-color: var(--warn);
+  background: var(--warn-soft);
 }
 .guess-result {
   font-weight: 600;
@@ -1002,15 +1017,6 @@ span.ex-step {
 }
 .guess-result.wrong {
   color: var(--warn);
-}
-.guess-missed {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  opacity: 0.7;
-}
-.guess-missed .static-math {
-  text-decoration: line-through;
 }
 .star,
 .ex-star {

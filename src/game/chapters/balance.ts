@@ -129,7 +129,7 @@ export const balance: Chapter = {
     { id: "b25", start: "(x + 1)/2 = x - 3", goal: "x = 7" },
     { id: "b26", start: "3(2x - 1) = 4x + 5", goal: "x = 4" },
     { id: "b27", start: "2(3 - x) = x - 9", goal: "x = 5" },
-    { id: "b28", start: "4(x + 1) = 2(x + 5) + x", goal: "x = 6" },
+    { id: "b28", start: "4(x + 1) = 2(x + 5) + x", goal: "x = 6", via: ["4*x = 2*x + 2*5 + x - 4"] },
     { id: "b29", start: "7 - 3(x - 1) = x - 2", goal: "x = 3" },
     { id: "b30", start: "(x + 5)/3 = x - 1", goal: "x = 4" },
   ],

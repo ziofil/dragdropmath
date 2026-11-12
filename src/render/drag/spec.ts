@@ -95,7 +95,7 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
   const flips = away.find((c) => feelOf(c).wears === "flip-sign");
   if (grows) moves = moves.with(growLog(rc, grows.state));
   else if (sheds.length) moves = moves.with(shedLog(rc, sheds));
-  else if (flips) moves = moves.with(flipSign(rc, flips.state));
+  else if (flips) moves = moves.with(flipSign(rc, flips.state, candidates.filter((c) => c.targetId).map((c) => c.state)));
 
   // Switching between moves (staying in the row, across the =, out in front …) slides too.
   moves = moves.withBranchTransition(SLIDE);

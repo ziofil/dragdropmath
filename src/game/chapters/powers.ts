@@ -111,7 +111,7 @@ export const powers: Chapter = {
     { id: "w24", start: "2x(x^2 + 1) - x^3", goal: "x^3 + 2x" },
     { id: "w25", start: "x^-1·(x^3 + x)", goal: "x^2 + 1", hint: "x⁻¹ meets each term: x⁻¹ times x is x⁰." },
     { id: "w27", start: "(x^2 + x)(x - 1)", goal: "x^3 - x" },
-    { id: "w28", start: "(a^2 + b)(a^2 - b)", goal: "a^4 - b^2" },
+    { id: "w28", start: "(a^2 + b)(a^2 - b)", goal: "a^4 - b^2", via: ["a^4 - a^2*b + b*(a^2 - b)"] },
     { id: "w29", start: "(2x^2)^2 + x(x^3 - 1)", goal: "5x^4 - x" },
     { id: "w30", start: "(x^2 + 3)^2", goal: "x^4 + 6x^2 + 9", hint: "Write it as (x² + 3)(x² + 3) and let every term meet every term." },
   ],

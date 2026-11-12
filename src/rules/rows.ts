@@ -3,9 +3,9 @@
  * another.
  */
 import type { Expr } from "../expr/types";
-import { cloneFresh } from "../expr/build";
-import { allNodes, children, withChildren } from "../expr/tree";
-import { dragCtx, partner, setSides, type Candidate, type Rule } from "./types";
+import { cloneFresh, freshId } from "../expr/build";
+import { allNodes, children, withChildren, withoutFrom } from "../expr/tree";
+import { adopt, dragCtx, partner, setSides, type Candidate, type Rule } from "./types";
 
 /**
  * y = 2x and x + y = 9 → x + 2x = 9: a letter that one equation gives alone
@@ -30,7 +30,13 @@ export const substitute: Rule = {
         .filter((n) => n.kind === "var" && n.name === name)
         .map((target) => {
           const sides = state.sides.slice();
-          sides[i] = replaceNode(s, target.id, cloneFresh(value));
+          // The x there turns into the value right where it is (x → 4 in
+          // place: the value keeps the target's identity, and nothing flies
+          // over from the other equation)…
+          sides[i] = replaceNode(s, target.id, adopt(withoutFrom(cloneFresh(value)), target.id));
+          // …and the carried x is absorbed into it, while the x of x = 4 stays
+          // where it was (a piece of its own, so the carried one doesn't fly back).
+          sides[c.loc.side] = { ...c.node, id: freshId() };
           return { rule: "substitute", state: { ...setSides(sides), rel: state.rel, join: state.join }, targetId: target.id };
         });
     });

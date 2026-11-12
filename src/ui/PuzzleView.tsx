@@ -136,7 +136,7 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
           </button>
         </section>
       ) : (
-        <section className="goal">
+        <section className={`goal ${guessed !== null && choices ? "guess" : ""}`}>
           {guessed !== null && choices && (
             <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
               {guessed === puzzle.goal ? (
@@ -144,14 +144,18 @@ export function PuzzleView({ puzzleRef: pref }: { puzzleRef: PuzzleRef }) {
                   <span className="star" aria-hidden="true">★</span> Right first time! Now show it.
                 </>
               ) : (
-                <>Not quite. This is what it becomes: solving it will show where the other one went wrong.</>
+                <>Not quite: the green one is what it becomes. Solving it will show where yours went wrong.</>
               )}
             </div>
           )}
-          {guessed !== null && guessed !== puzzle.goal && (
-            <div className="guess-missed">
-              <span className="goal-label">Your guess</span>
-              <StaticMath state={parseState(guessed)} height={70} />
+          {guessed !== null && choices && (
+            // The three answers stay: the right one green, a wrong pick red.
+            <div className="choices answered">
+              {choices.map((c) => (
+                <div key={c} className={`choice ${c === puzzle.goal ? "is-right" : c === guessed ? "is-picked" : ""}`}>
+                  <StaticMath state={parseState(c)} height={90} />
+                </div>
+              ))}
             </div>
           )}
           <span className="goal-label">Make it look like</span>

@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:quick": "vitest run --exclude 'src/**/exercises.*.test.tsx' --exclude 'src/**/solvable.*.test.ts' --exclude 'node_modules/**'",
     "test:all": "SLOW=1 vitest run",
     "typecheck": "tsc -p tsconfig.json",
     "deploy": "npm run build && wrangler deploy"

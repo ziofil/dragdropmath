@@ -28,7 +28,7 @@ class TurnRelation extends Modifier<MathState> {
     const id = ctx.draggedId!;
     const side = locate(rc.state, signOwner(id) ?? id)?.side ?? 0;
     const eq = rc.eq!;
-    [this.from, this.to] = side === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
+    [this.from, this.to] = side % 2 === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
   }
 
   frame(frame: DragFrame) {
