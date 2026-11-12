@@ -2,6 +2,7 @@ import { CHAPTERS, exerciseLabel, type Chapter } from "../game/puzzles";
 import { badgeTier, solvedCount } from "../game/scoring";
 import { choicesFor, loadGuesses, starsIn } from "../game/guess";
 import { Badge, BadgeNote } from "./Badge";
+import { t } from "../i18n";
 
 /** Where a chapter stands (badge, solved count, what the next badge takes), then its exercises as cards. */
 export function ChapterProgress({ chapter, solved }: { chapter: Chapter; solved: ReadonlySet<string> }) {
@@ -14,14 +15,14 @@ export function ChapterProgress({ chapter, solved }: { chapter: Chapter; solved:
       <div className="panel-progress">
         <Badge tier={badgeTier(chapter, solved)} n={ci + 1} size={30} />
         <span>
-          {solvedCount(chapter, solved)} of {chapter.puzzles.length} exercises solved
+          {t().solvedOf(solvedCount(chapter, solved), chapter.puzzles.length)}
           <br />
           <BadgeNote chapter={chapter} solved={solved} />
           {toGuess > 0 && (
             <>
               <br />
               <span className="stars-note">
-                <span className="star" aria-hidden="true">★</span> {stars} of {toGuess} guessed right first time
+                <span className="star" aria-hidden="true">★</span> {t().guessedRight(stars, toGuess)}
               </span>
             </>
           )}
@@ -32,20 +33,20 @@ export function ChapterProgress({ chapter, solved }: { chapter: Chapter; solved:
           const ok = solved.has(p.id);
           return (
             <li key={p.id}>
-              <a href={`#/p/${p.id}`} className={`ex-card ${ok ? "solved" : ""}`} title={`Exercise ${exerciseLabel(ci, i)}${ok ? " — solved" : ""}`}>
+              <a href={`#/p/${p.id}`} className={`ex-card ${ok ? "solved" : ""}`} title={t().exerciseTitle(exerciseLabel(ci, i), ok)}>
                 <span className="ex-num">{exerciseLabel(ci, i)}</span>
                 {ok && (
-                  <span className="ex-check" aria-label="solved">
+                  <span className="ex-check" aria-label={t().solved}>
                     ✓
                   </span>
                 )}
                 {guesses[p.id] === "right" && (
-                  <span className="ex-star" aria-label="guessed right first time">
+                  <span className="ex-star" aria-label={t().guessedRightFirstTime}>
                     ★
                   </span>
                 )}
                 {choicesFor(p) && !guesses[p.id] && (
-                  <span className="ex-guess" aria-label="guess first" title="Guess first">
+                  <span className="ex-guess" aria-label={t().guessFirstShort} title={t().guessFirstShort}>
                     ?
                   </span>
                 )}

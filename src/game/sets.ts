@@ -24,6 +24,8 @@ import { ALL_RULES } from "../rules";
 import { CHAPTERS, rulesFor, type Chapter } from "./puzzles";
 import { follows, isWrong, shapeMismatch } from "./answers";
 import { autoDecoys } from "./autoDecoys";
+import { allTitles, en, t } from "../i18n";
+import type { Mismatch } from "./answers";
 
 export type SetExercise = { start: string; goal: string; wrong?: string[]; hint?: string; moves?: string };
 export type ExerciseSet = { title: string; moves?: string; exercises: SetExercise[] };
@@ -40,10 +42,15 @@ export type CheckedExercise = {
 
 export type CheckedSet = { set: ExerciseSet | null; problems: string[]; exercises: CheckedExercise[] };
 
-/** A chapter named by its id, its number (1, 2, …) or its title. */
+/** A chapter named by its id, its number (1, 2, …) or its title (in any language: a set is shared across them). */
 export function chapterNamed(name: string): Chapter | undefined {
   const s = String(name).trim().toLowerCase();
-  return CHAPTERS.find((c, i) => c.id === s || String(i + 1) === s || c.title.toLowerCase() === s);
+  return CHAPTERS.find((c, i) => c.id === s || String(i + 1) === s || allTitles(c).some((title) => title.toLowerCase() === s));
+}
+
+function why(m: Mismatch): string {
+  const s = t().set;
+  return m.kind === "count" ? s.shapeCount : m.kind === "relation" ? s.shapeRelation : s.shapeIsolated(m.letter);
 }
 
 /** The chapter whose moves an exercise in a set uses, if one is named. */
@@ -75,17 +82,18 @@ export function readSet(text: string): CheckedSet {
   try {
     raw = parseYaml(text);
   } catch (e) {
-    return { set: null, problems: [`This isn't valid YAML: ${(e as Error).message.split("\n")[0]}`], exercises: [] };
+    return { set: null, problems: [t().set.badYaml((e as Error).message.split("\n")[0])], exercises: [] };
   }
+  const s = t().set;
   const obj = (raw ?? {}) as Record<string, unknown>;
   const problems: string[] = [];
-  if (typeof raw !== "object" || Array.isArray(raw)) problems.push("Expected `title:` and `exercises:` at the top.");
-  const title = str(obj.title) || "My exercises";
+  if (typeof raw !== "object" || Array.isArray(raw)) problems.push(s.expectedTop);
+  const title = str(obj.title) || s.defaultTitle;
   const moves = str(obj.moves);
-  if (moves !== undefined && !chapterNamed(moves)) problems.push(`No chapter called "${moves}" for \`moves:\` (use a chapter's number, id or title).`);
+  if (moves !== undefined && !chapterNamed(moves)) problems.push(s.noChapter(moves));
   const list = Array.isArray(obj.exercises) ? obj.exercises : [];
-  if (!Array.isArray(obj.exercises)) problems.push("Expected a list under `exercises:`.");
-  else if (list.length === 0) problems.push("The list under `exercises:` is empty.");
+  if (!Array.isArray(obj.exercises)) problems.push(s.expectedList);
+  else if (list.length === 0) problems.push(s.emptyList);
 
   const exercises: SetExercise[] = list.map((item) => {
     const o = (item ?? {}) as Record<string, unknown>;
@@ -100,28 +108,30 @@ function checkExercise(ex: SetExercise, n: number): CheckedExercise {
   const problems: string[] = [];
   const notes: string[] = [];
   let decoys: string[] = [];
-  if (!ex.start) problems.push("It needs a `start:`.");
-  if (!ex.goal) problems.push("It needs a `goal:`.");
-  if (ex.moves && !chapterNamed(ex.moves)) problems.push(`No chapter called "${ex.moves}" for \`moves:\`.`);
+  const s = t().set;
+  if (!ex.start) problems.push(s.needsStart);
+  if (!ex.goal) problems.push(s.needsGoal);
+  if (ex.moves && !chapterNamed(ex.moves)) problems.push(s.noChapterShort(ex.moves));
   const start = ex.start ? tryParse(ex.start) : null;
   const goal = ex.goal ? tryParse(ex.goal) : null;
-  if (typeof start === "string") problems.push(`Can't read the start: ${start}`);
-  if (typeof goal === "string") problems.push(`Can't read the goal: ${goal}`);
+  if (typeof start === "string") problems.push(s.cantReadStart(start));
+  if (typeof goal === "string") problems.push(s.cantReadGoal(goal));
   if (start && goal && typeof start !== "string" && typeof goal !== "string") {
-    if (!follows(start, goal)) problems.push("The goal doesn't follow from the start (check for a typo).");
+    if (!follows(start, goal)) problems.push(s.doesntFollow);
     if (ex.wrong) {
-      if (ex.wrong.length !== 2) problems.push("`wrong:` should list two wrong answers.");
+      if (ex.wrong.length !== 2) problems.push(s.twoWrong);
       for (const w of ex.wrong) {
-        const s = tryParse(w);
-        if (typeof s === "string") problems.push(`Can't read the wrong answer "${w}": ${s}`);
-        else if (shapeMismatch(goal, s)) problems.push(`The wrong answer "${w}" doesn't look like the goal: ${shapeMismatch(goal, s)}.`);
-        else if (!isWrong(goal, s) || follows(start, s)) problems.push(`The wrong answer "${w}" is actually right.`);
+        const parsed = tryParse(w);
+        const mismatch = typeof parsed === "string" ? null : shapeMismatch(goal, parsed);
+        if (typeof parsed === "string") problems.push(s.cantReadWrong(w, parsed));
+        else if (mismatch) problems.push(s.wrongShape(w, why(mismatch)));
+        else if (!isWrong(goal, parsed) || follows(start, parsed)) problems.push(s.wrongIsRight(w));
       }
       decoys = ex.wrong.slice(0, 2);
     } else {
       decoys = autoDecoys(start, goal);
-      if (decoys.length < 2) notes.push("No convincing wrong answers could be made: add `wrong:`, or it's solved without guessing.");
-      else notes.push(`Wrong answers made for guessing: ${decoys.join(", ")}.`);
+      if (decoys.length < 2) notes.push(s.noDecoys);
+      else notes.push(s.decoysMade(decoys.join(", ")));
     }
   }
   return { n, exercise: ex, problems, notes, decoys: problems.length || decoys.length < 2 ? [] : decoys };
@@ -166,18 +176,5 @@ export function setKey(code: string): string {
   return h.toString(36);
 }
 
-/** An example to start from. */
-export const EXAMPLE_SET = `title: Homework week 3
-# Moves up to "Solving equations" (a chapter's number, id or title). Leave out for all moves.
-moves: balance
-exercises:
-  - start: 2x + 3 = 11
-    goal: x = 4
-    # Two wrong answers to guess between (optional: else they're made for you).
-    wrong: [x = 7, x = 8]
-  - start: x/3 - 2 = 1
-    goal: x = 9
-    hint: The 2 leaves first, then the 3.
-  - start: 5 - (x - 1) = 2
-    goal: x = 4
-`;
+/** An example to start from (in English; the set maker shows it in the reader's language). */
+export const EXAMPLE_SET = en.exampleSet;

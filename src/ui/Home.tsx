@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 
 import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
 import { layoutPath, suggested } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, isMastered, loadSolved, solvedCount, TIER_NAMES } from "../game/scoring";
+import { badgeTier, isMastered, loadSolved, solvedCount } from "../game/scoring";
+import { chapterText, t } from "../i18n";
 import { Badge } from "./Badge";
 import { ChapterProgress } from "./ChapterProgress";
 
@@ -37,26 +38,25 @@ export function Home({ at }: { at?: Chapter }) {
     <main className="home">
       <section className="hero">
         <h1>
-          Algebra you can <FeelWord />.
+          {t().heroBefore}
+          <FeelWord word={t().heroWord} />
+          {t().heroAfter}
         </h1>
-        <p>
-          Drag any part of an equation. It can only move in ways the maths allows. Rearrange it until it matches
-          the goal.
-        </p>
+        <p>{t().heroText}</p>
       </section>
 
       <Shelf solved={solved} onSelect={select} />
 
       <div className="path-layout" ref={pathRef}>
-        <section className="path-card" aria-label="Learning path">
+        <section className="path-card" aria-label={t().learningPath}>
           <div className="path-legend">
             <span>
-              <i className="dot dot-next" /> next up
+              <i className="dot dot-next" /> {t().nextUp}
             </span>
             <span>
-              <i className="dot dot-done" /> mastered
+              <i className="dot dot-done" /> {t().mastered}
             </span>
-            <span className="path-open">Every chapter is open. The arrows show a suggested order.</span>
+            <span className="path-open">{t().everyChapterOpen}</span>
           </div>
           <PathMap solved={solved} next={next} selected={selected} onSelect={select} />
         </section>
@@ -141,7 +141,7 @@ function PathMap({
                 style={{ left: p.x, top: p.y - R, width: Math.min(140, nodes.filter((m) => m.row === n.row).length === 1 ? w / 2 : w / cols - 4) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
-                aria-label={`Chapter ${n.index + 1}: ${c.title}, ${done} of ${c.puzzles.length} solved`}
+                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title, done, c.puzzles.length)}
               >
                 <span className="node-ring">
                   <Ring done={done} total={c.puzzles.length} label={String(n.index + 1)} />
@@ -151,7 +151,7 @@ function PathMap({
                     </span>
                   )}
                 </span>
-                <span className="node-title">{c.title}</span>
+                <span className="node-title">{chapterText(c).title}</span>
               </button>
             );
           })}
@@ -204,32 +204,34 @@ function ChapterPanel({
   const builds = chapter.after.map((id) => chapterById(id)!);
   const missing = builds.filter((c) => !isMastered(c, solved));
   const opens = leadsTo(chapter);
+  const text = chapterText(chapter);
+  const titles = (cs: Chapter[]) => t().list(cs.map((c) => chapterText(c).title));
 
   return (
     <section className="chapter path-panel" ref={panelRef}>
       <div className="panel-kicker">
-        Chapter {ci + 1}
-        {mastered ? <span className="tag tag-done">mastered</span> : isNext && <span className="tag tag-next">next up</span>}
+        {t().chapterN(ci + 1)}
+        {mastered ? <span className="tag tag-done">{t().mastered}</span> : isNext && <span className="tag tag-next">{t().nextUp}</span>}
       </div>
       <h2 className="panel-title">
-        <a href={`#/c/${chapter.id}`}>{chapter.title}</a>
+        <a href={`#/c/${chapter.id}`}>{text.title}</a>
       </h2>
-      <p className="panel-blurb">{chapter.blurb}</p>
+      <p className="panel-blurb">{text.blurb}</p>
 
       {builds.length > 0 && (
         <p className="panel-builds">
-          Builds on {builds.map((c) => c.title).join(" and ")}.
-          {missing.length > 0 && ` Not mastered yet: ${missing.map((c) => c.title).join(", ")}. You can start anyway.`}
+          {t().buildsOn(titles(builds))}
+          {missing.length > 0 && t().notMasteredYet(titles(missing))}
         </p>
       )}
 
       <a className="button primary panel-start" href={`#/c/${chapter.id}`}>
-        {started ? "Back to the lesson →" : "Start the lesson →"}
+        {started ? t().backToLesson : t().startLesson}
       </a>
 
       <ChapterProgress chapter={chapter} solved={solved} />
 
-      {opens.length > 0 && <p className="panel-opens">Leads on to {opens.map((c) => c.title).join(", ")}.</p>}
+      {opens.length > 0 && <p className="panel-opens">{t().leadsOnTo(titles(opens))}</p>}
     </section>
   );
 }
@@ -239,14 +241,14 @@ function Shelf({ solved, onSelect }: { solved: ReadonlySet<string>; onSelect: (c
   const tiers = CHAPTERS.map((c) => badgeTier(c, solved));
   const earned = tiers.filter((t) => t > 0).length;
   return (
-    <section className="shelf" aria-label="Badges">
+    <section className="shelf" aria-label={t().badges}>
       <div className="shelf-head">
-        Badges <span>{earned === 0 ? "Solve exercises in any chapter to earn its badge." : `${earned} of ${CHAPTERS.length}`}</span>
+        {t().badges} <span>{earned === 0 ? t().noBadgesYet : t().badgesEarned(earned, CHAPTERS.length)}</span>
       </div>
       <ul className="shelf-row">
         {CHAPTERS.map((c, i) => (
           <li key={c.id}>
-            <button className="shelf-badge" onClick={() => onSelect(c)} title={`${c.title}: ${tiers[i] ? `${TIER_NAMES[tiers[i]]} badge` : "not earned yet"}`}>
+            <button className="shelf-badge" onClick={() => onSelect(c)} title={t().shelfTitle(chapterText(c).title, tiers[i])}>
               <Badge tier={tiers[i]} n={i + 1} size={34} />
             </button>
           </li>

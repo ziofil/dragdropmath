@@ -8,13 +8,25 @@ import { matchesGoal } from "../game/solver";
 import { TIDY_STEP_MS, tidied } from "../game/tidy";
 import { MathCanvas } from "./MathCanvas";
 import { MathText } from "./MathText";
+import { t, type ChapterText } from "../i18n";
 
 /**
  * A worked example the learner does by hand, one instructed move at a time.
  * Moves other than the one asked for are real moves, just not this
  * example's: they're shown, then gently put back.
  */
-export function GuidedExample({ example, rules, n }: { example: Guided; rules: readonly RuleId[]; n: number }) {
+export function GuidedExample({
+  example,
+  words,
+  rules,
+  n,
+}: {
+  example: Guided;
+  /** Its instructions and closing remark, in the reader's language. */
+  words: ChapterText["lesson"][number];
+  rules: readonly RuleId[];
+  n: number;
+}) {
   const start = useMemo(() => parseState(example.start), [example]);
   const wants = useMemo(() => example.steps.map((s) => parseState(s.then)), [example]);
   const [states, setStates] = useState<MathState[]>([start]);
@@ -52,12 +64,12 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
   return (
     <div className={`guided ${done ? "guided-done" : ""}`}>
       <div className="guided-head">
-        <span className="guided-num">Example {n}</span>
+        <span className="guided-num">{t().exampleN(n)}</span>
         <ol className="guided-steps">
           {example.steps.map((s, i) => (
             <li key={i} className={i < step ? "past" : i === step ? "now" : "later"}>
               {i < step && <span className="guided-tick">✓ </span>}
-              <MathText text={s.say} />
+              <MathText text={words.steps?.[i] ?? s.say} />
             </li>
           ))}
         </ol>
@@ -66,11 +78,11 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
         <MathCanvas state={current} rules={rules} onDrop={onDrop} height={160} />
         <div className="board-bar">
           <p className="guided-status" role="status">
-            {detour ? "That move works, but it isn't the one for this step. Putting it back." : done ? (
+            {detour ? t().notThisStep : done ? (
               <>
-                <MathText text={example.after ?? "Done."} /> <span className="guided-free">You can keep going: any move is allowed now.</span>
+                <MathText text={words.after ?? t().done} /> <span className="guided-free">{t().keepGoing}</span>
               </>
-            ) : `Step ${step + 1} of ${example.steps.length}`}
+            ) : t().stepOf(step + 1, example.steps.length)}
           </p>
           <div className="actions">
             <button
@@ -80,7 +92,7 @@ export function GuidedExample({ example, rules, n }: { example: Guided; rules: r
               }}
               disabled={states.length <= 1}
             >
-              Start over
+              {t().startOver}
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { Home } from "./Home";
 import { exerciseOfPath, PuzzleView } from "./PuzzleView";
 import { SetMaker, SetRoute } from "./SetView";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
+import { LANGS, setLang, t, useLang, type Lang } from "../i18n";
 
 function useHash() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -33,23 +34,37 @@ export function App() {
   const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
+  const lang = useLang();
+  useEffect(() => {
+    document.documentElement.lang = t().htmlLang;
+    document.title = t().pageTitle;
+  }, [lang]);
 
   return (
-    <div className="app">
+    // Keyed by the language: switching it redraws everything in the new one.
+    <div className="app" key={lang}>
       <nav className="topbar">
         <a href="#/" className="logo">
-          math by hand<span>.</span>
+          {t().logo}
+          <span>.</span>
         </a>
         <span className="top-right">
           {debug && (
-            <button className="debug-badge" onClick={() => setDebug(false)} title="Debug mode is on (Shift+D)">
+            <button className="debug-badge" onClick={() => setDebug(false)} title={t().debugOn}>
               debug ✕
             </button>
           )}
           {/* For teachers (or anyone): write exercises and share them as a link. */}
           <a href="#/sets/new" className="top-link" aria-current={making ? "page" : undefined}>
-            Make exercises
+            {t().makeExercises}
           </a>
+          <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
+            {LANGS.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
+            ))}
+          </select>
         </span>
       </nav>
       {making ? (

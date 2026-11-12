@@ -7,6 +7,7 @@ import { OP_TAP, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
 import { thumbLift } from "../render/drag/lift";
 import { DebugPanel, noteRecording, useDebug } from "./debug";
+import { t } from "../i18n";
 
 /** The interactive surface: drag pieces of the expression around. */
 export function MathCanvas({
@@ -99,9 +100,9 @@ class CanvasErrorBoundary extends Component<
     if (!this.state.error) return this.props.children;
     return (
       <div className="canvas-error" style={{ height: this.props.height }} role="alert">
-        <strong>Something went wrong with that move.</strong>
-        <span>Details are in the browser console.</span>
-        <button onClick={() => this.setState({ error: null })}>Try again</button>
+        <strong>{t().moveCrashed}</strong>
+        <span>{t().moveCrashedDetails}</span>
+        <button onClick={() => this.setState({ error: null })}>{t().tryAgain}</button>
       </div>
     );
   }
@@ -112,7 +113,7 @@ export function StillBoard({ state, height = 220 }: { state: MathState; height?:
   const width = useContainerWidth();
   return (
     <div ref={width.ref} className="canvas">
-      <svg width={width.value} height={height} role="img" aria-label="the exercise">
+      <svg width={width.value} height={height} role="img" aria-label={t().theExercise}>
         {renderState({ state }, width.value, height)}
       </svg>
     </div>
@@ -129,7 +130,7 @@ export function StaticMath({ state, width = 720, height = 110 }: { state: MathSt
     if (g && g.width > 0) setView(`${g.x - 8} 0 ${g.width + 16} ${height}`);
   }, [state, width, height]);
   return (
-    <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label="goal">
+    <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label={t().goal}>
       {renderState({ state }, width, height)}
     </svg>
   );

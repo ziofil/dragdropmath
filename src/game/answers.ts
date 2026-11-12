@@ -42,13 +42,15 @@ export function isolated(s: MathState): string | null {
 const relKind = (s: MathState) => (s.sides.length === 1 ? "none" : (s.rel ?? "=") === "=" ? "=" : "ineq");
 
 /** Why `other` doesn't look like an answer of the same kind as `goal` (null: it does). */
-export function shapeMismatch(goal: MathState, other: MathState): string | null {
+export type Mismatch = { kind: "count" } | { kind: "relation" } | { kind: "isolated"; letter: string };
+
+export function shapeMismatch(goal: MathState, other: MathState): Mismatch | null {
   const g = rowsOf(goal);
   const o = rowsOf(other);
-  if (g.length !== o.length || goal.sides.length !== other.sides.length) return "a different number of equations";
+  if (g.length !== o.length || goal.sides.length !== other.sides.length) return { kind: "count" };
   for (let k = 0; k < g.length; k++) {
-    if (relKind(g[k]) !== relKind(o[k])) return "an expression where an equation is expected, or the other way round";
-    if (isolated(g[k]) && isolated(o[k]) !== isolated(g[k])) return `it doesn't say what ${isolated(g[k])} is`;
+    if (relKind(g[k]) !== relKind(o[k])) return { kind: "relation" };
+    if (isolated(g[k]) && isolated(o[k]) !== isolated(g[k])) return { kind: "isolated", letter: isolated(g[k])! };
   }
   return null;
 }

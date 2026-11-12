@@ -85,6 +85,7 @@ a {
   font-weight: 500;
 }
 .logo {
+  white-space: nowrap;
   font-weight: 700 !important;
   font-size: 1.35rem;
   letter-spacing: -0.02em;
@@ -1067,6 +1068,31 @@ button.choice:focus-visible {
 }
 .topbar .top-link:hover,
 .topbar .top-link[aria-current="page"] {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.lang-pick {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+@media (max-width: 480px) {
+  .top-right {
+    gap: 6px;
+  }
+  .topbar .top-link,
+  .lang-pick {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}
+.lang-pick:hover,
+.lang-pick:focus-visible {
   color: var(--ink);
   border-color: var(--accent);
 }

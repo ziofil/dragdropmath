@@ -4,14 +4,14 @@ import { textWidth } from "../render/measure";
 import { moveItem } from "../util/array";
 
 /**
- * The word "feel" in the title, with letters you can pick up and rearrange.
+ * The word ("feel") in the title, with letters you can pick up and rearrange.
  * Just for fun: the order lives only in this component, so it resets on refresh.
  */
 type State = { order: string[] };
 
-const LETTERS: Record<string, string> = { f: "f", e1: "e", e2: "e", l: "l" };
-
-export function FeelWord() {
+export function FeelWord({ word }: { word: string }) {
+  // Each letter has its own id (a repeated letter too).
+  const LETTERS: Record<string, string> = Object.fromEntries([...word].map((ch, i) => [`${i}`, ch]));
   const ref = useRef<HTMLSpanElement>(null);
   const [size, setSize] = useState(48);
 
@@ -60,10 +60,10 @@ export function FeelWord() {
   };
 
   return (
-    <span ref={ref} className="feel-word" aria-label="feel">
+    <span ref={ref} className="feel-word" aria-label={word}>
       <DraggableRenderer
         draggable={draggable}
-        initialState={{ order: ["f", "e1", "e2", "l"] }}
+        initialState={{ order: Object.keys(LETTERS) }}
         width={total + 2 * pad}
         height={height}
       />

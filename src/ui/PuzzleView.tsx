@@ -8,7 +8,8 @@ import { matchesGoal } from "../game/solver";
 import { badgeTier, loadSolved, markSolved, type Tier } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { choicesFor, loadGuesses, loadPicks, saveGuess } from "../game/guess";
-import { Badge, tierName } from "./Badge";
+import { Badge } from "./Badge";
+import { chapterText, t } from "../i18n";
 import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
 
 /** A state reached: by the learner's own move, or by tidying after it. */
@@ -45,18 +46,20 @@ export function exerciseOfPath(pref: PuzzleRef): Exercise {
   const all = allPuzzles();
   const at = all.findIndex((r) => r.puzzle.id === puzzle.id);
   const [prev, next] = [all[at - 1], all[at + 1]];
+  const text = chapterText(chapter);
+  const hint = text.hints[puzzle.id] ?? puzzle.hint;
   return {
-    puzzle,
+    puzzle: { ...puzzle, ...(hint ? { hint } : {}) },
     rules: pref.rules,
     label: pref.label,
     choices: choicesFor(puzzle),
     back: [
-      { href: `#/at/${chapter.id}`, text: "← Learning path" },
-      { href: `#/c/${chapter.id}`, text: `${chapter.title}: lesson` },
+      { href: `#/at/${chapter.id}`, text: t().backToPath },
+      { href: `#/c/${chapter.id}`, text: t().lessonLink(text.title) },
     ],
     prev: prev && { href: `#/p/${prev.puzzle.id}`, text: prev.label },
     next: next && { href: `#/p/${next.puzzle.id}`, text: next.label },
-    onward: next && next.chapter === chapter ? { href: `#/p/${next.puzzle.id}`, text: "Next exercise →" } : { href: `#/at/${chapter.id}`, text: "Back to the learning path" },
+    onward: next && next.chapter === chapter ? { href: `#/p/${next.puzzle.id}`, text: t().nextExercise } : { href: `#/at/${chapter.id}`, text: t().backToThePath },
     badgeOf: chapter,
     positiveLetters: lettersPositive(chapter),
   };
@@ -154,17 +157,17 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             </a>
           ))}
         </span>
-        <nav className="ex-nav" aria-label="Exercises">
+        <nav className="ex-nav" aria-label={t().exercisesNav}>
           {prev ? (
-            <a href={prev.href} className="ex-step" title={`Previous: exercise ${prev.text}`} aria-label={`Previous exercise (${prev.text})`}>
+            <a href={prev.href} className="ex-step" title={t().previousTitle(prev.text)} aria-label={t().previousLabel(prev.text)}>
               ‹
             </a>
           ) : (
             <span className="ex-step" aria-hidden="true" />
           )}
-          <div className="title">Exercise {ex.label}</div>
+          <div className="title">{t().exerciseN(ex.label)}</div>
           {next ? (
-            <a href={next.href} className="ex-step" title={`Next: exercise ${next.text}`} aria-label={`Next exercise (${next.text})`}>
+            <a href={next.href} className="ex-step" title={t().nextTitle(next.text)} aria-label={t().nextLabel(next.text)}>
               ›
             </a>
           ) : (
@@ -175,7 +178,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
 
       {mustGuess ? (
         <section className="goal guess">
-          <span className="goal-label">Guess first: what does it become?</span>
+          <span className="goal-label">{t().guessPrompt}</span>
           <div className="choices">
             {choices.map((c) => (
               <button key={c} className="choice" onClick={() => pick(c)}>
@@ -184,7 +187,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             ))}
           </div>
           <button className="reveal" onClick={reveal}>
-            Reveal
+            {t().reveal}
           </button>
         </section>
       ) : (
@@ -193,10 +196,10 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             <div className={`guess-result ${before.guess}`}>
               {before.guess === "right" ? (
                 <>
-                  <span className="star" aria-hidden="true">★</span> You guessed this one right first time.
+                  <span className="star" aria-hidden="true">★</span> {t().guessedBeforeRight}
                 </>
               ) : (
-                <>Your first guess was {before.pick ? "the red one" : "wrong"}. The green one is right.</>
+                <>{t().guessedBeforeWrong(!!before.pick)}</>
               )}
             </div>
           )}
@@ -204,10 +207,10 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
               {guessed === puzzle.goal ? (
                 <>
-                  <span className="star" aria-hidden="true">★</span> Right first time. Now solve it.
+                  <span className="star" aria-hidden="true">★</span> {t().rightFirstTime}
                 </>
               ) : (
-                <>Not quite. The green one is right. Solve it to see where yours went wrong.</>
+                <>{t().notQuite}</>
               )}
             </div>
           )}
@@ -221,10 +224,10 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
               ))}
             </div>
           )}
-          {before.solved && !solved && <p className="solved-before">✓ You've solved this one before. You can solve it again.</p>}
-          <span className="goal-label">Make it look like</span>
+          {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
+          <span className="goal-label">{t().makeItLookLike}</span>
           <StaticMath state={goal} />
-          {ex.positiveLetters && <p className="assume">Here, letters stand for positive numbers.</p>}
+          {ex.positiveLetters && <p className="assume">{t().positiveLetters}</p>}
         </section>
       )}
 
@@ -232,7 +235,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
         {mustGuess ? (
           <div className="still">
             <StillBoard state={start} />
-            <p className="still-note">Pick an answer above, then solve it here.</p>
+            <p className="still-note">{t().pickFirst}</p>
           </div>
         ) : (
           <MathCanvas state={current} rules={rules} onDrop={onDrop} />
@@ -242,14 +245,14 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           <div className="actions">
             {puzzle.hint && !mustGuess && (
               <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint}>
-                Hint
+                {t().hint}
               </button>
             )}
             <button onClick={undo} disabled={history.length <= 1}>
-              Undo
+              {t().undo}
             </button>
             <button onClick={reset} disabled={history.length <= 1}>
-              Reset
+              {t().reset}
             </button>
           </div>
         </div>
@@ -258,11 +261,11 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
 
       {solved && (
         <section className="result" role="status">
-          <div className="result-name">Solved!</div>
+          <div className="result-name">{t().solvedBang}</div>
           {chapter && tiers.after > tiers.before && (
             <div className="new-badge">
               <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
-              {tierName(tiers.after)} badge for {chapter.title}.
+              {t().newBadge(tiers.after as 1 | 2 | 3, chapterText(chapter).title)}
             </div>
           )}
           <a className="button primary" href={ex.onward.href}>

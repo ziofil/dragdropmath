@@ -8,11 +8,12 @@ import { parseState } from "../expr/parse";
 import { choicesFor, loadGuesses } from "../game/guess";
 import { loadSolved } from "../game/scoring";
 import { autoDecoys } from "../game/autoDecoys";
-import { chapterOf, decodeSet, encodeSet, EXAMPLE_SET, movesOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
+import { chapterOf, decodeSet, encodeSet, movesOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
 import { lettersPositive } from "../game/puzzles";
 import type { SolveAnswer, SolveRequest } from "../game/solveWorker";
 import { StaticMath } from "./MathCanvas";
 import { PuzzleView, type Exercise } from "./PuzzleView";
+import { t } from "../i18n";
 
 // ---------- making a set ----------
 
@@ -31,7 +32,8 @@ function useSolvable(set: ExerciseSet | null): (number | null | "checking")[] {
 }
 
 export function SetMaker() {
-  const [text, setText] = useState(EXAMPLE_SET);
+  const exampleSet = t().exampleSet;
+  const [text, setText] = useState(exampleSet);
   const [checked, setChecked] = useState<CheckedSet | null>(null);
   const [link, setLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -68,17 +70,14 @@ export function SetMaker() {
   return (
     <main className="set-maker">
       <a href="#/" className="back">
-        ← Learning path
+        {t().backToPath}
       </a>
-      <h1>Your own exercises</h1>
-      <p>
-        Write a set of exercises, for example for your students, and share it as a link. For each exercise, students
-        guess the answer first, then solve it by hand. Nothing is stored online: the whole set is saved in the link.
-      </p>
+      <h1>{t().ownTitle}</h1>
+      <p>{t().ownIntro}</p>
       <div className="maker-actions">
-        <button onClick={() => file.current?.click()}>Upload a .yaml file</button>
+        <button onClick={() => file.current?.click()}>{t().upload}</button>
         <input ref={file} type="file" accept=".yaml,.yml,.txt,text/yaml" hidden onChange={(e) => upload(e.target.files?.[0])} />
-        <button onClick={() => (setText(EXAMPLE_SET), check(EXAMPLE_SET))}>Start from the example</button>
+        <button onClick={() => (setText(exampleSet), check(exampleSet))}>{t().startFromExample}</button>
       </div>
       <textarea
         className="yaml"
@@ -90,11 +89,11 @@ export function SetMaker() {
           setLink(null);
         }}
         rows={16}
-        aria-label="The exercise set, in YAML"
+        aria-label={t().yamlLabel}
       />
       <div className="maker-actions">
         <button className="primary" onClick={() => check()}>
-          Check
+          {t().check}
         </button>
       </div>
 
@@ -129,10 +128,10 @@ export function SetMaker() {
                   {usable && (
                     <span className={s === null ? "warn" : "note"}>
                       {s === "checking"
-                        ? "Checking it can be solved with these moves…"
+                        ? t().checking
                         : s === null
-                          ? "Couldn't solve it in 10 steps with these moves. It may need moves from a later chapter (`moves:`)."
-                          : `Can be solved in ${s} move${s === 1 ? "" : "s"}.`}
+                          ? t().unsolvable
+                          : t().solvableIn(s)}
                     </span>
                   )}
                 </li>
@@ -142,38 +141,30 @@ export function SetMaker() {
           {usable ? (
             link ? (
               <div className="link-box">
-                <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Link to the set" />
-                <button onClick={copy}>{copied ? "Copied" : "Copy"}</button>
+                <input readOnly value={link} onFocus={(e) => e.target.select()} aria-label={t().linkLabel} />
+                <button onClick={copy}>{copied ? t().copied : t().copy}</button>
                 <a className="button" href={link}>
-                  Open
+                  {t().open}
                 </a>
               </div>
             ) : (
               <button className="primary" onClick={makeLink}>
-                Make the link
+                {t().makeLink}
               </button>
             )
           ) : (
-            !checked.problems.length && <p className="problem">Fix the exercises marked ✗, then check again.</p>
+            !checked.problems.length && <p className="problem">{t().fixMarked}</p>
           )}
         </section>
       )}
 
       <details className="format">
-        <summary>How to write a set</summary>
-        <pre>{`title: A name for the set
-moves: balance       # optional: a chapter's number, id or title —
-                     # its moves and every earlier chapter's. Leave out: all moves.
-exercises:
-  - start: 2x + 3 = 11
-    goal: x = 4
-    wrong: [x = 7, x = 8]    # optional: two wrong answers to guess between
-    hint: A short hint.       # optional
-    moves: collect            # optional: moves for this exercise only`}</pre>
+        <summary>{t().howToWrite}</summary>
+        <pre>{t().formatExample}</pre>
         <p>
-          Write maths as you'd type it: <code>2x + 3 = 11</code>, <code>x/3</code>, <code>x^2</code>, <code>√x</code> or{" "}
-          <code>sqrt(x)</code>, <code>ln(x)</code>, <code>log_2(8)</code>, <code>x &lt;= 3</code>. Two equations at once go on one line
-          with <code>;</code> between them.
+          {t().writeMathsAs} <code>2x + 3 = 11</code>, <code>x/3</code>, <code>x^2</code>, <code>√x</code> {t().or}{" "}
+          <code>sqrt(x)</code>, <code>ln(x)</code>, <code>log_2(8)</code>, <code>x &lt;= 3</code>. {t().twoEquations[0]} <code>;</code>{" "}
+          {t().twoEquations[1]}
         </p>
       </details>
     </main>
@@ -215,12 +206,12 @@ function exerciseOfSet(set: ExerciseSet, code: string, n: number): Exercise | nu
   return {
     puzzle: { id, start: ex.start, goal: ex.goal, ...(ex.hint ? { hint: ex.hint } : {}) },
     rules: movesOf(set, ex),
-    label: `${n} of ${count}`,
+    label: t().ofCount(n, count),
     choices: choicesFor({ id, goal: ex.goal }, decoys),
     back: [{ href: `#/set/${code}`, text: `← ${set.title}` }],
     prev: n > 1 ? { href: at(n - 1), text: `${n - 1}` } : undefined,
     next: n < count ? { href: at(n + 1), text: `${n + 1}` } : undefined,
-    onward: n < count ? { href: at(n + 1), text: "Next exercise →" } : { href: `#/set/${code}`, text: `Back to ${set.title}` },
+    onward: n < count ? { href: at(n + 1), text: t().nextExercise } : { href: `#/set/${code}`, text: t().backToSet(set.title) },
     positiveLetters: chapterOf(set, ex) ? lettersPositive(chapterOf(set, ex)!) : false,
   };
 }
@@ -232,10 +223,10 @@ export function SetRoute({ code, n }: { code: string; n: number | null }) {
   if (set === "broken" || (n !== null && !exercise))
     return (
       <main className="set-page">
-        <h1>This link doesn't work</h1>
-        <p>It may have been cut short when it was copied. Ask for it again, or go to the learning path.</p>
+        <h1>{t().brokenLink}</h1>
+        <p>{t().brokenLinkText}</p>
         <a className="button primary" href="#/">
-          Learning path
+          {t().learningPathButton}
         </a>
       </main>
     );
@@ -250,15 +241,17 @@ function SetPage({ set, code }: { set: ExerciseSet; code: string }) {
   const ids = set.exercises.map((_, i) => `set-${key}-${i + 1}`);
   const done = ids.filter((id) => solved.has(id)).length;
   const stars = ids.filter((id) => guesses[id] === "right").length;
+  const [beforeStar, afterStar] = t().setSummary(done, set.exercises.length, stars);
   return (
     <main className="set-page">
       <a href="#/" className="back">
-        ← Learning path
+        {t().backToPath}
       </a>
       <h1>{set.title}</h1>
       <p>
-        {done} of {set.exercises.length} solved · <span className="star">★</span> {stars} guessed right first time. For each one,
-        guess the answer first, then solve it by hand.
+        {beforeStar}
+        <span className="star">★</span>
+        {afterStar}
       </p>
       <ol className="exercises set-exercises">
         {set.exercises.map((ex, i) => {
@@ -266,7 +259,7 @@ function SetPage({ set, code }: { set: ExerciseSet; code: string }) {
           const ok = solved.has(id);
           return (
             <li key={id}>
-              <a href={`#/set/${code}/${i + 1}`} className={`ex-card set-card ${ok ? "solved" : ""}`} title={`Exercise ${i + 1}${ok ? " — solved" : ""}`}>
+              <a href={`#/set/${code}/${i + 1}`} className={`ex-card set-card ${ok ? "solved" : ""}`} title={t().exerciseTitle(String(i + 1), ok)}>
                 <span className="ex-num">{i + 1}</span>
                 <StaticMath state={parseState(ex.start)} />
                 <span className="set-marks">
@@ -279,7 +272,7 @@ function SetPage({ set, code }: { set: ExerciseSet; code: string }) {
         })}
       </ol>
       <p className="set-own">
-        <a href="#/sets/new">Make a set of your own</a>
+        <a href="#/sets/new">{t().makeOwnSet}</a>
       </p>
     </main>
   );
