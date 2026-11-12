@@ -49,11 +49,11 @@ export const it: Strings = {
 
   // Progress
   solvedOf: (done: number, total: number) => `${done} su ${total} esercizi risolti`,
-  guessedRight: (n: number, total: number) => `${n} su ${total} indovinati al primo colpo`,
+  guessedRight: (n: number, total: number) => `${n} su ${total} previsioni giuste al primo colpo`,
   exerciseTitle: (label: string, solved: boolean) => `Esercizio ${label}${solved ? " — risolto" : ""}`,
   solved: "risolto",
-  guessedRightFirstTime: "indovinato al primo colpo",
-  guessFirstShort: "Prima indovina",
+  guessedRightFirstTime: "previsione giusta al primo colpo",
+  guessFirstShort: "Prima la previsione",
   goldNote: "Medaglia d'oro. Hai risolto tutti gli esercizi.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${medal[tier]}. ` : ""}${more === 1 ? "Ancora 1 esercizio" : `Ancora ${more} esercizi`} per ${["il bronzo", "l'argento", "l'oro"][tier]}.`,
@@ -76,12 +76,12 @@ export const it: Strings = {
   nextTitle: (label: string) => `Successivo: esercizio ${label}`,
   nextLabel: (label: string) => `Esercizio successivo (${label})`,
   exerciseN: (label: string) => `Esercizio ${label}`,
-  guessPrompt: "Prima prova a indovinare: che cosa diventa?",
+  guessPrompt: "Prima fai una previsione: che cosa diventa?",
   reveal: "Mostra",
-  guessedBeforeRight: "Questo l'avevi indovinato al primo colpo.",
+  guessedBeforeRight: "Qui la tua previsione era giusta al primo colpo.",
   guessedBeforeWrong: (picked: boolean) =>
-    `${picked ? "La prima volta avevi scelto quella rossa" : "La prima volta avevi sbagliato"}. Quella giusta è la verde.`,
-  rightFirstTime: "Indovinato al primo colpo! Ora risolvilo.",
+    `${picked ? "La prima volta avevi previsto quella rossa" : "La prima volta la previsione era sbagliata"}. Quella giusta è la verde.`,
+  rightFirstTime: "Previsione giusta al primo colpo! Ora risolvilo.",
   notQuite: "Non proprio. Quella giusta è la verde. Risolvilo per capire dove hai sbagliato.",
   solvedBefore: "✓ Questo l'hai già risolto. Puoi risolverlo di nuovo.",
   makeItLookLike: "Trasformalo in",
@@ -101,7 +101,7 @@ export const it: Strings = {
   // Making a set
   ownTitle: "I tuoi esercizi",
   ownIntro:
-    "Scrivi una serie di esercizi, per esempio per i tuoi studenti, e condividila con un link. In ogni esercizio gli studenti prima indovinano il risultato, poi lo risolvono a mano. Non viene salvato niente online: tutta la serie è contenuta nel link.",
+    "Scrivi una serie di esercizi, per esempio per i tuoi studenti, e condividila con un link. In ogni esercizio gli studenti prima prevedono il risultato, poi lo risolvono a mano. Non viene salvato niente online: tutta la serie è contenuta nel link.",
   upload: "Carica un file .yaml",
   startFromExample: "Parti dall'esempio",
   yamlLabel: "La serie di esercizi, in YAML",
@@ -123,7 +123,7 @@ moves: balance       # facoltativo: numero, id o titolo di un capitolo —
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    wrong: [x = 7, x = 8]    # facoltativo: due risposte sbagliate tra cui indovinare
+    wrong: [x = 7, x = 8]    # facoltativo: due risposte sbagliate tra cui scegliere
     hint: Un breve suggerimento.   # facoltativo
     moves: collect            # facoltativo: mosse solo per questo esercizio`,
   writeMathsAs: "Scrivi la matematica come la digiteresti:",
@@ -135,7 +135,7 @@ moves: balance
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    # Due risposte sbagliate tra cui indovinare (facoltativo: altrimenti vengono create da sole).
+    # Due risposte sbagliate tra cui scegliere (facoltativo: altrimenti vengono create da sole).
     wrong: [x = 7, x = 8]
   - start: x/3 - 2 = 1
     goal: x = 9
@@ -150,7 +150,7 @@ exercises:
   learningPathButton: "Percorso",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} su ${total} risolti · `,
-    ` ${stars} indovinati al primo colpo. In ogni esercizio, prima indovina il risultato, poi risolvilo a mano.`,
+    ` ${stars} previsioni giuste al primo colpo. In ogni esercizio, prima prevedi il risultato, poi risolvilo a mano.`,
   ],
   makeOwnSet: "Crea una serie tutta tua",
   ofCount: (n: number, count: number) => `${n} di ${count}`,
@@ -176,8 +176,8 @@ exercises:
     wrongShape: (w: string, why: string) => `La risposta sbagliata "${w}" non ha la stessa forma dell'obiettivo: ${why}.`,
     wrongIsRight: (w: string) => `La risposta sbagliata "${w}" in realtà è giusta.`,
     noDecoys:
-      "Non è stato possibile creare risposte sbagliate credibili: aggiungi `wrong:`, altrimenti l'esercizio si risolve senza indovinare.",
-    decoysMade: (list: string) => `Risposte sbagliate create per indovinare: ${list}.`,
+      "Non è stato possibile creare risposte sbagliate credibili: aggiungi `wrong:`, altrimenti l'esercizio si risolve senza previsione.",
+    decoysMade: (list: string) => `Risposte sbagliate create tra cui scegliere: ${list}.`,
     shapeCount: "ha un numero diverso di equazioni",
     shapeRelation: "è un'espressione dove ci si aspetta un'equazione, o viceversa",
     shapeIsolated: (letter: string) => `non dice quanto vale ${letter}`,

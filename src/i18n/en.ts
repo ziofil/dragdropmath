@@ -52,11 +52,11 @@ export const en = {
 
   // Progress
   solvedOf: (done: number, total: number) => `${done} of ${total} exercises solved`,
-  guessedRight: (n: number, total: number) => `${n} of ${total} guessed right first time`,
+  guessedRight: (n: number, total: number) => `${n} of ${total} predicted right first time`,
   exerciseTitle: (label: string, solved: boolean) => `Exercise ${label}${solved ? " — solved" : ""}`,
   solved: "solved",
-  guessedRightFirstTime: "guessed right first time",
-  guessFirstShort: "Guess first",
+  guessedRightFirstTime: "predicted right first time",
+  guessFirstShort: "Predict first",
   goldNote: "Gold badge. Every exercise solved.",
   /** The badge so far (`tier`, 0 for none yet), and `more` exercises still to solve for the next one. */
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
@@ -80,10 +80,10 @@ export const en = {
   nextTitle: (label: string) => `Next: exercise ${label}`,
   nextLabel: (label: string) => `Next exercise (${label})`,
   exerciseN: (label: string) => `Exercise ${label}`,
-  guessPrompt: "Guess first: what does it become?",
+  guessPrompt: "Predict first: what does it become?",
   reveal: "Reveal",
-  guessedBeforeRight: "You guessed this one right first time.",
-  guessedBeforeWrong: (picked: boolean) => `Your first guess was ${picked ? "the red one" : "wrong"}. The green one is right.`,
+  guessedBeforeRight: "You predicted this one right first time.",
+  guessedBeforeWrong: (picked: boolean) => `Your first prediction was ${picked ? "the red one" : "wrong"}. The green one is right.`,
   rightFirstTime: "Right first time. Now solve it.",
   notQuite: "Not quite. The green one is right. Solve it to see where yours went wrong.",
   solvedBefore: "✓ You've solved this one before. You can solve it again.",
@@ -104,7 +104,7 @@ export const en = {
   // Making a set
   ownTitle: "Your own exercises",
   ownIntro:
-    "Write a set of exercises, for example for your students, and share it as a link. For each exercise, students guess the answer first, then solve it by hand. Nothing is stored online: the whole set is saved in the link.",
+    "Write a set of exercises, for example for your students, and share it as a link. For each exercise, students predict the answer first, then solve it by hand. Nothing is stored online: the whole set is saved in the link.",
   upload: "Upload a .yaml file",
   startFromExample: "Start from the example",
   yamlLabel: "The exercise set, in YAML",
@@ -126,7 +126,7 @@ moves: balance       # optional: a chapter's number, id or title —
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    wrong: [x = 7, x = 8]    # optional: two wrong answers to guess between
+    wrong: [x = 7, x = 8]    # optional: two wrong answers to choose from
     hint: A short hint.       # optional
     moves: collect            # optional: moves for this exercise only`,
   /** Followed by the examples in code: `2x + 3 = 11`, `x/3`, …; then twoEquations. */
@@ -140,7 +140,7 @@ moves: balance
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    # Two wrong answers to guess between (optional: else they're made for you).
+    # Two wrong answers to choose from (optional: else they're made for you).
     wrong: [x = 7, x = 8]
   - start: x/3 - 2 = 1
     goal: x = 9
@@ -156,7 +156,7 @@ exercises:
   /** Around a ★: before it, and after it. */
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} of ${total} solved · `,
-    ` ${stars} guessed right first time. For each one, guess the answer first, then solve it by hand.`,
+    ` ${stars} predicted right first time. For each one, predict the answer first, then solve it by hand.`,
   ],
   makeOwnSet: "Make a set of your own",
   ofCount: (n: number, count: number) => `${n} of ${count}`,
@@ -180,8 +180,8 @@ exercises:
     cantReadWrong: (w: string, err: string) => `Can't read the wrong answer "${w}": ${err}`,
     wrongShape: (w: string, why: string) => `The wrong answer "${w}" doesn't look like the goal: ${why}.`,
     wrongIsRight: (w: string) => `The wrong answer "${w}" is actually right.`,
-    noDecoys: "No convincing wrong answers could be made: add `wrong:`, or it's solved without guessing.",
-    decoysMade: (list: string) => `Wrong answers made for guessing: ${list}.`,
+    noDecoys: "No convincing wrong answers could be made: add `wrong:`, or it's solved without predicting first.",
+    decoysMade: (list: string) => `Wrong answers made to choose from: ${list}.`,
     shapeCount: "a different number of equations",
     shapeRelation: "an expression where an equation is expected, or the other way round",
     shapeIsolated: (letter: string) => `it doesn't say what ${letter} is`,

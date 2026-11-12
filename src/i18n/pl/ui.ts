@@ -59,11 +59,11 @@ export const pl: Strings = {
 
   // Progress
   solvedOf: (done: number, total: number) => `Rozwiązane zadania: ${done} z ${total}`,
-  guessedRight: (n: number, total: number) => `Trafione za pierwszym razem: ${n} z ${total}`,
+  guessedRight: (n: number, total: number) => `Dobrze za pierwszym razem: ${n} z ${total}`,
   exerciseTitle: (label: string, solved: boolean) => `Zadanie ${label}${solved ? " — rozwiązane" : ""}`,
   solved: "rozwiązane",
-  guessedRightFirstTime: "trafione za pierwszym razem",
-  guessFirstShort: "Najpierw zgadnij",
+  guessedRightFirstTime: "dobrze za pierwszym razem",
+  guessFirstShort: "Najpierw pomyśl",
   goldNote: "Złota odznaka. Wszystkie zadania rozwiązane.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "zadanie", "zadania", "zadań")} do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
@@ -86,12 +86,12 @@ export const pl: Strings = {
   nextTitle: (label: string) => `Następne: zadanie ${label}`,
   nextLabel: (label: string) => `Następne zadanie (${label})`,
   exerciseN: (label: string) => `Zadanie ${label}`,
-  guessPrompt: "Najpierw zgadnij: co z tego wyjdzie?",
+  guessPrompt: "Najpierw pomyśl: co z tego wyjdzie?",
   reveal: "Pokaż",
-  guessedBeforeRight: "Tu twoja pierwsza odpowiedź była trafna.",
+  guessedBeforeRight: "Tu twoja pierwsza odpowiedź była dobra.",
   guessedBeforeWrong: (picked: boolean) =>
     `${picked ? "Twoja pierwsza odpowiedź to ta czerwona" : "Twoja pierwsza odpowiedź była błędna"}. Dobra jest ta zielona.`,
-  rightFirstTime: "Trafione za pierwszym razem. Teraz to rozwiąż.",
+  rightFirstTime: "Dobrze za pierwszym razem. Teraz to rozwiąż.",
   notQuite: "Niezupełnie. Dobra jest ta zielona. Rozwiąż zadanie, a zobaczysz, gdzie był błąd.",
   solvedBefore: "✓ To zadanie jest już rozwiązane. Możesz rozwiązać je jeszcze raz.",
   makeItLookLike: "Doprowadź do postaci",
@@ -111,7 +111,7 @@ export const pl: Strings = {
   // Making a set
   ownTitle: "Twoje własne zadania",
   ownIntro:
-    "Ułóż zestaw zadań, na przykład dla swoich uczniów, i udostępnij go jako link. W każdym zadaniu uczeń najpierw zgaduje wynik, a potem rozwiązuje je ręcznie. Nic nie jest zapisywane w sieci: cały zestaw mieści się w linku.",
+    "Ułóż zestaw zadań, na przykład dla swoich uczniów, i udostępnij go jako link. W każdym zadaniu uczeń najpierw przewiduje wynik, a potem rozwiązuje je ręcznie. Nic nie jest zapisywane w sieci: cały zestaw mieści się w linku.",
   upload: "Wczytaj plik .yaml",
   startFromExample: "Zacznij od przykładu",
   yamlLabel: "Zestaw zadań w formacie YAML",
@@ -159,7 +159,7 @@ exercises:
   learningPathButton: "Ścieżka nauki",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `Rozwiązane: ${done} z ${total} · `,
-    ` trafione za pierwszym razem: ${stars}. W każdym zadaniu najpierw zgadnij wynik, a potem rozwiąż je ręcznie.`,
+    ` dobrze za pierwszym razem: ${stars}. W każdym zadaniu najpierw przewidź wynik, a potem rozwiąż je ręcznie.`,
   ],
   makeOwnSet: "Ułóż własny zestaw",
   ofCount: (n: number, count: number) => `${n} z ${count}`,
@@ -183,8 +183,8 @@ exercises:
     cantReadWrong: (w: string, err: string) => `Nie da się odczytać błędnej odpowiedzi „${w}”: ${err}`,
     wrongShape: (w: string, why: string) => `Błędna odpowiedź „${w}” nie ma postaci celu: ${why}.`,
     wrongIsRight: (w: string) => `Błędna odpowiedź „${w}” jest tak naprawdę poprawna.`,
-    noDecoys: "Nie udało się utworzyć przekonujących błędnych odpowiedzi: dodaj `wrong:` albo zadanie obejdzie się bez zgadywania.",
-    decoysMade: (list: string) => `Błędne odpowiedzi utworzone do zgadywania: ${list}.`,
+    noDecoys: "Nie udało się utworzyć przekonujących błędnych odpowiedzi: dodaj `wrong:` albo zadanie obejdzie się bez przewidywania wyniku.",
+    decoysMade: (list: string) => `Błędne odpowiedzi utworzone do wyboru: ${list}.`,
     shapeCount: "inna liczba równań",
     shapeRelation: "wyrażenie tam, gdzie powinno być równanie, albo odwrotnie",
     shapeIsolated: (letter: string) => `nie mówi, ile wynosi ${letter}`,

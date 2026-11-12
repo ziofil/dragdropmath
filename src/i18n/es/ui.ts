@@ -52,7 +52,7 @@ export const es: Strings = {
   exerciseTitle: (label: string, solved: boolean) => `Ejercicio ${label}${solved ? " — resuelto" : ""}`,
   solved: "resuelto",
   guessedRightFirstTime: "acertado a la primera",
-  guessFirstShort: "Primero, adivina",
+  guessFirstShort: "Primero, predice",
   goldNote: "Insignia de oro. Todos los ejercicios resueltos.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `Insignia de ${TIER[tier]}. ` : ""}${more === 1 ? "Te falta 1 ejercicio" : `Te faltan ${more} ejercicios`} para la insignia de ${TIER[tier + 1]}.`,
@@ -75,7 +75,7 @@ export const es: Strings = {
   nextTitle: (label: string) => `Siguiente: ejercicio ${label}`,
   nextLabel: (label: string) => `Ejercicio siguiente (${label})`,
   exerciseN: (label: string) => `Ejercicio ${label}`,
-  guessPrompt: "Primero, adivina: ¿cómo queda?",
+  guessPrompt: "Primero, predice: ¿cómo queda?",
   reveal: "Mostrar",
   guessedBeforeRight: "Este lo acertaste a la primera.",
   guessedBeforeWrong: (picked: boolean) => `Tu primera respuesta fue ${picked ? "la roja" : "incorrecta"}. La verde es la correcta.`,
@@ -99,7 +99,7 @@ export const es: Strings = {
   // Making a set
   ownTitle: "Tus propios ejercicios",
   ownIntro:
-    "Escribe una colección de ejercicios, por ejemplo para tus alumnos, y compártela con un enlace. En cada ejercicio, primero se adivina la respuesta y luego se resuelve a mano. No se guarda nada en internet: toda la colección va dentro del enlace.",
+    "Escribe una colección de ejercicios, por ejemplo para tus alumnos, y compártela con un enlace. En cada ejercicio, primero se predice la respuesta y luego se resuelve a mano. No se guarda nada en internet: toda la colección va dentro del enlace.",
   upload: "Subir un archivo .yaml",
   startFromExample: "Empezar con el ejemplo",
   yamlLabel: "La colección de ejercicios, en YAML",
@@ -148,7 +148,7 @@ exercises:
   learningPathButton: "Ruta de aprendizaje",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} de ${total} resueltos · `,
-    ` ${stars} acertados a la primera. En cada uno, primero adivina la respuesta y luego resuélvelo a mano.`,
+    ` ${stars} acertados a la primera. En cada uno, primero predice la respuesta y luego resuélvelo a mano.`,
   ],
   makeOwnSet: "Crea tu propia colección",
   ofCount: (n: number, count: number) => `${n} de ${count}`,
@@ -172,8 +172,8 @@ exercises:
     cantReadWrong: (w: string, err: string) => `No se entiende la respuesta incorrecta "${w}": ${err}`,
     wrongShape: (w: string, why: string) => `La respuesta incorrecta "${w}" no tiene la forma del objetivo: ${why}.`,
     wrongIsRight: (w: string) => `La respuesta incorrecta "${w}" en realidad es correcta.`,
-    noDecoys: "No se han podido generar respuestas incorrectas convincentes: añade `wrong:`, o el ejercicio se hará sin adivinar.",
-    decoysMade: (list: string) => `Respuestas incorrectas generadas para adivinar: ${list}.`,
+    noDecoys: "No se han podido generar respuestas incorrectas convincentes: añade `wrong:`, o el ejercicio se hará sin predecir antes.",
+    decoysMade: (list: string) => `Respuestas incorrectas generadas para elegir: ${list}.`,
     shapeCount: "tiene un número distinto de ecuaciones",
     shapeRelation: "hay una expresión donde se espera una ecuación, o al revés",
     shapeIsolated: (letter: string) => `no dice cuánto vale ${letter}`,

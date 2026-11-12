@@ -50,11 +50,11 @@ export const nl: Strings = {
 
   // Progress
   solvedOf: (done: number, total: number) => `${done} van ${total} oefeningen opgelost`,
-  guessedRight: (n: number, total: number) => `${n} van ${total} in één keer goed geraden`,
+  guessedRight: (n: number, total: number) => `${n} van ${total} in één keer goed voorspeld`,
   exerciseTitle: (label: string, solved: boolean) => `Oefening ${label}${solved ? " — opgelost" : ""}`,
   solved: "opgelost",
-  guessedRightFirstTime: "in één keer goed geraden",
-  guessFirstShort: "Eerst raden",
+  guessedRightFirstTime: "in één keer goed voorspeld",
+  guessFirstShort: "Eerst voorspellen",
   goldNote: "Gouden badge. Alle oefeningen opgelost.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "oefening" : "oefeningen"} voor ${metal[tier]}.`,
@@ -77,11 +77,11 @@ export const nl: Strings = {
   nextTitle: (label: string) => `Volgende: oefening ${label}`,
   nextLabel: (label: string) => `Volgende oefening (${label})`,
   exerciseN: (label: string) => `Oefening ${label}`,
-  guessPrompt: "Raad eerst: wat komt eruit?",
+  guessPrompt: "Voorspel eerst: wat komt eruit?",
   reveal: "Laat zien",
-  guessedBeforeRight: "Deze had je in één keer goed geraden.",
+  guessedBeforeRight: "Deze had je in één keer goed voorspeld.",
   guessedBeforeWrong: (picked: boolean) =>
-    `${picked ? "Je gokte eerst de rode" : "Je eerste gok was fout"}. De groene is goed.`,
+    `${picked ? "Je koos eerst de rode" : "Je eerste antwoord was fout"}. De groene is goed.`,
   rightFirstTime: "In één keer goed. Los hem nu op.",
   notQuite: "Net niet. De groene is goed. Los hem op, dan zie je waar het bij jou misging.",
   solvedBefore: "✓ Deze heb je al eens opgelost. Je mag hem nog een keer doen.",
@@ -102,7 +102,7 @@ export const nl: Strings = {
   // Making a set
   ownTitle: "Je eigen oefeningen",
   ownIntro:
-    "Stel een reeks oefeningen samen, bijvoorbeeld voor je leerlingen, en deel die als link. Bij elke oefening raden leerlingen eerst het antwoord en lossen ze het daarna met de hand op. Er wordt niets online opgeslagen: de hele reeks zit in de link.",
+    "Stel een reeks oefeningen samen, bijvoorbeeld voor je leerlingen, en deel die als link. Bij elke oefening voorspellen leerlingen eerst het antwoord en lossen ze het daarna met de hand op. Er wordt niets online opgeslagen: de hele reeks zit in de link.",
   upload: "Upload een .yaml-bestand",
   startFromExample: "Begin met het voorbeeld",
   yamlLabel: "De oefenreeks, in YAML",
@@ -150,7 +150,7 @@ exercises:
   learningPathButton: "Leerpad",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} van ${total} opgelost · `,
-    ` ${stars} in één keer goed geraden. Raad bij elke oefening eerst het antwoord en los het dan met de hand op.`,
+    ` ${stars} in één keer goed voorspeld. Voorspel bij elke oefening eerst het antwoord en los het dan met de hand op.`,
   ],
   makeOwnSet: "Maak zelf een reeks",
   ofCount: (n: number, count: number) => `${n} van ${count}`,
@@ -176,7 +176,7 @@ exercises:
     wrongShape: (w: string, why: string) => `Het foute antwoord "${w}" lijkt niet op het doel: ${why}.`,
     wrongIsRight: (w: string) => `Het foute antwoord "${w}" is eigenlijk goed.`,
     noDecoys:
-      "Er konden geen overtuigende foute antwoorden worden gemaakt: voeg `wrong:` toe, of de oefening wordt opgelost zonder te raden.",
+      "Er konden geen overtuigende foute antwoorden worden gemaakt: voeg `wrong:` toe, of de oefening wordt opgelost zonder eerst te voorspellen.",
     decoysMade: (list: string) => `Gemaakte foute antwoorden om uit te kiezen: ${list}.`,
     shapeCount: "een ander aantal vergelijkingen",
     shapeRelation: "een uitdrukking waar een vergelijking wordt verwacht, of andersom",

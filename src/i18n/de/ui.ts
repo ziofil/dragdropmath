@@ -47,11 +47,11 @@ export const de: Strings = {
 
   // Progress
   solvedOf: (done: number, total: number) => `${done} von ${total} Aufgaben gelöst`,
-  guessedRight: (n: number, total: number) => `${n} von ${total} auf Anhieb richtig geraten`,
+  guessedRight: (n: number, total: number) => `${n} von ${total} auf Anhieb richtig vorhergesagt`,
   exerciseTitle: (label: string, solved: boolean) => `Aufgabe ${label}${solved ? " – gelöst" : ""}`,
   solved: "gelöst",
-  guessedRightFirstTime: "auf Anhieb richtig geraten",
-  guessFirstShort: "Erst raten",
+  guessedRightFirstTime: "auf Anhieb richtig vorhergesagt",
+  guessFirstShort: "Erst überlegen",
   goldNote: "Goldabzeichen. Alle Aufgaben gelöst.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "Aufgabe" : "Aufgaben"} bis ${TIER[tier + 1]}.`,
@@ -74,12 +74,12 @@ export const de: Strings = {
   nextTitle: (label: string) => `Nächste: Aufgabe ${label}`,
   nextLabel: (label: string) => `Nächste Aufgabe (${label})`,
   exerciseN: (label: string) => `Aufgabe ${label}`,
-  guessPrompt: "Erst raten: Was kommt heraus?",
+  guessPrompt: "Erst überlegen: Was kommt heraus?",
   reveal: "Auflösen",
-  guessedBeforeRight: "Diese hast du auf Anhieb richtig geraten.",
-  guessedBeforeWrong: (picked: boolean) => `Dein erster Tipp war ${picked ? "der rote" : "falsch"}. Der grüne ist richtig.`,
+  guessedBeforeRight: "Diese hast du auf Anhieb richtig vorhergesagt.",
+  guessedBeforeWrong: (picked: boolean) => `Deine erste Antwort war ${picked ? "die rote" : "falsch"}. Die grüne ist richtig.`,
   rightFirstTime: "Auf Anhieb richtig. Jetzt rechne es aus.",
-  notQuite: "Nicht ganz. Der grüne ist richtig. Rechne es aus, dann siehst du, wo dein Fehler lag.",
+  notQuite: "Nicht ganz. Die grüne ist richtig. Rechne es aus, dann siehst du, wo dein Fehler lag.",
   solvedBefore: "✓ Diese Aufgabe hast du schon gelöst. Du kannst sie noch einmal lösen.",
   makeItLookLike: "Mach daraus",
   positiveLetters: "Hier stehen die Variablen für positive Zahlen.",
@@ -98,7 +98,7 @@ export const de: Strings = {
   // Making a set
   ownTitle: "Eigene Aufgaben",
   ownIntro:
-    "Stell eine Aufgabenreihe zusammen, zum Beispiel für deine Klasse, und teile sie als Link. Bei jeder Aufgabe raten die Schülerinnen und Schüler zuerst das Ergebnis und rechnen es dann von Hand aus. Online wird nichts gespeichert: Die ganze Reihe steckt im Link.",
+    "Stell eine Aufgabenreihe zusammen, zum Beispiel für deine Klasse, und teile sie als Link. Bei jeder Aufgabe überlegen die Schülerinnen und Schüler zuerst, was herauskommt, und rechnen es dann von Hand aus. Online wird nichts gespeichert: Die ganze Reihe steckt im Link.",
   upload: "Eine .yaml-Datei hochladen",
   startFromExample: "Mit dem Beispiel anfangen",
   yamlLabel: "Die Aufgabenreihe als YAML",
@@ -120,7 +120,7 @@ moves: balance       # optional: Nummer, ID oder Titel eines Kapitels –
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    wrong: [x = 7, x = 8]    # optional: zwei falsche Antworten zum Raten
+    wrong: [x = 7, x = 8]    # optional: zwei falsche Antworten zur Auswahl
     hint: Ein kurzer Tipp.    # optional
     moves: collect            # optional: Schritte nur für diese Aufgabe`,
   writeMathsAs: "Schreib die Mathematik so, wie du sie eintippen würdest:",
@@ -132,7 +132,7 @@ moves: balance
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    # Zwei falsche Antworten zum Raten (optional: sonst werden sie automatisch erzeugt).
+    # Zwei falsche Antworten zur Auswahl (optional: sonst werden sie automatisch erzeugt).
     wrong: [x = 7, x = 8]
   - start: x/3 - 2 = 1
     goal: x = 9
@@ -147,7 +147,7 @@ exercises:
   learningPathButton: "Lernpfad",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} von ${total} gelöst · `,
-    ` ${stars} auf Anhieb richtig geraten. Rate bei jeder Aufgabe zuerst das Ergebnis, dann rechne sie von Hand aus.`,
+    ` ${stars} auf Anhieb richtig vorhergesagt. Überlege bei jeder Aufgabe zuerst, was herauskommt, dann rechne sie von Hand aus.`,
   ],
   makeOwnSet: "Eigene Aufgabenreihe erstellen",
   ofCount: (n: number, count: number) => `${n} von ${count}`,
@@ -173,8 +173,8 @@ exercises:
     wrongShape: (w: string, why: string) => `Die falsche Antwort „${w}“ sieht nicht aus wie das Ziel: ${why}.`,
     wrongIsRight: (w: string) => `Die falsche Antwort „${w}“ ist in Wirklichkeit richtig.`,
     noDecoys:
-      "Es ließen sich keine überzeugenden falschen Antworten erzeugen: Füge `wrong:` hinzu, sonst wird die Aufgabe ohne Raten gelöst.",
-    decoysMade: (list: string) => `Erzeugte falsche Antworten zum Raten: ${list}.`,
+      "Es ließen sich keine überzeugenden falschen Antworten erzeugen: Füge `wrong:` hinzu, sonst wird die Aufgabe ohne Vorhersage gelöst.",
+    decoysMade: (list: string) => `Erzeugte falsche Antworten zur Auswahl: ${list}.`,
     shapeCount: "eine andere Anzahl von Gleichungen",
     shapeRelation: "ein Term, wo eine Gleichung erwartet wird, oder umgekehrt",
     shapeIsolated: (letter: string) => `es sagt nicht, was ${letter} ist`,

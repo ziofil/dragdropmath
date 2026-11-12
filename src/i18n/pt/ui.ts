@@ -53,7 +53,7 @@ export const pt: Strings = {
   exerciseTitle: (label: string, solved: boolean) => `Exercício ${label}${solved ? " — resolvido" : ""}`,
   solved: "resolvido",
   guessedRightFirstTime: "acertou de primeira",
-  guessFirstShort: "Primeiro, um palpite",
+  guessFirstShort: "Pense primeiro",
   goldNote: "Medalha de ouro. Todos os exercícios resolvidos.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? "Falta 1 exercício" : `Faltam ${more} exercícios`} para a medalha de ${TIER[tier + 1]}.`,
@@ -76,10 +76,10 @@ export const pt: Strings = {
   nextTitle: (label: string) => `Próximo: exercício ${label}`,
   nextLabel: (label: string) => `Próximo exercício (${label})`,
   exerciseN: (label: string) => `Exercício ${label}`,
-  guessPrompt: "Primeiro, dê um palpite: no que isso vai dar?",
+  guessPrompt: "Pense primeiro: no que isso vai dar?",
   reveal: "Mostrar",
   guessedBeforeWrong: (picked: boolean) =>
-    `Seu primeiro palpite ${picked ? "foi a resposta em vermelho" : "estava errado"}. A verde é a certa.`,
+    `Sua primeira resposta ${picked ? "foi a vermelha" : "estava errada"}. A verde é a certa.`,
   guessedBeforeRight: "Você acertou este de primeira.",
   rightFirstTime: "Acertou de primeira! Agora resolva.",
   notQuite: "Não foi dessa vez. A verde é a certa. Resolva para ver onde a sua deu errado.",
@@ -101,7 +101,7 @@ export const pt: Strings = {
   // Making a set
   ownTitle: "Seus próprios exercícios",
   ownIntro:
-    "Monte uma lista de exercícios, por exemplo para seus alunos, e compartilhe como um link. Em cada exercício, o aluno primeiro dá um palpite e depois resolve à mão. Nada fica guardado na internet: a lista inteira vai dentro do link.",
+    "Monte uma lista de exercícios, por exemplo para seus alunos, e compartilhe como um link. Em cada exercício, o aluno primeiro prevê o resultado e depois resolve à mão. Nada fica guardado na internet: a lista inteira vai dentro do link.",
   upload: "Enviar um arquivo .yaml",
   startFromExample: "Começar pelo exemplo",
   yamlLabel: "A lista de exercícios, em YAML",
@@ -123,7 +123,7 @@ moves: balance       # opcional: número, id ou título de um capítulo —
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    wrong: [x = 7, x = 8]    # opcional: duas respostas erradas para o palpite
+    wrong: [x = 7, x = 8]    # opcional: duas respostas erradas para escolher
     hint: Uma dica curta.     # opcional
     moves: collect            # opcional: movimentos só para este exercício`,
   writeMathsAs: "Escreva a matemática como você digitaria:",
@@ -135,7 +135,7 @@ moves: balance
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    # Duas respostas erradas para o palpite (opcional: senão, são criadas automaticamente).
+    # Duas respostas erradas para escolher (opcional: senão, são criadas automaticamente).
     wrong: [x = 7, x = 8]
   - start: x/3 - 2 = 1
     goal: x = 9
@@ -150,7 +150,7 @@ exercises:
   learningPathButton: "Trilha de aprendizagem",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} de ${total} resolvidos · `,
-    ` ${stars} acertados de primeira. Em cada um, primeiro dê um palpite e depois resolva à mão.`,
+    ` ${stars} acertados de primeira. Em cada um, primeiro preveja o resultado e depois resolva à mão.`,
   ],
   makeOwnSet: "Monte sua própria lista",
   ofCount: (n: number, count: number) => `${n} de ${count}`,
@@ -175,8 +175,8 @@ exercises:
     wrongShape: (w: string, why: string) => `A resposta errada "${w}" não tem a mesma forma do objetivo: ${why}.`,
     wrongIsRight: (w: string) => `A resposta errada "${w}" na verdade está certa.`,
     noDecoys:
-      "Não foi possível criar respostas erradas convincentes: acrescente `wrong:`, ou o exercício será resolvido sem palpite.",
-    decoysMade: (list: string) => `Respostas erradas criadas para o palpite: ${list}.`,
+      "Não foi possível criar respostas erradas convincentes: acrescente `wrong:`, ou o exercício será resolvido sem a previsão.",
+    decoysMade: (list: string) => `Respostas erradas criadas para escolher: ${list}.`,
     shapeCount: "tem um número diferente de equações",
     shapeRelation: "é uma expressão onde se espera uma equação, ou o contrário",
     shapeIsolated: (letter: string) => `não diz quanto vale ${letter}`,

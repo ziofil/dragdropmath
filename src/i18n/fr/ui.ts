@@ -55,7 +55,7 @@ export const fr: Strings = {
   exerciseTitle: (label: string, solved: boolean) => `Exercice ${label}${solved ? " — résolu" : ""}`,
   solved: "résolu",
   guessedRightFirstTime: "trouvé du premier coup",
-  guessFirstShort: "Devine d'abord",
+  guessFirstShort: "Réfléchis d'abord",
   goldNote: "Badge d'or. Tous les exercices sont résolus.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} exercice${s(more)} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
@@ -78,7 +78,7 @@ export const fr: Strings = {
   nextTitle: (label: string) => `Suivant : exercice ${label}`,
   nextLabel: (label: string) => `Exercice suivant (${label})`,
   exerciseN: (label: string) => `Exercice ${label}`,
-  guessPrompt: "Devine d'abord : qu'est-ce que ça donne ?",
+  guessPrompt: "Réfléchis d'abord : qu'est-ce que ça donne ?",
   reveal: "Voir",
   guessedBeforeRight: "Tu avais trouvé celui-ci du premier coup.",
   guessedBeforeWrong: (picked: boolean) =>
@@ -103,7 +103,7 @@ export const fr: Strings = {
   // Making a set
   ownTitle: "Tes propres exercices",
   ownIntro:
-    "Écris une série d'exercices, par exemple pour tes élèves, et partage-la sous forme de lien. Pour chaque exercice, on devine d'abord la réponse, puis on le résout à la main. Rien n'est stocké en ligne : toute la série tient dans le lien.",
+    "Écris une série d'exercices, par exemple pour tes élèves, et partage-la sous forme de lien. Pour chaque exercice, on prévoit d'abord la réponse, puis on le résout à la main. Rien n'est stocké en ligne : toute la série tient dans le lien.",
   upload: "Importer un fichier .yaml",
   startFromExample: "Partir de l'exemple",
   yamlLabel: "La série d'exercices, en YAML",
@@ -152,7 +152,7 @@ exercises:
   learningPathButton: "Parcours",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done} sur ${total} résolu${s(done)} · `,
-    ` ${stars} trouvé${s(stars)} du premier coup. Pour chaque exercice, devine d'abord la réponse, puis résous-le à la main.`,
+    ` ${stars} trouvé${s(stars)} du premier coup. Pour chaque exercice, prévois d'abord la réponse, puis résous-le à la main.`,
   ],
   makeOwnSet: "Créer ta propre série",
   ofCount: (n: number, count: number) => `${n} sur ${count}`,
@@ -178,8 +178,8 @@ exercises:
     wrongShape: (w: string, why: string) => `La réponse fausse « ${w} » n'a pas la même forme que l'objectif : ${why}.`,
     wrongIsRight: (w: string) => `La réponse fausse « ${w} » est en fait juste.`,
     noDecoys:
-      "Impossible de créer des réponses fausses crédibles : ajoute `wrong:`, sinon l'exercice se résout sans deviner.",
-    decoysMade: (list: string) => `Réponses fausses créées pour deviner : ${list}.`,
+      "Impossible de créer des réponses fausses crédibles : ajoute `wrong:`, sinon l'exercice se résout directement.",
+    decoysMade: (list: string) => `Réponses fausses créées pour le choix : ${list}.`,
     shapeCount: "le nombre d'équations n'est pas le même",
     shapeRelation: "une expression là où on attend une équation, ou l'inverse",
     shapeIsolated: (letter: string) => `elle ne donne pas la valeur de ${letter}`,

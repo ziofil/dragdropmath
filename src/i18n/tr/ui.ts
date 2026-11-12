@@ -50,11 +50,11 @@ export const tr: Strings = {
 
   // Progress
   solvedOf: (done: number, total: number) => `${done}/${total} alıştırma çözüldü`,
-  guessedRight: (n: number, total: number) => `${n}/${total} ilk tahminde doğru`,
+  guessedRight: (n: number, total: number) => `${n}/${total} ilk seferde doğru`,
   exerciseTitle: (label: string, solved: boolean) => `Alıştırma ${label}${solved ? " — çözüldü" : ""}`,
   solved: "çözüldü",
-  guessedRightFirstTime: "ilk tahminde doğru",
-  guessFirstShort: "Önce tahmin et",
+  guessedRightFirstTime: "ilk seferde doğru",
+  guessFirstShort: "Önce düşün",
   goldNote: "Altın rozet. Bütün alıştırmalar çözüldü.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${more} alıştırma daha.`,
@@ -77,10 +77,10 @@ export const tr: Strings = {
   nextTitle: (label: string) => `Sonraki: alıştırma ${label}`,
   nextLabel: (label: string) => `Sonraki alıştırma (${label})`,
   exerciseN: (label: string) => `Alıştırma ${label}`,
-  guessPrompt: "Önce tahmin et: ne olur?",
+  guessPrompt: "Önce düşün: sonuç ne olur?",
   reveal: "Göster",
-  guessedBeforeRight: "Bunu ilk tahmininde bilmiştin.",
-  guessedBeforeWrong: (picked: boolean) => `İlk tahminin ${picked ? "kırmızı olandı" : "yanlıştı"}. Doğrusu yeşil olan.`,
+  guessedBeforeRight: "Bunu ilk seferde doğru bulmuştun.",
+  guessedBeforeWrong: (picked: boolean) => `İlk cevabın ${picked ? "kırmızı olandı" : "yanlıştı"}. Doğrusu yeşil olan.`,
   rightFirstTime: "İlk seferde doğru. Şimdi çöz.",
   notQuite: "Olmadı. Doğrusu yeşil olan. Nerede yanıldığını görmek için çöz.",
   solvedBefore: "✓ Bunu daha önce çözmüştün. İstersen yeniden çözebilirsin.",
@@ -101,7 +101,7 @@ export const tr: Strings = {
   // Making a set
   ownTitle: "Kendi alıştırmaların",
   ownIntro:
-    "Örneğin öğrencilerin için bir alıştırma seti yaz ve bağlantı olarak paylaş. Öğrenciler her alıştırmada önce cevabı tahmin eder, sonra elle çözer. İnternette hiçbir şey saklanmaz: setin tamamı bağlantının içindedir.",
+    "Örneğin öğrencilerin için bir alıştırma seti yaz ve bağlantı olarak paylaş. Öğrenciler her alıştırmada önce sonucun ne olacağını düşünür, sonra elle çözer. İnternette hiçbir şey saklanmaz: setin tamamı bağlantının içindedir.",
   upload: ".yaml dosyası yükle",
   startFromExample: "Örnekten başla",
   yamlLabel: "YAML biçiminde alıştırma seti",
@@ -122,7 +122,7 @@ moves: balance       # isteğe bağlı: bir bölümün numarası, id'si ya da ba
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    wrong: [x = 7, x = 8]    # isteğe bağlı: tahmin için iki yanlış cevap
+    wrong: [x = 7, x = 8]    # isteğe bağlı: seçenek olarak iki yanlış cevap
     hint: Kısa bir ipucu.     # isteğe bağlı
     moves: collect            # isteğe bağlı: yalnızca bu alıştırmanın hamleleri`,
   writeMathsAs: "Matematiği klavyede yazar gibi yaz:",
@@ -134,7 +134,7 @@ moves: balance
 exercises:
   - start: 2x + 3 = 11
     goal: x = 4
-    # Tahmin için iki yanlış cevap (isteğe bağlı; yazmazsan kendiliğinden üretilir).
+    # Seçenek olarak iki yanlış cevap (isteğe bağlı; yazmazsan kendiliğinden üretilir).
     wrong: [x = 7, x = 8]
   - start: x/3 - 2 = 1
     goal: x = 9
@@ -149,7 +149,7 @@ exercises:
   learningPathButton: "Öğrenme yolu",
   setSummary: (done: number, total: number, stars: number): [string, string] => [
     `${done}/${total} çözüldü · `,
-    ` ${stars} ilk tahminde doğru. Her alıştırmada önce cevabı tahmin et, sonra elle çöz.`,
+    ` ${stars} ilk seferde doğru. Her alıştırmada önce sonucun ne olacağını düşün, sonra elle çöz.`,
   ],
   makeOwnSet: "Kendi setini hazırla",
   ofCount: (n: number, count: number) => `${n}/${count}`,
@@ -173,8 +173,8 @@ exercises:
     cantReadWrong: (w: string, err: string) => `"${w}" yanlış cevabı okunamadı: ${err}`,
     wrongShape: (w: string, why: string) => `"${w}" yanlış cevabı hedefe benzemiyor: ${why}.`,
     wrongIsRight: (w: string) => `"${w}" yanlış cevabı aslında doğru.`,
-    noDecoys: "İnandırıcı yanlış cevaplar üretilemedi: `wrong:` ekle ya da alıştırma tahmin etmeden çözülsün.",
-    decoysMade: (list: string) => `Tahmin için üretilen yanlış cevaplar: ${list}.`,
+    noDecoys: "İnandırıcı yanlış cevaplar üretilemedi: `wrong:` ekle ya da alıştırma bu adım olmadan çözülsün.",
+    decoysMade: (list: string) => `Seçenek olarak üretilen yanlış cevaplar: ${list}.`,
     shapeCount: "denklem sayısı farklı",
     shapeRelation: "denklem beklenen yerde bir ifade var ya da tam tersi",
     shapeIsolated: (letter: string) => `${letter} değişkeninin neye eşit olduğunu söylemiyor`,
