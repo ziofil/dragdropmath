@@ -82,6 +82,11 @@ describe("rules do what they say", () => {
     ["(1/2)/(3/4)", "divide-by-fraction", "3/4", ["(1/2)*(4/3)"]],
     ["√9", "evaluate-power", "1/2", []], // no jump: √9 is worked out step by step…
     ["√9", "split-square", "9", ["√(3*3)"]], // …starting with 9 → 3·3
+    ["√9", "evaluate-root", "√(9)", ["3"]], // or tap the root: it comes out whole
+    ["root_3(8)", "evaluate-root", "root_3(8)", ["2"]],
+    ["√(3·3)", "evaluate-root", "√(3*3)", ["3"]],
+    ["√12", "evaluate-root", "√(12)", []], // not whole: split it instead
+    ["√x", "evaluate-root", "√(x)", []],
     ["root_3(8)", "split-square", "8", ["root_3(2*2*2)"]],
     ["x^1", "power-one", "1", ["x"]],
     ["3^1", "evaluate-power", "1", ["3"]],
@@ -428,6 +433,19 @@ describe("inequalities", () => {
   it("moves that don't cross keep the relation", () => {
     expect(moves("3x + 2x < 10", "2*x")).toContain("5*x < 10");
     expect(moves("2(x + 1) ≥ 4", "2")).toContain("2*x + 2*1 ≥ 4");
+  });
+});
+
+describe("tapping a root", () => {
+  const tap = (src: string) => {
+    const s = parseState(src);
+    const root = s.sides.flatMap(allNodes).find((n) => n.kind === "pow")!;
+    const c = tapFor(s, root.id, ALL_RULES);
+    return c && `${c.rule}: ${printState(c.state)}`;
+  };
+  it("works it out when it comes out whole, else shows it as a power", () => {
+    expect(tap("√9 + x")).toBe("evaluate-root: 3 + x");
+    expect(tap("√12 + x")).toBe("root-notation: 12^(1/2) + x");
   });
 });
 

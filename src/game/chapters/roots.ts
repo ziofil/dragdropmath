@@ -12,7 +12,7 @@ export const roots: Chapter = {
       example: {
         start: "√9",
         steps: [{ say: "Tap the 9 to split it into equal factors.", then: "√(3·3)" }],
-        after: "Then pull one 3 out of the root and see what's left.",
+        after: "Then pull one 3 out of the root and see what's left. Once you know how it works, tapping a root like √9 works it out in one go.",
       },
     },
     {
@@ -55,7 +55,7 @@ export const roots: Chapter = {
       },
     },
   ],
-  unlocks: ["root-notation", "split-square", "root-across"],
+  unlocks: ["root-notation", "split-square", "root-across", "evaluate-root"],
   puzzles: [
     { id: "r2", start: "x^(1/2)", goal: "√x", hint: "Tap it." },
     {
@@ -71,7 +71,7 @@ export const roots: Chapter = {
       id: "r1",
       start: "√9",
       goal: "3",
-      hint: "Tap the 9 to split it into 3·3, then pull one 3 out of the root.",
+      hint: "Tap the √ to work it out. Or see why: tap the 9 to split it into 3·3, then pull one 3 out of the root.",
     },
     { id: "r13", start: "√16", goal: "4" },
     {

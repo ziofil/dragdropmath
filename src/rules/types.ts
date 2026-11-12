@@ -37,6 +37,7 @@ export type RuleId =
   | "multiply-fractions"
   | "divide-by-fraction"
   | "root-notation"
+  | "evaluate-root"
   | "split-square"
   | "root-across"
   | "power-one"

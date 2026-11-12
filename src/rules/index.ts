@@ -29,6 +29,7 @@ import {
   powerToProduct,
   rootAcross,
   rootNotation,
+  evaluateRoot,
   splitSquare,
   zeroPower,
 } from "./powlog";
@@ -82,6 +83,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     evaluateLog,
     powerOfBase,
     rootNotation,
+    evaluateRoot,
     splitSquare,
     rootAcross,
     expAcross,

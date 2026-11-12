@@ -401,6 +401,30 @@ export const logAcross: Rule = {
 // ---------- roots ----------
 
 /** √x ↔ x^(1/2) (tap to switch notation). */
+/**
+ * √9 → 3, ∛8 → 2 (tap the root): a root of a number that comes out whole is
+ * worked out, as tapping 2·3 multiplies it out. One that doesn't (√12) is left
+ * for splitting: tapping it shows it as a power instead.
+ */
+export const evaluateRoot: Rule = {
+  id: "evaluate-root",
+  // Before root ↔ power, which a tap on any root would otherwise do.
+  tapOrder: -1,
+  name: "Work out a root",
+  gesture: "Tap a root of a number, like √9, to work it out (when it comes out whole).",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    if (c?.node.kind !== "pow" || !c.node.radical || !isConstant(c.node.base)) return [];
+    const n = rootOrder(c.node.exp);
+    const v = evaluate(c.node.base, {});
+    if (!n || !Number.isInteger(v) || v < 0) return [];
+    const r = Math.round(v ** (1 / n));
+    if (r ** n !== v) return [];
+    return [{ rule: "evaluate-root", state: replaceIn(state, c.loc, num(r, c.node.id)) }];
+  },
+};
+
 export const rootNotation: Rule = {
   id: "root-notation",
   name: "Root ↔ power",
