@@ -42,3 +42,7 @@ Turn on debug mode with `?debug` in the address or Shift+D. Dragology's overlay 
 - **Sets of one's own:** a teacher writes exercises in YAML (`#/sets/new`, format in `src/game/sets.ts`), they're checked (the goal follows from the start, wrong answers are really wrong, it can be solved with the chosen chapter's moves), and the whole set is packed into a link (`#/set/<code>`): nothing is stored online. Without `wrong:`, the wrong answers to choose from are made from classic slips (`autoDecoys.ts`).
 - **An exercise:** add it to `src/game/puzzles.ts`. `npm test` fails if it can't be solved with the moves unlocked so far.
 - **Words on screen:** English is the source — interface strings in `src/i18n/en.ts`, lessons and hints in the chapters themselves. Each other language (`src/i18n/<lang>/`) has `ui.ts` (the type checker makes it give every string) and `chapters.ts` (`src/i18n/i18n.test.ts` checks it has the English parts, steps and hints, with the same `backticked` maths). Write them the way a teacher in that country would, with the terms taught there, not word for word. A new language is an entry in `LANGS` in `src/i18n/index.ts` plus those two files.
+
+## License
+
+Proprietary: © 2026 Filippo Miatto, all rights reserved (see `LICENSE`). Open-source packages keep their own licenses; `npm run build` collects their notices into `third-party-licenses.txt`, published with the site. Before adding a dependency, check that its license allows closed commercial use (MIT, BSD, ISC, Apache are fine; GPL/AGPL are not).

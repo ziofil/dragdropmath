@@ -1,11 +1,12 @@
 {
   "name": "learn-math",
   "private": true,
+  "license": "UNLICENSED",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "node scripts/licenses.mjs && tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:quick": "vitest run --exclude 'src/**/exercises.*.test.tsx' --exclude 'src/**/solvable.*.test.ts' --exclude 'node_modules/**'",
