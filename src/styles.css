@@ -1,3 +1,8 @@
+:root:lang(el) {
+  /* Greek: Manrope for the letters Space Grotesk lacks. Only here, or other
+     pages would fetch it too, for the odd symbol Space Grotesk doesn't have. */
+  --ui: "Space Grotesk", "Manrope", system-ui, sans-serif;
+}
 :root {
   --bg: #f6f4ef;
   --surface: #ffffff;
@@ -20,8 +25,7 @@
   --bronze: #b8703a;
   --bronze-face: #f8e3d2;
   --radius: 14px;
-  /* Manrope only for the letters Space Grotesk lacks (Greek): browsers fetch it only then. */
-  --ui: "Space Grotesk", "Manrope", system-ui, sans-serif;
+  --ui: "Space Grotesk", system-ui, sans-serif;
   --math: "STIX Two Text", "Times New Roman", serif;
   color-scheme: light;
 }
@@ -109,9 +113,11 @@ button,
   text-decoration: none;
   display: inline-block;
 }
-button:hover:not(:disabled),
-.button:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  button:hover:not(:disabled),
+  .button:hover {
+    border-color: var(--accent);
+  }
 }
 button:disabled {
   opacity: 0.4;
@@ -188,8 +194,10 @@ button[aria-pressed="true"] {
   text-decoration: none;
   border: 2px solid transparent;
 }
-.ex-card:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .ex-card:hover {
+    border-color: var(--accent);
+  }
 }
 .ex-check {
   color: var(--good);
@@ -207,9 +215,11 @@ button[aria-pressed="true"] {
 /* ---------- puzzle ---------- */
 .puzzle-head {
   display: flex;
+  /* On a narrow phone, "‹ Exercise 4.26 ›" goes on a line of its own rather than off the screen. */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 8px 0 12px;
 }
 .back {
@@ -219,6 +229,7 @@ button[aria-pressed="true"] {
 /* ‹ Exercise 4.5 ›: step to the previous / next exercise. */
 .ex-nav {
   flex: none;
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -236,9 +247,11 @@ button[aria-pressed="true"] {
   font-size: 1.4rem;
   line-height: 1;
 }
-a.ex-step:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+@media (hover: hover) {
+  a.ex-step:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 }
 span.ex-step {
   visibility: hidden;
@@ -262,9 +275,12 @@ span.ex-step {
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
+/* A fixed height, not a max: Safari (iOS) sizes a grid cell from an SVG's
+   aspect ratio and ignores max-height, so answer cards grew far too tall. */
 .static-math {
+  display: block;
   width: 100%;
-  max-height: 90px;
+  height: 90px;
 }
 /* On a phone, the goal gets the whole width (beside the label it was tiny). */
 @media (max-width: 600px) {
@@ -274,20 +290,15 @@ span.ex-step {
     padding: 10px 12px 4px;
   }
   .static-math {
-    max-height: 64px;
+    height: 64px;
   }
 }
 
+/* The board has no frame: the maths sits on the page, its buttons under it.
+   Nothing can cut off a piece carried past its edge (a finger carries it
+   above itself, lift.ts). */
 .board {
   margin-top: 14px;
-  background: var(--surface);
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color 0.3s;
-}
-.board-solved {
-  border-color: var(--good);
 }
 .canvas {
   width: 100%;
@@ -298,6 +309,13 @@ span.ex-step {
   /* Its own compositing layer: WebKit (iOS) otherwise leaves trails of
      moving pieces behind, repainting only part of an SVG drawn outside its box. */
   transform: translateZ(0);
+}
+/* Safari repaints a glyph only within its box, and an italic x leans out of
+   its box: as it moves, the lean was left behind as a dotted trail. An
+   invisible outline widens what gets repainted. */
+.canvas svg text {
+  stroke: transparent;
+  stroke-width: 0.3em;
 }
 .canvas-error {
   display: flex;
@@ -318,18 +336,24 @@ span.ex-step {
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-top: 1px solid var(--line);
-  background: var(--surface-2);
+  padding: 6px 0 0;
 }
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
+  margin-left: auto;
+}
+@media (max-width: 480px) {
+  .board-bar button {
+    padding: 7px 11px;
+    font-size: 0.9rem;
+  }
 }
 .hint {
   margin: 0;
-  padding: 10px 14px;
-  border-top: 1px solid var(--line);
+  padding: 10px 0 0;
   color: var(--ink-soft);
 }
 
@@ -351,6 +375,7 @@ span.ex-step {
 }
 
 .result .button {
+  white-space: nowrap;
   grid-row: 1 / span 2;
   grid-column: 2;
 }
@@ -518,7 +543,8 @@ span.ex-step {
 .chapter-page {
   max-width: 760px;
   margin: 0 auto;
-  padding: 0 16px 64px;
+  /* Sideways margin: the app's own (16px), not twice that. */
+  padding: 0 0 64px;
 }
 .chapter-title {
   font-size: 2rem;
@@ -575,13 +601,11 @@ span.ex-step {
 .guided-tick {
   color: var(--good);
 }
-.guided-done .board {
-  border-color: var(--good);
-}
 .guided-status {
   margin: 0;
   color: var(--ink-soft);
-  flex: 1;
+  /* A line of its own when the button beside it would leave too little room. */
+  flex: 1 1 14rem;
 }
 
 /* ---------- home: the learning path ---------- */
@@ -677,8 +701,10 @@ span.ex-step {
   display: block;
   transition: transform 0.15s ease;
 }
-.path-node:hover .ring {
-  transform: scale(1.08);
+@media (hover: hover) {
+  .path-node:hover .ring {
+    transform: scale(1.08);
+  }
 }
 .ring-face {
   fill: var(--surface-2);
@@ -787,8 +813,10 @@ span.ex-step {
   color: inherit;
   text-decoration: none;
 }
-.panel-title a:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .panel-title a:hover {
+    color: var(--accent);
+  }
 }
 .panel-blurb,
 .panel-builds,
@@ -907,7 +935,6 @@ span.ex-step {
   border-radius: 50%;
   cursor: pointer;
 }
-.shelf-badge:hover,
 .shelf-badge:active {
   background: none;
   border: none;
@@ -1024,7 +1051,6 @@ span.ex-step {
   color: var(--ink);
   cursor: pointer;
 }
-button.choice:hover,
 button.choice:focus-visible {
   border-color: var(--accent);
 }
@@ -1099,7 +1125,6 @@ button.choice:focus-visible {
   border: 1px solid var(--line);
   border-radius: 999px;
 }
-.topbar .top-link:hover,
 .topbar .top-link[aria-current="page"] {
   color: var(--ink);
   border-color: var(--accent);
@@ -1124,7 +1149,8 @@ button.choice:focus-visible {
   appearance: none;
   -webkit-appearance: none;
   font: inherit;
-  font-size: 0.95rem;
+  /* 16px: iPhone zooms into a smaller form field (and stays zoomed). */
+  font-size: 1rem;
   line-height: inherit;
   color: var(--ink-soft);
   background: transparent;
@@ -1148,14 +1174,12 @@ button.choice:focus-visible {
     padding: 4px 8px;
   }
   .lang-pick {
-    font-size: 0.8rem;
-    padding: 5px 22px 5px 8px;
+    padding: 3px 22px 3px 8px;
   }
   .lang-wrap::after {
     right: 10px;
   }
 }
-.lang-pick:hover,
 .lang-pick:focus-visible {
   color: var(--ink);
   border-color: var(--accent);
@@ -1179,7 +1203,7 @@ button.choice:focus-visible {
 .yaml {
   display: block;
   width: 100%;
-  font: 0.95rem/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+  font: 1rem/1.5 ui-monospace, "SF Mono", Menlo, monospace; /* 16px: no zoom on iPhone */
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1301,4 +1325,83 @@ button.choice:focus-visible {
   text-align: center;
   color: var(--ink-soft);
   font-size: 0.85rem;
+}
+
+/* Hover looks, only where there's a pointer that hovers (a tapped element keeps :hover on a touchscreen). */
+@media (hover: hover) {
+  .shelf-badge:hover {
+    background: none;
+    border: none;
+    transform: scale(1.1);
+  }
+  button.choice:hover {
+    border-color: var(--accent);
+  }
+  .topbar .top-link:hover,
+  .lang-pick:hover {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+}
+
+/* ---------- touchscreens ---------- */
+html,
+body {
+  /* A piece carried past the screen's edge (the board has no frame) doesn't widen the page. */
+  overflow-x: clip;
+}
+html {
+  /* No double-tap zoom (two quick taps on Undo), pinch zoom still works. */
+  touch-action: manipulation;
+  /* iOS enlarges text when the phone is turned sideways. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* No grey flash over whatever is tapped (a piece, a card). */
+  -webkit-tap-highlight-color: transparent;
+}
+.canvas,
+.feel-word {
+  /* A long press on a piece is a drag, not a call for iOS's copy menu. */
+  -webkit-touch-callout: none;
+}
+@media (max-width: 480px) {
+  /* "Solved!" above its button: side by side, a long "Next exercise →" runs out of the bar. */
+  .result {
+    grid-template-columns: 1fr;
+  }
+  .result .button {
+    grid-row: auto;
+    grid-column: auto;
+    justify-self: start;
+  }
+  /* Three buttons (Sandbox, Make exercises, language) may not fit one row. */
+  .top-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 6px;
+  }
+}
+@media (max-width: 420px) {
+  /* Four chapters side by side leave ~60px each: break long words at their syllables. */
+  .node-title {
+    font-size: 0.66rem;
+    line-height: 1.1;
+  }
+  /* Where four chapters sit side by side, a long word can't fit its slot:
+     break it at its syllables (only there, so other titles keep whole words). */
+  .node-narrow .node-title {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  /* Three lines of title then end before the arrows start (TITLE_H in Home.tsx). */
+  .path-node {
+    gap: 4px;
+  }
+}
+@media (max-width: 480px) {
+  /* On a phone the maths may use the page's side margins too: bigger, easier to grab. */
+  .canvas {
+    margin-inline: -16px;
+    width: auto;
+  }
 }

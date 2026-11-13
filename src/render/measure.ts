@@ -3,6 +3,11 @@ export const MATH_FONT = `"STIX Two Text", "Times New Roman", serif`;
 const cache = new Map<string, number>();
 let ctx: CanvasRenderingContext2D | null = null;
 
+/** Forget measured widths (the math font arrived after they were taken with a fallback). */
+export function clearTextWidths(): void {
+  cache.clear();
+}
+
 /** Advance width of `text` in px. Wait for fonts (see main.tsx) before the first call. */
 export function textWidth(text: string, size: number, italic = false): number {
   const k = `${italic ? "i" : "r"}|${text}`;

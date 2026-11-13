@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
-import { layoutPath, suggested } from "../game/path";
+import { layoutPath, suggested, type PathNode } from "../game/path";
 import { FeelWord } from "./FeelWord";
 import { badgeTier, isMastered, loadSolved, solvedCount } from "../game/scoring";
 import { chapterText, t } from "../i18n";
@@ -103,6 +103,13 @@ function PathMap({
   const left = (width - w) / 2;
   const at = (n: { col: number; row: number }) => ({ x: left + ((n.col + 0.5) / cols) * w, y: R + 12 + n.row * ROW });
   const height = rows * ROW;
+  // A chapter's title may be as wide as the gap to its nearest neighbour in
+  // the row (chapters 4 and 5 sit two columns apart): on a narrow phone a long
+  // title then takes two lines, not four that run into the arrows below.
+  const room = (n: PathNode) => {
+    const gaps = nodes.filter((m) => m !== n && m.row === n.row).map((m) => Math.abs(m.col - n.col));
+    return Math.min(140, gaps.length ? (Math.min(...gaps) * w) / cols - 6 : w / 2);
+  };
 
   return (
     <div className="path" ref={box} style={{ height }}>
@@ -144,8 +151,8 @@ function PathMap({
             return (
               <button
                 key={c.id}
-                className={`path-node node-${state} ${c === selected ? "node-selected" : ""}`}
-                style={{ left: p.x, top: p.y - R, width: Math.min(140, nodes.filter((m) => m.row === n.row).length === 1 ? w / 2 : w / cols - 4) }}
+                className={`path-node node-${state} ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
+                style={{ left: p.x, top: p.y - R, width: room(n) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
                 aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title, done, c.puzzles.length)}

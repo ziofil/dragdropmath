@@ -236,7 +236,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
         </section>
       )}
 
-      <section className={`board ${solved ? "board-solved" : ""} ${mustGuess ? "board-waiting" : ""}`}>
+      <section className={`board ${mustGuess ? "board-waiting" : ""}`}>
         {mustGuess ? (
           <div className="still">
             <StillBoard state={start} />
