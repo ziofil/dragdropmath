@@ -20,7 +20,8 @@
   --bronze: #b8703a;
   --bronze-face: #f8e3d2;
   --radius: 14px;
-  --ui: "Space Grotesk", system-ui, sans-serif;
+  /* Manrope only for the letters Space Grotesk lacks (Greek): browsers fetch it only then. */
+  --ui: "Space Grotesk", "Manrope", system-ui, sans-serif;
   --math: "STIX Two Text", "Times New Roman", serif;
   color-scheme: light;
 }
@@ -360,6 +361,32 @@ span.ex-step {
   }
 }
 
+.sandbox-link {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sandbox-link p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+.sandbox-form {
+  display: flex;
+  gap: 8px;
+}
+.sandbox-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-family: var(--math);
+  font-size: 1.2rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
 .error {
   color: var(--warn);
 }

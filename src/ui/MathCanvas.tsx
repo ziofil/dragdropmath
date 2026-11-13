@@ -121,14 +121,22 @@ export function StillBoard({ state, height = 220 }: { state: MathState; height?:
 }
 
 /** A non-interactive rendering, e.g. for showing the goal. */
-export function StaticMath({ state, width = 720, height = 110 }: { state: MathState; width?: number; height?: number }) {
+/**
+ * `room`: extra height above and below, always kept, so a row of these (the
+ * answers to pick from) is drawn at one scale whether or not there are fractions.
+ */
+export function StaticMath({ state, width = 720, height = 110, room = 0 }: { state: MathState; width?: number; height?: number; room?: number }) {
   // Fitted to what's drawn, so a short expression isn't shrunk to fit an empty strip.
   const ref = useRef<SVGSVGElement>(null);
   const [view, setView] = useState(`0 0 ${width} ${height}`);
   useLayoutEffect(() => {
     const g = ref.current?.getBBox();
-    if (g && g.width > 0) setView(`${g.x - 8} 0 ${g.width + 16} ${height}`);
-  }, [state, width, height]);
+    if (!g || g.width <= 0) return;
+    // The usual strip, grown wherever something tall (a power on top of a fraction) would be cut off.
+    const top = Math.min(-room, g.y - 6);
+    const bottom = Math.max(height + room, g.y + g.height + 6);
+    setView(`${g.x - 8} ${top} ${g.width + 16} ${bottom - top}`);
+  }, [state, width, height, room]);
   return (
     <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label={t().goal}>
       {renderState({ state }, width, height)}

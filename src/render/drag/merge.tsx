@@ -46,6 +46,9 @@ const ease = (t: number) => t * t * t;
 /** An absorbed piece starts turning into the result only this far along its approach. */
 const ABSORB_FROM = 0.4;
 
+/** A merge held on past where it completes (into brackets) shows as all but complete. */
+const HELD = 0.999;
+
 /** Carrying past where a merge completes undoes it within this many target heights. */
 const OVERSHOOT = 2;
 
@@ -166,7 +169,16 @@ class Shown extends Operator<MathState> {
 }
 const shown = operator(Shown);
 
-type Merge = { state: MathState; targetId: string; preview: LayeredSvgx; zone: ReturnType<typeof onTarget>; aim: Vec2; absorbed: boolean };
+type Merge = {
+  state: MathState;
+  targetId: string;
+  preview: LayeredSvgx;
+  zone: ReturnType<typeof onTarget>;
+  aim: Vec2;
+  absorbed: boolean;
+  /** The target is brackets the piece goes into (a into a(b + c)): the merge holds all the way across them. */
+  enters: boolean;
+};
 
 /**
  * Carrying a piece towards pieces it can merge with. How far along it is —
@@ -204,6 +216,11 @@ class MergeApproach extends Operator<MathState> {
     this.carry = this.child("carry", carrySpec);
     this.still = this.child("still", rowSlot(env, id, [], 0, new Map()).withFloating());
     this.home = canvasBox(rc, ctx, id).centre;
+    // (A minus carried on its own has its own handle, not a node: no kind.)
+    const kindOf = (nid: string) => {
+      const loc = locate(rc.state, nid);
+      return loc ? nodeAt(rc.state, loc).kind : null;
+    };
     this.merges = merges.map((c) => {
       // What stays put (a pinned target, a term being multiplied) stays where it is in the picture until the drop.
       const plan = mergePlan(rc, ctx, id, c.state, c.targetId!, c.stays);
@@ -214,6 +231,8 @@ class MergeApproach extends Operator<MathState> {
         zone: onTarget(rc, ctx, id, c.targetId!),
         aim: plan.aim,
         absorbed: plan.pinned,
+        // (A factor going in; a bracket carried onto brackets multiplies them, it doesn't go in.)
+        enters: !plan.pinned && kindOf(c.targetId!) === "sum" && kindOf(id) !== "sum",
       };
     });
     const probeCtx = { ...ctx, draggedId: PROBE, draggedPath: `${PROBE}/`, anchorPos: Vec2(0, 0) };
@@ -225,12 +244,31 @@ class MergeApproach extends Operator<MathState> {
     // A target inside the piece is under it all along: there, all or nothing.
     if (m.zone.nested) return m.zone.hit(pointer) ? 1 : 0;
     const c = carriedCentre(this.env.rc, this.ctx, pointer);
-    // Carried on past where it ends up: the merge fades within a couple of symbol heights.
-    if (this.past(m, c)) return Math.max(0, 1 - Math.max(0, c.dist(m.aim) - SETTLED_PX) / (OVERSHOOT * m.zone.h));
     const away = this.home.sub(m.aim);
     const reach = REACH * m.zone.h;
+    if (this.past(m, c)) {
+      // Carried on into brackets (a into a(b + c), on past the b): the merge
+      // holds until the piece leaves them on the far side, then undoes over
+      // the distance it took to form, as it formed on the way in, in reverse.
+      // (Held, it gives way to another move completing right there: 2/3 onto (1 + 1/2) can also go on top.)
+      if (m.enters) return Math.min(HELD, Math.max(0, 1 - Math.max(0, this.overshoot(m, c) - SETTLED_PX) / Math.max(Math.min(away.len(), reach), m.zone.h / 2)));
+      // Carried on past where it ends up: the merge fades within a couple of symbol heights.
+      return Math.max(0, 1 - Math.max(0, c.dist(m.aim) - SETTLED_PX) / (OVERSHOOT * m.zone.h));
+    }
     const from = away.len() > reach ? m.aim.add(away.mul(reach / away.len())) : this.home;
     return approach(c, from, m.aim, SETTLED_PX);
+  }
+
+  /**
+   * How far the carried centre `c` is from the stretch where merge `m` holds:
+   * from where it completes on to the target's far edge.
+   */
+  private overshoot(m: Merge, c: Vec2): number {
+    const dir = Math.sign(m.aim.x - this.home.x) || Math.sign(m.zone.centre.x - this.home.x);
+    const far = dir > 0 ? m.zone.right : m.zone.left;
+    const end = (far - m.aim.x) * dir > 0 ? far : m.aim.x;
+    const x = dir > 0 ? Math.min(Math.max(c.x, m.aim.x), end) : Math.max(Math.min(c.x, m.aim.x), end);
+    return c.dist(Vec2(x, m.aim.y));
   }
 
   /** Whether reorder `r` puts the carried piece on the other side of `targetId` in their row. */

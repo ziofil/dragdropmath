@@ -12,6 +12,13 @@ export const en = {
 
   // Top bar
   makeExercises: "Make exercises",
+  /** Any expression, every move: the page, its link on the home page, and its input. */
+  sandbox: "Sandbox",
+  openSandbox: "Open the sandbox →",
+  sandboxIntro: "Type any expression or equation and play with every move.",
+  sandboxInput: "Expression or equation",
+  sandboxPlaceholder: "e.g. 3(x - 2) = 2x + 1   or   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Load",
   debugOn: "Debug mode is on (Shift+D)",
 
   // Home

@@ -64,6 +64,13 @@ export function Home({ at }: { at?: Chapter }) {
         <ChapterPanel panelRef={panel} chapter={selected} solved={solved} isNext={next.includes(selected)} />
       </div>
 
+      <section className="chapter sandbox-link">
+        <a href="#/sandbox" className="button">
+          {t().openSandbox}
+        </a>
+        <p>{t().sandboxIntro}</p>
+      </section>
+
     </main>
   );
 }

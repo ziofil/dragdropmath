@@ -13,6 +13,12 @@ export const fr: Strings = {
 
   // Top bar
   makeExercises: "Créer des exercices",
+  sandbox: "Bac à sable",
+  openSandbox: "Ouvrir le bac à sable →",
+  sandboxIntro: "Écris n'importe quelle expression ou équation et essaie tous les mouvements.",
+  sandboxInput: "Expression ou équation",
+  sandboxPlaceholder: "ex. 3(x - 2) = 2x + 1   ou   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Charger",
   debugOn: "Mode débogage activé (Maj+D)",
 
   // Home

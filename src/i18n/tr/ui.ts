@@ -12,6 +12,12 @@ export const tr: Strings = {
 
   // Top bar
   makeExercises: "Alıştırma hazırla",
+  sandbox: "Deneme alanı",
+  openSandbox: "Deneme alanını aç →",
+  sandboxIntro: "İstediğin bir ifadeyi ya da denklemi yaz, bütün hamleleri dene.",
+  sandboxInput: "İfade ya da denklem",
+  sandboxPlaceholder: "örn. 3(x - 2) = 2x + 1   veya   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Yükle",
   debugOn: "Hata ayıklama modu açık (Shift+D)",
 
   // Home

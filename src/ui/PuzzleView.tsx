@@ -206,7 +206,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             <div className="choices">
               {choices.map((c) => (
                 <button key={c} className="choice" onClick={() => pick(c)}>
-                  <StaticMath state={parseState(c)} height={90} />
+                  <StaticMath state={parseState(c)} height={90} room={12} />
                 </button>
               ))}
             </div>
@@ -215,7 +215,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             <div className="choices answered">
               {choices.map((c) => (
                 <div key={c} className={`choice ${c === puzzle.goal ? "is-right" : c === shownPick ? "is-picked" : ""}`}>
-                  <StaticMath state={parseState(c)} height={90} />
+                  <StaticMath state={parseState(c)} height={90} room={12} />
                 </div>
               ))}
             </div>

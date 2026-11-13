@@ -20,6 +20,12 @@ export const pl: Strings = {
 
   // Top bar
   makeExercises: "Ułóż zadania",
+  sandbox: "Piaskownica",
+  openSandbox: "Otwórz piaskownicę →",
+  sandboxIntro: "Wpisz dowolne wyrażenie lub równanie i wypróbuj wszystkie ruchy.",
+  sandboxInput: "Wyrażenie lub równanie",
+  sandboxPlaceholder: "np. 3(x - 2) = 2x + 1   albo   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Wczytaj",
   debugOn: "Tryb debugowania włączony (Shift+D)",
 
   // Home

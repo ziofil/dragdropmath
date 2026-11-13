@@ -11,6 +11,12 @@ export const nl: Strings = {
 
   // Top bar
   makeExercises: "Oefeningen maken",
+  sandbox: "Zandbak",
+  openSandbox: "Open de zandbak →",
+  sandboxIntro: "Typ een willekeurige uitdrukking of vergelijking en probeer alle zetten uit.",
+  sandboxInput: "Uitdrukking of vergelijking",
+  sandboxPlaceholder: "bijv. 3(x - 2) = 2x + 1   of   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Laden",
   debugOn: "Debugmodus staat aan (Shift+D)",
 
   // Home

@@ -16,7 +16,7 @@ const ids = await p.evaluate(async () => {
   const m = await import("/src/game/puzzles.ts");
   return { chapters: m.CHAPTERS.map((c) => c.id), puzzles: m.allPuzzles().map((r) => r.puzzle.id) };
 });
-const pages = ["#/", ...ids.chapters.map((c) => `#/c/${c}`), ...ids.puzzles.map((q) => `#/p/${q}`)];
+const pages = ["#/", "#/sandbox", ...ids.chapters.map((c) => `#/c/${c}`), ...ids.puzzles.map((q) => `#/p/${q}`)];
 for (const h of pages) {
   errs = [];
   await p.goto("http://localhost:5179/" + h);

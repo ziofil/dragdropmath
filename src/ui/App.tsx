@@ -4,6 +4,7 @@ import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { exerciseOfPath, PuzzleView } from "./PuzzleView";
 import { SetMaker, SetRoute } from "./SetView";
+import { Sandbox } from "./Sandbox";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
 import { LANGS, setLang, t, useLang, type Lang } from "../i18n";
 
@@ -31,6 +32,7 @@ export function App() {
   const at = chapterById(atId);
   // Sets of one's own: making one, or one opened from its link (and its exercises).
   const making = hash === "#/sets/new";
+  const sandbox = hash === "#/sandbox";
   const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
@@ -54,6 +56,9 @@ export function App() {
               debug ✕
             </button>
           )}
+          <a href="#/sandbox" className="top-link" aria-current={sandbox ? "page" : undefined}>
+            {t().sandbox}
+          </a>
           {/* For teachers (or anyone): write exercises and share them as a link. */}
           <a href="#/sets/new" className="top-link" aria-current={making ? "page" : undefined}>
             {t().makeExercises}
@@ -70,7 +75,9 @@ export function App() {
           </span>
         </span>
       </nav>
-      {making ? (
+      {sandbox ? (
+        <Sandbox />
+      ) : making ? (
         <SetMaker />
       ) : setLink ? (
         <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />

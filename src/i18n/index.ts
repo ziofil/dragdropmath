@@ -19,6 +19,7 @@ import { pt } from "./pt/ui";
 import { pl } from "./pl/ui";
 import { nl } from "./nl/ui";
 import { tr } from "./tr/ui";
+import { el } from "./el/ui";
 import { itChapters } from "./it/chapters";
 import { esChapters } from "./es/chapters";
 import { deChapters } from "./de/chapters";
@@ -27,6 +28,7 @@ import { ptChapters } from "./pt/chapters";
 import { plChapters } from "./pl/chapters";
 import { nlChapters } from "./nl/chapters";
 import { trChapters } from "./tr/chapters";
+import { elChapters } from "./el/chapters";
 
 export { en };
 export type { Strings };
@@ -60,12 +62,13 @@ export const LANGS = [
   { code: "pl", name: "Polski" },
   { code: "nl", name: "Nederlands" },
   { code: "tr", name: "Türkçe" },
+  { code: "el", name: "Ελληνικά" },
 ] as const;
 
 export type Lang = (typeof LANGS)[number]["code"];
 
-const UI: Record<Lang, Strings> = { en, it, es, de, fr, pt, pl, nl, tr };
-const CHAPTERS_IN: Record<Exclude<Lang, "en">, ChapterTexts> = { it: itChapters, es: esChapters, de: deChapters, fr: frChapters, pt: ptChapters, pl: plChapters, nl: nlChapters, tr: trChapters };
+const UI: Record<Lang, Strings> = { en, it, es, de, fr, pt, pl, nl, tr, el };
+const CHAPTERS_IN: Record<Exclude<Lang, "en">, ChapterTexts> = { it: itChapters, es: esChapters, de: deChapters, fr: frChapters, pt: ptChapters, pl: plChapters, nl: nlChapters, tr: trChapters, el: elChapters };
 
 const KEY = "mathbyhand.lang.v1";
 const isLang = (s: unknown): s is Lang => LANGS.some((l) => l.code === s);

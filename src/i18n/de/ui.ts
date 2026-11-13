@@ -10,6 +10,12 @@ export const de: Strings = {
 
   // Top bar
   makeExercises: "Aufgaben erstellen",
+  sandbox: "Spielwiese",
+  openSandbox: "Zur Spielwiese →",
+  sandboxIntro: "Gib einen beliebigen Term oder eine Gleichung ein und probier alle Umformungen aus.",
+  sandboxInput: "Term oder Gleichung",
+  sandboxPlaceholder: "z. B. 3(x - 2) = 2x + 1   oder   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Laden",
   debugOn: "Debug-Modus ist an (Shift+D)",
 
   // Home

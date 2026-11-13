@@ -172,6 +172,31 @@ describe("letting go gives what the picture shows", () => {
   });
 });
 
+describe("a merge holds while the piece is over its target, and undoes the way it formed", () => {
+  // Exercise 3.1: the a carried into a(b + c) showed ab + ac just before the b,
+  // then faded on past the b while still inside the brackets.
+  it.each([
+    ["a(b + c)", 1, "a*b + a*c"],
+    ["(b + c)a", -1, "b*a + c*a"],
+  ])("%s: the a carried across the brackets", (src, dir, merged) => {
+    const h = harness(src);
+    const grip = h.grab(h.find("a").id);
+    const b = h.centreOf(h.find("b").id).x;
+    const c = h.centreOf(h.find("c").id).x;
+    const at = (x: number) => grip.at(Vec2(x, grip.start.y));
+    // Over the b, between b and c, over the c: the result, and letting go gives it.
+    for (const x of [b, (b + c) / 2, c]) {
+      const f = at(x);
+      expect(f.blend, `at ${x.toFixed(0)}`).toBeGreaterThan(0.99);
+      expect(f.drops).toBe(merged);
+    }
+    // Carried out the far side, it fades away again.
+    const farOut = at((dir > 0 ? Math.max(b, c) : Math.min(b, c)) + dir * 150);
+    expect(farOut.blend).toBeCloseTo(0);
+    expect(farOut.drops).not.toBe(merged);
+  });
+});
+
 describe("a copy made by distributing is an ordinary piece afterwards", () => {
   it("2(x + 3) → 2x + 2·3, then the 2 of 2·3 onto the 3: no 2 flies between it and 2x", () => {
     // Reach 2x + 2·3 the way a learner does, so the copy still carries its "made from" mark.

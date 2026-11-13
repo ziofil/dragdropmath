@@ -10,6 +10,12 @@ export const es: Strings = {
 
   // Top bar
   makeExercises: "Crear ejercicios",
+  sandbox: "Laboratorio",
+  openSandbox: "Abrir el laboratorio →",
+  sandboxIntro: "Escribe cualquier expresión o ecuación y prueba todos los movimientos.",
+  sandboxInput: "Expresión o ecuación",
+  sandboxPlaceholder: "p. ej. 3(x - 2) = 2x + 1   o   ln(x^2) = e^(ln(4))",
+  sandboxLoad: "Cargar",
   debugOn: "El modo de depuración está activado (Shift+D)",
 
   // Home
