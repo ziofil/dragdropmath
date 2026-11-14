@@ -3,7 +3,7 @@ import type { Chapter } from "../puzzles";
 export const roots: Chapter = {
   id: "roots",
   title: "Roots",
-  blurb: "√x is x to the power ½, so the rules for powers work for roots too.",
+  blurb: "√x is x to the power ½, and ∛x is x to the power ⅓, so the rules for powers work for roots too.",
   after: ["powers", "fractions"],
   lesson: [
     {
@@ -23,6 +23,18 @@ export const roots: Chapter = {
       example: {
         start: "x^(1/2)",
         steps: [{ say: "Tap it: a power of ½ is a square root.", then: "√x" }],
+      },
+    },
+    {
+      title: "Cube roots, and more",
+      text: [
+        "`∛8` is the number that gives 8 when it's multiplied by itself three times. It's 2, since `2·2·2 = 8`. In the same way `∜16 = 2`, since `2·2·2·2 = 16`.",
+        "Every root is a power: `∛x = x^(1/3)`, `∜x = x^(1/4)`, and the nth root of x is `x^(1/n)`. Everything you can do with `√` works the same way for them.",
+      ],
+      example: {
+        start: "root_3(27)",
+        steps: [{ say: "Tap the 27 to split it into equal factors.", then: "root_3(3·3·3)" }],
+        after: "Three 3s, so ∛27 is 3. You can tap ∛27 to work it out in one step.",
       },
     },
     {
@@ -53,6 +65,7 @@ export const roots: Chapter = {
           { say: "Work it out.", then: "x = 9" },
         ],
       },
+      watch: "Each root is undone by its own power: `∛x = 2` gives `x = 2³ = 8`, and `∜x = 2` gives `x = 2⁴ = 16`.",
     },
   ],
   unlocks: ["root-notation", "split-square", "root-across", "evaluate-root"],

@@ -3,44 +3,47 @@
  * missing or blocked, so every access is guarded.
  *
  * A chapter's exercises are made up on the spot (generate/practice.ts), so
- * progress is how many were solved at each level. Sets of one's own keep
+ * progress is how many were done at each level: answered right in the test
+ * (which earns the badge), and solved in practice. Sets of one's own keep
  * which of their exercises are solved (loadSolved).
  */
 import { LEVELS, type Level } from "./generate/write";
 
 // ---------- a chapter: how many solved at each level ----------
 
-/** Solved at a level for its step of the badge: bronze easy, silver medium, gold hard. */
+/** Right answers in the test at a level for its step of the badge: bronze easy, silver medium, gold hard. */
 export const PER_LEVEL = 10;
 
 export type Counts = Record<Level, number>;
 export type Progress = Record<string, Counts>;
 
-const COUNTS_KEY = "mathbyhand.counts.v1";
+/** Where each kind is counted: the test (earlier, every exercise asked for a prediction first: those count as tests). */
+export type Kind = "test" | "practice";
+const COUNTS_KEY: Record<Kind, string> = { test: "mathbyhand.counts.v1", practice: "mathbyhand.practice.v1" };
 /** The exercises already counted (the latest few): solving one again doesn't count twice. */
 const COUNTED_KEY = "mathbyhand.counted.v1";
 const KEEP_COUNTED = 500;
 
 const none = (): Counts => ({ easy: 0, medium: 0, hard: 0 });
 
-export function loadProgress(): Progress {
+export function loadProgress(kind: Kind = "test"): Progress {
   try {
-    return JSON.parse(localStorage.getItem(COUNTS_KEY) ?? "{}");
+    return JSON.parse(localStorage.getItem(COUNTS_KEY[kind]) ?? "{}");
   } catch {
     return {};
   }
 }
 
-/** One more exercise solved, unless this one was counted already. */
-export function countSolved(chapterId: string, level: Level, exerciseId: string): void {
+/** One more exercise done, unless this one was counted already. */
+export function countSolved(chapterId: string, level: Level, exerciseId: string, kind: Kind = "test"): void {
   try {
     const counted: string[] = JSON.parse(localStorage.getItem(COUNTED_KEY) ?? "[]");
     if (counted.includes(exerciseId)) return;
-    const progress = loadProgress();
+    const progress = loadProgress(kind);
     const c = { ...none(), ...progress[chapterId] };
     c[level]++;
     progress[chapterId] = c;
-    localStorage.setItem(COUNTS_KEY, JSON.stringify(progress));
+    localStorage.setItem(COUNTS_KEY[kind], JSON.stringify(progress));
     localStorage.setItem(COUNTED_KEY, JSON.stringify([...counted, exerciseId].slice(-KEEP_COUNTED)));
   } catch {
     /* storage unavailable: progress just won't persist */

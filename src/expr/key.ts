@@ -9,10 +9,15 @@ import type { Expr, MathState } from "./types";
  */
 export type Ordering = boolean | "exact";
 
-/** Structural key, ignoring ids. */
-export function key(e: Expr, ordered: Ordering = false): string {
+/**
+ * Structural key, ignoring ids. `notation`: whether √x and x^(1/2) differ
+ * (they do whenever order counts; a search wants them apart always, so as
+ * not to lose the move between them).
+ */
+export function key(e: Expr, ordered: Ordering = false, notation = ordered !== false): string {
+  const k = (x: Expr) => key(x, ordered, notation);
   const list = (xs: Expr[], keepOrder: boolean) => {
-    const ks = xs.map((x) => key(x, ordered));
+    const ks = xs.map(k);
     return (keepOrder ? ks : ks.sort()).join(",");
   };
   switch (e.kind) {
@@ -21,25 +26,25 @@ export function key(e: Expr, ordered: Ordering = false): string {
     case "var":
       return e.name;
     case "neg":
-      return `-(${key(e.arg, ordered)})`;
+      return `-(${k(e.arg)})`;
     case "sum":
       return `+(${list(e.terms, ordered !== false)})`;
     case "prod":
       return `*(${list(e.factors, ordered === "exact")})`;
     case "frac":
-      return `/(${key(e.num, ordered)},${key(e.den, ordered)})`;
+      return `/(${k(e.num)},${k(e.den)})`;
     case "pow":
       // Notation counts whenever order does: a goal of 2√x isn't met by 2·x^(1/2).
-      return `${ordered !== false && e.radical ? "√" : ""}^(${key(e.base, ordered)},${key(e.exp, ordered)})`;
+      return `${notation && e.radical ? "√" : ""}^(${k(e.base)},${k(e.exp)})`;
     case "const":
       return `#${e.name}`;
     case "log":
-      return `log(${key(e.base, ordered)},${key(e.arg, ordered)})`;
+      return `log(${k(e.base)},${k(e.arg)})`;
   }
 }
 
-export function stateKey(s: MathState, ordered: Ordering = false): string {
-  return joinRows(s, (e) => key(e, ordered));
+export function stateKey(s: MathState, ordered: Ordering = false, notation = ordered !== false): string {
+  return joinRows(s, (e) => key(e, ordered, notation));
 }
 
 /** Each row's sides with their relation, rows joined by ;. */

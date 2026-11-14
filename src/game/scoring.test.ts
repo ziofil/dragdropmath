@@ -41,4 +41,11 @@ describe("progress", () => {
     expect(badgeTier(ch, loadProgress())).toBe(3);
     expect(toNextTier(ch, loadProgress())).toBeNull();
   });
+
+  it("counts practice on its own: it never earns the badge", () => {
+    for (let i = 0; i < 12; i++) countSolved("balance", "hard", `p${i}`, "practice");
+    expect(loadProgress("practice").balance).toEqual({ easy: 0, medium: 0, hard: 12 });
+    expect(loadProgress().balance).toBeUndefined();
+    expect(badgeTier(ch, loadProgress())).toBe(0);
+  });
 });

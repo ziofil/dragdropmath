@@ -1,4 +1,5 @@
 /** Exercise shapes for the chapter "explog" (see ../write.ts). */
+import { NESTED } from "./nested";
 import { gcd, plus, type Level, type Rng, type Shape } from "../write";
 
 /** One of a few letters, mostly x. */
@@ -349,5 +350,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("exp-equals", "log-equals", "log-of-power", "logs-of-powers", "same-base-product", "log-sum-equals", "log-with-e", "times-power-equals"),
   medium: pick("isolate-exp", "isolate-ln", "undo-log-linear", "split-log", "powers-in-logs"),
-  hard: pick("log-of-power-product", "split-and-collect-logs", "exp-quotient-equation", "root-of-e-equation"),
+  // Hard nests one thing in another, with x and y: chapters/nested.ts.
+  hard: NESTED.explog,
 };

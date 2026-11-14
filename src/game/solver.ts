@@ -60,7 +60,8 @@ export function solution(
 ): MathState[] | null {
   let frontier = [start];
   const parent = new Map<MathState, MathState>();
-  const seen = new Set([stateKey(start, ordered)]);
+  // Seen with notation: √x and x^(1/2) are a move apart, even where a goal doesn't mind which.
+  const seen = new Set([stateKey(start, ordered, true)]);
   for (let depth = 0; depth <= maxDepth; depth++) {
     const done = frontier.find((s) => matchesGoal(s, goal, ordered));
     if (done) {
@@ -74,7 +75,7 @@ export function solution(
       // Expanded: its moves aren't needed again (the search keeps the state itself, for the path).
       forgetMoves(s);
       for (const n of ns) {
-        const k = stateKey(n, ordered);
+        const k = stateKey(n, ordered, true);
         if (seen.has(k)) continue;
         seen.add(k);
         parent.set(n, s);

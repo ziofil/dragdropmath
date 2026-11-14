@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { CHAPTERS } from "../game/puzzles";
-import { chapterText, englishText, LANGS, type Lang } from ".";
+import { chapterText, englishText, ENGLISH_ONLY, LANGS, type Lang } from ".";
 import { readSet } from "../game/sets";
 import { t, setLang } from ".";
 
 /** The `backticked` maths in a piece of text, in order. */
 const maths = (s: string) => s.split("`").filter((_, i) => i % 2 === 1);
 
-describe.each(LANGS.filter((l) => l.code !== "en").map((l) => l.code))("%s", (lang) => {
+// Paused while the site is English only: the lessons may change before they are translated again.
+describe.skipIf(ENGLISH_ONLY).each(LANGS.filter((l) => l.code !== "en").map((l) => l.code))("%s", (lang) => {
   it.each(CHAPTERS.map((c) => [c.id, c] as const))("chapter %s has the English one's shape and maths", (_, chapter) => {
     const en = englishText(chapter);
     const tr = chapterText(chapter, lang as Lang);

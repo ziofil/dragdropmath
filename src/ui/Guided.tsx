@@ -8,26 +8,37 @@ import { matchesGoal } from "../game/solver";
 import { TIDY_STEP_MS, tidied } from "../game/tidy";
 import { MathCanvas } from "./MathCanvas";
 import { MathText } from "./MathText";
-import { t, type ChapterText } from "../i18n";
+import { t } from "../i18n";
 
 /**
  * A worked example the learner does by hand, one instructed move at a time.
  * Moves other than the one asked for are real moves, just not this
- * example's: they're shown, then gently put back.
+ * example's: they're shown, then gently put back. Used by the lessons, and
+ * for learning the moves (one step each, with `more` for another one).
  */
 export function GuidedExample({
   example,
   words,
   rules,
   n,
+  positive,
+  more,
 }: {
   example: Guided;
   /** Its instructions and closing remark, in the reader's language. */
-  words: ChapterText["lesson"][number];
+  words: { steps?: string[]; after?: string };
   rules: readonly RuleId[];
-  n: number;
+  /** "Example n" (none for a move's). */
+  n?: number;
+  /** Its letters stand for positive numbers. */
+  positive?: boolean;
+  /** A button for a fresh one. */
+  more?: { text: string; onClick: () => void };
 }) {
-  const start = useMemo(() => parseState(example.start), [example]);
+  const start = useMemo(
+    (): MathState => ({ ...parseState(example.start), ...(positive ? { letters: "positive" as const } : {}) }),
+    [example, positive],
+  );
   const wants = useMemo(() => example.steps.map((s) => parseState(s.then)), [example]);
   const [states, setStates] = useState<MathState[]>([start]);
   const [detour, setDetour] = useState<MathState | null>(null);
@@ -37,6 +48,8 @@ export function GuidedExample({
   const step = Math.min(states.length - 1, example.steps.length);
   const done = step >= example.steps.length;
   const current = detour ?? states[states.length - 1];
+  // A move's (one step, no number): its instruction reads as plain text.
+  const prose = n === undefined && example.steps.length === 1;
 
   // Tidying (x·2 → 2x) happens on its own here too, just after the move. A
   // move made before it shows takes it over (tidying from where it started).
@@ -64,25 +77,35 @@ export function GuidedExample({
   return (
     <div className={`guided ${done ? "guided-done" : ""}`}>
       <div className="guided-head">
-        <span className="guided-num">{t().exampleN(n)}</span>
-        <ol className="guided-steps">
-          {example.steps.map((s, i) => (
-            <li key={i} className={i < step ? "past" : i === step ? "now" : "later"}>
-              {i < step && <span className="guided-tick">✓ </span>}
-              <MathText text={words.steps?.[i] ?? s.say} />
-            </li>
-          ))}
-        </ol>
+        {n !== undefined && <span className="guided-num">{t().exampleN(n)}</span>}
+        {prose ? (
+          <p className="guided-say">
+            <MathText text={words.steps?.[0] ?? example.steps[0].say} />
+          </p>
+        ) : (
+          <ol className="guided-steps">
+            {example.steps.map((s, i) => (
+              <li key={i} className={i < step ? "past" : i === step ? "now" : "later"}>
+                {i < step && <span className="guided-tick">✓ </span>}
+                <MathText text={words.steps?.[i] ?? s.say} />
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
       <div className="board guided-board">
         <MathCanvas state={current} rules={rules} onDrop={onDrop} height={160} />
         <div className="board-bar">
           <p className="guided-status" role="status">
-            {detour ? t().notThisStep : done ? (
+            {detour ? (
+              t().notThisStep
+            ) : done ? (
               <>
                 <MathText text={words.after ?? t().done} /> <span className="guided-free">{t().keepGoing}</span>
               </>
-            ) : t().stepOf(step + 1, example.steps.length)}
+            ) : prose ? null : (
+              t().stepOf(step + 1, example.steps.length)
+            )}
           </p>
           <div className="actions">
             <button
@@ -94,6 +117,11 @@ export function GuidedExample({
             >
               {t().startOver}
             </button>
+            {more && (
+              <button className={done ? "primary" : ""} onClick={more.onClick}>
+                {more.text}
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 /** Exercise shapes for the chapter "roots" (see ../write.ts). */
+import { NESTED } from "./nested";
 import { ax, plus, type Level, type Rng, type Shape } from "../write";
 
 /** Numbers with no square factor, to stay inside a root. */
@@ -8,7 +9,66 @@ const letter = (r: Rng) => (r.next() < 0.6 ? "x" : ["y", "a", "t", "n"][r.int(0,
 /** k√m: "√3", "2√3". */
 const kroot = (k: number, m: number | string) => `${k === 1 ? "" : k}√${typeof m === "number" ? m : m.length > 1 ? `(${m})` : m}`;
 
+/** ⁿ√ as the exercises write it: "∛(x)" is root_3(x). */
+const nroot = (n: number, inside: string) => (n === 2 ? `√(${inside})` : `root_${n}(${inside})`);
+/** Cube and higher roots (the square roots are below). */
+const higher: Shape[] = [
+  {
+    id: "cube-simplify",
+    name: "a cube out of a cube root",
+    make: (r) => {
+      // ∛(k³m) → k∛m
+      const k = r.int(2, 3);
+      const m = r.int(2, 3);
+      const n = k ** 3 * m;
+      // ∛16, ∛24 (the start's numbers stay at 30 or under)
+      return { shape: "cube-simplify", start: `root_3(${n})`, goal: `${k}root_3(${m})`, via: [], numbers: [n], along: [k ** 3, k, m] };
+    },
+  },
+  {
+    id: "nth-root-equals",
+    name: "a cube or higher root equal to a number",
+    make: (r) => {
+      // ⁿ√x = a → x = aⁿ
+      const n = r.int(3, 5);
+      const a = n === 3 ? r.int(2, 3) : 2;
+      const x = letter(r);
+      return { shape: "nth-root-equals", start: `${nroot(n, x)} = ${a}`, goal: `${x} = ${a ** n}`, via: [], numbers: [a, n], along: [a ** n] };
+    },
+  },
+  {
+    id: "nth-root-of-power",
+    name: "a cube or fourth root of a power",
+    make: (r) => {
+      // ⁿ√(x^(nm)) → xᵐ
+      const n = r.int(3, 4);
+      const m = r.int(2, 3);
+      const x = letter(r);
+      return { shape: "nth-root-of-power", start: nroot(n, `${x}^${n * m}`), goal: `${x}^${m}`, via: [], numbers: [n * m], along: [m] };
+    },
+  },
+  {
+    id: "cube-root-and-like",
+    name: "the cube root of a cube, and a like term",
+    make: (r) => {
+      // ∛(k³x³) + m·x → (k + m)x
+      const k = r.int(2, 3);
+      const m = r.int(1, 4);
+      const x = letter(r);
+      return {
+        shape: "cube-root-and-like",
+        start: `root_3(${k ** 3}${x}^3) + ${ax(m, x)}`,
+        goal: ax(k + m, x),
+        via: [`${k}${x} + ${ax(m, x)}`],
+        numbers: [k ** 3, m],
+        along: [k, k + m],
+      };
+    },
+  },
+];
+
 const all: Shape[] = [
+  ...higher,
   {
     id: "simplify",
     name: "a square out of a root",
@@ -256,7 +316,8 @@ const all: Shape[] = [
 const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("simplify", "square-times-letter", "root-equals", "root-times-bracket", "times-root-equals", "add-roots", "root-plus-equals", "square-of-times-root"),
-  medium: pick("simplify-with-letter", "square-of-root-plus", "times-root-plus-equals", "roots-sum-equals"),
-  hard: pick("simplify-and-collect", "roots-both-sides", "square-minus"),
+  easy: pick("simplify", "square-times-letter", "root-equals", "root-times-bracket", "times-root-equals", "add-roots", "root-plus-equals", "square-of-times-root", "cube-simplify", "nth-root-equals", "nth-root-of-power"),
+  medium: pick("simplify-with-letter", "square-of-root-plus", "times-root-plus-equals", "roots-sum-equals", "cube-root-and-like"),
+  // Hard nests one thing in another, with x and y: chapters/nested.ts.
+  hard: NESTED.roots,
 };

@@ -595,6 +595,9 @@ span.ex-step {
   color: var(--ink-soft);
   opacity: 0.6;
 }
+.guided-say {
+  margin: 0;
+}
 .guided-tick {
   color: var(--good);
 }
@@ -1447,4 +1450,25 @@ html {
     margin-inline: -16px;
     width: auto;
   }
+}
+
+/* The test, answered: on to the next one (solving it is optional). */
+.answered-onward {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  margin-top: 6px;
+}
+.answered-onward .new-badge {
+  margin-right: auto;
+}
+/* On the learning path: the way to each kind of exercise. */
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
 }

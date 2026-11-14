@@ -1,14 +1,23 @@
 import { CHAPTERS, leadsTo, rulesFor, type Chapter } from "../game/puzzles";
+import { useEffect } from "react";
 import { loadProgress } from "../game/scoring";
+import { drillsOf } from "../game/generate/moves";
 import { GuidedExample } from "./Guided";
 import { MathText } from "./MathText";
-import { ChapterExercises } from "./Practice";
+import { BadgeRow, movesHref, PracticeLevels, TestLevels } from "./Practice";
 import { chapterText, t } from "../i18n";
 
-/** A chapter: the lesson (ideas, each tried by hand), then exercises from easy to hard. */
-export function ChapterView({ chapter }: { chapter: Chapter }) {
+/**
+ * A chapter: the lesson (ideas, each tried by hand), then its moves to learn
+ * one at a time, practice, and the test. `section`: one to scroll to.
+ */
+export function ChapterView({ chapter, section }: { chapter: Chapter; section?: string }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const progress = loadProgress();
+  const progress = loadProgress("test");
+  const practice = loadProgress("practice");
+  useEffect(() => {
+    if (section) document.getElementById(section)?.scrollIntoView({ block: "start" });
+  }, [section]);
   const next = leadsTo(chapter);
   const rules = rulesFor(ci);
   const text = chapterText(chapter);
@@ -48,10 +57,27 @@ export function ChapterView({ chapter }: { chapter: Chapter }) {
         );
       })}
 
-      <section className="practice" id="exercises">
-        <h2>{t().exercises}</h2>
+      {drillsOf(chapter.id).length > 0 && (
+        <section className="practice" id="moves">
+          <h2>{t().learnMoves}</h2>
+          <p className="practice-note">{t().learnMovesNote}</p>
+          <a className="button primary" href={movesHref(chapter)}>
+            {t().learnMoves} →
+          </a>
+        </section>
+      )}
+
+      <section className="practice" id="practice">
+        <h2>{t().practice}</h2>
         <p className="practice-note">{t().practiceNote}</p>
-        <ChapterExercises chapter={chapter} progress={progress} />
+        <PracticeLevels chapter={chapter} progress={practice} />
+      </section>
+
+      <section className="practice" id="test">
+        <h2>{t().testSkills}</h2>
+        <p className="practice-note">{t().testNote}</p>
+        <BadgeRow chapter={chapter} progress={progress} />
+        <TestLevels chapter={chapter} progress={progress} />
         {next.length > 0 && (
           <p className="leads-to">
             {t().leadsOnToStart}

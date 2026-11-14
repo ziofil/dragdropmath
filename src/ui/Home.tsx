@@ -5,7 +5,7 @@ import { FeelWord } from "./FeelWord";
 import { badgeTier, GOAL, isMastered, loadProgress, progressOf, solvedCount, type Progress } from "../game/scoring";
 import { chapterText, t } from "../i18n";
 import { Badge } from "./Badge";
-import { ChapterExercises } from "./Practice";
+import { ChapterLinks } from "./Practice";
 
 /** Height of one row of the path. */
 const ROW = 136;
@@ -243,7 +243,7 @@ function ChapterPanel({
         {started ? t().backToLesson : t().startLesson}
       </a>
 
-      <ChapterExercises chapter={chapter} progress={progress} />
+      <ChapterLinks chapter={chapter} progress={progress} />
 
       {opens.length > 0 && <p className="panel-opens">{t().leadsOnTo(titles(opens))}</p>}
     </section>

@@ -5,12 +5,16 @@
  * and the chapters' text (chapters.ts, checked against the English in
  * i18n.test.ts: same parts, same steps, same maths).
  *
+ * For now the site is in English only (ENGLISH_ONLY): new text is written in
+ * English until the design is settled, then translated. The translations
+ * stay here, and English stands in for whatever they don't have yet.
+ *
  * The language is the viewer's choice (kept in this browser), else their
  * browser's, else English. Switching re-renders the whole app (App is keyed by it).
  */
 import { useSyncExternalStore } from "react";
 import type { Chapter, Guided, LessonPart } from "../game/puzzles";
-import { en, type Strings } from "./en";
+import { en, type Strings, type Translation } from "./en";
 import { it } from "./it/ui";
 import { es } from "./es/ui";
 import { de } from "./de/ui";
@@ -65,13 +69,19 @@ export const LANGS = [
 
 export type Lang = (typeof LANGS)[number]["code"];
 
-const UI: Record<Lang, Strings> = { en, it, es, de, fr, pt, pl, nl, tr, el };
+/** Only English on the site, and no language picker, until the design is settled. */
+export const ENGLISH_ONLY = true;
+
+/** A translation, with English for what it doesn't have. */
+const withEnglish = (l: Translation): Strings => ({ ...en, ...l, drills: { ...en.drills, ...l.drills } }) as Strings;
+const UI: Record<Lang, Strings> = { en, it: withEnglish(it), es: withEnglish(es), de: withEnglish(de), fr: withEnglish(fr), pt: withEnglish(pt), pl: withEnglish(pl), nl: withEnglish(nl), tr: withEnglish(tr), el: withEnglish(el) };
 const CHAPTERS_IN: Record<Exclude<Lang, "en">, ChapterTexts> = { it: itChapters, es: esChapters, de: deChapters, fr: frChapters, pt: ptChapters, pl: plChapters, nl: nlChapters, tr: trChapters, el: elChapters };
 
 const KEY = "mathbyhand.lang.v1";
 const isLang = (s: unknown): s is Lang => LANGS.some((l) => l.code === s);
 
 function initialLang(): Lang {
+  if (ENGLISH_ONLY) return "en";
   try {
     const kept = localStorage.getItem(KEY);
     if (isLang(kept)) return kept;

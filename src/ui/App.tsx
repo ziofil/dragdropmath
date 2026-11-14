@@ -4,9 +4,9 @@ import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { SetMaker, SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
-import { ExerciseRoute } from "./Practice";
+import { ExerciseRoute, MovesPage } from "./Practice";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
-import { LANGS, setLang, t, useLang, type Lang } from "../i18n";
+import { ENGLISH_ONLY, LANGS, setLang, t, useLang, type Lang } from "../i18n";
 
 function useHash() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -23,16 +23,19 @@ function useHash() {
 
 export function App() {
   const hash = useHash();
-  const chapterId = hash.match(/^#\/c\/([\w-]+)$/)?.[1];
-  const chapter = chapterById(chapterId);
+  // A chapter, perhaps at one of its sections: #/c/<chapter>[/practice|test].
+  const chapterLink = hash.match(/^#\/c\/([\w-]+)(?:\/(practice|test))?$/);
+  const chapter = chapterById(chapterLink?.[1]);
   // The learning path, with a chapter picked out (coming back from it).
   const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
   const at = chapterById(atId);
   // Sets of one's own: making one, or one opened from its link (and its exercises).
   const making = hash === "#/sets/new";
   const sandbox = hash === "#/sandbox";
-  // A chapter's exercise: #/ex/<chapter>/<level>/<seed>.
-  const exercise = hash.match(/^#\/ex\/([\w-]+)\/(\w+)\/(\d+)$/);
+  // A chapter's exercise: #/practice|test/<chapter>/<level>/<seed> (#/ex/ is an earlier test link);
+  // learning the moves: #/moves/<chapter>.
+  const exercise = hash.match(/^#\/(practice|test|ex)\/([\w-]+)\/(\w+)\/(\d+)$/);
+  const moves = hash.match(/^#\/moves\/([\w-]+)$/);
   const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
@@ -64,15 +67,17 @@ export function App() {
             {t().makeExercises}
           </a>
           {/* The select's own arrow sits too far right: it's drawn by .lang-wrap instead. */}
-          <span className="lang-wrap">
-            <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
-              {LANGS.map((l) => (
-                <option key={l.code} value={l.code}>
-                  {l.name}
-                </option>
-              ))}
-            </select>
-          </span>
+          {!ENGLISH_ONLY && (
+            <span className="lang-wrap">
+              <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
+                {LANGS.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </span>
+          )}
         </span>
       </nav>
       {sandbox ? (
@@ -80,11 +85,19 @@ export function App() {
       ) : making ? (
         <SetMaker />
       ) : exercise ? (
-        <ExerciseRoute key={hash} chapterId={exercise[1]} level={exercise[2]} seed={Number(exercise[3])} />
+        <ExerciseRoute
+          key={hash}
+          kind={exercise[1] === "practice" ? "practice" : "test"}
+          chapterId={exercise[2]}
+          level={exercise[3]}
+          seed={Number(exercise[4])}
+        />
+      ) : moves ? (
+        <MovesPage key={hash} chapterId={moves[1]} />
       ) : setLink ? (
         <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />
       ) : chapter ? (
-        <ChapterView key={chapter.id} chapter={chapter} />
+        <ChapterView key={hash} chapter={chapter} section={chapterLink?.[2]} />
       ) : (
         <Home key={at?.id ?? ""} at={at} />
       )}

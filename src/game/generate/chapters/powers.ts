@@ -1,4 +1,5 @@
 /** Powers: multiply, divide, a power of a power, negative exponents, numbers in front. Letters are positive. */
+import { NESTED } from "./nested";
 import { type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** x^e as written: "x" for e = 1, "x^-2" for a negative one. */
@@ -446,5 +447,6 @@ const pick = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) =
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters", "bracket-cancel", "expand-collect"),
   medium: pick("two-products", "letters-and-number", "bracket-square", "square-and-more"),
-  hard: pick("bracket-minus-power", "negative-bracket", "quotient-plus-bracket", "square-minus-bracket"),
+  // Hard nests one thing in another, with x and y: chapters/nested.ts.
+  hard: NESTED.powers,
 };

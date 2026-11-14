@@ -6,7 +6,7 @@ import { CHAPTERS, type Chapter } from "../game/puzzles";
 import type { Level } from "../game/generate/write";
 import type { RuleId } from "../rules";
 import { matchesGoal } from "../game/solver";
-import { badgeTier, countSolved, isCounted, loadProgress, loadSolved, markSolved, type Tier } from "../game/scoring";
+import { badgeTier, countSolved, isCounted, loadProgress, loadSolved, markSolved, type Kind, type Tier } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { loadGuesses, loadPicks, saveGuess } from "../game/guess";
 import { Badge } from "./Badge";
@@ -20,8 +20,8 @@ type Entry = { state: MathState; tidy?: true };
 type Link = { href: string; text: string };
 
 /**
- * Everything the exercise screen needs, wherever the exercise comes from: the
- * learning path (exerciseOfPath) or a set of one's own (ui/SetView.tsx).
+ * Everything the exercise screen needs, wherever the exercise comes from: a
+ * chapter's made-up ones (ui/Practice.tsx) or a set of one's own (ui/SetView.tsx).
  */
 export type Exercise = {
   puzzle: { id: string; start: string; goal: string; hint?: string };
@@ -39,8 +39,13 @@ export type Exercise = {
   next?: Link;
   /** Once solved: where to go on. */
   onward: Link;
-  /** A chapter's made-up exercise: solving it counts towards the chapter's badge at this level (nothing else about it is kept). */
-  counts?: { chapter: Chapter; level: Level };
+  /** Made up on the spot (a chapter's): nothing about it is kept, beyond the counts. */
+  fresh?: true;
+  /**
+   * A chapter's practice or test exercise, counted at its level: in practice
+   * once solved, in the test once predicted right (which earns the badge).
+   */
+  counts?: { chapter: Chapter; level: Level; kind: Kind };
   /** Its letters stand for positive numbers (said on screen; see rules/signs.ts). */
   positiveLetters?: boolean;
 };
@@ -49,12 +54,13 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const { puzzle, rules } = ex;
   const chapter = ex.counts?.chapter;
   // A set's exercise keeps its prediction and that it's solved; a chapter's made-up one only adds to a count.
-  const keep = !ex.counts;
+  const keep = !ex.fresh;
+  const test = ex.counts?.kind === "test";
   const start = useMemo((): MathState => ({ ...parseState(puzzle.start), ...(ex.positiveLetters ? { letters: "positive" as const } : {}) }), [puzzle, ex.positiveLetters]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
-    if (!ex.counts || isCounted(puzzle.id)) return { before: 0 as Tier, after: 0 as Tier };
+    if (!test || !ex.counts || isCounted(puzzle.id)) return { before: 0 as Tier, after: 0 as Tier };
     const { chapter, level } = ex.counts;
     const before = loadProgress();
     const c = before[chapter.id] ?? { easy: 0, medium: 0, hard: 0 };
@@ -67,11 +73,15 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const choices = ex.choices;
   const [guessed, setGuessed] = useState<string | null>(null);
   // What was done on an earlier visit: shown again, and it can all be done again.
-  const before = useMemo(() => ({ guess: loadGuesses()[puzzle.id], pick: loadPicks()[puzzle.id], solved: loadSolved().has(puzzle.id) }), [puzzle.id]);
+  const before = useMemo(
+    () => (keep ? { guess: loadGuesses()[puzzle.id], pick: loadPicks()[puzzle.id], solved: loadSolved().has(puzzle.id) } : { guess: undefined, pick: undefined, solved: false }),
+    [puzzle.id, keep],
+  );
   const guessedBefore = before.guess !== undefined;
   const pick = (choice: string) => {
     setGuessed(choice);
     if (keep) saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
+    if (test && ex.counts && choice === puzzle.goal) countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id, "test");
   };
   // Skip predicting: the right answer turns green, as if picked (no star, nothing said).
   const [revealed, setRevealed] = useState(false);
@@ -95,9 +105,9 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const solved = matchesGoal(current, goal);
   useEffect(() => {
     if (!solved) return;
-    if (ex.counts) countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id);
-    else markSolved(puzzle.id);
-  }, [solved, puzzle.id, ex.counts]);
+    if (ex.counts?.kind === "practice") countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id, "practice");
+    if (keep) markSolved(puzzle.id);
+  }, [solved, puzzle.id, ex.counts, keep]);
 
   const onDrop = (next: MathState) => {
     if (stateKey(next, "exact") === stateKey(current, "exact")) return;
@@ -183,7 +193,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
               {guessed === puzzle.goal ? (
                 <>
-                  <span className="star" aria-hidden="true">★</span> {t().rightFirstTime}
+                  <span className="star" aria-hidden="true">★</span> {test ? t().testRight : t().rightFirstTime}
                 </>
               ) : (
                 <>{t().notQuite}</>
@@ -225,6 +235,15 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             {t().reveal}
           </button>
           {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
+          {/* The test: answered, it's done (solving it is only to see why). */}
+          {test && !mustGuess && !solved && (
+            <div className="answered-onward">
+              <NewBadge chapter={chapter} tiers={tiers} />
+              <a className="button primary" href={ex.onward.href}>
+                {ex.onward.text}
+              </a>
+            </div>
+          )}
         </section>
       ) : (
         <section className="goal">
@@ -265,18 +284,24 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
       {solved && (
         <section className="result" role="status">
           <div className="result-name">{t().solvedBang}</div>
-          {chapter && tiers.after > tiers.before && (
-            <div className="new-badge">
-              <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
-              {t().newBadge(tiers.after as 1 | 2 | 3, chapterText(chapter).title)}
-            </div>
-          )}
+          <NewBadge chapter={chapter} tiers={tiers} />
           <a className="button primary" href={ex.onward.href}>
             {ex.onward.text}
           </a>
         </section>
       )}
     </main>
+  );
+}
+
+/** A badge just earned, if this exercise earned one. */
+function NewBadge({ chapter, tiers }: { chapter?: Chapter; tiers: { before: Tier; after: Tier } }) {
+  if (!chapter || tiers.after <= tiers.before) return null;
+  return (
+    <div className="new-badge">
+      <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
+      {t().newBadge(tiers.after as 1 | 2 | 3, chapterText(chapter).title)}
+    </div>
   );
 }
 

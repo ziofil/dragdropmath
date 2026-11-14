@@ -1,4 +1,5 @@
 /** Exercise shapes for the chapter "fractions" (see ../write.ts). */
+import { NESTED } from "./nested";
 import { ax, gcd, lin, plus, type Level, type Rng, type Shape } from "../write";
 
 /** One of a few letters, mostly x. */
@@ -399,5 +400,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("same-bottom", "whole-and-fraction", "split-top", "top-factor", "divide", "fraction-equals", "cancel-equals", "whole-equals"),
   medium: pick("unlike-bottoms", "mixed-divide", "sum-times", "letter-unlike-equals"),
-  hard: pick("brackets-over-numbers", "brackets-over-numbers-equation", "factor-cancel-add", "factor-cancel-solve"),
+  // Hard nests one thing in another, with x and y: chapters/nested.ts.
+  hard: NESTED.fractions,
 };
