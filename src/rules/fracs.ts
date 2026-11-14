@@ -3,7 +3,7 @@ import { cloneFresh, frac, neg, num, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { allNodes, nodeAt } from "../expr/tree";
 import { roleOf, viewTerm } from "./view";
-import { dragCtx, replaceIn, without, type Candidate, type Rule } from "./types";
+import { dragCtx, mergeInto, replaceIn, without, type Candidate, type Rule } from "./types";
 import { fractionPart, timesVisible } from "./shapes";
 
 // ---------- helpers ----------
@@ -111,11 +111,10 @@ export const addFractions: Rule = {
         : [[mine.negative, myFrac.num], [theirs.negative, theirs.body.num]];
       const top = sum(parts.map(([negative, n]) => withSign(negative, n)));
       const merged = frac(top, theirs.body.den, theirs.body.id);
-      const newTerms = terms.map((t, k) => (k === j ? merged : t));
       return [
         {
           rule: "add-fractions",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, terms: without(newTerms, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: U.id,
         },
       ];
@@ -163,11 +162,10 @@ export const multiplyFractions: Rule = {
       // The result takes over the target's identity only if the target is the fraction
       // (a number target survives inside it: 3/4 onto 2 → (2·3)/4 keeps that 2).
       const merged = frac(timesVisible(a.top, b.top), bottoms.length === 1 ? bottoms[0] : timesVisible(...bottoms), G.kind === "frac" ? G.id : undefined);
-      const newFactors = factors.map((f, k) => (k === j ? merged : f));
       return [
         {
           rule: "multiply-fractions",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: G.id,
         },
       ];

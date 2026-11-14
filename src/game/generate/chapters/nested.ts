@@ -403,9 +403,9 @@ const brackets: Shape[] = [
     name: "two brackets of x and y multiplied, take away x times a bracket",
     make: (r) => {
       // (x + ay)(x − by) − x(x + cy) → (a − b − c)xy − ab·y²
-      const a = r.int(1, 3);
-      const b = r.int(1, 3);
-      const c = r.int(1, 3);
+      const a = r.int(1, 4);
+      const b = r.int(1, 4);
+      const c = r.int(1, 4);
       const k = a - b - c;
       if (a === b || k === 0) return null;
       const A = co(a, "y");
@@ -426,22 +426,24 @@ const brackets: Shape[] = [
     id: "letter-bracket-minus-product",
     name: "x times a bracket, take away two brackets of x and y multiplied",
     make: (r) => {
-      // x(x + ay) − (x + ay)(x − ay) → axy + a²y²
-      const a = r.int(1, 3);
-      const A = co(a, "y");
+      // x(x + ay) − (x + ay)(x − by) → bxy + ab·y²
+      const a = r.int(1, 4);
+      const b = r.int(1, 4);
+      const [A, B] = [co(a, "y"), co(b, "y")];
+      const head = `x^2 + ${co(a, "xy")}`;
       return {
         shape: "letter-bracket-minus-product",
-        start: `x(x + ${A}) - (x + ${A})(x - ${A})`,
-        goal: `${co(a, "xy")} + ${co(a * a, "y^2")}`,
+        start: `x(x + ${A}) - (x + ${A})(x - ${B})`,
+        goal: `${co(b, "xy")} + ${co(a * b, "y^2")}`,
         via: [
-          `x^2 + ${co(a, "xy")} - (x + ${A})(x - ${A})`,
-          `x^2 + ${co(a, "xy")} - ((x + ${A})x - (x + ${A})·${A})`,
-          `x^2 + ${co(a, "xy")} - (x^2 + ${co(a, "xy")} - (x + ${A})·${A})`,
-          `x^2 + ${co(a, "xy")} - (x^2 + ${co(a, "xy")} - ${co(a, "xy")} - ${co(a * a, "y^2")})`,
-          `x^2 + ${co(a, "xy")} - (x^2 - ${co(a * a, "y^2")})`,
+          `${head} - (x + ${A})(x - ${B})`,
+          `${head} - ((x + ${A})x - (x + ${A})·${B})`,
+          `${head} - (x^2 + ${co(a, "xy")} - (x + ${A})·${B})`,
+          `${head} - (x^2 + ${co(a, "xy")} - ${co(b, "xy")} - ${co(a * b, "y^2")})`,
+          `${head} - (x^2${then(a - b, "xy")} - ${co(a * b, "y^2")})`,
         ],
-        numbers: [a],
-        along: [a * a],
+        numbers: [a, b],
+        along: [a * b],
       };
     },
   },

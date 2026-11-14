@@ -16,8 +16,10 @@ export const PRACTICE = SHAPES;
 
 export const hasPractice = (chapterId: string) => LEVELS.every((l) => (SHAPES[chapterId]?.[l].length ?? 0) > 0);
 
-/** Drafts that pass the hard rules, of which the best-scoring is kept. */
+/** Drafts that pass the hard rules, among the best-scoring of which one is kept. */
 const POOL = 12;
+/** How far below the best a draft may score and still be picked: the best alone would nearly always be the same one. */
+const NEAR_BEST = 10;
 
 /**
  * The exercise for this seed: a shape of the level, the nicest of a few
@@ -37,16 +39,18 @@ export function practiceExercise(chapterId: string, level: Level, seed: number):
 }
 
 function nicest(s: Shape, r: Rng): Draft | null {
-  let best: { d: Draft; score: number } | null = null;
-  for (let tries = 0, found = 0; found < POOL && tries < 500; tries++) {
+  const found: { d: Draft; score: number }[] = [];
+  for (let tries = 0; found.length < POOL && tries < 500; tries++) {
     const d = s.make(r);
     if (!d) continue;
     const v = judge(d);
     if (!v.ok || !predictable(d)) continue;
-    found++;
-    if (!best || v.score > best.score) best = { d, score: v.score };
+    found.push({ d, score: v.score });
   }
-  return best?.d ?? null;
+  if (!found.length) return null;
+  const best = Math.max(...found.map((f) => f.score));
+  const near = found.filter((f) => f.score >= best - NEAR_BEST);
+  return near[r.int(0, near.length - 1)].d;
 }
 
 /** It has two wrong answers to predict between (see autoDecoys). */

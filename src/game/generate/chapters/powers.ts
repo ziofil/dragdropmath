@@ -1,6 +1,6 @@
 /** Powers: multiply, divide, a power of a power, negative exponents, numbers in front. Letters are positive. */
 import { NESTED } from "./nested";
-import { type Draft, type Level, type Rng, type Shape } from "../write";
+import { byIds, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** x^e as written: "x" for e = 1, "x^-2" for a negative one. */
 const pw = (x: string, e: number) => (e === 1 ? x : `${x}^${e}`);
@@ -310,143 +310,10 @@ const all: Shape[] = [
   },
 ];
 
-// ---------- Hard: powers inside brackets, multiplied out (brackets) and collected (collect) ----------
-
-/** "3·" before a factor, nothing for 1. */
-const times = (k: number) => (k === 1 ? "" : `${k}·`);
-
-const mixed: Shape[] = [
-  {
-    id: "bracket-minus-power",
-    name: "a bracket multiplied out, take away a power of a power",
-    make: (r) => {
-      // x^m(x^n + kx^p) - (x^a)^b·x^c with ab + c = m + n: x^2(x^3 + 2x) - (x^2)^2·x = 2x^3
-      const m = r.int(2, 3);
-      const n = r.int(2, 4);
-      const p = r.int(1, n - 1);
-      const k = r.int(2, 4);
-      const a = r.int(2, 3);
-      const b = r.int(2, 3);
-      const c = m + n - a * b;
-      if (c < 1) return null;
-      const P = `(${pw("x", a)})^${b}·${pw("x", c)}`;
-      const head = pw("x", m + n);
-      const kept = mono(k, "x", m + p);
-      return {
-        shape: "bracket-minus-power",
-        start: `${pw("x", m)}(${pw("x", n)} + ${mono(k, "x", p)}) - ${P}`,
-        goal: kept,
-        via: [
-          `${pw("x", m)}·${pw("x", n)} + ${k}·${pw("x", m)}·${pw("x", p)} - ${P}`,
-          `${head} + ${k}·${pw("x", m)}·${pw("x", p)} - ${P}`,
-          `${head} + ${kept} - ${P}`,
-          `${head} + ${kept} - ${pw("x", a * b)}·${pw("x", c)}`,
-          `${head} + ${kept} - ${head}`,
-        ],
-        numbers: [m, n, k, p, a, b, c],
-        along: [m + n, m + p, a * b],
-      };
-    },
-  },
-  {
-    id: "negative-bracket",
-    name: "a negative power times a bracket, take away another bracket",
-    make: (r) => {
-      // x^-m(x^(m+a) + kx^(m+1)) - x(x^(a-1) - j) = (k + j)x: x^-2(x^5 + 3x^3) - x(x^2 - 1) = 4x
-      const m = r.int(1, 3);
-      const a = r.int(2, 4);
-      const k = r.int(1, 4);
-      const j = r.int(1, 4);
-      const neg = pw("x", -m);
-      const second = `x(${pw("x", a - 1)} - ${j})`;
-      return {
-        shape: "negative-bracket",
-        start: `${neg}(${pw("x", m + a)} + ${mono(k, "x", m + 1)}) - ${second}`,
-        goal: mono(k + j, "x", 1),
-        via: [
-          `${neg}·${pw("x", m + a)} + ${times(k)}${neg}·${pw("x", m + 1)} - ${second}`,
-          `${pw("x", a)} + ${times(k)}${neg}·${pw("x", m + 1)} - ${second}`,
-          `${pw("x", a)} + ${mono(k, "x", 1)} - ${second}`,
-          `${pw("x", a)} + ${mono(k, "x", 1)} - (x·${pw("x", a - 1)} - ${mono(j, "x", 1)})`,
-          `${pw("x", a)} + ${mono(k, "x", 1)} - ${pw("x", a)} + ${mono(j, "x", 1)}`,
-        ],
-        numbers: [m, m + a, k, m + 1, a - 1, j],
-        along: [a, k + j],
-      };
-    },
-  },
-  {
-    id: "quotient-plus-bracket",
-    name: "a power over a power, plus a bracket, collected",
-    make: (r) => {
-      // (kx^a)^n/x^c + mx(x^(e-1) + p) - mpx = (k^n + m)x^e: (2x^3)^2/x^3 + x(x^2 + 4) - 4x = 5x^3
-      const k = r.int(2, 3);
-      const a = r.int(2, 3);
-      const n = r.int(2, 3);
-      const c = r.int(1, a * n - 3);
-      const e = a * n - c;
-      const m = r.int(1, 2);
-      const q = r.int(1, 5);
-      if (k ** n > 9 || a * n > 9) return null;
-      const lead = mono(k ** n, "x", e);
-      const tail = `${mono(m * q, "x", 1)} - ${mono(m * q, "x", 1)}`;
-      const br = `${m === 1 ? "" : m}x(${pw("x", e - 1)} + ${q}) - ${mono(m * q, "x", 1)}`;
-      return {
-        shape: "quotient-plus-bracket",
-        start: `(${mono(k, "x", a)})^${n}/${pw("x", c)} + ${br}`,
-        goal: mono(k ** n + m, "x", e),
-        via: [
-          `(${k}^${n}·${pw("x", a * n)})/${pw("x", c)} + ${br}`,
-          `${k ** n}${pw("x", a * n)}/${pw("x", c)} + ${br}`,
-          `${lead} + ${br}`,
-          `${lead} + ${times(m)}x·${pw("x", e - 1)} + ${tail}`,
-          `${lead} + ${mono(m, "x", e)} + ${tail}`,
-        ],
-        numbers: [k, a, n, c, m, e - 1, q, m * q],
-        along: [k ** n, a * n, e, k ** n + m, m * q],
-      };
-    },
-  },
-  {
-    id: "square-minus-bracket",
-    name: "a bracket with a power squared, take away a bracket",
-    make: (r) => {
-      // (x^m + p)^2 - x^m(x^m + q) = (2p - q)x^m + p^2: (x^2 + 3)^2 - x^2(x^2 + 4) = 2x^2 + 9
-      const m = r.int(2, 3);
-      const p = r.int(2, 4);
-      const q = r.int(1, 2 * p - 1);
-      const X = pw("x", m);
-      const XX = pw("x", 2 * m);
-      const A = `${X} + ${p}`;
-      const B = `${X}(${X} + ${q})`;
-      return {
-        shape: "square-minus-bracket",
-        start: `(${A})^2 - ${B}`,
-        goal: `${mono(2 * p - q, "x", m)} + ${p * p}`,
-        via: [
-          `(${A})(${A}) - ${B}`,
-          `(${A})*${X} + ${p}(${A}) - ${B}`,
-          `${X}*${X} + ${p}${X} + ${p}(${A}) - ${B}`,
-          `${XX} + ${p}${X} + ${p}(${A}) - ${B}`,
-          `${XX} + ${p}${X} + ${p}${X} + ${p * p} - ${B}`,
-          `${XX} + ${2 * p}${X} + ${p * p} - ${B}`,
-          `${XX} + ${2 * p}${X} + ${p * p} - (${X}*${X} + ${q === 1 ? "" : q}${X})`,
-          `${XX} + ${2 * p}${X} + ${p * p} - (${XX} + ${q === 1 ? "" : q}${X})`,
-          `${XX} + ${2 * p}${X} + ${p * p} - ${XX} - ${q === 1 ? "" : q}${X}`,
-        ],
-        numbers: [m, p, q],
-        along: [2 * m, 2 * p, p * p, 2 * p - q],
-      };
-    },
-  },
-];
-
-const pick = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) => s.id === id)!);
-
-/** Easy: one rule, once. Medium: numbers, powers of powers and brackets together. Hard: powers inside brackets, multiplied out and collected, negative powers too. */
+/** Easy: one rule, once. Medium: numbers, powers of powers and brackets together. Hard: a power of a quotient, a quotient of powers, with x and y (nested.ts). */
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters", "bracket-cancel", "expand-collect"),
-  medium: pick("two-products", "letters-and-number", "bracket-square", "square-and-more"),
+  easy: byIds(all, "multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters", "bracket-cancel", "expand-collect"),
+  medium: byIds(all, "two-products", "letters-and-number", "bracket-square", "square-and-more"),
   // Hard nests one thing in another, with x and y: chapters/nested.ts.
   hard: NESTED.powers,
 };

@@ -47,7 +47,6 @@ export const el: Translation = {
 
   // Chapter page
   backToPath: "← Διαδρομή μάθησης",
-  exercises: "Ασκήσεις",
   practiceNote: "Κάθε άσκηση είναι καινούργια, φτιαγμένη μόνο για σένα. Ξεκίνα από τις εύκολες και ανέβα επίπεδο όταν το νιώσεις.",
   leadsOnToStart: "Μετά συνεχίζεις με: ",
   leadsOnToEnd: ". Μπορείς να πας εκεί όποτε θέλεις.",
@@ -61,7 +60,6 @@ export const el: Translation = {
   testNote:
     "Βρες την απάντηση με το μυαλό και μετά διάλεξέ τη. Οι σωστές απαντήσεις σού δίνουν το μετάλλιο του κεφαλαίου: 10 στις εύκολες για το χάλκινο, στις μέτριες για το ασημένιο και στις δύσκολες για το χρυσό.",
   solvedN: (n: number) => `${n} ${n === 1 ? "λυμένη" : "λυμένες"}`,
-  toPractice: "Πάμε για εξάσκηση →",
   testRight: "Σωστά! Μετράει για το μετάλλιο.",
   drills: {
     commute: { name: "Άλλαξε τη σειρά", how: "Σύρε έναν όρο πέρα από τον διπλανό του. Στο + και στο × η σειρά δεν παίζει ρόλο." },
@@ -124,7 +122,6 @@ export const el: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Άσκηση ${label}${solved ? " — λυμένη" : ""}`,
-  solved: "λυμένη",
   goldNote: "Χρυσό μετάλλιο. Μπορείς να συνεχίσεις όσο θέλεις.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${more === 1 ? "σωστή απάντηση" : "σωστές απαντήσεις"} στις ${["εύκολες", "μέτριες", "δύσκολες"][tier]} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
@@ -162,7 +159,6 @@ export const el: Translation = {
   solvedBang: "Λύθηκε!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} στο κεφάλαιο «${chapter}».`,
   theExercise: "η άσκηση",
-  goal: "στόχος",
   moveCrashed: "Κάτι πήγε στραβά με αυτή την κίνηση.",
   moveCrashedDetails: "Θα βρεις λεπτομέρειες στην κονσόλα του προγράμματος περιήγησης.",
   tryAgain: "Δοκίμασε ξανά",

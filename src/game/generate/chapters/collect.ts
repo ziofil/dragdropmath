@@ -1,23 +1,5 @@
 /** Exercise shapes for the chapter "collect": like terms added together (see ../write.ts). */
-import { ax, type Draft, type Level, type Rng, type Shape } from "../write";
-
-/** Terms written one after another, each with its own sign: ["2x", "-y", "3"] → "2x - y + 3". */
-const sum = (terms: string[]) =>
-  terms.map((t, i) => (i === 0 ? t : t.startsWith("-") ? ` - ${t.slice(1)}` : ` + ${t}`)).join("");
-
-const one = <T>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
-
-function shuffled<T>(r: Rng, xs: T[]): T[] {
-  const out = xs.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = r.int(0, i);
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-/** A term: k times a monomial ("" for a plain number). */
-const term = (k: number, mono: string) => (mono === "" ? `${k}` : ax(k, mono));
+import { byIds, one, shuffled, signedSum, term, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** k as a product of two small numbers, if it is one: 6 → [2, 3]. */
 function factors(r: Rng, k: number): [number, number] | null {
@@ -88,8 +70,8 @@ function build(r: Rng, shape: string, groups: Group[], opts: { firstMinus?: bool
   const totals = groups.map((g) => ({ mono: g.mono, k: g.parts.reduce((s, p) => s + p, 0) })).filter((g) => g.k !== 0);
   if (!totals.length || totals[0].k < 0) return null;
   along.push(...totals.map((g) => g.k));
-  const goal = sum(totals.map((g) => term(g.k, g.mono)));
-  const start = sum(texts);
+  const goal = signedSum(totals.map((g) => term(g.k, g.mono)));
+  const start = signedSum(texts);
   if (start === goal) return null;
   // Milestones, for the longer ones: each product worked out, then each group added up, where its first term stood.
   const via: string[] = [];
@@ -98,7 +80,7 @@ function build(r: Rng, shape: string, groups: Group[], opts: { firstMinus?: bool
     order.forEach((p, i) => {
       if (now[i] === term(p.k, p.mono)) return;
       now[i] = term(p.k, p.mono);
-      via.push(sum(now.filter((t): t is string => t !== null)));
+      via.push(signedSum(now.filter((t): t is string => t !== null)));
     });
     for (const g of groups) {
       const at = order.map((p, i) => (p.mono === g.mono ? i : -1)).filter((i) => i >= 0);
@@ -110,7 +92,7 @@ function build(r: Rng, shape: string, groups: Group[], opts: { firstMinus?: bool
         now[at[0]] = k !== 0 ? term(k, g.mono) : null;
         now[i] = null;
         const left = now.filter((t): t is string => t !== null);
-        if (left.length) via.push(sum(left));
+        if (left.length) via.push(signedSum(left));
       }
     }
   }
@@ -320,10 +302,8 @@ const all: Shape[] = [
   },
 ];
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("two-like", "cancel-or-product", "letter-and-numbers", "two-letters", "products-and-like"),
-  medium: pick("letters-and-number", "mixed-terms", "cancel-out"),
-  hard: pick("letter-products", "square-products", "partly-cancel"),
+  easy: byIds(all, "two-like", "cancel-or-product", "letter-and-numbers", "two-letters", "products-and-like"),
+  medium: byIds(all, "letters-and-number", "mixed-terms", "cancel-out"),
+  hard: byIds(all, "letter-products", "square-products", "partly-cancel"),
 };

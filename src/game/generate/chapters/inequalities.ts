@@ -1,7 +1,6 @@
 /** Exercise shapes for the chapter "inequalities" (see ../write.ts): linear, one unknown, like balance's, with the sign turning round when a negative multiplies or divides. */
 import { NESTED } from "./nested";
-import { ax, bracket, lin, pickAnswer, plus, type Level, type Rng, type Shape } from "../write";
-import { finish, fractionsMinus, minusFraction, twoBracketsMixed } from "./balance";
+import { ax, bracket, lin, pickAnswer, plus, byIds, type Level, type Rng, type Shape } from "../write";
 
 type Rel = "<" | ">" | "≤" | "≥";
 const RELS: Rel[] = ["<", ">", "≤", "≥"];
@@ -11,10 +10,6 @@ const rel = (r: Rng): Rel => RELS[r.int(0, 3)];
 const letter = (r: Rng) => (r.next() < 0.6 ? "x" : ["y", "n", "a", "k", "m", "p"][r.int(0, 5)]);
 /** The answer as the goal reads it: "x ≥ -3". */
 const sol = (v: string, s: Rel, x: number) => `${v} ${s} ${x}`;
-/** a·v + b with any letter. */
-const linv = (a: number, b: number, v: string) => lin(a, b, v);
-/** a(v + b) with any letter. */
-const bracketv = (a: number, b: number, v: string) => bracket(a, b).replace("x", v);
 /** -v/a or v/a. */
 const over = (a: number, v: string) => (a < 0 ? `-${v}/${-a}` : `${v}/${a}`);
 
@@ -34,7 +29,7 @@ const all: Shape[] = [
       const swap = r.next() < 0.3;
       return {
         shape: "add",
-        start: swap ? `${c} ${s} ${linv(1, b, v)}` : `${linv(1, b, v)} ${s} ${c}`,
+        start: swap ? `${c} ${s} ${lin(1, b, v)}` : `${lin(1, b, v)} ${s} ${c}`,
         goal: sol(v, swap ? turned[s] : s, x),
         via: [],
         answer: x,
@@ -107,7 +102,7 @@ const all: Shape[] = [
       if (neg && b < 0) return null;
       return {
         shape: "two-step",
-        start: neg ? `${b} - ${ax(a, v)} ${s} ${c}` : `${linv(a, b, v)} ${s} ${c}`,
+        start: neg ? `${b} - ${ax(a, v)} ${s} ${c}` : `${lin(a, b, v)} ${s} ${c}`,
         goal: sol(v, neg ? turned[s] : s, x),
         via: [`${ax(neg ? -a : a, v)} ${s} ${c - b}`],
         answer: x,
@@ -168,9 +163,9 @@ const all: Shape[] = [
         if (c === 0) return null;
         return {
           shape: "bracket",
-          start: `${bracketv(a, b, v)} ${s} ${c}`,
+          start: `${bracket(a, b, v)} ${s} ${c}`,
           goal: sol(v, s, x),
-          via: [`${linv(1, b, v)} ${s} ${c / a}`],
+          via: [`${lin(1, b, v)} ${s} ${c / a}`],
           answer: x,
           numbers: [a, b, c],
           along: [c / a],
@@ -206,7 +201,7 @@ const all: Shape[] = [
       const d = (a - c) * x + b;
       const s = rel(r);
       if (d === 0) return null;
-      const start = a < 0 ? `${b} - ${ax(-a, v)} ${s} ${linv(c, d, v)}` : `${linv(a, b, v)} ${s} ${linv(c, d, v)}`;
+      const start = a < 0 ? `${b} - ${ax(-a, v)} ${s} ${lin(c, d, v)}` : `${lin(a, b, v)} ${s} ${lin(c, d, v)}`;
       return {
         shape: "both-sides",
         start,
@@ -238,9 +233,9 @@ const all: Shape[] = [
       if (d === 0 || d === b || Math.abs(d) > 9) return null;
       return {
         shape: "brackets-both",
-        start: `${bracketv(a, b, v)} ${s} ${bracketv(c, d, v)}`,
+        start: `${bracket(a, b, v)} ${s} ${bracket(c, d, v)}`,
         goal: sol(v, a > c ? s : turned[s], x),
-        via: [`${linv(a, a * b, v)} ${s} ${linv(c, c * d, v)}`, `${ax(a, v)} ${s} ${linv(c, c * d - a * b, v)}`, a > c ? `${ax(a - c, v)} ${s} ${c * d - a * b}` : `${a * b - c * d} ${s} ${ax(c - a, v)}`],
+        via: [`${lin(a, a * b, v)} ${s} ${lin(c, c * d, v)}`, `${ax(a, v)} ${s} ${lin(c, c * d - a * b, v)}`, a > c ? `${ax(a - c, v)} ${s} ${c * d - a * b}` : `${a * b - c * d} ${s} ${ax(c - a, v)}`],
         answer: x,
         numbers: [a, b, c, d],
         along: [a * b, c * d, a - c, c * d - a * b],
@@ -264,9 +259,9 @@ const all: Shape[] = [
       const k = a - c;
       return {
         shape: "bracket-less",
-        start: `${bracketv(a, b, v)} - ${ax(c, v)} ${s} ${e}`,
+        start: `${bracket(a, b, v)} - ${ax(c, v)} ${s} ${e}`,
         goal: sol(v, k > 0 ? s : turned[s], x),
-        via: [`${linv(k, a * b, v)} ${s} ${e}`, `${ax(k, v)} ${s} ${e - a * b}`],
+        via: [`${lin(k, a * b, v)} ${s} ${e}`, `${ax(k, v)} ${s} ${e - a * b}`],
         answer: x,
         numbers: [a, b, c, e],
         along: [a * b, k, e - a * b],
@@ -287,9 +282,9 @@ const all: Shape[] = [
       if (c === 0 || c === a) return null;
       return {
         shape: "minus-bracket",
-        start: `-(${linv(1, a, v)}) ${s} ${linv(b, c, v)}`,
+        start: `-(${lin(1, a, v)}) ${s} ${lin(b, c, v)}`,
         goal: sol(v, turned[s], x),
-        via: [`${-a} - ${v} ${s} ${linv(b, c, v)}`, `${-a - c} ${s} ${ax(b + 1, v)}`],
+        via: [`${-a} - ${v} ${s} ${lin(b, c, v)}`, `${-a - c} ${s} ${ax(b + 1, v)}`],
         answer: x,
         numbers: [a, b, c],
         along: [a + c, b + 1],
@@ -298,19 +293,10 @@ const all: Shape[] = [
   },
 ];
 
-// ---------- hard: everything from solving equations at once (see balance.ts) ----------
-all.push(
-  { id: "two-brackets-mixed", name: "two brackets, one taken away, x on both sides", make: (r) => { const m = twoBracketsMixed(r, true); return m && finish("two-brackets-mixed", m, rel(r)); } },
-  { id: "fractions-minus", name: "one fraction less another", make: (r) => { const m = fractionsMinus(r); return m && finish("fractions-minus", m, rel(r)); } },
-  { id: "minus-fraction", name: "a number less a bracket over a number", make: (r) => { const m = minusFraction(r); return m && finish("minus-fraction", m, rel(r)); } },
-);
-
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 /** By how many moves they take, and how much there is to keep track of. */
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("add", "times", "divided", "two-step", "over-plus", "bracket", "both-sides"),
-  medium: pick("brackets-both", "bracket-less", "minus-bracket"),
+  easy: byIds(all, "add", "times", "divided", "two-step", "over-plus", "bracket", "both-sides"),
+  medium: byIds(all, "brackets-both", "bracket-less", "minus-bracket"),
   // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
   hard: NESTED.inequalities,
 };

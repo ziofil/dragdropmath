@@ -1,18 +1,8 @@
 /** Factoring: take a common factor out in front, a number, a letter or a whole bracket. Built from the factors, then multiplied out. */
 import { NESTED } from "./nested";
-import { gcd, lin, type Level, type Rng, type Shape } from "../write";
+import { byIds, gcd, lin, poly, term, timesBracket, type Level, type Rng, type Shape } from "../write";
 
-/** c·v as a person writes it: "3x^2", "x", "-x", "7" (v empty: a number). */
-const term = (c: number, v: string) => (v === "" ? `${c}` : c === 1 ? v : c === -1 ? `-${v}` : `${c}${v}`);
-/** Terms in the order given, zeros left out: [[1, "x^2"], [-3, "x"], [2, ""]] → "x^2 - 3x + 2". */
-const poly = (ts: [number, string][]) =>
-  ts
-    .filter(([c]) => c !== 0)
-    .map(([c, v], i) => (i === 0 ? term(c, v) : c < 0 ? ` - ${term(-c, v)}` : ` + ${term(c, v)}`))
-    .join("");
-/** " + 3(x + 1)", " - (x + 1)": d times a bracket, after a term. */
-const times = (d: number, inside: string) => `${d < 0 ? " - " : " + "}${Math.abs(d) === 1 ? "" : Math.abs(d)}(${inside})`;
-
+/** One of these letters. */
 const letter = (r: Rng, ls: string[]) => ls[r.int(0, ls.length - 1)];
 
 /**
@@ -68,7 +58,7 @@ function pairs(f: string, fa: [number, string], fb: [number, string], d: number,
   const after = (first: string) => `${first} + ${rest}`.replace("+ -", "- ");
   return {
     start: after(poly([fa, fb])),
-    via: [...(letterFirst ? [after(letterFirst)] : []), after(`${f}(${shared})`), `${f}(${shared})${times(d, shared)}`],
+    via: [...(letterFirst ? [after(letterFirst)] : []), after(`${f}(${shared})`), `${f}(${shared})${timesBracket(d, shared)}`],
   };
 }
 
@@ -121,7 +111,7 @@ const all: Shape[] = [
       const q = r.signed(1, 6);
       if (p === q || q === 1) return null;
       const shared = lin(1, p, x);
-      return { shape: "bracket-out", start: `${x}(${shared})${times(q, shared)}`, goal: `(${shared})(${lin(1, q, x)})`, via: [], numbers: [p, q], along: [] };
+      return { shape: "bracket-out", start: `${x}(${shared})${timesBracket(q, shared)}`, goal: `(${shared})(${lin(1, q, x)})`, via: [], numbers: [p, q], along: [] };
     },
   },
   {
@@ -148,7 +138,7 @@ const all: Shape[] = [
       const shared = lin(1, p);
       return {
         shape: "square-and-bracket",
-        start: `(${shared})^2${times(q, shared)}`,
+        start: `(${shared})^2${timesBracket(q, shared)}`,
         goal: `(${shared})(${lin(1, p + q)})`,
         via: [],
         numbers: [p, q],
@@ -169,7 +159,7 @@ const all: Shape[] = [
         shape: "half-done",
         start: `x(${shared}) + ${poly([[q, "x"], [q * p, ""]])}`.replace("+ -", "- "),
         goal: `(${shared})(${lin(1, q)})`,
-        via: [`x(${shared})${times(q, shared)}`],
+        via: [`x(${shared})${timesBracket(q, shared)}`],
         numbers: [p, q, q * p],
         along: [],
       };
@@ -245,125 +235,10 @@ const all: Shape[] = [
   },
 ];
 
-// ---------- Hard: multiply out and simplify first, then factor fully ----------
-
-/** "k(...)" for k > 1, the thing itself for k = 1. */
-const kTimes = (k: number, inside: string) => (k === 1 ? inside : `${k}(${inside})`);
-/** gx(ax + b) with g the biggest number that goes into both: x(5x + 6), 2x(x + 5), 4x(x + 1). */
-function letterAndNumber(a: number, b: number): { goal: string; cost: number } {
-  const g = gcd(a, b);
-  return { goal: `${g === 1 ? "" : g}x(${lin(a / g, b / g)})`, cost: splitCost(a, g) + splitCost(b, g) };
-}
-
-const mixed: Shape[] = [
-  {
-    id: "square-minus-number",
-    name: "a square take away a number, then factor",
-    make: (r) => {
-      if (r.next() < 0.3) {
-        // (ax + 1)^2 - 1 = a^2x^2 + 2ax: (2x + 1)^2 - 1 = 4x(x + 1)
-        const a = r.int(2, 3);
-        const inside = lin(a, 1);
-        const f = letterAndNumber(a * a, 2 * a);
-        return {
-          shape: "square-minus-number",
-          start: `(${inside})^2 - 1`,
-          goal: f.goal,
-          via: [`(${inside})(${inside}) - 1`, `${poly([[a * a, "x^2"], [a, "x"], [a, "x"], [1, ""]])} - 1`, poly([[a * a, "x^2"], [2 * a, "x"]]), `x(${lin(a * a, 2 * a)})`],
-          numbers: [a],
-          along: [a * a, 2 * a],
-        };
-      }
-      // k(x + p)^2 - kp^2 = kx(x + 2p): 2(x + 3)^2 - 18 = 2x(x + 6)
-      const k = r.int(1, 3);
-      const p = r.signed(1, 4);
-      if (splitCost(2 * k * p, k) > 3 || (k === 1 && Math.abs(p) === 1) || (k === 3 && Math.abs(p) > 2)) return null;
-      const inside = lin(1, p);
-      const sq = k * p * p;
-      const open = poly([[1, "x^2"], [2 * p, "x"], [p * p, ""]]);
-      return {
-        shape: "square-minus-number",
-        start: `${k === 1 ? "" : k}(${inside})^2 - ${sq}`,
-        goal: `${k === 1 ? "" : k}x(${lin(1, 2 * p)})`,
-        via: [
-          `${k === 1 ? "" : k}(${inside})(${inside}) - ${sq}`,
-          `${kTimes(k, `${poly([[1, "x^2"], [p, "x"]])}${times(p, inside)}`)} - ${sq}`,
-          `${kTimes(k, poly([[1, "x^2"], [p, "x"], [p, "x"], [p * p, ""]]))} - ${sq}`,
-          `${kTimes(k, open)} - ${sq}`,
-          ...(k > 1 ? [`${poly([[k, "x^2"], [2 * k * p, "x"], [sq, ""]])} - ${sq}`] : []),
-          poly([[k, "x^2"], [2 * k * p, "x"]]),
-          ...(k > 1 ? [`x(${lin(k, 2 * k * p)})`] : []),
-        ],
-        numbers: [k, p, sq],
-        along: [2 * p, p * p, 2 * k * p],
-      };
-    },
-  },
-  {
-    id: "product-minus-number",
-    name: "a product take away a number, then factor",
-    make: (r) => {
-      // k(x + p)(x + q) - kpq = kx(x + p + q): (x + 2)(x + 5) - 10 = x(x + 7)
-      const k: number = 2; // with 1 it is short for this level
-      const p = r.signed(1, 5);
-      const q = r.int(2, 5);
-      const n = k * p * q;
-      if (p === q || p + q === 0) return null;
-      const [A, B] = [lin(1, p), lin(1, q)];
-      return {
-        shape: "product-minus-number",
-        start: `${k === 1 ? "" : k}(${A})(${B})${n < 0 ? " + " : " - "}${Math.abs(n)}`,
-        goal: `${k === 1 ? "" : k}x(${lin(1, p + q)})`,
-        via: [
-          `${kTimes(k, `${poly([[1, "x^2"], [p, "x"]])}${times(q, A)}`)}${n < 0 ? " + " : " - "}${Math.abs(n)}`,
-          `${kTimes(k, poly([[1, "x^2"], [p + q, "x"], [p * q, ""]]))}${n < 0 ? " + " : " - "}${Math.abs(n)}`,
-          ...(k > 1 ? [`${poly([[k, "x^2"], [k * (p + q), "x"], [n, ""]])}${n < 0 ? " + " : " - "}${Math.abs(n)}`] : []),
-          poly([[k, "x^2"], [k * (p + q), "x"]]),
-          ...(k > 1 ? [`x(${lin(k, k * (p + q))})`] : []),
-        ],
-        numbers: [k, p, q, n],
-        along: [p + q, p * q, k * (p + q)],
-      };
-    },
-  },
-  {
-    id: "two-terms-common",
-    name: "two products, one taken from the other, then factor",
-    make: (r) => {
-      // ax(x + p) - bx(x + q) = (a - b)x^2 + (ap - bq)x: 3x(x + 2) - x(x - 4) = 2x(x + 5)
-      const a = r.int(2, 4);
-      const b = r.int(1, a - 1);
-      const p = r.signed(1, 4);
-      const q = r.signed(1, 5);
-      const c = a * p - b * q;
-      if (c <= 0 || c > 12 || p === q) return null;
-      const f = letterAndNumber(a - b, c);
-      if (f.cost > 3) return null;
-      const second = `${b === 1 ? "" : b}x(${lin(1, q)})`;
-      return {
-        shape: "two-terms-common",
-        start: `${a}x(${lin(1, p)}) - ${second}`,
-        goal: f.goal,
-        via: [
-          `${poly([[a, "x^2"], [a * p, "x"]])} - ${second}`,
-          ...(b > 1 ? [`${poly([[a, "x^2"], [a * p, "x"]])} - (${poly([[b, "x^2"], [b * q, "x"]])})`] : []),
-          poly([[a, "x^2"], [a * p, "x"], [-b, "x^2"], [-b * q, "x"]]),
-          poly([[a - b, "x^2"], [c, "x"]]),
-          `x(${lin(a - b, c)})`,
-        ].filter((v) => v !== f.goal),
-        numbers: [a, b, p, q],
-        along: [a * p, b * q, a - b, c],
-      };
-    },
-  },
-];
-
-const pick = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) => s.id === id)!);
-
-/** Easy: one thing out in front. Medium: four terms in pairs (numbers in front, cubes, a number out first). Hard: multiply out and simplify first (brackets, collecting), then factor fully. */
+/** Easy: one thing out in front. Medium: four terms in pairs (numbers in front, cubes, a number out first). Hard: a common factor of x and y, pairs with x and y (nested.ts). */
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("number-out", "letter-out", "bracket-out", "square-and-bracket", "number-and-letter", "half-done", "pairs"),
-  medium: pick("pairs-numbers", "pairs-cube", "number-then-pairs"),
+  easy: byIds(all, "number-out", "letter-out", "bracket-out", "square-and-bracket", "number-and-letter", "half-done", "pairs"),
+  medium: byIds(all, "pairs-numbers", "pairs-cube", "number-then-pairs"),
   // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
   hard: NESTED.factor,
 };

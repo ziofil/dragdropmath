@@ -1,21 +1,26 @@
-import type { Expr, Log, Pow } from "../expr/types";
-import { cloneFresh, frac, log, neg, negate, num, pow, prod, sum } from "../expr/build";
+import type { Expr, Log, MathState, Pow } from "../expr/types";
+import { cloneFresh, frac, log, neg, negate, num, pow, prod, relOf, sum, withFlippedRel } from "../expr/build";
 import { key, rootOrder } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
-import { dragCtx, isEquation, partner, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
-import { asPower, fractionPart, raise as raiseTo } from "./shapes";
-import { roleOf, viewTerm } from "./view";
+import { dragCtx, isEquation, mergeInto, partner, replaceIn, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { asPower, dropFactor, fractionPart, raise as raiseTo } from "./shapes";
+import { factorsOf, roleOf, viewTerm } from "./view";
 import { assumeOf, canBeNegative } from "./signs";
 import { nodeAt } from "../expr/tree";
 
 // ---------- helpers ----------
 
-/** An integer as an expression (negatives as −n). */
-export function integer(v: number, id?: string): Expr {
-  return v < 0 ? neg(num(-v, id)) : num(v, id);
-}
+/** A whole-number exponent: powers like these split and merge whatever the sign of their base. */
+const whole = (e: Expr) => isConstant(e) && Number.isInteger(evaluate(e, {}));
 
-/** n if this exponent is 1/n (a root), else null. */
+/** Nothing here can be negative (so a log of it, or a root, splits as the rules say). */
+const noneNegative = (state: MathState, ...es: Expr[]) => es.every((e) => !canBeNegative(e, assumeOf(state)));
+
+/**
+ * An inequality after undoing a power or log of base b: below 1, the power
+ * goes down as its exponent goes up, so the relation turns round.
+ */
+const acrossBase = (next: MathState, state: MathState, b: number): MathState => (relOf(state) !== "=" && b < 1 ? withFlippedRel(next, state) : next);
 
 /** The log being dragged: the log itself, or its base (the "ln" label is the base e). */
 function logAt(c: DragCtx): Log | null {
@@ -34,14 +39,8 @@ function exponentOf(c: DragCtx): Pow | null {
   return c.parent?.kind === "pow" && c.index === 1 ? c.parent : null;
 }
 
-/** Factors of an expression (a product's factors, or the expression itself). */
-const factorsOf = (e: Expr) => (e.kind === "prod" ? e.factors : [e]);
-
 /** Remove the factor with this id (leaving 1 if it was the whole thing). */
-function removeFactor(e: Expr, id: string): Expr {
-  if (e.id === id) return num(1);
-  return e.kind === "prod" ? prod(without(e.factors, e.factors.findIndex((f) => f.id === id)), e.id) : e;
-}
+const removeFactor = (e: Expr, id: string): Expr => dropFactor(e, (f) => f.id === id) ?? e;
 
 function replaceFactor(e: Expr, id: string, by: Expr): Expr {
   if (e.id === id) return by;
@@ -60,6 +59,8 @@ export const powerOfPower: Rule = {
     const P = c && exponentOf(c);
     if (!c || !P || P.base.kind !== "pow") return [];
     const Q = P.base;
+    // √(x²) is |x|, not x: a fractional outer power only merges onto something never negative.
+    if (!whole(c.node) && !noneNegative(state, Q.base)) return [];
     // Show the operation: (x²)³ → x^(2·3); the learner multiplies 2·3 themselves.
     const exp = prod([Q.exp, c.node]);
     return [{ rule: "power-of-power", state: replaceIn(state, c.parentLoc!, pow(Q.base, exp, Q.id)), targetId: Q.exp.id }];
@@ -121,15 +122,7 @@ export const evaluatePower: Rule = {
   id: "evaluate-power",
   name: "Work out a power",
   gesture: "Drop a whole-number exponent onto a number to work it out.",
-  apply(state, id) {
-    const c = dragCtx(state, id);
-    const P = c && exponentOf(c);
-    // Whole-number exponents only: √9 is worked out step by step (√(3·3) → √3·√3 → …), not in one jump.
-    if (!c || !P || P.base.kind !== "num" || c.node.kind !== "num") return [];
-    const v = P.base.value ** c.node.value;
-    if (!Number.isSafeInteger(v) || v > 100_000) return [];
-    return [{ rule: "evaluate-power", state: replaceIn(state, c.parentLoc!, num(v, P.base.id)), targetId: P.base.id }];
-  },
+  apply: (state, id) => workOutPower(state, id, "evaluate-power"),
 };
 
 /** 2³ → 8 by tapping the exponent: the same as dropping it on the base. */
@@ -138,15 +131,20 @@ export const tapPower: Rule = {
   name: "Work out a power",
   gesture: "Tap a whole-number exponent on a number to work it out: 2³ → 8.",
   tap: true,
-  apply(state, id) {
-    const c = dragCtx(state, id);
-    const P = c && exponentOf(c);
-    if (!c || !P || P.base.kind !== "num" || c.node.kind !== "num") return [];
-    const v = P.base.value ** c.node.value;
-    if (!Number.isSafeInteger(v) || v > 100_000) return [];
-    return [{ rule: "tap-power", state: replaceIn(state, c.parentLoc!, num(v, P.base.id)) }];
-  },
+  apply: (state, id) => workOutPower(state, id, "tap-power"),
 };
+
+/** 2³ → 8, the exponent `id` dropped on its base or tapped. */
+function workOutPower(state: MathState, id: string, rule: "evaluate-power" | "tap-power"): Candidate[] {
+  const c = dragCtx(state, id);
+  const P = c && exponentOf(c);
+  // Whole-number exponents only: √9 is worked out step by step (√(3·3) → √3·√3 → …), not in one jump.
+  if (!c || !P || P.base.kind !== "num" || c.node.kind !== "num") return [];
+  const v = P.base.value ** c.node.value;
+  if (!Number.isSafeInteger(v) || v > 100_000) return [];
+  const state2 = replaceIn(state, c.parentLoc!, num(v, P.base.id));
+  return [rule === "evaluate-power" ? { rule, state: state2, targetId: P.base.id } : { rule, state: state2 }];
+}
 
 /** x⁵/x² → x³ (drop a power on the bottom onto one with the same base on top). */
 export const dividePowers: Rule = {
@@ -190,7 +188,8 @@ export const flipAcrossBar: Rule = {
     if (!inDen && !(f.kind === "pow" && f.exp.kind === "neg")) return [];
     if (f.kind === "num") return []; // numbers don't flip into 2⁻¹
     // The dragged node itself crosses over (x becomes the base of x⁻¹).
-    const moved: Expr = f.kind === "pow" ? { ...f, exp: negate(f.exp) } : pow(f, neg(num(1)));
+    // Written as a power from now on (1/√x → x^(−1/2)): the √ sign can't show a negative exponent.
+    const moved: Expr = f.kind === "pow" ? pow(f.base, negate(f.exp), f.id) : pow(f, neg(num(1)));
     const result = inDen
       ? frac(prod([F.num, moved]), removeFactor(F.den, f.id), F.id)
       : frac(removeFactor(F.num, f.id), prod([F.den, moved]), F.id);
@@ -233,6 +232,8 @@ export const logOfProduct: Rule = {
       if (L?.kind !== "log" || up!.index !== 1) return [];
       const fs = c.parent.factors;
       const rest = prod(without(fs, c.index), c.parent.id);
+      // ln(ab) = ln a + ln b only when a and b are positive.
+      if (!noneNegative(state, c.node, rest)) return [];
       const mineLog = copy(L, c.node);
       const theirs = log(L.base, rest, L.id);
       const split = sum(c.index === 0 ? [mineLog, theirs] : [theirs, mineLog]);
@@ -243,6 +244,7 @@ export const logOfProduct: Rule = {
       const L = up?.parent;
       if (L?.kind !== "log" || up!.index !== 1) return [];
       const F = c.parent;
+      if (!noneNegative(state, F.num, F.den)) return [];
       const split =
         c.index === 0
           ? sum([copy(L, F.num), neg(log(L.base, F.den, L.id))])
@@ -265,6 +267,9 @@ export const logOfPower: Rule = {
     const pc = dragCtx(state, P.id);
     const L = pc?.parent;
     if (L?.kind !== "log" || pc!.index !== 1) return [];
+    // ln(x²) = 2·ln x only for positive x: ln(x²) is also there for negative x (an odd power, or a root, isn't).
+    const even = whole(c.node) && evaluate(c.node, {}) % 2 === 0;
+    if (even && !noneNegative(state, P.base)) return [];
     return [{ rule: "log-of-power", state: replaceIn(state, pc!.parentLoc!, prod([c.node, log(L.base, P.base, L.id)])) }];
   },
 };
@@ -281,11 +286,10 @@ export const powerIntoLog: Rule = {
     return factors.flatMap((L, j): Candidate[] => {
       if (j === c.index || L.kind !== "log") return [];
       const merged = log(L.base, pow(L.arg, c.node), L.id);
-      const newFactors = factors.map((f, k) => (k === j ? merged : f));
       return [
         {
           rule: "power-into-log",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: L.id,
         },
       ];
@@ -325,11 +329,10 @@ export const combineLogs: Rule = {
         const bottom = myNeg ? mine.arg : theirs.arg;
         merged = log(theirs.base, frac(top, bottom), theirs.id);
       }
-      const newTerms = terms.map((t, k) => (k === j ? merged : t));
       return [
         {
           rule: "combine-logs",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, terms: without(newTerms, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: U.id,
         },
       ];
@@ -385,12 +388,15 @@ export const expAcross: Rule = {
     if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
     if (!c || c.loc.path.length !== 1 || c.index !== 0 || c.parent?.kind !== "pow") return [];
-    if (!isConstant(c.node) || evaluate(c.node, {}) <= 0 || evaluate(c.node, {}) === 1) return [];
+    const b = isConstant(c.node) ? evaluate(c.node, {}) : NaN;
+    if (!(b > 0) || b === 1) return [];
     const sides = state.sides.slice();
     const other = partner(c.loc.side);
+    // A log of something that may be negative isn't there (2ˣ = −8 has no solution).
+    if (!noneNegative(state, sides[other])) return [];
     sides[c.loc.side] = c.parent.exp;
     sides[other] = log(c.node, sides[other]);
-    return [{ rule: "exp-across", state: setSides(sides) }];
+    return [{ rule: "exp-across", state: acrossBase(setSides(sides), state, b) }];
   },
 };
 
@@ -407,17 +413,18 @@ export const logAcross: Rule = {
     const c = dragCtx(state, id);
     const L = c && logAt(c);
     if (!c || !L || logLoc(c).path.length !== 0) return [];
+    const b = isConstant(L.base) ? evaluate(L.base, {}) : NaN;
+    if (!(b > 0) || b === 1) return [];
     const sides = state.sides.slice();
     const other = partner(c.loc.side);
     sides[c.loc.side] = L.arg;
     sides[other] = pow(L.base, sides[other], c.node.kind === "log" ? L.id : undefined);
-    return [{ rule: "log-across", state: setSides(sides) }];
+    return [{ rule: "log-across", state: acrossBase(setSides(sides), state, b) }];
   },
 };
 
 // ---------- roots ----------
 
-/** √x ↔ x^(1/2) (tap to switch notation). */
 /**
  * √9 → 3, ∛8 → 2 (tap the root): a root of a number that comes out whole is
  * worked out, as tapping 2·3 multiplies it out. One that doesn't (√12) is left
@@ -442,6 +449,7 @@ export const evaluateRoot: Rule = {
   },
 };
 
+/** √x ↔ x^(1/2) (tap to switch notation). */
 export const rootNotation: Rule = {
   id: "root-notation",
   name: "Root ↔ power",
@@ -542,6 +550,8 @@ export const pullOutOfPower: Rule = {
     const up = dragCtx(state, c.parent.id);
     const P = up?.parent;
     if (P?.kind !== "pow" || up!.index !== 0) return [];
+    // √(ab) = √a·√b only when a and b aren't negative; a whole power splits anyway.
+    if (!whole(P.exp) && !noneNegative(state, ...(c.parent.kind === "frac" ? [c.parent.num, c.parent.den] : c.parent.factors))) return [];
     const copy = { ...cloneFresh(P.exp), from: P.exp.id };
     // A factor that is already a power multiplies exponents: (x²y)³ → x^(2·3)·y³.
     const raise = (f: Expr, e: Expr) => raiseTo(f, e, P.radical);
@@ -575,11 +585,12 @@ export const powerOfProduct: Rule = {
     if (!c || !P || P.radical) return [];
     const B = P.base;
     const n = c.node;
+    // (ab)^(1/2) = a^(1/2)·b^(1/2) only when a and b aren't negative; a whole power spreads anyway.
+    if (!whole(n) && !noneNegative(state, ...(B.kind === "prod" ? B.factors : B.kind === "frac" ? [B.num, B.den] : []))) return [];
     // A factor that is already a power multiplies exponents: (x²y)³ → x^(2·3)·y³.
-    const raise = (f: Expr, e: Expr) => raiseTo(f, e);
     let spread: Expr;
-    if (B.kind === "prod") spread = prod(B.factors.map((f, k) => raise(f, k === 0 ? n : cloneFresh(n))), B.id);
-    else if (B.kind === "frac") spread = frac(raise(B.num, n), raise(B.den, cloneFresh(n)), B.id);
+    if (B.kind === "prod") spread = prod(B.factors.map((f, k) => raiseTo(f, k === 0 ? n : cloneFresh(n))), B.id);
+    else if (B.kind === "frac") spread = frac(raiseTo(B.num, n), raiseTo(B.den, cloneFresh(n)), B.id);
     else return [];
     return [{ rule: "power-of-product", state: replaceIn(state, c.parentLoc!, spread), targetId: B.id }];
   },

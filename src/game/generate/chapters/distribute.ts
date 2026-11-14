@@ -1,23 +1,12 @@
 /** Exercise shapes for the chapter "distribute": multiplying out brackets, and taking a factor out (see ../write.ts). */
 import { NESTED } from "./nested";
-import { ax, gcd, lin, type Level, type Rng, type Shape } from "../write";
-
-const one = <T>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
+import { ax, byIds, gcd, lin, one, poly, type Level, type Rng, type Shape } from "../write";
 
 /** The factor in front of brackets: "3", "", "-", "-2", "x", "2x". */
 const front = (k: number, v = "") => (k === 1 ? v : k === -1 ? `-${v}` : `${k}${v}`);
 
-/** k·v + n with the letter first, or "" parts left out: "3x - 2", "x", "-6". */
-const poly = (terms: [number, string][]) => {
-  const ts = terms.filter(([k]) => k !== 0);
-  if (!ts.length) return "0";
-  return ts
-    .map(([k, v], i) => {
-      const t = v === "" ? `${Math.abs(k)}` : ax(Math.abs(k), v);
-      return i === 0 ? (k < 0 ? `-${t}` : t) : k < 0 ? ` - ${t}` : ` + ${t}`;
-    })
-    .join("");
-};
+/** k·v + n with the letter first, or "" parts left out: "3x - 2", "x", "-6" ("0" for nothing). */
+const polyOr0 = (terms: [number, string][]) => poly(terms) || "0";
 
 /**
  * Milestones for adding up like terms in a long sum, one kind at a time:
@@ -31,7 +20,7 @@ function collecting(terms: [number, string][]): string[] {
     if (at.length < 2) continue;
     const k = at.reduce((t, i) => t + now[i][0], 0);
     now = now.flatMap((t, i) => (i === at[0] ? (k === 0 ? [] : [[k, mono] as [number, string]]) : at.includes(i) ? [] : [t]));
-    if (now.length) out.push(poly(now));
+    if (now.length) out.push(polyOr0(now));
   }
   return out.slice(0, -1);
 }
@@ -138,7 +127,7 @@ const all: Shape[] = [
       return {
         shape: "simple-brackets",
         start: `${a}(${lin(1, b, v)})${second}`,
-        goal: poly([[xs, v], [ns, ""]]),
+        goal: polyOr0([[xs, v], [ns, ""]]),
         via: [`${lin(a, a * b, v)}${second}`],
         numbers: [a, b, c, d],
         along: [a * b, c * d, xs, ns],
@@ -159,8 +148,8 @@ const all: Shape[] = [
       return {
         shape: "square",
         start: `${v}(${lin(1, n, v)})${second}`,
-        goal: poly([[1, `${v}^2`], [n + m, v], [m * e, ""]]),
-        via: [`${poly([[1, `${v}^2`], [n, v]])}${second}`],
+        goal: polyOr0([[1, `${v}^2`], [n + m, v], [m * e, ""]]),
+        via: [`${polyOr0([[1, `${v}^2`], [n, v]])}${second}`],
         numbers: [n, m, e],
         along: [m * e, n + m],
       };
@@ -185,8 +174,8 @@ const all: Shape[] = [
       if (xs <= 0 || ns === 0 || Math.abs(ns) > 20 || (m === n && b === d) || gcd(m, b) > 1 || gcd(n, d) > 1) return null;
       const second = `${s < 0 ? " - " : " + "}${c}(${lin(n, d, v)})`;
       const start = `${a}(${lin(m, b, v)})${second}`;
-      const via = [`${lin(a * m, a * b, v)}${second}`, poly([[a * m, v], [a * b, ""], [s * c * n, v], [s * c * d, ""]])];
-      return { shape: "two-brackets", start, goal: poly([[xs, v], [ns, ""]]), via, numbers: [a, m, b, c, n, d], along: [a * m, a * b, c * n, c * d, xs, ns] };
+      const via = [`${lin(a * m, a * b, v)}${second}`, polyOr0([[a * m, v], [a * b, ""], [s * c * n, v], [s * c * d, ""]])];
+      return { shape: "two-brackets", start, goal: polyOr0([[xs, v], [ns, ""]]), via, numbers: [a, m, b, c, n, d], along: [a * m, a * b, c * n, c * d, xs, ns] };
     },
   },
   {
@@ -207,12 +196,12 @@ const all: Shape[] = [
       const ka = p * m + q * u;
       const kb = p * n + q * w;
       if (kb === 0 || ka <= 0 || gcd(m, n) > 1 || gcd(u, w) > 1) return null;
-      const br = (k: number, l: number) => poly([[k, a], [l, b]]);
+      const br = (k: number, l: number) => polyOr0([[k, a], [l, b]]);
       const second = `${q < 0 ? " - " : " + "}${Math.abs(q)}(${br(u, w)})`;
       const start = `${p}(${br(m, n)})${second}`;
-      const goal = poly([[ka, a], [kb, b]]);
+      const goal = polyOr0([[ka, a], [kb, b]]);
       // Milestones: the first bracket multiplied out, then both.
-      const via = [`${br(p * m, p * n)}${second}`, poly([[p * m, a], [p * n, b], [q * u, a], [q * w, b]])];
+      const via = [`${br(p * m, p * n)}${second}`, polyOr0([[p * m, a], [p * n, b], [q * u, a], [q * w, b]])];
       return { shape: "two-letters", start, goal, via, numbers: [p, m, n, q, u, w].filter((x) => Math.abs(x) !== 1), along: [p * m, p * n, q * u, q * w, ka, kb] };
     },
   },
@@ -230,8 +219,8 @@ const all: Shape[] = [
       const k1 = p * b - q * c;
       if (k1 === 0 || b === c) return null;
       const start = `${front(p, v)}(${lin(1, b, v)}) - ${front(q, v)}(${lin(1, c, v)})`;
-      const goal = poly([[k2, `${v}^2`], [k1, v]]);
-      const via = [poly([[p, `${v}^2`], [p * b, v]]) + ` - ${front(q, v)}(${lin(1, c, v)})`, poly([[p, `${v}^2`], [p * b, v], [-q, `${v}^2`], [-q * c, v]])];
+      const goal = polyOr0([[k2, `${v}^2`], [k1, v]]);
+      const via = [polyOr0([[p, `${v}^2`], [p * b, v]]) + ` - ${front(q, v)}(${lin(1, c, v)})`, polyOr0([[p, `${v}^2`], [p * b, v], [-q, `${v}^2`], [-q * c, v]])];
       return { shape: "letter-brackets", start, goal, via, numbers: [p, q, b, c], along: [p * b, q * c, k1] };
     },
   },
@@ -254,13 +243,13 @@ const all: Shape[] = [
       if (ka <= 0 || kb === 0 || Math.abs(kb) > 20 || k * n === z * ws * u * w) return null;
       const extra = t < 0 ? ` - ${ax(-t, a)}` : ` + ${ax(t, a)}`;
       const second = `${z === 1 ? "" : z}(${ax(m, a)}${ws < 0 ? " - " : " + "}${u}·${w}·${b})`;
-      const start = `${p}·${q}(${poly([[1, a], [n, b]])}) - ${second}${extra}`;
+      const start = `${p}·${q}(${polyOr0([[1, a], [n, b]])}) - ${second}${extra}`;
       const via = [
-        `${k}(${poly([[1, a], [n, b]])}) - ${second}${extra}`,
-        `${poly([[k, a], [k * n, b]])} - ${second}${extra}`,
-        ...[[[k, a], [k * n, b], [-z * m, a], [-z * ws * u * w, b], [t, a]] as [number, string][]].flatMap((ts) => [poly(ts), ...collecting(ts)]),
+        `${k}(${polyOr0([[1, a], [n, b]])}) - ${second}${extra}`,
+        `${polyOr0([[k, a], [k * n, b]])} - ${second}${extra}`,
+        ...[[[k, a], [k * n, b], [-z * m, a], [-z * ws * u * w, b], [t, a]] as [number, string][]].flatMap((ts) => [polyOr0(ts), ...collecting(ts)]),
       ];
-      return { shape: "products-and-brackets", start, goal: poly([[ka, a], [kb, b]]), via, numbers: [p, q, n, m, u, w, t, z].filter((x) => Math.abs(x) !== 1), along: [k, k * n, u * w, z * m, z * u * w, ka, kb] };
+      return { shape: "products-and-brackets", start, goal: polyOr0([[ka, a], [kb, b]]), via, numbers: [p, q, n, m, u, w, t, z].filter((x) => Math.abs(x) !== 1), along: [k, k * n, u * w, z * m, z * u * w, ka, kb] };
     },
   },
   {
@@ -279,19 +268,19 @@ const all: Shape[] = [
       const ka = -c1 + p * c2 - q * c3;
       const kb = -d1 + p * d2 - q * d3;
       if (ka <= 0 || kb === 0 || gcd(c2, d2) > 1 || gcd(c3, d3) > 1) return null;
-      const inner = (c: number, d: number) => poly([[c, a], [d, b]]);
+      const inner = (c: number, d: number) => polyOr0([[c, a], [d, b]]);
       const first = `-(${inner(c1, d1)})`;
       const second = ` + ${p}(${inner(c2, d2)})`;
       const third = ` - ${q}(${inner(c3, d3)})`;
       const via = [
         `${inner(-c1, -d1)}${second}${third}`,
-        `${poly([[-c1, a], [-d1, b], [p * c2, a], [p * d2, b]])}${third}`,
-        ...[[[-c1, a], [-d1, b], [p * c2, a], [p * d2, b], [-q * c3, a], [-q * d3, b]] as [number, string][]].flatMap((ts) => [poly(ts), ...collecting(ts)]),
+        `${polyOr0([[-c1, a], [-d1, b], [p * c2, a], [p * d2, b]])}${third}`,
+        ...[[[-c1, a], [-d1, b], [p * c2, a], [p * d2, b], [-q * c3, a], [-q * d3, b]] as [number, string][]].flatMap((ts) => [polyOr0(ts), ...collecting(ts)]),
       ];
       return {
         shape: "three-brackets",
         start: `${first}${second}${third}`,
-        goal: poly([[ka, a], [kb, b]]),
+        goal: polyOr0([[ka, a], [kb, b]]),
         via,
         numbers: [c1, d1, c2, d2, c3, d3, p, q].filter((x) => Math.abs(x) !== 1),
         along: [p * c2, p * d2, q * c3, q * d3, ka, kb],
@@ -313,18 +302,18 @@ const all: Shape[] = [
       const c = -m * e;
       if (k <= 0 || f === n || Math.abs(c) > 20) return null;
       const second = ` - ${m}(${lin(1, e, v)})`;
-      const third = ` - (${poly([[j, `${v}^2`], [f, v]])})`;
+      const third = ` - (${polyOr0([[j, `${v}^2`], [f, v]])})`;
       const via = [
         // Multiplied out, not yet tidied: 3a·a + 3·4·a.
         `${j}${v}·${v}${n < 0 ? " - " : " + "}${Math.abs(n) === 1 ? `${j}${v}` : `${j}·${Math.abs(n)}·${v}`}${second}${third}`,
-        `${poly([[j, `${v}^2`], [j * n, v]])}${second}${third}`,
-        `${poly([[j, `${v}^2`], [j * n, v], [-m, v], [-m * e, ""]])}${third}`,
-        ...[[[j, `${v}^2`], [j * n, v], [-m, v], [-m * e, ""], [-j, `${v}^2`], [-f, v]] as [number, string][]].flatMap((ts) => [poly(ts), ...collecting(ts)]),
+        `${polyOr0([[j, `${v}^2`], [j * n, v]])}${second}${third}`,
+        `${polyOr0([[j, `${v}^2`], [j * n, v], [-m, v], [-m * e, ""]])}${third}`,
+        ...[[[j, `${v}^2`], [j * n, v], [-m, v], [-m * e, ""], [-j, `${v}^2`], [-f, v]] as [number, string][]].flatMap((ts) => [polyOr0(ts), ...collecting(ts)]),
       ];
       return {
         shape: "square-brackets",
         start: `${front(j, v)}(${lin(1, n, v)})${second}${third}`,
-        goal: poly([[k, v], [c, ""]]),
+        goal: polyOr0([[k, v], [c, ""]]),
         via,
         numbers: [n, m, e, f, j].filter((x) => Math.abs(x) !== 1),
         along: [j * n, m * e, k],
@@ -350,12 +339,12 @@ const all: Shape[] = [
       const via = [
         `${c} - ${p * q} + ${ax(p, v)}${rest}`,
         `${c} - ${p * q} + ${ax(p, v)} + ${ax(g * h, v)} - ${u}(${lin(1, d, v)})`,
-        ...[[[c, ""], [-p * q, ""], [p, v], [g * h, v], [-u, v], [-u * d, ""]] as [number, string][]].flatMap((ts) => [poly(ts), ...collecting(ts)]),
+        ...[[[c, ""], [-p * q, ""], [p, v], [g * h, v], [-u, v], [-u * d, ""]] as [number, string][]].flatMap((ts) => [polyOr0(ts), ...collecting(ts)]),
       ];
       return {
         shape: "number-minus-bracket",
         start: `${c} - ${p}(${q} - ${v})${rest}`,
-        goal: poly([[kx, v], [k0, ""]]),
+        goal: polyOr0([[kx, v], [k0, ""]]),
         via,
         numbers: [c, p, q, g, h, u, d],
         along: [p * q, g * h, u * d, c - p * q, kx, k0],
@@ -364,11 +353,9 @@ const all: Shape[] = [
   },
 ];
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("expand", "factor", "expand-cancel", "expand-and-add", "simple-brackets", "square"),
-  medium: pick("two-brackets", "two-letters", "letter-brackets"),
+  easy: byIds(all, "expand", "factor", "expand-cancel", "expand-and-add", "simple-brackets", "square"),
+  medium: byIds(all, "two-brackets", "two-letters", "letter-brackets"),
   // And brackets inside brackets: chapters/nested.ts.
-  hard: [...pick("products-and-brackets", "three-brackets", "square-brackets", "number-minus-bracket"), ...NESTED.distribute],
+  hard: [...byIds(all, "products-and-brackets", "three-brackets", "square-brackets", "number-minus-bracket"), ...NESTED.distribute],
 };

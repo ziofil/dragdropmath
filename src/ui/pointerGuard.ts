@@ -9,7 +9,8 @@
  *   next finger, and the next release completed the move.
  *
  * So while a press on a draggable canvas is down, other pointers are kept
- * away from the page, and a cancelled press is ended where it started: the
+ * away from the page, and a cancelled press (or one still down when the
+ * window loses focus) is ended where it started: the
  * piece goes back, nothing changes, and it isn't a tap (taps are only ever
  * trusted events, see MathCanvas).
  */
@@ -68,6 +69,9 @@ function install() {
     },
     { capture: true },
   );
+
+  // The tab or window loses focus mid-drag: the pointerup may never come.
+  window.addEventListener("blur", endAtStart);
 }
 
 if (typeof window !== "undefined") install();

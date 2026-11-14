@@ -3,8 +3,7 @@
  * with a letter to make the subject picked at random, and made-up equations
  * solved for x in terms of another letter (x = 5a).
  */
-import { ax, gcd, type Level, type Rng, type Shape } from "../write";
-import { terms } from "./balance";
+import { ax, gcd, terms, byIds, type Level, type Rng, type Shape } from "../write";
 
 /** A formula and the subjects it can be rearranged for (each goal as the engine writes it). */
 type Formula = { start: string; goals: string[]; via?: Record<string, string[]> };
@@ -140,31 +139,6 @@ const letterShapes: Shape[] = [
         via: [`${linL(p, p * m, l)} = ${ax(n, l)}`, `${ax(p)} = ${ax(p * k, l)}`],
         numbers: [p, m, n],
         along: [p * m, p * k],
-      };
-    },
-  },
-  {
-    id: "bracket-both",
-    name: "a bracket, and x on both sides",
-    make: (r) => {
-      // p(x + ma) = qx + na, or the sides the other way round.
-      const l = LETTERS[r.int(0, 2)];
-      const k = pickK(r);
-      const q = r.int(1, 3);
-      const p = q + r.int(2, 3);
-      const m = r.signed(1, 4);
-      const n = (p - q) * k + p * m;
-      if (!small(n, p * m) || n === p * m || n === m) return null;
-      const [left, right] = [bracketL(p, m, l), linL(q, n, l)];
-      const swap = r.next() < 0.4;
-      const expanded = linL(p, p * m, l);
-      return {
-        shape: "bracket-both",
-        start: swap ? `${right} = ${left}` : `${left} = ${right}`,
-        goal: goalL(k, l),
-        via: swap ? [`${right} = ${expanded}`, ...collectL(q, n, p, p * m, l, k)] : [`${expanded} = ${right}`, ...collectL(p, p * m, q, n, l, k)],
-        numbers: [p, m, q, n],
-        along: [p * m, p - q, (p - q) * k],
       };
     },
   },
@@ -373,10 +347,8 @@ const mixedL: Shape[] = [
 
 const all: Shape[] = [fromBank("product", PRODUCTS), fromBank("sum", SUMS), fromBank("two-step", TWO_STEP), fromBank("formula", LONGER), ...letterShapes, fromBank("factor-twice", FACTOR), ...mixedL];
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("product", "sum", "two-step", "formula", "letters-both", "bracket-letter", "fraction-equal"),
-  medium: pick("two-brackets", "two-fractions", "fraction-letter", "bracket-and-letter", "factor-twice"),
-  hard: pick("fractions-minus", "two-brackets-mixed"),
+  easy: byIds(all, "product", "sum", "two-step", "formula", "letters-both", "bracket-letter", "fraction-equal"),
+  medium: byIds(all, "two-brackets", "two-fractions", "fraction-letter", "bracket-and-letter", "factor-twice"),
+  hard: byIds(all, "fractions-minus", "two-brackets-mixed"),
 };

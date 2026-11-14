@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { decodeSet, encodeSet, EXAMPLE_SET, readSet, setKey } from "./sets";
+import { decodeSet, encodeSet, readSet, setKey } from "./sets";
+import { en } from "../i18n";
+
+const EXAMPLE_SET = en.exampleSet;
 
 describe("exercise sets of one's own", () => {
   it("the example reads cleanly, with wrong answers for every exercise", () => {

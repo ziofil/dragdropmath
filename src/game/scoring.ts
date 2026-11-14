@@ -8,6 +8,7 @@
  * which of their exercises are solved (loadSolved).
  */
 import { LEVELS, type Level } from "./generate/write";
+import { isRecord, isStrings, readJson, writeJson } from "../util/storage";
 
 // ---------- a chapter: how many solved at each level ----------
 
@@ -26,40 +27,33 @@ const KEEP_COUNTED = 500;
 
 const none = (): Counts => ({ easy: 0, medium: 0, hard: 0 });
 
-export function loadProgress(kind: Kind = "test"): Progress {
-  try {
-    return JSON.parse(localStorage.getItem(COUNTS_KEY[kind]) ?? "{}");
-  } catch {
-    return {};
-  }
-}
+export const loadProgress = (kind: Kind = "test"): Progress => readJson(COUNTS_KEY[kind], {}, isRecord);
+
+/** The exercises counted so far (the latest few). */
+const loadCounted = (): string[] => readJson(COUNTED_KEY, [], isStrings);
 
 /** One more exercise done, unless this one was counted already. */
 export function countSolved(chapterId: string, level: Level, exerciseId: string, kind: Kind = "test"): void {
-  try {
-    const counted: string[] = JSON.parse(localStorage.getItem(COUNTED_KEY) ?? "[]");
-    if (counted.includes(exerciseId)) return;
-    const progress = loadProgress(kind);
-    const c = { ...none(), ...progress[chapterId] };
-    c[level]++;
-    progress[chapterId] = c;
-    localStorage.setItem(COUNTS_KEY[kind], JSON.stringify(progress));
-    localStorage.setItem(COUNTED_KEY, JSON.stringify([...counted, exerciseId].slice(-KEEP_COUNTED)));
-  } catch {
-    /* storage unavailable: progress just won't persist */
-  }
+  const counted = loadCounted();
+  if (counted.includes(exerciseId)) return;
+  const progress = loadProgress(kind);
+  const c = countsOf({ id: chapterId }, progress);
+  c[level]++;
+  progress[chapterId] = c;
+  writeJson(COUNTS_KEY[kind], progress);
+  writeJson(COUNTED_KEY, [...counted, exerciseId].slice(-KEEP_COUNTED));
 }
 
 /** This exercise has been counted already. */
-export function isCounted(exerciseId: string): boolean {
-  try {
-    return (JSON.parse(localStorage.getItem(COUNTED_KEY) ?? "[]") as string[]).includes(exerciseId);
-  } catch {
-    return false;
-  }
-}
+export const isCounted = (exerciseId: string): boolean => loadCounted().includes(exerciseId);
 
-export const countsOf = (chapter: { id: string }, p: Progress): Counts => ({ ...none(), ...p[chapter.id] });
+/** A chapter's counts (a stored one that isn't numbers counts as none). */
+export function countsOf(chapter: { id: string }, p: Progress): Counts {
+  const c = none();
+  const stored = p[chapter.id];
+  if (isRecord(stored)) for (const l of LEVELS) if (Number.isFinite(stored[l])) c[l] = stored[l];
+  return c;
+}
 
 /** Solved in a chapter, at any level. */
 export const solvedCount = (chapter: { id: string }, p: Progress) => LEVELS.reduce((n, l) => n + countsOf(chapter, p)[l], 0);
@@ -98,22 +92,13 @@ const OLD_KEY = "graspable.solved.v1";
 const OLD_BEST_KEY = "graspable.best.v1";
 
 export function loadSolved(): Set<string> {
-  try {
-    const solved: string[] = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    const old: string[] = JSON.parse(localStorage.getItem(OLD_KEY) ?? "[]");
-    const oldBest: Record<string, number> = JSON.parse(localStorage.getItem(OLD_BEST_KEY) ?? "{}");
-    return new Set([...solved, ...old, ...Object.keys(oldBest)]);
-  } catch {
-    return new Set();
-  }
+  // Each read on its own: an unreadable old key mustn't lose the current list.
+  const solved = readJson<string[]>(KEY, [], isStrings);
+  const old = readJson<string[]>(OLD_KEY, [], isStrings);
+  const oldBest = readJson<Record<string, number>>(OLD_BEST_KEY, {}, isRecord);
+  return new Set([...solved, ...old, ...Object.keys(oldBest)]);
 }
 
 export function markSolved(exerciseId: string): void {
-  const solved = loadSolved();
-  solved.add(exerciseId);
-  try {
-    localStorage.setItem(KEY, JSON.stringify([...solved]));
-  } catch {
-    /* storage unavailable: progress just won't persist */
-  }
+  writeJson(KEY, [...loadSolved(), exerciseId].filter((id, i, all) => all.indexOf(id) === i));
 }

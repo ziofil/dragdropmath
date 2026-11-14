@@ -60,7 +60,7 @@ export function FeelWord({ word }: { word: string }) {
   };
 
   return (
-    <span ref={ref} className="feel-word" aria-label={word}>
+    <span ref={ref} className="feel-word" role="img" aria-label={word}>
       <DraggableRenderer
         draggable={draggable}
         initialState={{ order: Object.keys(LETTERS) }}

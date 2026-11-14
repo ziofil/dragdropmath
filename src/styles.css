@@ -547,6 +547,14 @@ span.ex-step {
   font-size: 2rem;
   margin: 8px 0 12px;
 }
+/* The lesson's second half: its moves, one at a time. */
+.moves-head {
+  font-size: 1.5rem;
+  margin: 8px 0 12px;
+}
+.moves-head + .chapter-blurb {
+  margin-bottom: 24px;
+}
 .theory,
 .practice {
   margin-bottom: 36px;
@@ -849,14 +857,6 @@ span.ex-step {
 .badge-note {
   font-weight: 400;
 }
-.path-panel .exercises {
-  margin-top: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 8px;
-}
-.path-panel .ex-num {
-  font-size: 1.1rem;
-}
 
 @media (max-width: 860px) {
   .path-layout {
@@ -1082,10 +1082,6 @@ span.ex-step {
   /* The same height, so the answers don't shift when one replaces the other. */
   line-height: 1.5rem;
 }
-/* After the guess, the goal below the answers gets a row of its own. */
-.goal.guess > .static-math {
-  flex-basis: 100%;
-}
 .choices {
   flex-basis: 100%;
   display: grid;
@@ -1131,13 +1127,6 @@ button.choice:focus-visible {
 .star,
 .ex-star {
   color: var(--gold);
-}
-.ex-star {
-  font-size: 0.85rem;
-}
-.ex-guess {
-  color: var(--accent);
-  font-weight: 700;
   font-size: 0.85rem;
 }
 

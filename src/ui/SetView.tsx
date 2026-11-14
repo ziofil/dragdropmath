@@ -8,10 +8,10 @@ import { parseState } from "../expr/parse";
 import { choicesFor, loadGuesses } from "../game/guess";
 import { loadSolved } from "../game/scoring";
 import { autoDecoys } from "../game/autoDecoys";
-import { chapterOf, decodeSet, encodeSet, movesOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
-import { lettersPositive } from "../game/puzzles";
+import { decodeSet, encodeSet, movesOf, positiveOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
 import type { SolveAnswer, SolveRequest } from "../game/solveWorker";
 import { StaticMath } from "./MathCanvas";
+import { Broken } from "./Practice";
 import { PuzzleView, type Exercise } from "./PuzzleView";
 import { t } from "../i18n";
 
@@ -25,7 +25,7 @@ function useSolvable(set: ExerciseSet | null): (number | null | "checking")[] {
     setFound(set.exercises.map(() => "checking"));
     const worker = new Worker(new URL("../game/solveWorker.ts", import.meta.url), { type: "module" });
     worker.onmessage = (e: MessageEvent<SolveAnswer>) => setFound((f) => f.map((v, i) => (i === e.data.id ? e.data.moves : v)));
-    set.exercises.forEach((ex, id) => worker.postMessage({ id, start: ex.start, goal: ex.goal, rules: movesOf(set, ex) } satisfies SolveRequest));
+    set.exercises.forEach((ex, id) => worker.postMessage({ id, start: ex.start, goal: ex.goal, rules: movesOf(set, ex), positive: positiveOf(set, ex) } satisfies SolveRequest));
     return () => worker.terminate();
   }, [set]);
   return found;
@@ -76,7 +76,12 @@ export function SetMaker() {
       <p>{t().ownIntro}</p>
       <div className="maker-actions">
         <button onClick={() => file.current?.click()}>{t().upload}</button>
-        <input ref={file} type="file" accept=".yaml,.yml,.txt,text/yaml" hidden onChange={(e) => upload(e.target.files?.[0])} />
+        <input ref={file} type="file" accept=".yaml,.yml,.txt,text/yaml" hidden onChange={(e) => {
+            upload(e.target.files?.[0]);
+            // So choosing the same file again (after editing) reads it again.
+            e.target.value = "";
+          }}
+        />
         <button onClick={() => (setText(exampleSet), check(exampleSet))}>{t().startFromExample}</button>
       </div>
       <textarea
@@ -212,7 +217,7 @@ function exerciseOfSet(set: ExerciseSet, code: string, n: number): Exercise | nu
     prev: n > 1 ? { href: at(n - 1), text: `${n - 1}` } : undefined,
     next: n < count ? { href: at(n + 1), text: `${n + 1}` } : undefined,
     onward: n < count ? { href: at(n + 1), text: t().nextExercise } : { href: `#/set/${code}`, text: t().backToSet(set.title) },
-    positiveLetters: chapterOf(set, ex) ? lettersPositive(chapterOf(set, ex)!) : false,
+    positiveLetters: positiveOf(set, ex),
   };
 }
 
@@ -221,15 +226,7 @@ export function SetRoute({ code, n }: { code: string; n: number | null }) {
   const exercise = useMemo(() => (typeof set === "object" && n !== null ? exerciseOfSet(set, code, n) : null), [set, code, n]);
   if (set === "loading") return <main className="set-page" />;
   if (set === "broken" || (n !== null && !exercise))
-    return (
-      <main className="set-page">
-        <h1>{t().brokenLink}</h1>
-        <p>{t().brokenLinkText}</p>
-        <a className="button primary" href="#/">
-          {t().learningPathButton}
-        </a>
-      </main>
-    );
+    return <Broken />;
   if (exercise) return <PuzzleView key={exercise.puzzle.id} exercise={exercise} />;
   return <SetPage set={set} code={code} />;
 }

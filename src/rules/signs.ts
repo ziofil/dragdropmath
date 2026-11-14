@@ -67,8 +67,12 @@ export function signOf(e: Expr, a: Assume): Sign {
     case "pow": {
       const b = signOf(e.base, a);
       if (b === "positive") return "positive"; // 2ˣ, eˣ, a positive base to any power
-      // A root is never negative (√ means the one that isn't), whatever is under it.
-      if (e.radical) return b === "zero" ? "zero" : "non-negative";
+      // An even root is never negative (√ means the one that isn't); an odd one keeps the sign (∛−8 = −2).
+      if (e.radical) {
+        const n = isConstant(e.exp) ? Math.round(1 / evaluate(e.exp, {})) : NaN;
+        if (n % 2 === 1) return b;
+        return b === "zero" ? "zero" : "non-negative";
+      }
       // An even whole power is never negative: x², (x − 1)⁴.
       if (isConstant(e.exp)) {
         const n = evaluate(e.exp, {});

@@ -1,9 +1,9 @@
 import type { Expr } from "../expr/types";
-import { frac, num, prod } from "../expr/build";
+import { frac, num } from "../expr/build";
 import { key } from "../expr/key";
 import { buildTerm, splitCoef } from "./monomial";
-import { dragCtx, replaceIn, without, type Candidate, type Rule } from "./types";
-import { fractionPart } from "./shapes";
+import { dragCtx, replaceIn, type Candidate, type Rule } from "./types";
+import { dropFactor, fractionPart } from "./shapes";
 
 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 
@@ -14,7 +14,7 @@ export const divideNumbers: Rule = {
   gesture: "Drop a number on the bottom of a fraction onto the number on top.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    if (c?.parent?.kind !== "frac" || c.index !== 1 || c.node.kind !== "num") return [];
+    if (c?.parent?.kind !== "frac" || c.index !== 1 || c.node.kind !== "num" || c.node.value === 0) return [];
     const f = c.parent;
     const d = c.node.value;
     const m = splitCoef(f.num);
@@ -58,17 +58,11 @@ export const cancelFactor: Rule = {
     const [mine, theirs] = fromBottom ? [f.den, f.num] : [f.num, f.den];
 
     const k = key(c.node);
-    const removeOne = (e: Expr, pick: (x: Expr) => boolean): Expr | null => {
-      if (pick(e)) return num(1);
-      if (e.kind !== "prod") return null;
-      const i = e.factors.findIndex(pick);
-      return i < 0 ? null : prod(without(e.factors, i), e.id);
-    };
     const otherFactors = theirs.kind === "prod" ? theirs.factors : [theirs];
     return otherFactors.flatMap((t): Candidate[] => {
       if (key(t) !== k) return [];
-      const kept = removeOne(theirs, (x) => x.id === t.id)!;
-      const left = removeOne(mine, (x) => x.id === c.node.id)!;
+      const kept = dropFactor(theirs, (x) => x.id === t.id)!;
+      const left = dropFactor(mine, (x) => x.id === c.node.id)!;
       const [top, bottom] = fromBottom ? [kept, left] : [left, kept];
       return [{ rule: "cancel-factor", state: replaceIn(state, fracLoc, frac(top, bottom, f.id)), targetId: t.id }];
     });

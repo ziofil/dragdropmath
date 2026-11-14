@@ -21,10 +21,10 @@ import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { ALL_RULES } from "../rules";
-import { CHAPTERS, rulesFor, type Chapter } from "./puzzles";
+import { CHAPTERS, lettersPositive, rulesFor, type Chapter } from "./puzzles";
 import { follows, isWrong, shapeMismatch } from "./answers";
 import { autoDecoys } from "./autoDecoys";
-import { allTitles, en, t } from "../i18n";
+import { allTitles, t } from "../i18n";
 import type { Mismatch } from "./answers";
 
 export type SetExercise = { start: string; goal: string; wrong?: string[]; hint?: string; moves?: string };
@@ -61,9 +61,14 @@ export function chapterOf(set: ExerciseSet, ex: SetExercise): Chapter | undefine
 
 /** The moves of an exercise in a set: its own chapter's, else the set's, else all. */
 export function movesOf(set: ExerciseSet, ex: SetExercise): RuleId[] {
-  const name = ex.moves ?? set.moves;
-  const ch = name === undefined ? undefined : chapterNamed(name);
+  const ch = chapterOf(set, ex);
   return ch ? rulesFor(CHAPTERS.indexOf(ch)) : ALL_RULES;
+}
+
+/** Its letters stand for positive numbers (its chapter's do). */
+export function positiveOf(set: ExerciseSet, ex: SetExercise): boolean {
+  const ch = chapterOf(set, ex);
+  return ch ? lettersPositive(ch) : false;
 }
 
 const str = (v: unknown) => (typeof v === "number" ? String(v) : typeof v === "string" ? v.trim() : undefined);
@@ -153,19 +158,36 @@ export async function encodeSet(set: ExerciseSet): Promise<string> {
   return b64url(await pipe(new TextEncoder().encode(JSON.stringify(packed)), new CompressionStream("deflate-raw")));
 }
 
+/** The set in a link. A link that isn't one (cut short, or made by hand) throws. */
 export async function decodeSet(code: string): Promise<ExerciseSet> {
   const json = new TextDecoder().decode(await pipe(unb64url(code), new DecompressionStream("deflate-raw")));
-  const [title, moves, list] = JSON.parse(json) as [string, string, string[][]];
+  const packed: unknown = JSON.parse(json);
+  const isText = (v: unknown): v is string => typeof v === "string";
+  const parses = (v: string) => {
+    try {
+      parseState(v);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  if (!Array.isArray(packed) || !isText(packed[0]) || !isText(packed[1]) || !Array.isArray(packed[2])) throw new Error("not a set");
+  const [title, moves, list] = packed as [string, string, unknown[]];
   return {
     title,
     ...(moves ? { moves } : {}),
-    exercises: list.map(([start, goal, w1, w2, hint, mv]) => ({
-      start,
-      goal,
-      ...(w1 && w2 ? { wrong: [w1, w2] } : {}),
-      ...(hint ? { hint } : {}),
-      ...(mv ? { moves: mv } : {}),
-    })),
+    exercises: list.map((row) => {
+      if (!Array.isArray(row) || !row.every(isText)) throw new Error("not an exercise");
+      const [start, goal, w1, w2, hint, mv] = row as string[];
+      if (!start || !goal || !parses(start) || !parses(goal)) throw new Error("not an exercise");
+      return {
+        start,
+        goal,
+        ...(w1 && w2 && parses(w1) && parses(w2) ? { wrong: [w1, w2] } : {}),
+        ...(hint ? { hint } : {}),
+        ...(mv ? { moves: mv } : {}),
+      };
+    }),
   };
 }
 
@@ -176,5 +198,3 @@ export function setKey(code: string): string {
   return h.toString(36);
 }
 
-/** An example to start from (in English; the set maker shows it in the reader's language). */
-export const EXAMPLE_SET = en.exampleSet;

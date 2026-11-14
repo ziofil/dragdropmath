@@ -1,18 +1,8 @@
 /** Multiplying brackets: each term of one by each term of the other, then collect. */
 import { NESTED } from "./nested";
-import { lin, plus, type Draft, type Level, type Rng, type Shape } from "../write";
+import { byIds, lin, plus, poly, term, timesBracket, type Draft, type Level, type Rng, type Shape } from "../write";
 
-/** c·v as a person writes it: "3x^2", "x", "-x", "7" (v empty: a number). */
-const term = (c: number, v: string) => (v === "" ? `${c}` : c === 1 ? v : c === -1 ? `-${v}` : `${c}${v}`);
-/** Terms in the order given, zeros left out: [[1, "x^2"], [-3, "x"], [2, ""]] → "x^2 - 3x + 2". */
-const poly = (ts: [number, string][]) =>
-  ts
-    .filter(([c]) => c !== 0)
-    .map(([c, v], i) => (i === 0 ? term(c, v) : c < 0 ? ` - ${term(-c, v)}` : ` + ${term(c, v)}`))
-    .join("");
-/** " + 3(x + 1)", " - (x + 1)": d times a bracket, after a term. */
-const times = (d: number, inside: string) => `${d < 0 ? " - " : " + "}${Math.abs(d) === 1 ? "" : Math.abs(d)}(${inside})`;
-
+/** One of these letters. */
 const letter = (r: Rng, ls: string[]) => ls[r.int(0, ls.length - 1)];
 
 /**
@@ -22,7 +12,7 @@ const letter = (r: Rng, ls: string[]) => ls[r.int(0, ls.length - 1)];
 function expand(a: number, b: number, c: number, d: number, x: string) {
   const first = lin(a, b, x);
   return {
-    via: [`(${first})*${term(c, x)}${times(d, first)}`, `${poly([[a * c, `${x}^2`], [b * c, x]])}${times(d, first)}`],
+    via: [`(${first})*${term(c, x)}${timesBracket(d, first)}`, `${poly([[a * c, `${x}^2`], [b * c, x]])}${timesBracket(d, first)}`],
     /** All four products, before collecting. */
     four: poly([[a * c, `${x}^2`], [b * c, x], [a * d, x], [b * d, ""]]),
     goal: poly([[a * c, `${x}^2`], [a * d + b * c, x], [b * d, ""]]),
@@ -124,7 +114,7 @@ const all: Shape[] = [
         shape: "times-square",
         start: `(${lin(1, p)})(x^2 + ${q})`,
         goal: poly([[1, "x^3"], [p, "x^2"], [q, "x"], [p * q, ""]]),
-        via: [`(${lin(1, p)})*x^2${times(q, lin(1, p))}`, `${poly([[1, "x^3"], [p, "x^2"]])}${times(q, lin(1, p))}`],
+        via: [`(${lin(1, p)})*x^2${timesBracket(q, lin(1, p))}`, `${poly([[1, "x^3"], [p, "x^2"]])}${timesBracket(q, lin(1, p))}`],
         numbers: [p, q],
         along: [p, q, p * q],
       };
@@ -299,166 +289,10 @@ const all: Shape[] = [
   },
 ];
 
-// ---------- Hard: two expansions, one added to or taken from the other, then collected ----------
-
-/** A term: its number and its letters as written ("x^2", "ab", "" for a number). */
-type Term = [number, string];
-/** The letters of a product, as written: x·x = x^2, a·b = ab. */
-function mulVars(u: string, v: string): string {
-  const pow: Record<string, number> = {};
-  for (const w of [u, v]) for (const m of w.matchAll(/([a-z])(?:\^(\d+))?/g)) pow[m[1]] = (pow[m[1]] ?? 0) + Number(m[2] ?? 1);
-  return Object.keys(pow)
-    .sort()
-    .map((l) => (pow[l] === 1 ? l : `${l}^${pow[l]}`))
-    .join("");
-}
-const mul = (s: Term, t: Term): Term => [s[0] * t[0], mulVars(s[1], t[1])];
-/** Like terms added up, in the order they first appear. */
-function collect(ts: Term[]): Term[] {
-  const m = new Map<string, number>();
-  for (const [c, v] of ts) m.set(v, (m.get(v) ?? 0) + c);
-  return [...m].map(([v, c]): Term => [c, v]).filter(([c]) => c !== 0);
-}
-
-/** One part of the expression: how it's written, the states it goes through as it's multiplied out (`sum`: needs a bracket after a minus), and what it comes to. */
-type Part = { start: string; steps: { s: string; sum: boolean }[]; terms: Term[] };
-
-/** (P)(Q), or (P)^2: the first bracket over the second's terms, as the moves go (see expand). */
-function productPart(P: Term[], Q: Term[], square = false): Part {
-  const A = poly(P);
-  const [q0, q1] = Q;
-  const back = `${q1[0] < 0 ? " - " : " + "}(${A})${q1[1] === "" && Math.abs(q1[0]) === 1 ? "" : `*${term(Math.abs(q1[0]), q1[1])}`}`;
-  const four = [mul(P[0], q0), mul(P[1], q0), mul(P[0], q1), mul(P[1], q1)];
-  const terms = collect(four);
-  const steps = [
-    ...(square ? [{ s: `(${A})(${A})`, sum: false }] : []),
-    { s: `(${A})*${term(q0[0], q0[1])}${back}`, sum: true },
-    // 2x: the 2 goes into the bracket first, (4x - 6)x.
-    ...(q0[0] !== 1 ? [{ s: `(${poly(P.map(([c, v]): Term => [c * q0[0], v]))})*${q0[1]}${back}`, sum: true }] : []),
-    { s: `${poly([four[0], four[1]])}${back}`, sum: true },
-    // ... - (2x - 3)*3: the 3 into the bracket, then the minus.
-    ...(q1[1] === "" && Math.abs(q1[0]) !== 1 && q1[0] < 0
-      ? [{ s: `${poly([four[0], four[1]])} - (${poly(P.map(([c, v]): Term => [-c * q1[0], v]))})`, sum: true }]
-      : []),
-    { s: poly(four), sum: true },
-    { s: poly(terms), sum: true },
-  ];
-  return { start: square ? `(${A})^2` : `(${A})(${poly(Q)})`, steps, terms };
-}
-/** k times a part: k(x + 1)^2. */
-function scaled(k: number, p: Part): Part {
-  const terms = p.terms.map(([c, v]): Term => [k * c, v]);
-  return {
-    start: `${k}${p.start}`,
-    steps: [...p.steps.map(({ s, sum }) => ({ s: sum ? `${k}(${s})` : `${k}${s}`, sum: false })), { s: poly(terms), sum: true }],
-    terms,
-  };
-}
-/** A term times a bracket, 2x(x + 3): quick enough to need no steps of its own. */
-function termTimes(t: Term, Q: Term[]): Part {
-  const terms = Q.map((q) => mul(t, q));
-  return { start: `${term(t[0], t[1])}(${poly(Q)})`, steps: [{ s: poly(terms), sum: true }], terms };
-}
-/** Like terms collected one kind at a time (x^2s, then xs, ...), each where it first appears. */
-function collecting(ts: Term[]): string[] {
-  const kinds = [...new Set(ts.map(([, v]) => v))];
-  return kinds.map((_, k) => {
-    const done = new Set(kinds.slice(0, k + 1));
-    const out: Term[] = [];
-    for (const [c, v] of ts) {
-      if (!done.has(v)) out.push([c, v]);
-      else if (!out.some(([, w]) => w === v)) out.push([ts.filter(([, w]) => w === v).reduce((a, [c2]) => a + c2, 0), v]);
-    }
-    return poly(out);
-  });
-}
-
-/** p1 + p2 or p1 - p2: p1 multiplied out, then p2, then the minus shared out, then like terms collected. */
-function combine(shape: string, p1: Part, sign: 1 | -1, p2: Part, numbers: number[]): Draft | null {
-  const L1 = poly(p1.terms);
-  const all2 = p2.terms.map(([c, v]): Term => [sign * c, v]);
-  const result = collect([...p1.terms, ...all2]);
-  if (!result.length || result[0][0] < 0) return null;
-  const via = [
-    ...p1.steps.map(({ s }) => `${s}${sign < 0 ? " - " : " + "}${p2.start}`),
-    ...p2.steps.map(({ s, sum }) => `${L1}${sign < 0 ? (sum ? ` - (${s})` : ` - ${s}`) : ` + ${s}`}`),
-    poly([...p1.terms, ...all2]),
-    ...collecting([...p1.terms, ...all2]),
-  ];
-  const goal = poly(result);
-  const along = [...p1.terms, ...p2.terms, ...result].map(([c]) => c);
-  return {
-    shape,
-    start: `${p1.start}${sign < 0 ? " - " : " + "}${p2.start}`,
-    goal,
-    via: via.filter((v, i) => v !== via[i - 1] && v !== goal),
-    numbers,
-    along,
-  };
-}
-
-const X = (c: number): Term => [c, "x"];
-const N = (c: number): Term => [c, ""];
-
-const mixed: Shape[] = [
-  {
-    id: "square-minus-product",
-    name: "a square take away a product",
-    make: (r) => {
-      // (ax + b)^2 - (x + c)(x - c): (2x - 1)^2 - (x + 3)(x - 3) = 3x^2 - 4x + 10
-      const a = r.int(1, 2);
-      const b = r.signed(1, 4);
-      const c = r.int(2, 5);
-      // (2x ± 3)^2 is 22 moves and slow to check: with a 2, only (2x ± 1)^2.
-      if ((a === 1 && Math.abs(b) === 1) || (a === 2 && Math.abs(b) !== 1)) return null;
-      return combine("square-minus-product", productPart([X(a), N(b)], [X(a), N(b)], true), -1, productPart([X(1), N(c)], [X(1), N(-c)]), [a, b, c]);
-    },
-  },
-  {
-    id: "two-squares",
-    name: "two squares, added or taken away",
-    make: (r) => {
-      // (x + p)^2 - (x - p)^2 = 4px;  (a + b)^2 - (a - b)^2 = 4ab;  (x + p)^2 + (x - p)^2 = 2x^2 + 2p^2
-      const sign = r.next() < 0.7 ? -1 : 1;
-      if (r.next() < 0.35) {
-        const [u, v] = [["a", "b"], ["x", "y"], ["p", "q"]][r.int(0, 2)];
-        return combine("two-squares", productPart([[1, u], [1, v]], [[1, u], [1, v]], true), sign, productPart([[1, u], [-1, v]], [[1, u], [-1, v]], true), [2]);
-      }
-      const p = r.int(2, 5);
-      const q = r.next() < 0.5 ? p : r.int(1, 5);
-      return combine("two-squares", productPart([X(1), N(p)], [X(1), N(p)], true), sign, productPart([X(1), N(-q)], [X(1), N(-q)], true), [p, q]);
-    },
-  },
-  {
-    id: "scaled-square",
-    name: "a number times a square, take away a term times a bracket",
-    make: (r) => {
-      // k(x + p)^2 - mx(x + q): 3(x + 1)^2 - 2x(x + 3) = x^2 + 3
-      const k = r.int(2, 3);
-      const m = r.int(1, k);
-      const p = r.signed(1, 3);
-      const q = r.signed(1, 6);
-      return combine("scaled-square", scaled(k, productPart([X(1), N(p)], [X(1), N(p)], true)), -1, termTimes([m, "x"], [X(1), N(q)]), [k, m, p, q]);
-    },
-  },
-  {
-    id: "product-minus-product",
-    name: "one product take away another",
-    make: (r) => {
-      // (x + p)(x + q) - (x + s)(x + t): (x + 5)(x - 1) - (x + 2)(x - 3) = 5x + 1
-      const [p, q, s, t] = [r.signed(1, 6), r.signed(1, 6), r.signed(1, 6), r.signed(1, 6)];
-      if (p + q <= s + t || p === -q || s === -t || p * q === s * t || p === q || s === t) return null;
-      return combine("product-minus-product", productPart([X(1), N(p)], [X(1), N(q)]), -1, productPart([X(1), N(s)], [X(1), N(t)]), [p, q, s, t]);
-    },
-  },
-];
-
-const byId = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) => s.id === id)!);
-
-/** Easy (1–3 moves): one bracket times a letter. Medium (4–7): two brackets. Hard (7+): numbers in front of x in both, squares, three factors. */
+/** Easy (1–3 moves): one bracket times a letter. Medium (4–7): two brackets, squares, three factors. Hard: nested brackets, with x and y. */
 export const shapes: Record<Level, Shape[]> = {
-  easy: byId("letter-times", "power-times", "then-collect", "two-plus", "signs", "times-square", "then-take"),
-  medium: byId("both-numbers", "square", "number-times", "three-factors"),
+  easy: byIds(all, "letter-times", "power-times", "then-collect", "two-plus", "signs", "times-square", "then-take"),
+  medium: byIds(all, "both-numbers", "square", "number-times", "three-factors"),
   // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
   hard: NESTED.brackets,
 };

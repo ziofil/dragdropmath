@@ -5,23 +5,11 @@
  * the letter on its own, substituted, collected, one letter found.
  */
 import { NESTED } from "./nested";
-import { ax, type Level, type Rng, type Shape } from "../write";
+import { ax, terms, byIds, type Level, type Rng, type Shape } from "../write";
 
 /** The two letters: mostly x and y, now and then a and b. */
 const letters = (r: Rng): [string, string] => (r.next() < 0.8 ? ["x", "y"] : ["a", "b"]);
 
-/** A sum of terms written as a person would: terms(2, "x", -1, "y", 3, "") → "2x - y + 3". */
-function terms(...parts: (number | string)[]): string {
-  let out = "";
-  for (let i = 0; i < parts.length; i += 2) {
-    const c = parts[i] as number;
-    const v = parts[i + 1] as string;
-    if (c === 0) continue;
-    const t = v ? ax(Math.abs(c), v) : `${Math.abs(c)}`;
-    out += out === "" ? (c < 0 ? `-${t}` : t) : c < 0 ? ` - ${t}` : ` + ${t}`;
-  }
-  return out;
-}
 /** p·(e), "e" when p is 1. */
 const times = (p: number, e: string) => (p === 1 ? e : `${p}(${e})`);
 const goalOf = (X: string, Y: string, x: number, y: number) => `${X} = ${x}; ${Y} = ${y}`;
@@ -381,11 +369,9 @@ all.push(
   },
 );
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("known-x", "known-y", "multiple", "linear", "take-away"),
-  medium: pick("sum-difference", "sum-and-other", "bracket-sub", "minus-bracket"),
+  easy: byIds(all, "known-x", "known-y", "multiple", "linear", "take-away"),
+  medium: byIds(all, "sum-difference", "sum-and-other", "bracket-sub", "minus-bracket"),
   // And brackets inside brackets: chapters/nested.ts.
-  hard: [...pick("tidy-factor", "tidy-bracket", "minus-bracket-sub"), ...NESTED.simultaneous],
+  hard: [...byIds(all, "tidy-factor", "tidy-bracket", "minus-bracket-sub"), ...NESTED.simultaneous],
 };

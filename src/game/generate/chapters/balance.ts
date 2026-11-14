@@ -1,143 +1,6 @@
 /** Solving equations: linear, one unknown. */
 import { NESTED } from "./nested";
-import { answer, ax, bracket, gcd, lin, pickAnswer, plus, type Draft, type Level, type Rng, type Shape } from "../write";
-
-// ---------- mixed exercises: everything from the chapters before at once ----------
-// Shared with inequalities.ts, which asks for the same with a < or ≥ in the middle.
-
-export type Rel = "=" | "<" | ">" | "≤" | "≥";
-export const turned: Record<Rel, Rel> = { "=": "=", "<": ">", ">": "<", "≤": "≥", "≥": "≤" };
-
-/** A sum written as a person would: terms(2, "x", -3, "", 1, "x") → "2x - 3 + x". */
-export function terms(...parts: (number | string)[]): string {
-  let out = "";
-  for (let i = 0; i < parts.length; i += 2) {
-    const c = parts[i] as number;
-    const v = parts[i + 1] as string;
-    if (c === 0) continue;
-    const t = v ? ax(Math.abs(c), v) : `${Math.abs(c)}`;
-    out += out === "" ? (c < 0 ? `-${t}` : t) : c < 0 ? ` - ${t}` : ` + ${t}`;
-  }
-  return out;
-}
-
-/**
- * A mixed exercise up to the last step: its sides, the milestones (as pairs
- * of sides), and where it ends, k·x on one side and m = k·x on the other
- * (k positive).
- */
-export type Mixed = { sides: [string, string]; via: [string, string][]; k: number; x: number; xLeft: boolean; numbers: number[]; along: number[] };
-
-/** From L·x + K = f·x + g, collected: the x's to the side with more of them. */
-function lastSteps(L: number, K: number, f: number, g: number, x: number) {
-  const xLeft = L > f;
-  const k = Math.abs(L - f);
-  const via: [string, string][] = xLeft ? [[ax(L), lin(f, g - K)]] : [[lin(L, K - g), ax(f)]];
-  return { xLeft, k, via: f === 0 || L === 0 ? [] : via, x };
-}
-
-/** The draft: start, milestones, and the answer read off (an inequality turns round when it must). */
-export function finish(id: string, m: Mixed, rel: Rel, v = "x"): Draft {
-  const join = ([l, r]: [string, string]) => `${l} ${rel} ${r}`;
-  const kx = ax(m.k, v);
-  const last: [string, string] = m.xLeft ? [kx, `${m.k * m.x}`] : [`${m.k * m.x}`, kx];
-  const via = [...m.via.map(join), ...(m.k === 1 && m.xLeft ? [] : [join(last)])].filter((v, i, all) => all.indexOf(v) === i);
-  // x R value when the x's end on the left; value R x reads x turned(R) value.
-  const goalRel = m.xLeft ? rel : turned[rel];
-  return { shape: id, start: join(m.sides), goal: `${v} ${goalRel} ${m.x}`, via, answer: m.x, numbers: m.numbers, along: m.along };
-}
-
-/** a(bx + c) - d(x + e) = fx + g: two brackets, one taken away, x on both sides. */
-export function twoBracketsMixed(r: Rng, allowNeg: boolean): Mixed | null {
-  const x = pickAnswer(r);
-  const a = r.int(2, 4);
-  const b = r.int(1, 3);
-  const c = r.signed(1, 5);
-  const d = r.int(2, 4);
-  const e = r.signed(1, 5);
-  const f = r.int(1, 4);
-  const L = a * b - d;
-  const K = a * c - d * e;
-  const g = (L - f) * x + K;
-  if (L === f || L === 0 || K === 0 || g === 0 || (b === 1 && (a === d || c === e))) return null;
-  if (!allowNeg && L < f) return null;
-  if (a * b > 12 || Math.abs(g) > 30) return null;
-  const R = lin(f, g);
-  const end = lastSteps(L, K, f, g, x);
-  return {
-    sides: [`${a}(${lin(b, c)}) - ${bracket(d, e)}`, R],
-    via: [
-      [`${terms(a * b, "x", a * c, "")} - ${bracket(d, e)}`, R],
-      [terms(a * b, "x", a * c, "", -d, "x", -d * e, ""), R],
-      [lin(L, K), R],
-      ...end.via,
-    ],
-    k: end.k,
-    x,
-    xLeft: end.xLeft,
-    numbers: [a, b, c, d, e, f, g],
-    along: [a * b, a * c, d * e, L, K, g - K, L - f],
-  };
-}
-
-/** (x + a)/b - (x + c)/d = e: two fractions, one taken away. */
-export function fractionsMinus(r: Rng): Mixed | null {
-  const x = pickAnswer(r) + r.int(0, 4);
-  const [b, d] = [[2, 3], [3, 2], [2, 5], [3, 4], [4, 3], [2, 3]][r.int(0, 5)];
-  const a = r.signed(1, 6);
-  const c = r.signed(1, 6);
-  const top = d * (x + a) - b * (x + c);
-  if (top % (b * d) !== 0 || a === c) return null;
-  const e = top / (b * d);
-  const N = b * d * e;
-  const L = d - b;
-  const K = d * a - b * c;
-  if (e === 0 || K === 0 || x + a === 0 || x + c === 0 || N - K === 0) return null;
-  const end = lastSteps(L, K, 0, N, x);
-  return {
-    sides: [`(${lin(1, a)})/${b} - (${lin(1, c)})/${d}`, `${e}`],
-    via: [
-      [`${bracket(d, a)} - ${bracket(b, c)}`, `${N}`],
-      [`${terms(d, "x", d * a, "")} - ${bracket(b, c)}`, `${N}`],
-      [terms(d, "x", d * a, "", -b, "x", -b * c, ""), `${N}`],
-      [lin(L, K), `${N}`],
-      ...(L < 0 ? [[`${K - N}`, ax(-L)] as [string, string]] : []),
-    ],
-    k: end.k,
-    x,
-    xLeft: end.xLeft,
-    numbers: [a, b, c, d, e],
-    along: [d * a, b * c, N, L, K, N - K],
-  };
-}
-
-/** e - p(x + a)/b = x + c: a number less a bracket over a number, x on both sides. */
-export function minusFraction(r: Rng): Mixed | null {
-  const x = pickAnswer(r);
-  const [p, b] = [[3, 2], [2, 3], [5, 2], [3, 4]][r.int(0, 3)];
-  const a = r.signed(1, 5);
-  const c = r.signed(1, 6);
-  const top = (b + p) * x + p * a + b * c;
-  if (top % b !== 0) return null;
-  const e = top / b;
-  const M = b * e - p * a - b * c;
-  if (e === 0 || x + a === 0 || b * e - p * a === 0) return null;
-  return {
-    sides: [`${e} - ${p}(${lin(1, a)})/${b}`, lin(1, c)],
-    via: [
-      [`${b * e} - ${bracket(p, a)}`, bracket(b, c)],
-      [terms(b * e, "", -p, "x", -p * a, ""), bracket(b, c)],
-      [terms(b * e, "", -p, "x", -p * a, ""), terms(b, "x", b * c, "")],
-      [terms(b * e - p * a, "", -p, "x"), terms(b, "x", b * c, "")],
-    ],
-    k: b + p,
-    x,
-    xLeft: false,
-    numbers: [e, p, a, b, c],
-    along: [b * e, p * a, b * c, b * e - p * a, M, b + p],
-  };
-}
-
+import { answer, ax, bracket, gcd, lin, pickAnswer, plus, byIds, type Level, type Shape } from "../write";
 
 const all: Shape[] = [
   {
@@ -484,19 +347,10 @@ const all: Shape[] = [
   },
 ];
 
-const mixed: Shape[] = [
-  { id: "two-brackets-mixed", name: "two brackets, one taken away, x on both sides", make: (r) => { const m = twoBracketsMixed(r, true); return m && finish("two-brackets-mixed", m, "="); } },
-  { id: "fractions-minus", name: "one fraction less another", make: (r) => { const m = fractionsMinus(r); return m && finish("fractions-minus", m, "="); } },
-  { id: "minus-fraction", name: "a number less a bracket over a number", make: (r) => { const m = minusFraction(r); return m && finish("minus-fraction", m, "="); } },
-];
-all.push(...mixed);
-
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 /** By how many moves they take: easy one step, medium two or three, hard everything at once. */
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("one-step", "times", "two-step", "over-plus", "bracket", "both-sides", "bracket-plus"),
-  medium: pick("brackets-both", "minus-bracket", "fraction", "brackets-and-x", "minus-times-bracket", "two-fractions", "fractions-ax", "nested", "bracket-over"),
+  easy: byIds(all, "one-step", "times", "two-step", "over-plus", "bracket", "both-sides", "bracket-plus"),
+  medium: byIds(all, "brackets-both", "minus-bracket", "fraction", "brackets-and-x", "minus-times-bracket", "two-fractions", "fractions-ax", "nested", "bracket-over"),
   // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
   hard: NESTED.balance,
 };

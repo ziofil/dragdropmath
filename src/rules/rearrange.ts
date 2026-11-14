@@ -5,7 +5,7 @@ import { allNodes, nodeAt, withChildren } from "../expr/tree";
 import { roleOf } from "./view";
 import { buildTerm, restKey, splitCoef } from "./monomial";
 import { asPower } from "./shapes";
-import { adopt, dragCtx, moveItem, replaceIn, siblings, without, type Candidate, type Rule } from "./types";
+import { adopt, dragCtx, mergeInto, moveItem, replaceIn, siblings, without, type Candidate, type Rule } from "./types";
 
 /** a + b → b + a, a·b → b·a (drag a term or factor to a new slot). */
 export const commute: Rule = {
@@ -60,12 +60,10 @@ export const combine: Rule = {
       // survives inside it (x + x → 2·x keeps that x), which would duplicate the id.
       const built = buildTerm({ ...theirs, coef: mine.coef + theirs.coef });
       const merged = allNodes(built).some((n) => n.id === t.id) ? built : adopt(built, t.id);
-      const newTerms = terms.slice();
-      newTerms[j] = merged;
       return [
         {
           rule: "combine",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, terms: without(newTerms, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: t.id,
           secondary,
         },
@@ -86,12 +84,10 @@ export const multiplyNumbers: Rule = {
     const factors = c.parent.factors;
     return factors.flatMap((f, j): Candidate[] => {
       if (j === c.index || f.kind !== "num") return [];
-      const newFactors = factors.slice();
-      newFactors[j] = num(a * f.value, f.id);
       return [
         {
           rule: "multiply-numbers",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, num(a * f.value, f.id)),
           targetId: f.id,
         },
       ];
@@ -116,12 +112,10 @@ export const mergePowers: Rule = {
       // A square root times itself gives back what's inside: √2·√2 → 2. That's
       // what a square root is (like x·x → x² below), not arithmetic to show.
       if (f.kind === "pow" && f.radical && c.node.kind === "pow" && c.node.radical && key(f) === key(c.node)) {
-        const newFactors = factors.slice();
-        newFactors[j] = theirs.base;
         return [
           {
             rule: "merge-powers",
-            state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+            state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, theirs.base),
             targetId: f.id,
             // What's inside stays where it is while its √ fades away.
             stays: theirs.base.id,
@@ -133,12 +127,10 @@ export const mergePowers: Rule = {
       // The exception is x·x → x², which is just what "squared" means.
       const plain = f.kind !== "pow" && c.node.kind !== "pow";
       const exp = plain ? num(2) : sum(j < c.index ? [theirs.exp, mine.exp] : [mine.exp, theirs.exp]);
-      const newFactors = factors.slice();
-      newFactors[j] = pow(theirs.base, exp, f.kind === "pow" ? f.id : undefined);
       return [
         {
           rule: "merge-powers",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, pow(theirs.base, exp, f.kind === "pow" ? f.id : undefined)),
           targetId: f.id,
         },
       ];
@@ -213,8 +205,8 @@ export const multiplyOut: Rule = {
     // The product itself, or one of its numbers (grabbable anyway: they can be dropped on each other).
     const P = c.node.kind === "prod" ? c.node : c.node.kind === "num" && c.parent?.kind === "prod" ? c.parent : null;
     const loc = c.node.kind === "prod" ? c.loc : c.parentLoc;
-    if (!P || P.kind !== "prod" || !loc || nums(P).length < 2) return [];
-    const ns = nums(P);
+    const ns = P ? nums(P) : [];
+    if (!P || !loc || ns.length < 2) return [];
     const value = num(
       ns.reduce((a, f) => a * f.value, 1),
       ns[0].id,

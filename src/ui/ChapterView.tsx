@@ -1,15 +1,17 @@
-import { CHAPTERS, leadsTo, rulesFor, type Chapter } from "../game/puzzles";
-import { useEffect } from "react";
+import { CHAPTERS, leadsTo, lettersPositive, rulesFor, type Chapter } from "../game/puzzles";
+import { useEffect, useState } from "react";
 import { loadProgress } from "../game/scoring";
-import { drillsOf } from "../game/generate/moves";
+import { drillExercise, drillsOf, type Drill } from "../game/generate/moves";
+import { freshSeed } from "../game/generate/practice";
 import { GuidedExample } from "./Guided";
 import { MathText } from "./MathText";
-import { BadgeRow, movesHref, PracticeLevels, TestLevels } from "./Practice";
+import { BadgeRow, LevelButtons } from "./Practice";
 import { chapterText, t } from "../i18n";
 
 /**
- * A chapter: the lesson (ideas, each tried by hand), then its moves to learn
- * one at a time, practice, and the test. `section`: one to scroll to.
+ * A chapter: the lesson (ideas, each tried by hand, then its moves one at a
+ * time, each with a board to try it on), practice, and the test.
+ * `section`: one to scroll to.
  */
 export function ChapterView({ chapter, section }: { chapter: Chapter; section?: string }) {
   const ci = CHAPTERS.indexOf(chapter);
@@ -21,6 +23,7 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
   const next = leadsTo(chapter);
   const rules = rulesFor(ci);
   const text = chapterText(chapter);
+  const drills = drillsOf(chapter.id);
   let example = 0;
 
   return (
@@ -47,7 +50,7 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
                 <MathText text={p} />
               </p>
             ))}
-            {part.example && <GuidedExample example={part.example} words={words} rules={rules} n={++example} />}
+            {part.example && <GuidedExample example={part.example} words={words} rules={rules} positive={lettersPositive(chapter)} n={++example} />}
             {words.watch && (
               <p className="watch">
                 <strong>{t().watchOut}</strong> <MathText text={words.watch} />
@@ -57,27 +60,29 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
         );
       })}
 
-      {drillsOf(chapter.id).length > 0 && (
-        <section className="practice" id="moves">
-          <h2>{t().learnMoves}</h2>
-          <p className="practice-note">{t().learnMovesNote}</p>
-          <a className="button primary" href={movesHref(chapter)}>
-            {t().learnMoves} →
-          </a>
-        </section>
+      {drills.length > 0 && (
+        <>
+          <h2 className="moves-head" id="moves">
+            {t().learnMoves}
+          </h2>
+          <p className="chapter-blurb">{t().learnMovesNote}</p>
+          {drills.map((d, i) => (
+            <MoveBlock key={d.id} chapter={chapter} drill={d} rules={rules} n={chapter.lesson.length + i + 1} />
+          ))}
+        </>
       )}
 
       <section className="practice" id="practice">
         <h2>{t().practice}</h2>
         <p className="practice-note">{t().practiceNote}</p>
-        <PracticeLevels chapter={chapter} progress={practice} />
+        <LevelButtons kind="practice" chapter={chapter} progress={practice} />
       </section>
 
       <section className="practice" id="test">
         <h2>{t().testSkills}</h2>
         <p className="practice-note">{t().testNote}</p>
         <BadgeRow chapter={chapter} progress={progress} />
-        <TestLevels chapter={chapter} progress={progress} />
+        <LevelButtons kind="test" chapter={chapter} progress={progress} />
         {next.length > 0 && (
           <p className="leads-to">
             {t().leadsOnToStart}
@@ -92,5 +97,28 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
         )}
       </section>
     </main>
+  );
+}
+
+/** One move: its name, how it's made, and a board to make it on, again with new numbers as often as one likes. */
+function MoveBlock({ chapter, drill, rules, n }: { chapter: Chapter; drill: Drill; rules: ReturnType<typeof rulesFor>; n: number }) {
+  const [seed, setSeed] = useState(freshSeed);
+  const d = drillExercise(chapter.id, drill.id, seed);
+  const words = t().drills[drill.id as keyof ReturnType<typeof t>["drills"]];
+  if (!d) return null;
+  return (
+    <section className="theory lesson-part">
+      <h2>
+        <span className="part-num">{n}</span> {words.name}
+      </h2>
+      <GuidedExample
+        key={seed}
+        example={{ start: d.start, steps: [{ say: words.how, then: d.goal }] }}
+        words={{ steps: [words.how] }}
+        rules={rules}
+        positive={lettersPositive(chapter)}
+        more={{ text: t().anotherOne, onClick: () => setSeed(freshSeed()) }}
+      />
+    </section>
   );
 }

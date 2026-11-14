@@ -1,5 +1,5 @@
 import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
-import { stateKey } from "../expr/key";
+import { printState, stateKey } from "../expr/key";
 import { DraggableRenderer, type Draggable } from "dragology";
 import type { MathState } from "../expr/types";
 import { movesFor, operatorTap, type RuleId } from "../rules";
@@ -26,7 +26,6 @@ export function MathCanvas({
   const onDropRef = useRef(onDrop);
   onDropRef.current = onDrop;
   const debug = useDebug();
-  useEndCancelledDrags(width.ref);
   const draggable = useMemo<Draggable<MathState>>(
     () =>
       ({ state, d, draggedId }) =>
@@ -138,7 +137,7 @@ export function StaticMath({ state, width = 720, height = 110, room = 0 }: { sta
     setView(`${g.x - 8} ${top} ${g.width + 16} ${bottom - top}`);
   }, [state, width, height, room]);
   return (
-    <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label={t().goal}>
+    <svg ref={ref} className="static-math" viewBox={view} role="img" aria-label={printState(state).replace(/\*/g, "·")}>
       {renderState({ state }, width, height)}
     </svg>
   );
@@ -196,45 +195,6 @@ function tapAt(canvas: HTMLElement | null, state: MathState, rules: readonly Rul
     if (area !== null && (!best || area < best.area)) best = { id: g.id, area };
   }
   return best ? (moves.tap(best.id)?.state ?? null) : null;
-}
-
-/**
- * The drag engine ends a drag on pointerup only. When the browser cancels a
- * press instead (a system gesture, a palm, the pointer leaving the window,
- * the tab losing focus), the drag would never end: the board freezes
- * mid-preview and nothing can be grabbed. So a cancelled press is ended for
- * it, back where it started: like putting the piece back, nothing changes.
- */
-function useEndCancelledDrags(ref: RefObject<HTMLElement | null>) {
-  useEffect(() => {
-    let down: PointerEvent | null = null;
-    const onDown = (e: PointerEvent) => {
-      if (e.isTrusted && ref.current?.contains(e.target as Node)) down = e;
-    };
-    const putBack = () => {
-      if (!down) return;
-      const init = { pointerId: down.pointerId, pointerType: down.pointerType, isPrimary: true, clientX: down.clientX, clientY: down.clientY, bubbles: true };
-      down = null;
-      document.dispatchEvent(new PointerEvent("pointermove", { ...init, buttons: 1 }));
-      document.dispatchEvent(new PointerEvent("pointerup", { ...init, button: 0, buttons: 0 }));
-    };
-    const onUp = (e: PointerEvent) => {
-      if (e.isTrusted && e.pointerId === down?.pointerId) down = null;
-    };
-    const onCancel = (e: PointerEvent) => {
-      if (e.pointerId === down?.pointerId) putBack();
-    };
-    document.addEventListener("pointerdown", onDown, true);
-    document.addEventListener("pointerup", onUp, true);
-    document.addEventListener("pointercancel", onCancel, true);
-    window.addEventListener("blur", putBack);
-    return () => {
-      document.removeEventListener("pointerdown", onDown, true);
-      document.removeEventListener("pointerup", onUp, true);
-      document.removeEventListener("pointercancel", onCancel, true);
-      window.removeEventListener("blur", putBack);
-    };
-  }, [ref]);
 }
 
 function useContainerWidth() {

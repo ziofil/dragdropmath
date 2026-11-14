@@ -48,7 +48,6 @@ export const tr: Translation = {
 
   // Chapter page
   backToPath: "← Öğrenme yolu",
-  exercises: "Alıştırmalar",
   practiceNote: "Her alıştırma yeni, yalnızca senin için hazırlanıyor. Kolaylarla başla, kendini hazır hissettiğinde bir üst seviyeye geç.",
   leadsOnToStart: "Sonra gelenler: ",
   leadsOnToEnd: ". İstediğin zaman geçebilirsin.",
@@ -62,7 +61,6 @@ export const tr: Translation = {
   testNote:
     "Cevabı aklından bul, sonra seç. Doğru cevaplar bölümün rozetini kazandırır: Kolay seviyede 10 doğru bronz, Orta seviyede gümüş, Zor seviyede altın rozet getirir.",
   solvedN: (n: number) => `${n} çözüldü`,
-  toPractice: "Alıştırmaya geç →",
   testRight: "Doğru! Rozet için sayıldı.",
   drills: {
     commute: { name: "Sırayı değiştir", how: "Bir terimi yanındakinin öbür yanına sürükle. + ve × işlemlerinde sıra fark etmez." },
@@ -125,7 +123,6 @@ export const tr: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Alıştırma ${label}${solved ? " — çözüldü" : ""}`,
-  solved: "çözüldü",
   goldNote: "Altın rozet. İstediğin kadar devam edebilirsin.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${["Kolay", "Orta", "Zor"][tier]} seviyede ${more} doğru cevap daha.`,
@@ -162,7 +159,6 @@ export const tr: Translation = {
   solvedBang: "Çözdün!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${["", "Bronz", "Gümüş", "Altın"][tier]} rozet: ${chapter}.`,
   theExercise: "alıştırma",
-  goal: "hedef",
   moveCrashed: "Bu hamlede bir şeyler ters gitti.",
   moveCrashedDetails: "Ayrıntılar tarayıcı konsolunda.",
   tryAgain: "Yeniden dene",

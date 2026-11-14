@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
-import { stateKey } from "../expr/key";
 import { CHAPTERS, type Chapter } from "../game/puzzles";
 import type { Level } from "../game/generate/write";
 import type { RuleId } from "../rules";
 import { matchesGoal } from "../game/solver";
 import { badgeTier, countSolved, isCounted, loadProgress, loadSolved, markSolved, type Kind, type Tier } from "../game/scoring";
-import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 import { loadGuesses, loadPicks, saveGuess } from "../game/guess";
 import { Badge } from "./Badge";
 import { chapterText, t } from "../i18n";
 import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
-
-/** A state reached: by the learner's own move, or by tidying after it. */
-type Entry = { state: MathState; tidy?: true };
+import { useMoveHistory } from "./useMoveHistory";
 
 /** A link: where to, and what it says. */
 type Link = { href: string; text: string };
@@ -93,56 +89,18 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
   const shownPick = guessed ?? (revealed ? null : (before.pick ?? (before.guess === "right" ? puzzle.goal : null)));
   const mustGuess = choices !== null && !guessedBefore && guessed === null && !revealed;
-  const [history, setHistory] = useState<Entry[]>([{ state: start }]);
+  const { current, onDrop, undo, reset, canUndo } = useMoveHistory(start, (s) => matchesGoal(s, goal));
   const [showHint, setShowHint] = useState(false);
-  // Pending tidying belongs to one move: undoing it cancels it. A move made
-  // before it's shown takes it over (tidying from where it started).
-  const generation = useRef(0);
-  const tidyFrom = useRef<MathState | null>(null);
-  useEffect(() => () => void generation.current++, []);
-
-  const current = history[history.length - 1].state;
   const solved = matchesGoal(current, goal);
   useEffect(() => {
-    if (!solved) return;
-    if (ex.counts?.kind === "practice") countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id, "practice");
-    if (keep) markSolved(puzzle.id);
-  }, [solved, puzzle.id, ex.counts, keep]);
-
-  const onDrop = (next: MathState) => {
-    if (stateKey(next, "exact") === stateKey(current, "exact")) return;
-    const gen = ++generation.current;
-    const from = tidyFrom.current ?? current;
-    tidyFrom.current = null;
-    setHistory((h) => [...h, { state: next }]);
-    if (matchesGoal(next, goal)) return;
-    const steps = tidySteps(from, next, history.map((e) => e.state));
-    // Tidying stops once the goal is reached.
-    const done = steps.findIndex((s) => matchesGoal(s, goal));
-    const shown = done < 0 ? steps : steps.slice(0, done + 1);
-    if (shown.length) tidyFrom.current = from;
-    shown.forEach((state, i) =>
-      setTimeout(() => {
-        if (generation.current !== gen) return;
-        setHistory((h) => [...h, { state, tidy: true }]);
-        if (i === shown.length - 1) tidyFrom.current = null;
-      }, TIDY_STEP_MS * (i + 1)),
-    );
-  };
-
-  const cancelTidying = () => {
-    generation.current++;
-    tidyFrom.current = null;
-  };
-  // Undo takes back your last move, with the tidying after it.
-  const undo = () => {
-    cancelTidying();
-    setHistory((h) => h.slice(0, Math.max(1, lastMove(h))));
-  };
-  const reset = () => {
-    cancelTidying();
-    setHistory([{ state: start }]);
-  };
+    if (!solved || !ex.counts) return;
+    const { chapter, level, kind } = ex.counts;
+    // A test with no wrong answers to offer is solved straight away: solving it is its right answer.
+    if (kind === "practice" || choices === null) countSolved(chapter.id, level, puzzle.id, kind);
+  }, [solved, puzzle.id, ex.counts, choices]);
+  useEffect(() => {
+    if (solved && keep) markSolved(puzzle.id);
+  }, [solved, puzzle.id, keep]);
 
   const { prev, next } = ex;
 
@@ -263,17 +221,16 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           <MathCanvas state={current} rules={rules} onDrop={onDrop} />
         )}
         <div className="board-bar">
-          <span />
           <div className="actions">
             {puzzle.hint && !mustGuess && (
               <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint}>
                 {t().hint}
               </button>
             )}
-            <button onClick={undo} disabled={history.length <= 1}>
+            <button onClick={undo} disabled={!canUndo}>
               {t().undo}
             </button>
-            <button onClick={reset} disabled={history.length <= 1}>
+            <button onClick={reset} disabled={!canUndo}>
               {t().reset}
             </button>
           </div>
@@ -303,11 +260,4 @@ function NewBadge({ chapter, tiers }: { chapter?: Chapter; tiers: { before: Tier
       {t().newBadge(tiers.after as 1 | 2 | 3, chapterText(chapter).title)}
     </div>
   );
-}
-
-/** Where the learner's last move is in the history (tidying after it comes later). */
-function lastMove(h: Entry[]): number {
-  let n = h.length - 1;
-  while (n > 0 && h[n].tidy) n--;
-  return n;
 }

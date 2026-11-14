@@ -262,7 +262,12 @@ function Shelf({ progress, onSelect }: { progress: Progress; onSelect: (c: Chapt
       <ul className="shelf-row">
         {CHAPTERS.map((c, i) => (
           <li key={c.id}>
-            <button className="shelf-badge" onClick={() => onSelect(c)} title={t().shelfTitle(chapterText(c).title, tiers[i])}>
+            <button
+              className="shelf-badge"
+              onClick={() => onSelect(c)}
+              title={t().shelfTitle(chapterText(c).title, tiers[i])}
+              aria-label={t().shelfTitle(chapterText(c).title, tiers[i])}
+            >
               <Badge tier={tiers[i]} n={i + 1} size={34} />
             </button>
           </li>

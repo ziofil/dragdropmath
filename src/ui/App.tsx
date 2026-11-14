@@ -4,7 +4,7 @@ import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { SetMaker, SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
-import { ExerciseRoute, MovesPage } from "./Practice";
+import { ExerciseRoute } from "./Practice";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
 import { ENGLISH_ONLY, LANGS, setLang, t, useLang, type Lang } from "../i18n";
 
@@ -23,8 +23,10 @@ function useHash() {
 
 export function App() {
   const hash = useHash();
-  // A chapter, perhaps at one of its sections: #/c/<chapter>[/practice|test].
-  const chapterLink = hash.match(/^#\/c\/([\w-]+)(?:\/(practice|test))?$/);
+  // A chapter, perhaps at one of its sections: #/c/<chapter>[/moves|practice|test]
+  // (#/moves/<chapter> is an earlier link to its moves).
+  const oldMoves = hash.match(/^#\/moves\/([\w-]+)$/);
+  const chapterLink = oldMoves ? [hash, oldMoves[1], "moves"] : hash.match(/^#\/c\/([\w-]+)(?:\/(moves|practice|test))?$/);
   const chapter = chapterById(chapterLink?.[1]);
   // The learning path, with a chapter picked out (coming back from it).
   const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
@@ -32,10 +34,8 @@ export function App() {
   // Sets of one's own: making one, or one opened from its link (and its exercises).
   const making = hash === "#/sets/new";
   const sandbox = hash === "#/sandbox";
-  // A chapter's exercise: #/practice|test/<chapter>/<level>/<seed> (#/ex/ is an earlier test link);
-  // learning the moves: #/moves/<chapter>.
+  // A chapter's exercise: #/practice|test/<chapter>/<level>/<seed> (#/ex/ is an earlier test link).
   const exercise = hash.match(/^#\/(practice|test|ex)\/([\w-]+)\/(\w+)\/(\d+)$/);
-  const moves = hash.match(/^#\/moves\/([\w-]+)$/);
   const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
@@ -92,8 +92,6 @@ export function App() {
           level={exercise[3]}
           seed={Number(exercise[4])}
         />
-      ) : moves ? (
-        <MovesPage key={hash} chapterId={moves[1]} />
       ) : setLink ? (
         <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />
       ) : chapter ? (

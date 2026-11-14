@@ -1,12 +1,12 @@
 import type { Expr } from "../expr/types";
-import { cloneFresh, neg, negate, num, prod, sum } from "../expr/build";
+import { cloneFresh, neg, negate, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
-import { adopt, dragCtx, replaceIn, signOwner, without, type Candidate, type Rule } from "./types";
+import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
 import { nodeAt, type Loc } from "../expr/tree";
 import { roleOf } from "./view";
 import type { MathState } from "../expr/types";
 import { restKey, splitCoef } from "./monomial";
-import { visibleOne } from "./shapes";
+import { dropFactor, visibleOne } from "./shapes";
 
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
 export const distribute: Rule = {
@@ -37,12 +37,10 @@ export const distribute: Rule = {
         return t.kind === "neg" ? neg(times(t.arg), t.id) : times(t);
       };
       const spread = sum(s.terms.map(each), s.id);
-      const newFactors = factors.slice();
-      newFactors[j] = spread;
       return [
         {
           rule: "distribute",
-          state: replaceIn(state, c.parentLoc!, { ...c.parent!, factors: without(newFactors, c.index) } as Expr),
+          state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, spread),
           targetId: s.id,
           stays: staysPut(near, fromLeft),
         },
@@ -107,13 +105,7 @@ function stripFactor(t: Expr, f: Expr, mine: boolean): Expr | null {
     const inner = stripFactor(t.arg, f, mine);
     return inner && negate(inner);
   }
-  const is = (x: Expr) => (mine ? x.id === f.id : key(x) === fKey);
-  if (is(t)) return num(1);
-  if (t.kind === "prod") {
-    const i = t.factors.findIndex(is);
-    return i < 0 ? null : prod(without(t.factors, i), t.id);
-  }
-  return null;
+  return dropFactor(t, (x) => (mine ? x.id === f.id : key(x) === fKey));
 }
 
 /**

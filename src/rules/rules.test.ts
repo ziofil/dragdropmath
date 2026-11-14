@@ -8,9 +8,14 @@ import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, handles, isGrabbable, operatorTap, RULES, signId, signOwner, tapFor, type RuleId } from ".";
 
 /** Apply one rule to one node (found by its printed form) and print the results. */
-/** `nodeText` names a node by its printed form; "sign:…" means that node's minus-sign handle. */
+/**
+ * `nodeText` names a node by its printed form; "sign:…" means that node's minus-sign handle.
+ * A `src` ending "(letters > 0)": its letters stand for positive numbers (as in the powers, roots and logs chapters).
+ */
 function results(src: string, rule: RuleId, nodeText: string, occurrence = 0): string[] {
-  const state = parseState(src);
+  const positive = src.endsWith(" (letters > 0)");
+  const parsed = parseState(positive ? src.slice(0, -" (letters > 0)".length) : src);
+  const state: MathState = positive ? { ...parsed, letters: "positive" } : parsed;
   const sign = nodeText.startsWith("sign:");
   const text = sign ? nodeText.slice(5) : nodeText;
   const nodes = state.sides.flatMap(allNodes).filter((n) => printState({ sides: [n] }) === text);
@@ -98,13 +103,17 @@ describe("rules do what they say", () => {
     ["(2x)^3", "power-of-product", "3", ["2^3*x^3"]],
     ["(x^2·y)^3", "power-of-product", "3", ["x^(2*3)*y^3"]],
     ["√12", "split-square", "12", ["√(4*3)"]],
-    ["√(4x)", "pull-out-of-power", "4", ["√(4)*√(x)"]], // pull the 4 out…
-    ["√(4x)", "pull-out-of-power", "x", ["√(4)*√(x)"]], // …or the x
+    ["√(4x) (letters > 0)", "pull-out-of-power", "4", ["√(4)*√(x)"]], // pull the 4 out…
+    ["√(4x) (letters > 0)", "pull-out-of-power", "x", ["√(4)*√(x)"]], // …or the x
+    ["√(x·y)", "pull-out-of-power", "x", []], // x and y could both be negative
+    ["(2x)^3", "pull-out-of-power", "2", ["2^3*x^3"]], // a whole power splits anyway
     ["(2x)^3", "pull-out-of-power", "2", ["2^3*x^3"]],
     ["(x^2·y)^3", "pull-out-of-power", "y", ["x^(2*3)*y^3"]],
     ["√x·√x", "merge-powers", "√(x)", ["x"], 1], // a root times itself: what's inside
     ["√x·x^(1/2)", "merge-powers", "√(x)", ["x^(1/2 + 1/2)"]], // otherwise exponents add (fractions in exponents)
-    ["√(x^2)", "power-of-power", "1/2", ["x^(2*(1/2))"]],
+    ["√(x^2) (letters > 0)", "power-of-power", "1/2", ["x^(2*(1/2))"]],
+    ["√(x^2)", "power-of-power", "1/2", []], // √(x²) is |x|, not x
+    ["((-3)^2)^(1/2)", "power-of-power", "1/2", []],
     ["√x = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x^(1/2) = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x = 3^2", "root-across", "2", ["x^(1/2) = 3"]], // and back again
@@ -114,7 +123,8 @@ describe("rules do what they say", () => {
     ["√x = -3", "root-across", "1/2", []], // no solution: squaring would invent x = 9 (QA #4)
     ["x^(1/2) = y", "root-across", "1/2", []], // y might be negative
     ["-x = 0", "move-sign", "sign:-x", ["x = 0"]], // the − is absorbed by the 0 (QA #5)
-    ["ln(√x)", "log-of-power", "1/2", ["(1/2)*ln(x)"]],
+    ["ln(√x) (letters > 0)", "log-of-power", "1/2", ["(1/2)*ln(x)"]],
+    ["ln(x^2) = 4", "log-of-power", "2", []], // would lose x = −e²
     ["1/2", "flip-across-bar", "2", []], // numbers don't flip into 2⁻¹
     ["(1/2)·ln(x)", "multiply-fractions", "1/2", []], // a number on a log goes into it…
     ["(1/2)·ln(x)", "power-into-log", "1/2", ["ln(x^(1/2))"]], // …like this
@@ -135,10 +145,16 @@ describe("rules do what they say", () => {
     ["x·ln(e)", "evaluate-log", "ln(e)", ["x*1"]],
     ["e^(ln(x))", "exp-of-log", "e", ["x"]],
     ["ln(2x)", "log-of-product", "ln(2*x)", []], // not by touching the ln…
-    ["ln(2x)", "log-of-product", "2", ["ln(2) + ln(x)"]], // …but by pulling a factor out
-    ["ln(2x)", "log-of-product", "x", ["ln(2) + ln(x)"]],
-    ["ln(x/y)", "log-of-product", "y", ["ln(x) - ln(y)"]],
-    ["ln(x/y)", "log-of-product", "x", ["ln(x) - ln(y)"]],
+    ["ln(2x) (letters > 0)", "log-of-product", "2", ["ln(2) + ln(x)"]], // …but by pulling a factor out
+    ["ln(2x) (letters > 0)", "log-of-product", "x", ["ln(2) + ln(x)"]],
+    ["ln(x/y) (letters > 0)", "log-of-product", "y", ["ln(x) - ln(y)"]],
+    ["ln(x·y)", "log-of-product", "x", []], // x and y could both be negative
+    ["ln(x/y) (letters > 0)", "log-of-product", "x", ["ln(x) - ln(y)"]],
+    ["(1/3)^x > 9", "exp-across", "1/3", ["x < log_(1/3)(9)"]], // a base below 1 turns the inequality round
+    ["2^x = -8", "exp-across", "2", []], // no solution: no log of −8
+    ["log_(1/3)(x) > 2", "log-across", "log_(1/3)(x)", ["x < (1/3)^2"]],
+    ["y/√x", "flip-across-bar", "√(x)", ["y*x^(-1/2)"]],
+    ["6/0", "divide-numbers", "0", []],
     ["ln(x^3)", "log-of-power", "3", ["3*ln(x)"]],
     ["3ln(x)", "power-into-log", "3", ["ln(x^3)"]],
     ["ln(a) + ln(b)", "combine-logs", "ln(b)", ["ln(a*b)"]],

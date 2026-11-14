@@ -1,6 +1,6 @@
 /** Exercise shapes for the chapter "roots" (see ../write.ts). */
 import { NESTED } from "./nested";
-import { ax, plus, type Level, type Rng, type Shape } from "../write";
+import { ax, plus, byIds, type Level, type Rng, type Shape } from "../write";
 
 /** Numbers with no square factor, to stay inside a root. */
 const SQUAREFREE = [2, 3, 5, 6, 7];
@@ -184,84 +184,6 @@ const all: Shape[] = [
     },
   },
   {
-    id: "simplify-and-collect",
-    name: "two roots to simplify, then like terms",
-    make: (r) => {
-      // √(k²m·x²) + x√(j²m) → (k + j)x√m
-      const k = r.int(2, 3);
-      const j = r.int(2, 3);
-      const m = SQUAREFREE[r.int(0, SQUAREFREE.length - 1)];
-      const x = letter(r);
-      if (k * k * m > 30 || j * j * m > 30) return null;
-      const second = `${x}√${j * j * m}`;
-      return {
-        shape: "simplify-and-collect",
-        start: `√(${k * k * m}${x}^2) + ${second}`,
-        goal: `${k + j}${x}√${m}`,
-        via: [
-          `√(${k * k}*${m}*${x}^2) + ${second}`,
-          `${k}√(${m}${x}^2) + ${second}`,
-          `${k}√${m}·${x}^(2/2) + ${second}`,
-          `${k}${x}√${m} + ${second}`,
-          `${k}${x}√${m} + ${j}${x}√${m}`,
-        ],
-        numbers: [k * k * m, j * j * m],
-        along: [k * k, j * j, k + j],
-      };
-    },
-  },
-  {
-    id: "roots-both-sides",
-    name: "the same root on both sides",
-    make: (r) => {
-      // a√(x + b) - c = d√(x + b) + e → x = q² - b
-      const d = r.int(1, 2);
-      const a = d + 2;
-      const q = r.int(2, 4);
-      const b = r.signed(1, 5);
-      const c = r.int(1, 6);
-      const e = (a - d) * q - c;
-      const x = q * q - b;
-      if (e <= 0 || x <= 0 || x > 30) return null;
-      const root = `√(x${plus(b)})`;
-      return {
-        shape: "roots-both-sides",
-        start: `${a}${root} - ${c} = ${d === 1 ? "" : d}${root} + ${e}`,
-        goal: `x = ${x}`,
-        via: [`${a - d === 1 ? "" : a - d}${root} - ${c} = ${e}`, `${a - d === 1 ? "" : a - d}${root} = ${c + e}`, `${root} = ${q}`].filter((v, i, all) => all.indexOf(v) === i),
-        numbers: [a, b, c, d, e],
-        along: [a - d, c + e, q, q * q, x],
-      };
-    },
-  },
-  {
-    id: "square-minus",
-    name: "the square of a root expression, then like terms",
-    make: (r) => {
-      // (a√x + b)² - a²x → 2ab√x + b²
-      const a = r.int(2, 3);
-      const b = [2, 3, 5][r.int(0, 2)];
-      const x = letter(r);
-      if (a === b) return null;
-      const t = `(${a}√${x} + ${b})`;
-      return {
-        shape: "square-minus",
-        start: `${t}^2 - ${a * a}${x}`,
-        goal: `${2 * a * b}√${x} + ${b * b}`,
-        via: [
-          `${t}${t} - ${a * a}${x}`,
-          `${a}${t}√${x} + ${b}${t} - ${a * a}${x}`,
-          `(${a}*${a}√${x} + ${a}*${b})√${x} + ${b}${t} - ${a * a}${x}`,
-          `(${a * a}√${x} + ${a * b})√${x} + ${b}${t} - ${a * a}${x}`,
-          `${a * a}${x} + ${a * b}√${x} + ${b}${t} - ${a * a}${x}`,
-          `${a * b}√${x} + ${b}${t}`,
-        ],
-        numbers: [a, b, a * a],
-        along: [a * a, a * b, 2 * a * b, b * b],
-      };
-    },
-  },
-  {
     id: "times-root-equals",
     name: "a number times a root, equal to a number",
     make: (r) => {
@@ -313,11 +235,9 @@ const all: Shape[] = [
   },
 ];
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("simplify", "square-times-letter", "root-equals", "root-times-bracket", "times-root-equals", "add-roots", "root-plus-equals", "square-of-times-root", "cube-simplify", "nth-root-equals", "nth-root-of-power"),
-  medium: pick("simplify-with-letter", "square-of-root-plus", "times-root-plus-equals", "roots-sum-equals", "cube-root-and-like"),
+  easy: byIds(all, "simplify", "square-times-letter", "root-equals", "root-times-bracket", "times-root-equals", "add-roots", "root-plus-equals", "square-of-times-root", "cube-simplify", "nth-root-equals", "nth-root-of-power"),
+  medium: byIds(all, "simplify-with-letter", "square-of-root-plus", "times-root-plus-equals", "roots-sum-equals", "cube-root-and-like"),
   // Hard nests one thing in another, with x and y: chapters/nested.ts.
   hard: NESTED.roots,
 };

@@ -46,7 +46,6 @@ export const es: Translation = {
 
   // Chapter page
   backToPath: "← Ruta de aprendizaje",
-  exercises: "Ejercicios",
   practiceNote: "Cada ejercicio es nuevo, creado solo para ti. Empieza por los fáciles y sube de nivel cuando quieras.",
   leadsOnToStart: "Te prepara para ",
   leadsOnToEnd: ". Puedes ir cuando quieras.",
@@ -59,7 +58,6 @@ export const es: Translation = {
   testSkills: "Ponte a prueba",
   testNote: "Calcula la respuesta mentalmente y luego elígela. Las respuestas correctas te dan la insignia del capítulo: 10 en Fácil para la de bronce, en Medio para la de plata y en Difícil para la de oro.",
   solvedN: (n: number) => (n === 1 ? "1 resuelto" : `${n} resueltos`),
-  toPractice: "A practicar →",
   testRight: "¡Correcto! Cuenta para la insignia.",
   drills: {
     commute: { name: "Cambiar el orden", how: "Arrastra un término más allá del de al lado. Al sumar y al multiplicar, el orden no importa." },
@@ -122,7 +120,6 @@ export const es: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Ejercicio ${label}${solved ? " — resuelto" : ""}`,
-  solved: "resuelto",
   goldNote: "Insignia de oro. Puedes seguir practicando todo lo que quieras.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `Insignia de ${TIER[tier]}. ` : ""}${more === 1 ? "Te falta 1 respuesta correcta" : `Te faltan ${more} respuestas correctas`} en ${["Fácil", "Medio", "Difícil"][tier]} para la insignia de ${TIER[tier + 1]}.`,
@@ -159,7 +156,6 @@ export const es: Translation = {
   solvedBang: "¡Resuelto!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `Insignia de ${TIER[tier]} en ${chapter}.`,
   theExercise: "el ejercicio",
-  goal: "objetivo",
   moveCrashed: "Algo salió mal con ese movimiento.",
   moveCrashedDetails: "Los detalles están en la consola del navegador.",
   tryAgain: "Volver a intentarlo",

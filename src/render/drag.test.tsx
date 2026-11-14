@@ -42,7 +42,8 @@ describe("pulling a factor out of a log", () => {
     ["ln(2x)", "x", 1, "ln(2) + ln(x)"],
     ["log_2(8x)", "8", -1, "log_2(8) + log_2(x)"],
   ] as const)("%s: carrying the %s out, a faint log goes with it and firms up", (src, what, dir, split) => {
-    const h = harness(src);
+    // As in the logs chapter: its letters stand for positive numbers (ln(ab) splits only then).
+    const h = harness({ ...parseState(src), letters: "positive" });
     const grip = h.grab(what, ANCHOR);
     const piece = grip.id;
     const frames = Array.from({ length: 31 }, (_, i) => grip.by(Vec2((dir * 160 * i) / 30, 0)));

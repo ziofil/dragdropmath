@@ -48,7 +48,6 @@ export const nl: Translation = {
 
   // Chapter page
   backToPath: "← Leerpad",
-  exercises: "Oefeningen",
   practiceNote: "Elke oefening is nieuw, speciaal voor jou gemaakt. Begin met de makkelijke en ga een niveau hoger als je er klaar voor bent.",
   leadsOnToStart: "Hierna komt ",
   leadsOnToEnd: ". Daar kun je altijd heen.",
@@ -62,7 +61,6 @@ export const nl: Translation = {
   testNote:
     "Reken het antwoord uit in je hoofd en kies het dan. Met goede antwoorden verdien je de badge van het hoofdstuk: 10 bij Makkelijk voor brons, bij Gemiddeld voor zilver, bij Moeilijk voor goud.",
   solvedN: (n: number) => `${n} opgelost`,
-  toPractice: "Door naar oefenen →",
   testRight: "Goed! Deze telt mee voor de badge.",
   drills: {
     commute: { name: "Volgorde omwisselen", how: "Sleep een term langs zijn buurman. Bij + en × maakt de volgorde niet uit." },
@@ -125,7 +123,6 @@ export const nl: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Oefening ${label}${solved ? " — opgelost" : ""}`,
-  solved: "opgelost",
   goldNote: "Gouden badge. Je kunt zo lang doorgaan als je wilt.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "goed antwoord" : "goede antwoorden"} bij ${["Makkelijk", "Gemiddeld", "Moeilijk"][tier]} voor ${metal[tier]}.`,
@@ -163,7 +160,6 @@ export const nl: Translation = {
   solvedBang: "Opgelost!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${tierName[tier]} badge voor ${chapter}.`,
   theExercise: "de oefening",
-  goal: "doel",
   moveCrashed: "Er ging iets mis bij die zet.",
   moveCrashedDetails: "Details staan in de console van de browser.",
   tryAgain: "Probeer opnieuw",

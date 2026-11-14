@@ -1,6 +1,6 @@
 /** Exercise shapes for the chapter "explog" (see ../write.ts). */
 import { NESTED } from "./nested";
-import { gcd, plus, type Level, type Rng, type Shape } from "../write";
+import { gcd, plus, byIds, type Level, type Rng, type Shape } from "../write";
 
 /** One of a few letters, mostly x. */
 const letter = (r: Rng) => (r.next() < 0.6 ? "x" : ["y", "a", "t", "n"][r.int(0, 3)]);
@@ -232,78 +232,6 @@ const all: Shape[] = [
     },
   },
   {
-    id: "log-of-power-product",
-    name: "the log of a number times a power, split and worked out, then solved",
-    make: (r) => {
-      // log_B(c·Mˣ) = n → k + jx = n;  log_B(Mˣ/c) = n → jx - k = n  (c = Bᵏ, M = Bʲ)
-      const B = r.next() < 0.7 ? 2 : 3;
-      const j = B === 2 ? r.int(2, 3) : 2;
-      const k = r.int(1, B === 2 ? 3 : 2);
-      const x = r.int(2, 3);
-      const over = r.next() < 0.4;
-      const n = over ? j * x - k : j * x + k;
-      const [M, c] = [B ** j, B ** k];
-      if (n < 2 || n > 12 || c === M) return null;
-      const L = `log_${B}`;
-      return {
-        shape: "log-of-power-product",
-        start: over ? `${L}(${M}^x/${c}) = ${n}` : `${L}(${c}·${M}^x) = ${n}`,
-        goal: `x = ${x}`,
-        via: over
-          ? [`${L}(${M}^x) - ${L}(${c}) = ${n}`, `x·${L}(${M}) - ${L}(${c}) = ${n}`, `x·${L}(${M}) - ${k} = ${n}`, `${j}x - ${k} = ${n}`]
-          : [`${L}(${c}) + ${L}(${M}^x) = ${n}`, `${L}(${c}) + x·${L}(${M}) = ${n}`, `${k} + x·${L}(${M}) = ${n}`, `${k} + ${j}x = ${n}`],
-        answer: x,
-        numbers: [B, M, c, n],
-        along: [j, k, j * x],
-      };
-    },
-  },
-  {
-    id: "split-and-collect-logs",
-    name: "split a log, work out a power, collect the logs of x, solve",
-    make: (r) => {
-      // log_B(Bᵏ·x) - log_B(x²) = n → k - log_B(x) = n → x = B^(k - n)
-      const B = r.int(2, 3);
-      const k = r.int(2, B === 2 ? 4 : 3);
-      const n = r.int(1, k - 1);
-      const m = k - n;
-      const x = letter(r);
-      if (B ** m > 27) return null;
-      const L = `log_${B}`;
-      return {
-        shape: "split-and-collect-logs",
-        start: `${L}(${B ** k}${x}) - ${L}(${x}^2) = ${n}`,
-        goal: `${x} = ${B ** m}`,
-        via: [`${L}(${B ** k}) + ${L}(${x}) - ${L}(${x}^2) = ${n}`, `${k} + ${L}(${x}) - ${L}(${x}^2) = ${n}`, `${k} - ${L}(${x}) = ${n}`, `${L}(${x}) = ${m}`],
-        numbers: [B, B ** k, n],
-        along: [k, m],
-      };
-    },
-  },
-  {
-    id: "exp-quotient-equation",
-    name: "a quotient of powers of e, to combine, isolate and solve",
-    make: (r) => {
-      // a·e^(bx)/e^(x + c) + d = a·k + d → (b - 1)x - c = ln(k)
-      const a = r.int(2, 3);
-      const b = r.int(3, 4);
-      const c = r.signed(1, 3);
-      const k = r.int(2, 6);
-      const d = r.signed(1, 5);
-      const rhs = a * k + d;
-      if (rhs <= 0 || k === a) return null;
-      const ex = `${times(b - 1, "x")}${plus(-c)}`;
-      return {
-        shape: "exp-quotient-equation",
-        start: `${a}e^(${b}x)/e^(x${plus(c)})${plus(d)} = ${rhs}`,
-        goal: `x = (ln(${k})${plus(c)})/${b - 1}`,
-        via: [`${a}e^(${b}x - (x${plus(c)}))${plus(d)} = ${rhs}`, `${a}e^(${ex})${plus(d)} = ${rhs}`, `${a}e^(${ex}) = ${a * k}`, `e^(${ex}) = ${k}`],
-        numbers: [a, b, c, d, rhs],
-        along: [b - 1, a * k, k],
-      };
-    },
-  },
-  {
     id: "split-log",
     name: "the log of a product or a quotient, split and worked out",
     make: (r) => {
@@ -325,31 +253,11 @@ const all: Shape[] = [
       };
     },
   },
-  {
-    id: "root-of-e-equation",
-    name: "a root of e and powers of e inside lns, combined and solved",
-    make: (r) => {
-      // ln(eᵃ·√e) + ln(eˣ) = n → a + 1/2 + x = n → x = (2n - 2a - 1)/2
-      const a = r.int(2, 4);
-      const n = r.int(a + 1, a + 3);
-      const p = 2 * n - 2 * a - 1;
-      return {
-        shape: "root-of-e-equation",
-        start: `ln(e^${a}·√e) + ln(e^x) = ${n}`,
-        goal: `x = ${p}/2`,
-        via: [`ln(e^${a}·√e·e^x) = ${n}`, `ln(e^(${a} + 1/2 + x)) = ${n}`, `${a} + 1/2 + x = ${n}`, `${2 * a + 1} + 2x = ${n}*2`],
-        numbers: [a, n],
-        along: [2 * a + 1, 2 * n, p],
-      };
-    },
-  },
 ];
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("exp-equals", "log-equals", "log-of-power", "logs-of-powers", "same-base-product", "log-sum-equals", "log-with-e", "times-power-equals"),
-  medium: pick("isolate-exp", "isolate-ln", "undo-log-linear", "split-log", "powers-in-logs"),
+  easy: byIds(all, "exp-equals", "log-equals", "log-of-power", "logs-of-powers", "same-base-product", "log-sum-equals", "log-with-e", "times-power-equals"),
+  medium: byIds(all, "isolate-exp", "isolate-ln", "undo-log-linear", "split-log", "powers-in-logs"),
   // Hard nests one thing in another, with x and y: chapters/nested.ts.
   hard: NESTED.explog,
 };

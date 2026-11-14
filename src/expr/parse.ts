@@ -126,12 +126,7 @@ class Parser {
   private atom(): Expr {
     const t = this.peek();
     if (t === undefined) throw new Error(`Unexpected end of: ${this.src}`);
-    if (t === "(") {
-      this.i++;
-      const e = this.expr();
-      this.expect(")");
-      return e;
-    }
+    if (t === "(") return this.bracketed();
     this.i++;
     if (/^\d+$/.test(t)) return num(Number(t));
     if (t === "ln") return log(econst(), this.bracketed());

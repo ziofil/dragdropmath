@@ -89,12 +89,6 @@ export function solution(
   return null;
 }
 
-/** Fewest steps from start to goal, or null if not found within `maxDepth`. Used to check exercises are solvable. */
-export function fewestMoves(start: MathState, goal: MathState, rules: readonly RuleId[], opts: SearchOpts = {}): number | null {
-  const path = solution(start, goal, rules, opts);
-  return path ? path.length - 1 : null;
-}
-
 /**
  * A way through an exercise: from start, by each checkpoint (`via`), to the
  * goal — the states on the way, or null if a stretch can't be done in

@@ -24,7 +24,7 @@ export const brackets: Chapter = {
           },
           { say: "Then drop the 2 onto its (x + 1).", then: "x·x + x + 2x + 2·1" },
         ],
-        after: "That gives four terms: x·x, 1·x, 2·x and 2·1. Collect like terms to get x² + 3x + 2.",
+        after: "That gives four terms: x·x, x, 2x and 2. Collect like terms to get x² + 3x + 2.",
       },
     },
     {

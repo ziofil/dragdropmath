@@ -4,7 +4,7 @@
 import type { Expr, Frac } from "../expr/types";
 import { num, pow, prod } from "../expr/build";
 import { nodeAt, parentLoc, type Loc } from "../expr/tree";
-import type { DragCtx } from "./types";
+import { without, type DragCtx } from "./types";
 import type { MathState } from "../expr/types";
 
 /**
@@ -46,4 +46,12 @@ export function fractionPart(state: MathState, c: DragCtx): { F: Frac; fracLoc: 
   const F = nodeAt(state, fracLoc);
   if (F.kind !== "frac") return null;
   return { F, fracLoc, partLoc, inDen: partLoc.path[partLoc.path.length - 1] === 1 };
+}
+
+/** `e` without the factor `pick` finds (1, if that was all of it), or null if there's none. */
+export function dropFactor(e: Expr, pick: (x: Expr) => boolean): Expr | null {
+  if (pick(e)) return num(1);
+  if (e.kind !== "prod") return null;
+  const i = e.factors.findIndex(pick);
+  return i < 0 ? null : prod(without(e.factors, i), e.id);
 }

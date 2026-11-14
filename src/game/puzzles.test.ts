@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
-import { CHAPTERS, rulesFor } from "./puzzles";
+import { CHAPTERS, rulesFor, startOf } from "./puzzles";
 import { allPuzzles } from "./testing/exercises";
 import { matchesGoal, moves } from "./solver";
 import { tidied } from "./tidy";
@@ -42,7 +42,7 @@ describe("exercises", () => {
 
 describe("guided examples", () => {
   const examples = CHAPTERS.flatMap((ch, ci) =>
-    ch.lesson.flatMap((part) => (part.example ? [[`${ch.id} "${part.title}": ${part.example.start}`, part.example, rulesFor(ci)] as const] : [])),
+    ch.lesson.flatMap((part) => (part.example ? [[`${ch.id} "${part.title}": ${part.example.start}`, part.example, rulesFor(ci), ch] as const] : [])),
   );
 
   it("every chapter has a lesson, with at least one example to try", () => {
@@ -53,8 +53,9 @@ describe("guided examples", () => {
     }
   });
 
-  it.each(examples)("%s: each step is one move", (_, g, rules) => {
-    let state = parseState(g.start);
+  it.each(examples)("%s: each step is one move", (_, g, rules, ch) => {
+    // As in the app: the chapter's letters may stand for positive numbers.
+    let state = startOf(g.start, ch);
     for (const step of g.steps) {
       const want = parseState(step.then);
       // As in the app: the move is checked as made, then tidied.

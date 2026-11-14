@@ -45,7 +45,6 @@ export const de: Translation = {
 
   // Chapter page
   backToPath: "← Lernpfad",
-  exercises: "Aufgaben",
   practiceNote: "Jede Aufgabe ist neu, extra für dich erstellt. Fang mit den leichten an und geh eine Stufe höher, wenn du so weit bist.",
   leadsOnToStart: "Darauf baut auf: ",
   leadsOnToEnd: ". Du kannst jederzeit dorthin wechseln.",
@@ -59,7 +58,6 @@ export const de: Translation = {
   testNote:
     "Rechne die Antwort im Kopf aus und wähl sie dann aus. Richtige Antworten bringen dir das Abzeichen des Kapitels: 10 bei „Leicht“ für Bronze, bei „Mittel“ für Silber, bei „Schwer“ für Gold.",
   solvedN: (n: number) => `${n} gelöst`,
-  toPractice: "Weiter zum Üben →",
   testRight: "Richtig! Das zählt für das Abzeichen.",
   drills: {
     commute: { name: "Reihenfolge tauschen", how: "Zieh einen Term an seinem Nachbarn vorbei. Bei + und × ist die Reihenfolge egal." },
@@ -122,7 +120,6 @@ export const de: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Aufgabe ${label}${solved ? " – gelöst" : ""}`,
-  solved: "gelöst",
   goldNote: "Goldabzeichen. Üb ruhig weiter, so viel du willst.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "richtige Antwort" : "richtige Antworten"} bei „${["Leicht", "Mittel", "Schwer"][tier]}“ bis ${TIER[tier + 1]}.`,
@@ -159,7 +156,6 @@ export const de: Translation = {
   solvedBang: "Gelöst!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${TIER[tier]}abzeichen für ${chapter}.`,
   theExercise: "die Aufgabe",
-  goal: "Ziel",
   moveCrashed: "Bei diesem Schritt ist etwas schiefgegangen.",
   moveCrashedDetails: "Details stehen in der Browser-Konsole.",
   tryAgain: "Nochmal versuchen",

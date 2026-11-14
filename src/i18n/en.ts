@@ -50,7 +50,6 @@ export const en = {
 
   // Chapter page
   backToPath: "← Learning path",
-  exercises: "Exercises",
   practiceNote: "Every exercise is new, made up just for you. Start with easy ones and move up when you feel ready.",
   /** Followed by the chapters' links, then leadsOnToEnd. */
   leadsOnToStart: "Leads on to ",
@@ -65,7 +64,6 @@ export const en = {
   testNote: "Work out the answer in your head, then pick it. Right answers earn the chapter's badge: 10 at Easy for bronze, at Medium for silver, at Hard for gold.",
   /** How many practice exercises are solved at a level. */
   solvedN: (n: number) => `${n} solved`,
-  toPractice: "On to practice →",
   testRight: "Right! It counts towards the badge.",
   /**
    * Learning the moves: each drill's name (on its button) and what to do (above
@@ -96,7 +94,7 @@ export const en = {
     "power-of-power": { name: "Power of a power", how: "Drop the outer exponent onto the inner one. They multiply." },
     "divide-powers": { name: "Same base: subtract exponents", how: "Drop the power on the bottom onto the one on top. The exponents subtract." },
     "flip-across-bar": { name: "Across the fraction bar", how: "Drag the power up across the bar. Its exponent changes sign." },
-    "power-one": { name: "Power of 1", how: "Drop the exponent 1 onto its base: `x¹` is just `x`." },
+    "power-one": { name: "Power of 1", how: "Drop the exponent 1 onto its base: `x¹` is just `x`. This is so simple that from now on it happens on its own." },
     "zero-power": { name: "Power of 0", how: "Drop the exponent 0 onto its base. Anything to the power 0 is 1." },
     "tap-power": { name: "Work out a power", how: "Tap the exponent to work the power out: `2³` becomes 8." },
     "power-of-product": { name: "Exponent into brackets", how: "Drag the exponent into the brackets. Every factor inside gets its own copy." },
@@ -112,7 +110,7 @@ export const en = {
     "multiply-fractions": { name: "Multiply fractions", how: "Drop one fraction onto the other. Tops multiply, and so do bottoms." },
     "divide-by-fraction": { name: "Divide by a fraction", how: "Drag the fraction on the bottom up across the bar. It turns upside down and multiplies." },
     "split-fraction": { name: "Split a fraction", how: "Pull a term out of the top. It takes a copy of the bottom with it." },
-    "times-one": { name: "Times 1", how: "Drop the 1 onto what it multiplies. Multiplying by 1 changes nothing." },
+    "times-one": { name: "Times 1", how: "Drop the 1 onto what it multiplies. Multiplying by 1 changes nothing, so from now on it happens on its own." },
     substitute: { name: "Substitute", how: "Drag the `y` of `y = …` onto the `y` in the other equation. It becomes what `y` equals." },
     "evaluate-root": { name: "Work out a root", how: "Tap the root to work it out." },
     "split-square": { name: "Split under a root", how: "Tap the number under the root. A square splits off (a cube, under a cube root)." },
@@ -132,7 +130,6 @@ export const en = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Exercise ${label}${solved ? " — solved" : ""}`,
-  solved: "solved",
   goldNote: "Gold badge. Keep going as long as you like.",
   /** The badge so far (`tier`, 0 for none yet), and `more` exercises still to solve for the next one. */
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
@@ -170,7 +167,6 @@ export const en = {
   solvedBang: "Solved!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${["", "Bronze", "Silver", "Gold"][tier]} badge for ${chapter}.`,
   theExercise: "the exercise",
-  goal: "goal",
   moveCrashed: "Something went wrong with that move.",
   moveCrashedDetails: "Details are in the browser console.",
   tryAgain: "Try again",

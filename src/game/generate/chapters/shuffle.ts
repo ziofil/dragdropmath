@@ -1,23 +1,5 @@
 /** Exercise shapes for the chapter "shuffle": terms in any order, numbers worked out (see ../write.ts). */
-import { ax, lin, type Draft, type Level, type Rng, type Shape } from "../write";
-
-/** Terms written one after another, each with its own sign: ["2", "-x", "3·y·2"] → "2 - x + 3·y·2". */
-const sum = (terms: string[]) =>
-  terms.map((t, i) => (i === 0 ? t : t.startsWith("-") ? ` - ${t.slice(1)}` : ` + ${t}`)).join("");
-
-/** One of the list. */
-const one = <T>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
-
-/** k times a letter, as a product of two numbers and the letter in some order: "2·x·3", "x·2·3", "2·3·x". */
-function product(r: Rng, k: number, v: string): { text: string; factors: [number, number] } | null {
-  const m = Math.abs(k);
-  const ways: [number, number][] = [];
-  for (let p = 2; p <= 5; p++) if (m % p === 0 && m / p >= 2 && m / p <= 5) ways.push([p, m / p]);
-  if (!ways.length) return null;
-  const [p, q] = one(r, ways);
-  const text = one(r, [`${p}·${v}·${q}`, `${v}·${p}·${q}`, `${p}·${q}·${v}`]);
-  return { text: k < 0 ? `-${text}` : text, factors: [p, q] };
-}
+import { ax, byIds, lin, one, shuffled, signedSum, type Draft, type Level, type Rng, type Shape } from "../write";
 
 const letter = (r: Rng) => one(r, ["x", "y", "a", "b"]);
 
@@ -32,17 +14,17 @@ const all: Shape[] = [
       const k = r.next() < 0.3 ? r.int(2, 5) : 1;
       switch (r.int(0, 3)) {
         case 0: // p + v + q → v + (p + q)
-          return draft("numbers-around", sum([`${p}`, ax(k, v), `${q}`]), lin(k, p + q, v), [p, q, k], [p + q]);
+          return draft("numbers-around", signedSum([`${p}`, ax(k, v), `${q}`]), lin(k, p + q, v), [p, q, k], [p + q]);
         case 1: // v + p - q → v + (p - q)
           if (p === q) return null;
-          return draft("numbers-around", sum([ax(k, v), `${p}`, `-${q}`]), lin(k, p - q, v), [p, q, k], [p - q]);
+          return draft("numbers-around", signedSum([ax(k, v), `${p}`, `-${q}`]), lin(k, p - q, v), [p, q, k], [p - q]);
         case 2: // p - q + v → v + (p - q)
           if (p === q) return null;
-          return draft("numbers-around", sum([`${p}`, `-${q}`, ax(k, v)]), lin(k, p - q, v), [p, q, k], [p - q]);
+          return draft("numbers-around", signedSum([`${p}`, `-${q}`, ax(k, v)]), lin(k, p - q, v), [p, q, k], [p - q]);
         default: {
           // p - v - q → (p - q) - v
           const big = p + q;
-          return draft("numbers-around", sum([`${big}`, `-${ax(k, v)}`, `-${q}`]), `${p} - ${ax(k, v)}`, [big, q, k], [p]);
+          return draft("numbers-around", signedSum([`${big}`, `-${ax(k, v)}`, `-${q}`]), `${p} - ${ax(k, v)}`, [big, q, k], [p]);
         }
       }
     },
@@ -72,129 +54,7 @@ const all: Shape[] = [
       }
     },
   },
-  {
-    id: "product-and-numbers",
-    name: "a product and two numbers",
-    make: (r) => {
-      const k = r.int(2, 5) * r.int(2, 5);
-      const p = r.int(1, 9);
-      const q = r.int(1, 9);
-      if (p === q) return null;
-      if (r.next() < 0.4) {
-        // k·x·m·y + p - q → (km)xy + (p - q)
-        const [a, b] = one(r, [["x", "y"], ["a", "b"]]);
-        const pr = product(r, k, "")!;
-        const [m, n] = pr.factors;
-        return draft("product-and-numbers", sum([`${m}·${a}·${n}·${b}`, `${p}`, `-${q}`]), lin(k, p - q, a + b), [m, n, p, q], [k, p - q]);
-      }
-      // p + k·a·m - q + b → (km)a + b + (p - q), the second letter after the first in the alphabet
-      const [a, b] = one(r, [["x", "y"], ["a", "b"]]);
-      const pr = product(r, k, a);
-      if (!pr) return null;
-      const terms = r.next() < 0.5 ? [`${p}`, pr.text, `-${q}`, b] : [pr.text, `${p}`, `-${q}`, b];
-      return draft("product-and-numbers", sum(terms), `${ax(k, a)} + ${b}${sign(p - q)}`, [...pr.factors, p, q], [k, p - q]);
-    },
-  },
-  {
-    id: "two-letters",
-    name: "two letters and some numbers",
-    make: (r) => {
-      const [a, b] = one(r, [["x", "y"], ["a", "b"]]);
-      const p = r.int(1, 9);
-      const q = r.int(1, 9);
-      switch (r.int(0, 2)) {
-        case 0: // p + a + q + b → a + b + (p + q)
-          return draft("two-letters", sum(r.next() < 0.5 ? [`${p}`, a, `${q}`, b] : [a, `${p}`, b, `${q}`]), `${a} + ${b}${sign(p + q)}`, [p, q], [p + q]);
-        case 1: {
-          // a + p + b + q + s → a + b + (p + q + s)
-          const s = r.int(1, 5);
-          return draft("two-letters", sum([a, `${p}`, b, `${q}`, `${s}`]), `${a} + ${b}${sign(p + q + s)}`, [p, q, s], [p + q, p + q + s]);
-        }
-        default: {
-          // k·b·m + p + a → a + (km)b + p, or with "- q" as well
-          const k = r.int(2, 5) * r.int(2, 4);
-          const pr = product(r, k, b);
-          if (!pr) return null;
-          if (r.next() < 0.5) return draft("two-letters", sum([pr.text, `${p}`, a]), `${a} + ${ax(k, b)}${sign(p)}`, [...pr.factors, p], [k]);
-          if (p === q) return null;
-          return draft("two-letters", sum([`${p}`, pr.text, a, `-${q}`]), `${a} + ${ax(k, b)}${sign(p - q)}`, [...pr.factors, p, q], [k, p - q]);
-        }
-      }
-    },
-  },
-  {
-    id: "three-letters",
-    name: "three letters, products, and a number to put last",
-    make: (r) => {
-      // 2·4 - z + y·3 + x·3·3 → 9x + 3y - z + 8: each letter a term, some written as products.
-      const vs = one(r, [["x", "y", "z"], ["a", "b", "c"]]);
-      // Two or three of the letters written as products, the others plain; at most one minus, never on the first letter.
-      const asProduct = shuffled(r, [true, true, r.next() < 0.4]);
-      const neg = r.next() < 0.6 ? r.int(1, 2) : -1;
-      const cs = vs.map((_, i) => (i === neg ? -1 : 1) * (asProduct[i] ? one(r, [4, 6, 8, 9, 10, 12, 15]) : r.int(1, 6)));
-      const c = r.int(2, 12);
-      const mids: string[] = [];
-      const numbers: number[] = [];
-      const along: number[] = [];
-      for (let i = 0; i < 3; i++) {
-        const pr = asProduct[i] ? product(r, cs[i], vs[i]) : null;
-        if (pr) {
-          mids.push(pr.text);
-          numbers.push(...pr.factors);
-          along.push(cs[i]);
-        } else {
-          mids.push(ax(cs[i], vs[i]));
-          if (Math.abs(cs[i]) > 1) numbers.push(Math.abs(cs[i]));
-        }
-      }
-      // The number first, also a product now and then.
-      const cp = product(r, c, "");
-      const first = cp && r.next() < 0.6 ? `${cp.factors[0]}·${cp.factors[1]}` : `${c}`;
-      if (cp && first.includes("·")) (numbers.push(...cp.factors), along.push(c));
-      else numbers.push(c);
-      // Never already in order.
-      const order = shuffled(r, [0, 1, 2]);
-      if (order[0] === 0 && order[1] === 1) return null;
-      const start = sum([first, ...order.map((i) => mids[i])]);
-      const goal = sum([...cs.map((k, i) => ax(k, vs[i])), `${c}`]);
-      // Halfway: every product worked out, the terms as they were.
-      const via = sum([`${c}`, ...order.map((i) => ax(cs[i], vs[i]))]);
-      return { shape: "three-letters", start, goal, via: [via], numbers, along };
-    },
-  },
-  {
-    id: "ab-product",
-    name: "a product of two letters and three numbers",
-    make: (r) => {
-      // 2·a·3·b·2 + 5 - 3 + 4·c → 12ab + 4c + 2
-      const [a, b, c] = one(r, [["a", "b", "c"], ["x", "y", "z"]]);
-      const m = r.int(2, 3);
-      const n = r.int(2, 4);
-      const o = r.int(2, 3);
-      const k = m * n * o;
-      const p = r.int(2, 9);
-      const q = r.int(1, 8);
-      const s = r.int(2, 6);
-      if (p === q || k > 30) return null;
-      const big = `${m}·${a}·${n}·${b}·${o}`;
-      const terms = r.next() < 0.5 ? [big, `${p}`, `-${q}`, `${s}·${c}`] : [`${p}`, big, `-${q}`, `${s}·${c}`];
-      // Halfway: the long product worked out.
-      const via = sum(terms.map((t) => (t === big ? ax(k, a + b) : t)));
-      return draft("ab-product", sum(terms), `${ax(k, a + b)} + ${ax(s, c)}${sign(p - q)}`, [m, n, o, p, q, s], [m * n, k, p - q], [via]);
-    },
-  },
 ];
-
-const sign = (n: number) => (n < 0 ? ` - ${-n}` : ` + ${n}`);
-
-function shuffled<T>(r: Rng, xs: T[]): T[] {
-  const out = xs.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = r.int(0, i);
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
 
 function draft(shape: string, start: string, goal: string, numbers: number[], along: number[], via: string[] = []) {
   return { shape, start, goal, via, numbers, along };
@@ -261,18 +121,18 @@ function mix(r: Rng, shape: string, letters: Lt[], nums: number[], numProduct = 
     order = o;
   }
   if (!order) return null;
-  const start = sum(order.map((p) => p.text));
+  const start = signedSum(order.map((p) => p.text));
   // One milestone per product worked out, in the order they're written.
   const steps: string[] = [];
   const now = order.map((p) => p.text);
   order.forEach((p, i) => {
     if (p.text === p.done) return;
     now[i] = p.done;
-    steps.push(sum(now));
+    steps.push(signedSum(now));
   });
   const sorted = letters.slice().sort((x, y) => (x.mono < y.mono ? -1 : 1));
-  const goal = sum([...sorted.map((l) => ax(l.k, l.mono)), `${total}`]);
-  const added = sum([...letters.map((l) => ax(l.k, l.mono)), `${total}`]);
+  const goal = signedSum([...sorted.map((l) => ax(l.k, l.mono)), `${total}`]);
+  const added = signedSum([...letters.map((l) => ax(l.k, l.mono)), `${total}`]);
   const via = [...steps, added].filter((v, i, vs) => v !== start && vs.indexOf(v) === i);
   return { shape, start, goal, via, numbers, along };
 }
@@ -350,10 +210,8 @@ all.push(
   },
 );
 
-const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!);
-
 export const shapes: Record<Level, Shape[]> = {
-  easy: pick("numbers-around", "numbers-together"),
-  medium: pick("two-products", "three-plain"),
-  hard: pick("long-sum", "long-ab"),
+  easy: byIds(all, "numbers-around", "numbers-together"),
+  medium: byIds(all, "two-products", "three-plain"),
+  hard: byIds(all, "long-sum", "long-ab"),
 };

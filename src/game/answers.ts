@@ -9,12 +9,21 @@ import type { Expr, MathState } from "../expr/types";
 import { evaluate, variables, type Env } from "../expr/eval";
 import { printState } from "../expr/key";
 
-/** Several random positive values for every letter in these expressions. */
+/**
+ * Several random positive values for every letter in these expressions, at
+ * which all of them have a value: first between 0.3 and 11, then (for
+ * √(x − 8), ln(x − 20)) ten and a hundred times as large. If there aren't
+ * `n` such, as many as there are, or else the first tries.
+ */
 export function envs(exprs: Expr[], n = 6): Env[] {
   const names = [...new Set(exprs.flatMap(variables))];
-  return Array.from({ length: n }, (_, k) => k + 1).map((seed) =>
-    Object.fromEntries(names.map((name, i) => [name, ((seed * 7919 + i * 104729) % 1000) / 97 + 0.31])),
-  );
+  const at = (seed: number): Env => {
+    const scale = 10 ** Math.floor((seed - 1) / (2 * n));
+    return Object.fromEntries(names.map((name, i) => [name, scale * (((seed * 7919 + i * 104729) % 1000) / 97 + 0.31)]));
+  };
+  const tries = Array.from({ length: 6 * n }, (_, k) => at(k + 1));
+  const defined = tries.filter((env) => exprs.every((e) => Number.isFinite(evaluate(e, env))));
+  return defined.length ? defined.slice(0, n) : tries.slice(0, n);
 }
 
 const close = (x: number, y: number) => Math.abs(x - y) <= 1e-9 * Math.max(1, Math.abs(x), Math.abs(y));
@@ -131,9 +140,42 @@ export function follows(start: MathState, goal: MathState): boolean {
   }
   // The same equation up to a factor: lhs − rhs keeps its sign, everywhere, row by row.
   if (startRows.length !== goalRows.length) return false;
+  // One letter, one row: also true for the same values (a sample can miss √(x − 8) = 2 against x − 8 = 5).
+  const names = [...new Set(all.flatMap(variables))];
+  if (names.length === 1 && startRows.length === 1) {
+    const [x] = names;
+    const solves = (r: MathState, v: number) => close(evaluate(r.sides[0], { [x]: v }), evaluate(r.sides[1], { [x]: v }));
+    if (!solutions(start, x).every((v) => solves(goal, v)) || !solutions(goal, x).every((v) => solves(start, v))) return false;
+  }
   return startRows.every((sr, k) => {
     const res = (s: MathState, env: Env) => evaluate(s.sides[0], env) - evaluate(s.sides[1], env);
     const ratios = envs([...sr.sides, ...goalRows[k].sides]).map((env) => res(sr, env) / res(goalRows[k], env));
     return ratios.every((r) => Number.isFinite(r) && r !== 0 && Math.sign(r) === Math.sign(ratios[0]));
   });
+}
+
+/**
+ * Where a one-letter equation holds, as far as can be found: scanning −50 to
+ * 50 finely, then on to 5000, and narrowing down each change of sign of
+ * lhs − rhs (one that isn't a jump, like 1/x's at 0).
+ */
+function solutions(s: MathState, x: string): number[] {
+  const f = (v: number) => evaluate(s.sides[0], { [x]: v }) - evaluate(s.sides[1], { [x]: v });
+  const grid = [...Array.from({ length: 4001 }, (_, i) => -50 + i * 0.025 + 0.00731), ...Array.from({ length: 4950 }, (_, i) => 51 + i + 0.00731)];
+  const out: number[] = [];
+  for (let i = 1; i < grid.length; i++) {
+    let [a, b] = [grid[i - 1], grid[i]];
+    let [fa, fb] = [f(a), f(b)];
+    if (!Number.isFinite(fa) || !Number.isFinite(fb) || Math.sign(fa) === Math.sign(fb)) continue;
+    for (let k = 0; k < 60; k++) {
+      const m = (a + b) / 2;
+      const fm = f(m);
+      if (!Number.isFinite(fm)) break;
+      if (Math.sign(fm) === Math.sign(fa)) [a, fa] = [m, fm];
+      else [b, fb] = [m, fm];
+    }
+    const v = (a + b) / 2;
+    if (Math.abs(f(v)) < 1e-6 * Math.max(1, Math.abs(fa), Math.abs(fb))) out.push(v);
+  }
+  return out;
 }

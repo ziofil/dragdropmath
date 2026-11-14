@@ -12,11 +12,11 @@ p.on("pageerror", (e) => errs.push("pageerror: " + e.message.slice(0, 200)));
 p.on("console", (m) => m.type() === "error" && !KNOWN.test(m.text()) && errs.push("console: " + m.text().slice(0, 200)));
 await p.goto("http://localhost:5179/#/");
 await p.waitForTimeout(800);
-const ids = await p.evaluate(async () => {
-  const m = await import("/src/game/puzzles.ts");
-  return { chapters: m.CHAPTERS.map((c) => c.id), puzzles: m.allPuzzles().map((r) => r.puzzle.id) };
-});
-const pages = ["#/", "#/sandbox", ...ids.chapters.map((c) => `#/c/${c}`), ...ids.puzzles.map((q) => `#/p/${q}`)];
+const chapters = await p.evaluate(async () => (await import("/src/game/puzzles.ts")).CHAPTERS.map((c) => c.id));
+const exercises = chapters.flatMap((c) => ["easy", "medium", "hard"].flatMap((l) => [1, 2, 3].flatMap((seed) => [`#/practice/${c}/${l}/${seed}`, `#/test/${c}/${l}/${seed}`])));
+// Odd links: an old link to the moves (now in the lesson), and broken ones.
+const odd = ["#/moves/fractions", "#/c/nope", "#/practice/nope/easy/1", "#/practice/fractions/nope/1", "#/set/garbage", "#/set/garbage/3", "#/at/nope", "#/whatever"];
+const pages = ["#/", "#/sandbox", "#/sets/new", ...chapters.map((c) => `#/c/${c}`), ...exercises, ...odd];
 for (const h of pages) {
   errs = [];
   await p.goto("http://localhost:5179/" + h);
@@ -38,14 +38,14 @@ for (const h of pages) {
   });
   if (errs.length || issues.length) console.log(h, [...new Set(errs)], issues);
 }
-// Phone width: home and a lesson.
-await p.setViewportSize({ width: 375, height: 800 });
-for (const h of ["#/", "#/c/fractions", "#/p/m4"]) {
+// Phone width: home, lessons, exercises.
+await p.setViewportSize({ width: 320, height: 700 });
+for (const h of ["#/", "#/sets/new", "#/sandbox", ...chapters.map((c) => `#/c/${c}`), ...chapters.map((c) => `#/test/${c}/hard/1`)]) {
   await p.goto("http://localhost:5179/" + h);
   await p.waitForTimeout(400);
   const side = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   if (side) console.log(h, "phone: page scrolls sideways");
-  await p.screenshot({ path: `scripts/.out/qa-phone-${h.replace(/[#/]/g, "") || "home"}.png`, fullPage: false });
+  if (["#/", "#/c/fractions", "#/test/roots/hard/1"].includes(h)) await p.screenshot({ path: `scripts/.out/qa-phone-${h.replace(/[#/]/g, "") || "home"}.png`, fullPage: false });
 }
 console.log("checked", pages.length, "pages");
 await b.close();

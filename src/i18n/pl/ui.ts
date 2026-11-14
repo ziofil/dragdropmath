@@ -57,7 +57,6 @@ export const pl: Translation = {
 
   // Chapter page
   backToPath: "← Ścieżka nauki",
-  exercises: "Zadania",
   practiceNote: "Każde zadanie jest nowe, ułożone specjalnie dla ciebie. Zacznij od łatwych i przejdź wyżej, kiedy poczujesz, że już czas.",
   leadsOnToStart: "Dalej możesz przejść do: ",
   leadsOnToEnd: ". Zajrzyj tam, kiedy chcesz.",
@@ -71,7 +70,6 @@ export const pl: Translation = {
   testNote:
     "Oblicz wynik w pamięci, a potem go wybierz. Za dobre odpowiedzi dostajesz odznakę rozdziału: 10 na poziomie „Łatwe” to brązowa, na „Średnie” srebrna, na „Trudne” złota.",
   solvedN: (n: number) => `${n} ${plural(n, "rozwiązane", "rozwiązane", "rozwiązanych")}`,
-  toPractice: "Przejdź do ćwiczeń →",
   testRight: "Dobrze! To się liczy do odznaki.",
   drills: {
     commute: { name: "Zmiana kolejności", how: "Przeciągnij wyraz za sąsiada. Przy + i × kolejność nie ma znaczenia." },
@@ -134,7 +132,6 @@ export const pl: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Zadanie ${label}${solved ? " — rozwiązane" : ""}`,
-  solved: "rozwiązane",
   goldNote: "Złota odznaka. Możesz ćwiczyć dalej, ile chcesz.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
     `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "dobra odpowiedź", "dobre odpowiedzi", "dobrych odpowiedzi")} na poziomie „${["Łatwe", "Średnie", "Trudne"][tier]}” do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
@@ -172,7 +169,6 @@ export const pl: Translation = {
   solvedBang: "Rozwiązane!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} za rozdział „${chapter}”.`,
   theExercise: "zadanie",
-  goal: "cel",
   moveCrashed: "Coś poszło nie tak przy tym ruchu.",
   moveCrashedDetails: "Szczegóły są w konsoli przeglądarki.",
   tryAgain: "Spróbuj jeszcze raz",

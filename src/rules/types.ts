@@ -1,6 +1,7 @@
 import type { Expr, MathState } from "../expr/types";
 import { normalize } from "../expr/build";
 import { allNodes, children, locate, nodeAt, parentLoc, replaceAt, type Loc } from "../expr/tree";
+import { without } from "../util/array";
 
 export type RuleId =
   | "commute"
@@ -139,6 +140,17 @@ export function dragCtx(state: MathState, id: string): DragCtx | null {
 }
 
 /** Replace the node at `loc` and re-normalize that side. */
+/**
+ * A piece dropped onto a sibling in the same sum or product (a term onto a
+ * like term, a number onto a number): the sibling at `to` becomes `merged`,
+ * and the piece at `from` is gone.
+ */
+export function mergeInto(state: MathState, holderLoc: Loc, holder: Expr, from: number, to: number, merged: Expr): MathState {
+  if (holder.kind === "sum") return replaceIn(state, holderLoc, { ...holder, terms: without(holder.terms.map((t, k) => (k === to ? merged : t)), from) });
+  if (holder.kind === "prod") return replaceIn(state, holderLoc, { ...holder, factors: without(holder.factors.map((f, k) => (k === to ? merged : f)), from) });
+  throw new Error(`mergeInto: a ${holder.kind} holds no terms or factors`);
+}
+
 export function replaceIn(state: MathState, loc: Loc, e: Expr): MathState {
   const sides = state.sides.slice();
   sides[loc.side] = normalize(replaceAt(sides[loc.side], loc.path, () => e));
