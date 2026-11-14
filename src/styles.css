@@ -548,13 +548,6 @@ span.ex-step {
   margin: 8px 0 12px;
 }
 /* The lesson's second half: its moves, one at a time. */
-.moves-head {
-  font-size: 1.5rem;
-  margin: 8px 0 12px;
-}
-.moves-head + .chapter-blurb {
-  margin-bottom: 24px;
-}
 .theory,
 .practice {
   margin-bottom: 36px;
@@ -584,30 +577,14 @@ span.ex-step {
 .guided-head {
   margin-bottom: 10px;
 }
-.guided-num {
-  font-weight: 700;
-  color: var(--accent);
-}
-.guided-steps {
-  margin: 6px 0 0;
-  padding-left: 22px;
-  line-height: 1.5;
-}
-.guided-steps li.past {
-  color: var(--ink-soft);
-}
-.guided-steps li.now {
-  font-weight: 600;
-}
-.guided-steps li.later {
-  color: var(--ink-soft);
-  opacity: 0.6;
-}
+/* What to do on a move's board: set apart from why it works. */
 .guided-say {
   margin: 0;
+  font-weight: 600;
 }
-.guided-tick {
-  color: var(--good);
+/* The lesson's moves start a little below the chapter's intro. */
+#moves {
+  margin-top: 28px;
 }
 .guided-status {
   margin: 0;

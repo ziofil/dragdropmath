@@ -63,8 +63,6 @@ export const pl: Translation = {
   watchOut: "Uwaga!",
   level: { easy: "Łatwe", medium: "Średnie", hard: "Trudne" },
   anotherOne: "Jeszcze jedno →",
-  learnMoves: "Poznaj ruchy",
-  learnMovesNote: "Każdy ruch z osobna. Możesz go próbować tyle razy, ile chcesz.",
   practice: "Ćwiczenia",
   testSkills: "Sprawdź się",
   testNote:
@@ -137,11 +135,9 @@ export const pl: Translation = {
     `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "dobra odpowiedź", "dobre odpowiedzi", "dobrych odpowiedzi")} na poziomie „${["Łatwe", "Średnie", "Trudne"][tier]}” do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Przykład ${n}`,
   notThisStep: "Ten ruch jest poprawny, ale w tym kroku chodzi o inny. Cofam go.",
   done: "Gotowe.",
   keepGoing: "Możesz działać dalej: teraz wolno wykonać dowolny ruch.",
-  stepOf: (n: number, total: number) => `Krok ${n} z ${total}`,
   startOver: "Od początku",
 
   // Exercise

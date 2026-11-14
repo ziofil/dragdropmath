@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
-import { printState } from "../expr/key";
-import { CHAPTERS, rulesFor, startOf } from "./puzzles";
+import { CHAPTERS } from "./puzzles";
 import { allPuzzles } from "./testing/exercises";
-import { matchesGoal, moves } from "./solver";
-import { tidied } from "./tidy";
+import { matchesGoal } from "./solver";
+import { drillsOf } from "./generate/moves";
+import { en } from "../i18n";
+import type { MoveWords } from "../i18n/en";
 
 describe("goals are matched as shown", () => {
   it("term and factor order matter, equation sides don't", () => {
@@ -40,29 +41,16 @@ describe("exercises", () => {
   // Solvability is checked in solvable.*.test.ts (split, to run in parallel).
 });
 
-describe("guided examples", () => {
-  const examples = CHAPTERS.flatMap((ch, ci) =>
-    ch.lesson.flatMap((part) => (part.example ? [[`${ch.id} "${part.title}": ${part.example.start}`, part.example, rulesFor(ci), ch] as const] : [])),
-  );
-
-  it("every chapter has a lesson, with at least one example to try", () => {
+describe("lessons", () => {
+  it("every chapter's lesson is its moves, each saying why it works and what to do", () => {
     for (const ch of CHAPTERS) {
-      expect(ch.lesson.length, ch.id).toBeGreaterThan(0);
-      for (const part of ch.lesson) expect(part.text.length, `${ch.id}: ${part.title}`).toBeGreaterThan(0);
-      expect(ch.lesson.some((p) => p.example), ch.id).toBe(true);
-    }
-  });
-
-  it.each(examples)("%s: each step is one move", (_, g, rules, ch) => {
-    // As in the app: the chapter's letters may stand for positive numbers.
-    let state = startOf(g.start, ch);
-    for (const step of g.steps) {
-      const want = parseState(step.then);
-      // As in the app: the move is checked as made, then tidied.
-      const options = moves(state, rules);
-      const next = options.find((n) => matchesGoal(n, want));
-      expect(next, `"${step.say}" from ${printState(state)}: one move gives ${options.map(printState).join(" | ")}`).toBeDefined();
-      state = tidied(state, next!);
+      const moves = drillsOf(ch.id);
+      expect(moves.length, ch.id).toBeGreaterThan(0);
+      for (const m of moves) {
+        const w = en.drills[m.id as keyof typeof en.drills] as MoveWords;
+        expect(w?.name && w.how, `${ch.id}: ${m.id}`).toBeTruthy();
+        expect(w.text.length, `${ch.id}: ${m.id}: why it works`).toBeGreaterThan(0);
+      }
     }
   });
 });

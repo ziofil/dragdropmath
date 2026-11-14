@@ -54,8 +54,6 @@ export const nl: Translation = {
   watchOut: "Let op.",
   level: { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" },
   anotherOne: "Nog een →",
-  learnMoves: "Leer de zetten",
-  learnMovesNote: "Elke zet apart. Probeer hem zo vaak als je wilt.",
   practice: "Oefenen",
   testSkills: "Test jezelf",
   testNote:
@@ -128,11 +126,9 @@ export const nl: Translation = {
     `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "goed antwoord" : "goede antwoorden"} bij ${["Makkelijk", "Gemiddeld", "Moeilijk"][tier]} voor ${metal[tier]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Voorbeeld ${n}`,
   notThisStep: "Die zet mag wel, maar hij hoort niet bij deze stap. We zetten hem terug.",
   done: "Klaar.",
   keepGoing: "Je mag verder gaan: nu is elke zet toegestaan.",
-  stepOf: (n: number, total: number) => `Stap ${n} van ${total}`,
   startOver: "Opnieuw beginnen",
 
   // Exercise

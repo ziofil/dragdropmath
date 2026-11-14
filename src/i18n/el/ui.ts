@@ -53,8 +53,6 @@ export const el: Translation = {
   watchOut: "Προσοχή.",
   level: { easy: "Εύκολη", medium: "Μέτρια", hard: "Δύσκολη" },
   anotherOne: "Άλλη μία →",
-  learnMoves: "Μάθε τις κινήσεις",
-  learnMovesNote: "Κάθε κίνηση χωριστά. Δοκίμασέ την όσες φορές θέλεις.",
   practice: "Εξάσκηση",
   testSkills: "Δοκίμασε τον εαυτό σου",
   testNote:
@@ -127,11 +125,9 @@ export const el: Translation = {
     `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${more === 1 ? "σωστή απάντηση" : "σωστές απαντήσεις"} στις ${["εύκολες", "μέτριες", "δύσκολες"][tier]} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Παράδειγμα ${n}`,
   notThisStep: "Η κίνηση είναι σωστή, αλλά δεν είναι αυτή που θέλουμε σε αυτό το βήμα. Την παίρνω πίσω.",
   done: "Έτοιμο.",
   keepGoing: "Μπορείς να συνεχίσεις: τώρα επιτρέπεται κάθε κίνηση.",
-  stepOf: (n: number, total: number) => `Βήμα ${n} από ${total}`,
   startOver: "Από την αρχή",
 
   // Exercise

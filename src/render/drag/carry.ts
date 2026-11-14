@@ -87,6 +87,34 @@ export function landing(env: DragEnv, draggedId: string, result: MathState): Dra
 }
 
 /**
+ * A piece carried across = (a term, a bottom, a factor) can also be let go
+ * anywhere over the other side, not only just where it will sit: dropped on
+ * the 16 of x + 6 = 16, the 6 goes across. Aims at the middle of that side,
+ * when the piece ends up there (part of a side: a whole side carried over
+ * is swapping them).
+ */
+export function overOtherSide(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState>[] {
+  const from = locate(env.rc.state, draggedId);
+  const to = locate(result, draggedId);
+  // A whole side carried over the other is swapping them (11 = x → x = 11), not this.
+  if (!from || !to || env.rc.state.sides.length !== 2 || from.side === to.side || from.path.length === 0) return [];
+  const side = env.rc.state.sides[to.side];
+  const { rc, d } = env;
+  return [
+    d.custom((ctx: DragInitContext<MathState>) => {
+      const preview = renderStateReadOnly(ctx, result);
+      const box = canvasBox(rc, ctx, side.id);
+      return (frame) => {
+        const at = carriedCentre(rc, ctx, frame.pointer);
+        // Only once it's over that side: short of it, the row's own slots (a swap with the last term) come first.
+        const over = at.x >= box.symLeft.x && at.x <= box.symRight.x;
+        return { preview: () => preview, dropState: result, gap: over ? at.dist(box.centre) : Infinity };
+      };
+    }),
+  ];
+}
+
+/**
  * Pulling something out of its container, past the container's edge: a
  * factor out of ln( … ) or √( … ), or a term out of a fraction's top. The
  * first one goes out to the left, the others to the right.

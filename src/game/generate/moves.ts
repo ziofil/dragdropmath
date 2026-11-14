@@ -1,5 +1,5 @@
 /**
- * Learn the moves: endless one-move drills, one kind per move of a chapter.
+ * A chapter's lesson is its moves: endless one-move drills, one kind per move.
  * A drill writes a small start where its move applies; the goal is what that
  * one move makes of it (found with the move engine, so it is always exactly
  * one move away). Each drill has its own words in i18n (`drills`).
@@ -58,15 +58,21 @@ export const DRILLS: Record<string, Drill[]> = {
   distribute: [
     d("distribute", (r) => `${r.int(2, 6)}(${letter(r)} + ${r.int(1, 9)})`),
     d("distribute-neg", (r) => `${r.int(2, 9)} - (${letter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
+    // x(x + 2) gives x·x + 2x. Powers with exponents come in the Powers chapter.
+    d("x-times-x", (r) => `x·x + ${r.int(2, 9)}x`, "merge-powers"),
     d("factor-out", (r) => {
       const [x, y] = letters2(r);
       const a = r.int(2, 7);
       return `${a}${x} + ${a}${y}`;
     }),
-    // As the lesson has it: x(x + 2) gives x·x + 2x. Powers with exponents come in the Powers chapter.
-    d("x-times-x", (r) => `x·x + ${r.int(2, 9)}x`, "merge-powers"),
   ],
-  brackets: [d("power-to-product", (r) => `(${letter(r)} + ${r.int(1, 9)})^2`)],
+  brackets: [
+    d("bracket-times-bracket", (r) => {
+      const x = letter(r);
+      return `(${x} + ${r.int(1, 5)})(${x} + ${r.int(1, 5)})`;
+    }, "distribute"),
+    d("power-to-product", (r) => `(${letter(r)} + ${r.int(1, 9)})^2`),
+  ],
   balance: [
     d("move-term", (r) => `${letter(r)} + ${r.int(2, 9)} = ${r.int(10, 20)}`),
     d("move-factor", (r) => `${r.int(2, 9)}${letter(r)} = ${r.int(10, 40)}`),
@@ -98,16 +104,22 @@ export const DRILLS: Record<string, Drill[]> = {
       const b = r.int(2, 4);
       return `${x}^${b + r.int(1, 4)}/${x}^${b}`;
     }),
+    d("zero-power", (r) => `${letter(r)}^0 + ${r.int(2, 9)}`),
     d("flip-across-bar", (r) => `1/${letter(r)}^${r.int(2, 5)}`),
     d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`),
-    d("zero-power", (r) => `${letter(r)}^0 + ${r.int(2, 9)}`),
     d("tap-power", (r) => `${pick(r, ["2^3", "2^4", "2^5", "3^2", "3^3", "4^2", "5^2", "10^2"])} + ${letter(r)}`),
     d("power-of-product", (r) => `(${r.int(2, 5)}${letter(r)})^${r.int(2, 3)}`),
   ],
   factor: [
     d("split-number", (r) => `${letter(r)} + ${pick(r, [4, 6, 9, 10, 14, 15, 21, 25])}`),
+    d("bracket-out", (r) => {
+      const x = letter(r);
+      const a = r.int(1, 6);
+      const b = pick(r, [2, 3, 4, 5].filter((n) => n !== a));
+      return `${x}(${x} + ${a}) + ${b}(${x} + ${a})`;
+    }, "factor-out"),
     d("factor-shared", (r) => {
-      // The lesson's four terms, worked in pairs: x² + 2x + 3x + 6, the first two first.
+      // Four terms, worked in pairs: x² + 2x + 3x + 6, the first two first.
       const a = r.int(1, 5);
       const b = pick(r, [2, 3, 4, 5, 6].filter((n) => n !== a));
       return { start: `x·x + ${times(a, "x")} + ${b}x + ${a * b}`, want: `x*(x + ${a})` };
@@ -125,6 +137,10 @@ export const DRILLS: Record<string, Drill[]> = {
   ],
   inequalities: [
     d("ineq-move-term", (r) => `${letter(r)} + ${r.int(2, 9)} ${pick(r, ["<", ">", "≤", "≥"])} ${r.int(10, 20)}`, "move-term"),
+    d("ineq-move-factor", (r) => {
+      const a = r.int(2, 6);
+      return `${a}${letter(r)} ${pick(r, ["<", ">", "≤", "≥"])} ${a * r.int(2, 6)}`;
+    }, "move-factor"),
     d("ineq-swap", (r) => `${r.int(2, 9)} ${pick(r, ["<", ">"])} ${letter(r)}`, "swap-sides"),
     d("ineq-sign", (r) => `-${letter(r)} ${pick(r, ["<", ">", "≤", "≥"])} ${r.int(2, 9)}`, "move-sign"),
   ],
@@ -140,7 +156,10 @@ export const DRILLS: Record<string, Drill[]> = {
     d("multiply-fractions", (r) => {
       const p = r.int(1, 3);
       const q = r.int(1, 3);
-      return `(${p}/${p + r.int(1, 4)})·(${q}/${q + r.int(1, 4)})`;
+      const b = p + r.int(1, 4);
+      // Never the same fraction twice: (2/5)·(2/5) is a square (dropping one on the other makes (2/5)²).
+      const d = q + r.int(1, 4);
+      return `(${p}/${b})·(${q}/${p === q && d === b ? d + 1 : d})`;
     }),
     d("divide-by-fraction", (r) => `${r.int(2, 9)}/(${r.int(1, 3)}/${r.int(4, 7)})`),
     d("split-fraction", (r) => `(${letter(r)} + ${r.int(1, 9)})/${r.int(2, 9)}`),
@@ -204,7 +223,12 @@ export function oneMove(state: MathState, rule: RuleId, rules: readonly RuleId[]
  * move can't be made on (or whose result can't be written back as it is) is
  * tried again with the next numbers.
  */
-export function drillExercise(chapterId: string, drillId: string, seed: number): { start: string; goal: string } | null {
+/**
+ * A board for a drill: its start, the goal it shows, and everything else its
+ * move can make there (`also`): dropping either bracket of (x + 1)(x + 2) on
+ * the other is the same move, and both count.
+ */
+export function drillExercise(chapterId: string, drillId: string, seed: number): { start: string; goal: string; also: string[] } | null {
   const drill = drillById(chapterId, drillId);
   const ci = CHAPTERS.findIndex((c) => c.id === chapterId);
   if (!drill || ci < 0) return null;
@@ -223,7 +247,8 @@ export function drillExercise(chapterId: string, drillId: string, seed: number):
     const least = Math.min(...results.map(size));
     const goal = printState(pick(r, results.filter((s) => size(s) === least)));
     // The goal must read back as the very state the move makes.
-    if (results.some((s) => stateKey(s, "exact") === stateKey(parseState(goal), "exact"))) return { start, goal };
+    if (results.some((s) => stateKey(s, "exact") === stateKey(parseState(goal), "exact")))
+      return { start, goal, also: results.map(printState).filter((g) => g !== goal) };
   }
   return null;
 }

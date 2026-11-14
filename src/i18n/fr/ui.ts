@@ -55,8 +55,6 @@ export const fr: Translation = {
   watchOut: "Attention !",
   level: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
   anotherOne: "Un autre →",
-  learnMoves: "Apprends les mouvements",
-  learnMovesNote: "Chaque mouvement, un par un. Refais-le autant de fois que tu veux.",
   practice: "Entraîne-toi",
   testSkills: "Teste-toi",
   testNote: "Trouve la réponse de tête, puis choisis-la. Les bonnes réponses font gagner le badge du chapitre : 10 au niveau Facile pour le bronze, au niveau Moyen pour l'argent, au niveau Difficile pour l'or.",
@@ -128,11 +126,9 @@ export const fr: Translation = {
     `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} bonne${s(more)} réponse${s(more)} au niveau ${["Facile", "Moyen", "Difficile"][tier]} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Exemple ${n}`,
   notThisStep: "Ce mouvement est correct, mais ce n'est pas celui de cette étape. On le remet en place.",
   done: "Terminé.",
   keepGoing: "Tu peux continuer : maintenant, tous les mouvements sont permis.",
-  stepOf: (n: number, total: number) => `Étape ${n} sur ${total}`,
   startOver: "Recommencer",
 
   // Exercise

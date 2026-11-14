@@ -51,8 +51,6 @@ export const de: Translation = {
   watchOut: "Vorsicht!",
   level: { easy: "Leicht", medium: "Mittel", hard: "Schwer" },
   anotherOne: "Noch eine →",
-  learnMoves: "Umformungen kennenlernen",
-  learnMovesNote: "Jede Umformung einzeln. Probier sie so oft aus, wie du willst.",
   practice: "Üben",
   testSkills: "Teste dein Können",
   testNote:
@@ -125,11 +123,9 @@ export const de: Translation = {
     `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "richtige Antwort" : "richtige Antworten"} bei „${["Leicht", "Mittel", "Schwer"][tier]}“ bis ${TIER[tier + 1]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Beispiel ${n}`,
   notThisStep: "Das geht zwar, ist aber nicht der Schritt, um den es hier geht. Er wird zurückgenommen.",
   done: "Fertig.",
   keepGoing: "Du kannst weitermachen: Jetzt ist jeder Schritt erlaubt.",
-  stepOf: (n: number, total: number) => `Schritt ${n} von ${total}`,
   startOver: "Von vorn",
 
   // Exercise

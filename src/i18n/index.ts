@@ -13,7 +13,7 @@
  * browser's, else English. Switching re-renders the whole app (App is keyed by it).
  */
 import { useSyncExternalStore } from "react";
-import type { Chapter, Guided, LessonPart } from "../game/puzzles";
+import type { Chapter } from "../game/puzzles";
 import { en, type Strings, type Translation } from "./en";
 import { it } from "./it/ui";
 import { es } from "./es/ui";
@@ -41,15 +41,6 @@ export type { Strings };
 export type ChapterText = {
   title: string;
   blurb: string;
-  lesson: {
-    title: string;
-    text: string[];
-    /** The example's instructions (`say`), one per step, if the part has an example. */
-    steps?: string[];
-    /** The example's closing remark, if it has one. */
-    after?: string;
-    watch?: string;
-  }[];
 };
 
 export type ChapterTexts = Record<string, ChapterText>;
@@ -73,7 +64,13 @@ export type Lang = (typeof LANGS)[number]["code"];
 export const ENGLISH_ONLY = true;
 
 /** A translation, with English for what it doesn't have. */
-const withEnglish = (l: Translation): Strings => ({ ...en, ...l, drills: { ...en.drills, ...l.drills } }) as Strings;
+const withEnglish = (l: Translation): Strings =>
+  ({
+    ...en,
+    ...l,
+    // Each move's words, with English for what isn't translated (yet).
+    drills: Object.fromEntries(Object.entries(en.drills).map(([k, w]) => [k, { ...w, ...l.drills?.[k as keyof Strings["drills"]] }])),
+  }) as Strings;
 const UI: Record<Lang, Strings> = { en, it: withEnglish(it), es: withEnglish(es), de: withEnglish(de), fr: withEnglish(fr), pt: withEnglish(pt), pl: withEnglish(pl), nl: withEnglish(nl), tr: withEnglish(tr), el: withEnglish(el) };
 const CHAPTERS_IN: Record<Exclude<Lang, "en">, ChapterTexts> = { it: itChapters, es: esChapters, de: deChapters, fr: frChapters, pt: ptChapters, pl: plChapters, nl: nlChapters, tr: trChapters, el: elChapters };
 
@@ -136,23 +133,9 @@ export function chapterText(chapter: Chapter, lang: Lang = current): ChapterText
 }
 
 export function englishText(chapter: Chapter): ChapterText {
-  return {
-    title: chapter.title,
-    blurb: chapter.blurb,
-    lesson: chapter.lesson.map(partText),
-  };
+  return { title: chapter.title, blurb: chapter.blurb };
 }
 
-function partText(part: LessonPart): ChapterText["lesson"][number] {
-  return {
-    title: part.title,
-    text: part.text,
-    ...(part.example ? exampleText(part.example) : {}),
-    ...(part.watch ? { watch: part.watch } : {}),
-  };
-}
-
-const exampleText = (ex: Guided) => ({ steps: ex.steps.map((s) => s.say), ...(ex.after ? { after: ex.after } : {}) });
 
 /** Every chapter title, in every language (sets name a chapter by its title in any of them). */
 export function allTitles(chapter: Chapter): string[] {

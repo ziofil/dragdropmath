@@ -19,21 +19,6 @@ import { explog } from "./chapters/explog";
  * A worked example the learner does by hand, one instructed move at a time.
  * `then` is what the expression must look like after the move.
  */
-export type Guided = {
-  start: string;
-  steps: { say: string; then: string }[];
-  /** A closing remark, once it's done. */
-  after?: string;
-};
-
-export type LessonPart = {
-  title: string;
-  text: string[];
-  example?: Guided;
-  /** A common mistake. */
-  watch?: string;
-};
-
 export type Chapter = {
   id: string;
   title: string;
@@ -43,12 +28,6 @@ export type Chapter = {
    * never a lock — every chapter is open from the start.
    */
   after: string[];
-  /**
-   * The lesson, before the exercises: short parts, each an idea in a few
-   * sentences (`backticks` mark maths), usually with an example to do by
-   * hand, and sometimes a common mistake to watch out for.
-   */
-  lesson: LessonPart[];
   /** Rules this chapter unlocks; earlier chapters' rules stay available. */
   unlocks: RuleId[];
 };

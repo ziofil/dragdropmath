@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import { loadProgress } from "../game/scoring";
 import { drillExercise, drillsOf, type Drill } from "../game/generate/moves";
 import { freshSeed } from "../game/generate/practice";
-import { GuidedExample } from "./Guided";
+import { MoveBoard } from "./Guided";
 import { MathText } from "./MathText";
 import { BadgeRow, LevelButtons } from "./Practice";
 import { chapterText, t } from "../i18n";
+import type { MoveWords } from "../i18n/en";
 
 /**
- * A chapter: the lesson (ideas, each tried by hand, then its moves one at a
- * time, each with a board to try it on), practice, and the test.
+ * A chapter: the lesson (its moves one at a time: why each works, and a
+ * board to try it on), practice, and the test.
  * `section`: one to scroll to.
  */
 export function ChapterView({ chapter, section }: { chapter: Chapter; section?: string }) {
@@ -24,7 +25,6 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
   const rules = rulesFor(ci);
   const text = chapterText(chapter);
   const drills = drillsOf(chapter.id);
-  let example = 0;
 
   return (
     <main className="chapter-page">
@@ -38,39 +38,12 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
       <h1 className="chapter-title">{text.title}</h1>
       <p className="chapter-blurb">{text.blurb}</p>
 
-      {chapter.lesson.map((part, i) => {
-        const words = text.lesson[i];
-        return (
-          <section className="theory lesson-part" key={i}>
-            <h2>
-              <span className="part-num">{i + 1}</span> {words.title}
-            </h2>
-            {words.text.map((p, k) => (
-              <p key={k}>
-                <MathText text={p} />
-              </p>
-            ))}
-            {part.example && <GuidedExample example={part.example} words={words} rules={rules} positive={lettersPositive(chapter)} n={++example} />}
-            {words.watch && (
-              <p className="watch">
-                <strong>{t().watchOut}</strong> <MathText text={words.watch} />
-              </p>
-            )}
-          </section>
-        );
-      })}
-
-      {drills.length > 0 && (
-        <>
-          <h2 className="moves-head" id="moves">
-            {t().learnMoves}
-          </h2>
-          <p className="chapter-blurb">{t().learnMovesNote}</p>
-          {drills.map((d, i) => (
-            <MoveBlock key={d.id} chapter={chapter} drill={d} rules={rules} n={chapter.lesson.length + i + 1} />
-          ))}
-        </>
-      )}
+      {/* The lesson: the chapter's moves, one after another, each with a board to try it on. */}
+      <div id="moves">
+        {drills.map((d, i) => (
+          <MoveBlock key={d.id} chapter={chapter} drill={d} rules={rules} n={i + 1} />
+        ))}
+      </div>
 
       <section className="practice" id="practice">
         <h2>{t().practice}</h2>
@@ -100,25 +73,36 @@ export function ChapterView({ chapter, section }: { chapter: Chapter; section?: 
   );
 }
 
-/** One move: its name, how it's made, and a board to make it on, again with new numbers as often as one likes. */
+/** One move: its name, why it works, what to do, and a board to do it on, again with new numbers as often as one likes. */
 function MoveBlock({ chapter, drill, rules, n }: { chapter: Chapter; drill: Drill; rules: ReturnType<typeof rulesFor>; n: number }) {
   const [seed, setSeed] = useState(freshSeed);
   const d = drillExercise(chapter.id, drill.id, seed);
-  const words = t().drills[drill.id as keyof ReturnType<typeof t>["drills"]];
+  const words: MoveWords = t().drills[drill.id as keyof ReturnType<typeof t>["drills"]];
   if (!d) return null;
   return (
     <section className="theory lesson-part">
       <h2>
         <span className="part-num">{n}</span> {words.name}
       </h2>
-      <GuidedExample
+      {words.text.map((p, k) => (
+        <p key={k}>
+          <MathText text={p} />
+        </p>
+      ))}
+      <MoveBoard
         key={seed}
-        example={{ start: d.start, steps: [{ say: words.how, then: d.goal }] }}
-        words={{ steps: [words.how] }}
+        start={d.start}
+        goals={[d.goal, ...d.also]}
+        how={words.how}
         rules={rules}
         positive={lettersPositive(chapter)}
         more={{ text: t().anotherOne, onClick: () => setSeed(freshSeed()) }}
       />
+      {words.watch && (
+        <p className="watch">
+          <strong>{t().watchOut}</strong> <MathText text={words.watch} />
+        </p>
+      )}
     </section>
   );
 }

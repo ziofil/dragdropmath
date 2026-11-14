@@ -54,8 +54,6 @@ export const tr: Translation = {
   watchOut: "Dikkat!",
   level: { easy: "Kolay", medium: "Orta", hard: "Zor" },
   anotherOne: "Bir tane daha →",
-  learnMoves: "Hamleleri öğren",
-  learnMovesNote: "Her hamle ayrı ayrı. Birini istediğin kadar tekrar deneyebilirsin.",
   practice: "Alıştırma yap",
   testSkills: "Kendini sına",
   testNote:
@@ -128,11 +126,9 @@ export const tr: Translation = {
     `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${["Kolay", "Orta", "Zor"][tier]} seviyede ${more} doğru cevap daha.`,
 
   // Guided example
-  exampleN: (n: number) => `Örnek ${n}`,
   notThisStep: "Bu hamle geçerli, ama bu adımda yapılacak olan bu değil. Geri alıyorum.",
   done: "Tamam.",
   keepGoing: "Devam edebilirsin: artık her hamle serbest.",
-  stepOf: (n: number, total: number) => `Adım ${n}/${total}`,
   startOver: "Baştan başla",
 
   // Exercise

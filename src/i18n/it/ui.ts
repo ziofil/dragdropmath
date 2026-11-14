@@ -53,8 +53,6 @@ export const it: Translation = {
   watchOut: "Attenzione.",
   level: { easy: "Facile", medium: "Medio", hard: "Difficile" },
   anotherOne: "Un altro →",
-  learnMoves: "Impara le mosse",
-  learnMovesNote: "Una mossa alla volta. Provala tutte le volte che vuoi.",
   practice: "Esercitati",
   testSkills: "Mettiti alla prova",
   testNote: "Trova la risposta a mente, poi sceglila. Con le risposte giuste vinci la medaglia del capitolo: 10 al livello Facile per il bronzo, al Medio per l'argento, al Difficile per l'oro.",
@@ -126,11 +124,9 @@ export const it: Translation = {
     `${tier ? `${medal[tier]}. ` : ""}${more === 1 ? "Ancora 1 risposta giusta" : `Ancora ${more} risposte giuste`} al livello ${["Facile", "Medio", "Difficile"][tier]} per ${["il bronzo", "l'argento", "l'oro"][tier]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Esempio ${n}`,
   notThisStep: "Questa mossa funziona, ma non è quella di questo passaggio. La rimetto a posto.",
   done: "Fatto.",
   keepGoing: "Puoi continuare: ora puoi fare qualsiasi mossa.",
-  stepOf: (n: number, total: number) => `Passaggio ${n} di ${total}`,
   startOver: "Ricomincia",
 
   // Exercise

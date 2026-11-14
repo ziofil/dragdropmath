@@ -53,8 +53,6 @@ export const pt: Translation = {
   watchOut: "Atenção.",
   level: { easy: "Fácil", medium: "Médio", hard: "Difícil" },
   anotherOne: "Outro →",
-  learnMoves: "Aprenda os movimentos",
-  learnMovesNote: "Um movimento de cada vez. Repita cada um quantas vezes quiser.",
   practice: "Prática",
   testSkills: "Teste o que você aprendeu",
   testNote:
@@ -127,11 +125,9 @@ export const pt: Translation = {
     `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? "Falta 1 acerto" : `Faltam ${more} acertos`} no ${["Fácil", "Médio", "Difícil"][tier]} para a medalha de ${TIER[tier + 1]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Exemplo ${n}`,
   notThisStep: "Esse movimento vale, mas não é o deste passo. Vou desfazer.",
   done: "Pronto.",
   keepGoing: "Pode continuar: agora vale qualquer movimento.",
-  stepOf: (n: number, total: number) => `Passo ${n} de ${total}`,
   startOver: "Recomeçar",
 
   // Exercise

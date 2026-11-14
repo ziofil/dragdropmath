@@ -177,12 +177,13 @@ export const multiplyFractions: Rule = {
 export const divideByFraction: Rule = {
   id: "divide-by-fraction",
   name: "Dividing by a fraction",
-  gesture: "Carry a fraction from the bottom up across the bar — it flips upside down and multiplies.",
+  gesture: "Carry a fraction from the bottom up onto the top — it flips upside down and multiplies.",
   apply(state, id) {
     const c = dragCtx(state, id);
     if (c?.parent?.kind !== "frac" || c.index !== 1 || c.node.kind !== "frac") return [];
     const D = c.node;
     const flipped = frac(D.den, D.num, D.id);
-    return [{ rule: "divide-by-fraction", state: replaceIn(state, c.parentLoc!, prod([c.parent.num, flipped])) }];
+    // Brought up onto the top, which it multiplies.
+    return [{ rule: "divide-by-fraction", state: replaceIn(state, c.parentLoc!, prod([c.parent.num, flipped])), targetId: c.parent.num.id }];
   },
 };

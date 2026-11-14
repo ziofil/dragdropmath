@@ -104,3 +104,15 @@ export function solutionVia(start: MathState, goal: MathState, via: readonly Mat
   }
   return out;
 }
+
+/**
+ * This move does the step: it gives what the step shows, or the same in
+ * another order (dropping the first x of x + 2 + x on the second gives
+ * 2 + 2x, not 2x + 2: just as right). Not when the step is the order itself
+ * (a reorder: the same terms as before, in any order).
+ */
+export function stepDone(before: MathState, next: MathState, want: MathState): boolean {
+  if (matchesGoal(next, want)) return true;
+  const reorder = stateKey(before, false) === stateKey(want, false);
+  return !reorder && matchesGoal(next, want, false);
+}

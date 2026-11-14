@@ -52,8 +52,6 @@ export const es: Translation = {
   watchOut: "¡Ojo!",
   level: { easy: "Fácil", medium: "Medio", hard: "Difícil" },
   anotherOne: "Otro →",
-  learnMoves: "Aprende los movimientos",
-  learnMovesNote: "Cada movimiento por separado. Pruébalo tantas veces como quieras.",
   practice: "Practica",
   testSkills: "Ponte a prueba",
   testNote: "Calcula la respuesta mentalmente y luego elígela. Las respuestas correctas te dan la insignia del capítulo: 10 en Fácil para la de bronce, en Medio para la de plata y en Difícil para la de oro.",
@@ -125,11 +123,9 @@ export const es: Translation = {
     `${tier ? `Insignia de ${TIER[tier]}. ` : ""}${more === 1 ? "Te falta 1 respuesta correcta" : `Te faltan ${more} respuestas correctas`} en ${["Fácil", "Medio", "Difícil"][tier]} para la insignia de ${TIER[tier + 1]}.`,
 
   // Guided example
-  exampleN: (n: number) => `Ejemplo ${n}`,
   notThisStep: "Ese movimiento es correcto, pero no es el de este paso. Lo devuelvo a su sitio.",
   done: "Hecho.",
   keepGoing: "Puedes seguir: ahora vale cualquier movimiento.",
-  stepOf: (n: number, total: number) => `Paso ${n} de ${total}`,
   startOver: "Empezar de nuevo",
 
   // Exercise

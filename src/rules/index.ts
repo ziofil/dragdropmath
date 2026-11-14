@@ -1,6 +1,6 @@
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
-import { allNodes, withoutFrom } from "../expr/tree";
+import { allNodes, locate, nodeAt, parentLoc, withoutFrom } from "../expr/tree";
 import { dragCtx, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
@@ -173,7 +173,50 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   // the √ (and the 1 and n inside it). A root moves as one piece; its ½ is
   // reached by tapping the root into x^(1/2) first.
   const inert = rootParts(state);
-  const drag = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
+  const own = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
+  // Two-way merges: dropping B on A does what dropping A on B does (see MIRRORED).
+  const mirrorable = enabled.filter((id) => MIRRORED.includes(id));
+  const nodes = state.sides.flatMap(allNodes);
+  // A piece inside a term among others (the bracket of x(x − 2) + 5x): a press
+  // there picks up the whole term, to carry it; the way back alone mustn't
+  // make the piece a handle of its own.
+  const inCompany = (id: string) => {
+    let loc = locate(state, id);
+    while (loc && loc.path.length > 0) {
+      const up = parentLoc(loc)!;
+      const P = nodeAt(state, up);
+      if (P.kind === "sum" && P.terms.length >= 2) return nodeAt(state, loc).id !== id;
+      loc = up;
+    }
+    return false;
+  };
+  // Two pieces side by side in a row, or not in the same row at all.
+  const neighbours = (a: string, b: string) => {
+    const ca = dragCtx(state, a);
+    const cb = dragCtx(state, b);
+    const row = ca?.parent && cb?.parent && ca.parent.id === cb.parent.id && (ca.parent.kind === "prod" || ca.parent.kind === "sum");
+    return !row || Math.abs(ca!.index - cb!.index) === 1;
+  };
+  const drag = memo((id): Candidate[] => {
+    const mine = own(id);
+    if (inert.has(id) || !mirrorable.length) return mine;
+    const seen = new Set(mine.map((c) => stateKey(c.state, "exact")));
+    const back: Candidate[] = [];
+    for (const n of nodes) {
+      if (n.id === id || inert.has(n.id)) continue;
+      for (const c of own(n.id)) {
+        // Only where this piece has no move of its own onto that one. Nor from a bracket: carried onto another factor it has a direction of its own ((x + 1) onto (x + 2)).
+        if (c.targetId !== id || !mirrorable.includes(c.rule) || mine.some((m) => m.targetId === n.id) || n.kind === "sum") continue;
+        // In the same row, only from a neighbour: (x + 2) doesn't reach over (x + 1) to the 2 of 2(x + 1)(x + 2).
+        if (!neighbours(id, n.id)) continue;
+        const k = stateKey(c.state, "exact");
+        if (seen.has(k)) continue;
+        seen.add(k);
+        back.push({ rule: c.rule, state: c.state, targetId: n.id, ...(inCompany(id) ? { secondary: true } : {}) });
+      }
+    }
+    return [...mine, ...back];
+  });
   const tap = memo((id) => (inert.has(id) ? null : (collect(state, id, tapRules)[0] ?? null)));
   const grabbable = memo((id) => !partOfUnit(state, id) && drag(id).some((c) => !isCosmetic(state, id, c) && !c.secondary));
   const tappable = memo((id) => tap(id) !== null);
@@ -203,6 +246,26 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   }
   return out;
 }
+
+/**
+ * Merges that work both ways round: whichever of the two is dropped on the
+ * other, the same happens (36 on the 6 of 36/6 as well as 6 on the 36, the
+ * bracket of 4(x + 6) on the 4, ln x on the 4 of 4·ln x, …).
+ */
+const MIRRORED: RuleId[] = [
+  "divide-numbers",
+  "power-of-power",
+  "divide-powers",
+  "evaluate-power",
+  "distribute",
+  "substitute",
+  "exp-of-log",
+  "power-into-log",
+  "divide-by-fraction",
+  "times-one",
+  "power-one",
+  "zero-power",
+];
 
 /** A root's exponent (drawn as the √) and everything inside it. */
 function rootParts(state: MathState): Set<string> {
