@@ -49,21 +49,19 @@ export const nl: Strings = {
   // Chapter page
   backToPath: "← Leerpad",
   exercises: "Oefeningen",
-  practiceNote: "Ze beginnen makkelijk en worden steeds moeilijker. In de latere oefeningen gebruik je ook wat je in eerdere hoofdstukken hebt geleerd.",
+  practiceNote: "Elke oefening is nieuw, speciaal voor jou gemaakt. Begin met de makkelijke en ga een niveau hoger als je er klaar voor bent.",
   leadsOnToStart: "Hierna komt ",
   leadsOnToEnd: ". Daar kun je altijd heen.",
   watchOut: "Let op.",
+  level: { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" },
+  anotherOne: "Nog een →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} van ${total} oefeningen opgelost`,
-  guessedRight: (n: number, total: number) => `${n} van ${total} in één keer goed voorspeld`,
   exerciseTitle: (label: string, solved: boolean) => `Oefening ${label}${solved ? " — opgelost" : ""}`,
   solved: "opgelost",
-  guessedRightFirstTime: "in één keer goed voorspeld",
-  guessFirstShort: "Eerst voorspellen",
-  goldNote: "Gouden badge. Alle oefeningen opgelost.",
+  goldNote: "Gouden badge. Je kunt zo lang doorgaan als je wilt.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "oefening" : "oefeningen"} voor ${metal[tier]}.`,
+    `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${["makkelijke", "gemiddelde", "moeilijke"][tier]} ${more === 1 ? "oefening" : "oefeningen"} voor ${metal[tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Voorbeeld ${n}`,
@@ -76,7 +74,6 @@ export const nl: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: les`,
   nextExercise: "Volgende oefening →",
-  backToThePath: "Terug naar het leerpad",
   exercisesNav: "Oefeningen",
   previousTitle: (label: string) => `Vorige: oefening ${label}`,
   previousLabel: (label: string) => `Vorige oefening (${label})`,
@@ -92,7 +89,6 @@ export const nl: Strings = {
   notQuite: "Net niet. De groene is goed. Los hem op, dan zie je waar het bij jou misging.",
   solvedBefore: "✓ Deze heb je al eens opgelost. Je mag hem nog een keer doen.",
   makeItLookLike: "Maak er dit van",
-  positiveLetters: "Letters staan hier voor positieve getallen.",
   pickFirst: "Kies hierboven een antwoord en los het dan hier op.",
   hint: "Tip",
   undo: "Ongedaan maken",

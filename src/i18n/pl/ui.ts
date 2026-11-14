@@ -58,21 +58,19 @@ export const pl: Strings = {
   // Chapter page
   backToPath: "← Ścieżka nauki",
   exercises: "Zadania",
-  practiceNote: "Na początku są łatwe, potem coraz trudniejsze. W dalszych przyda się też to, co znasz z wcześniejszych rozdziałów.",
+  practiceNote: "Każde zadanie jest nowe, ułożone specjalnie dla ciebie. Zacznij od łatwych i przejdź wyżej, kiedy poczujesz, że już czas.",
   leadsOnToStart: "Dalej możesz przejść do: ",
   leadsOnToEnd: ". Zajrzyj tam, kiedy chcesz.",
   watchOut: "Uwaga!",
+  level: { easy: "Łatwe", medium: "Średnie", hard: "Trudne" },
+  anotherOne: "Jeszcze jedno →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `Rozwiązane zadania: ${done} z ${total}`,
-  guessedRight: (n: number, total: number) => `Dobrze za pierwszym razem: ${n} z ${total}`,
   exerciseTitle: (label: string, solved: boolean) => `Zadanie ${label}${solved ? " — rozwiązane" : ""}`,
   solved: "rozwiązane",
-  guessedRightFirstTime: "dobrze za pierwszym razem",
-  guessFirstShort: "Najpierw pomyśl",
-  goldNote: "Złota odznaka. Wszystkie zadania rozwiązane.",
+  goldNote: "Złota odznaka. Możesz ćwiczyć dalej, ile chcesz.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "zadanie", "zadania", "zadań")} do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
+    `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, ["łatwe", "średnie", "trudne"][tier], ["łatwe", "średnie", "trudne"][tier], ["łatwych", "średnich", "trudnych"][tier])} ${plural(more, "zadanie", "zadania", "zadań")} do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Przykład ${n}`,
@@ -85,7 +83,6 @@ export const pl: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: lekcja`,
   nextExercise: "Następne zadanie →",
-  backToThePath: "Wróć do ścieżki nauki",
   exercisesNav: "Zadania",
   previousTitle: (label: string) => `Poprzednie: zadanie ${label}`,
   previousLabel: (label: string) => `Poprzednie zadanie (${label})`,
@@ -101,7 +98,6 @@ export const pl: Strings = {
   notQuite: "Niezupełnie. Dobra jest ta zielona. Rozwiąż zadanie, a zobaczysz, gdzie był błąd.",
   solvedBefore: "✓ To zadanie jest już rozwiązane. Możesz rozwiązać je jeszcze raz.",
   makeItLookLike: "Doprowadź do postaci",
-  positiveLetters: "Tutaj litery oznaczają liczby dodatnie.",
   pickFirst: "Wybierz odpowiedź powyżej, a potem rozwiąż zadanie tutaj.",
   hint: "Podpowiedź",
   undo: "Cofnij",

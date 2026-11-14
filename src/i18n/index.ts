@@ -46,8 +46,6 @@ export type ChapterText = {
     after?: string;
     watch?: string;
   }[];
-  /** Hints, by exercise id (only the exercises that have one). */
-  hints: Record<string, string>;
 };
 
 export type ChapterTexts = Record<string, ChapterText>;
@@ -132,7 +130,6 @@ export function englishText(chapter: Chapter): ChapterText {
     title: chapter.title,
     blurb: chapter.blurb,
     lesson: chapter.lesson.map(partText),
-    hints: Object.fromEntries(chapter.puzzles.filter((p) => p.hint).map((p) => [p.id, p.hint!])),
   };
 }
 

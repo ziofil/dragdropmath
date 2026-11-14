@@ -26,6 +26,22 @@ export const divideNumbers: Rule = {
   },
 };
 
+/** 8/2 → 4: tap the fraction bar to work it out, when it comes out whole. */
+export const evaluateFraction: Rule = {
+  id: "evaluate-fraction",
+  name: "Work out a fraction",
+  gesture: "Tap the bar of a fraction of two numbers to work it out, when it comes out whole: 8/2 → 4.",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    const f = c?.node;
+    if (!c || f?.kind !== "frac" || f.num.kind !== "num" || f.den.kind !== "num" || f.den.value === 0) return [];
+    const v = f.num.value / f.den.value;
+    if (!Number.isInteger(v)) return [];
+    return [{ rule: "evaluate-fraction", state: replaceIn(state, c.loc, num(v, f.id)) }];
+  },
+};
+
 /** ab/b → a (drop a factor on the bottom onto the same factor on top). */
 export const cancelFactor: Rule = {
   id: "cancel-factor",

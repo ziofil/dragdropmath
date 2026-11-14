@@ -36,14 +36,6 @@ export const nlChapters: ChapterTexts = {
         steps: ["Sleep de 5 op de 2."],
       },
     ],
-    hints: {
-      s1: "Sleep de 2 achter de x.",
-      s2: "Sleep de 4 op de 3.",
-      s3: "Sleep het ene getal op het andere.",
-      s8: "De 4 houdt zijn minteken.",
-      s17: "2 − 7 is kleiner dan nul.",
-      s24: "Zet de term met a vooraan en het losse getal achteraan.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const nlChapters: ChapterTexts = {
         watch: "`x + x` is `2x`, niet `x²`. `x²` betekent `x·x`, en dat komt later.",
       },
     ],
-    hints: {
-      c4: "Iets min zichzelf is 0.",
-      c17: "Zie ab als één letter: 3ab + 2ab gaat net als 3x + 2x.",
-      c9: "Reken eerst 2·3 uit. Neem daarna de x-termen samen.",
-      c6: "Neem eerst de x-termen samen, dan de y-termen.",
-      c27: "Neem de b's samen en zet daarna de letters op volgorde, met het losse getal achteraan.",
-    },
   },
 
   distribute: {
@@ -119,15 +104,6 @@ export const nlChapters: ChapterTexts = {
         steps: ["Sleep de x op de haakjes.", "Sleep de ene x op de andere."],
       },
     ],
-    hints: {
-      d1: "Sleep de a op de haakjes.",
-      d3: "Sleep een a uit een van beide termen naar voren.",
-      d19: "Sleep het minteken op de haakjes.",
-      d6: "Sleep het minteken op de haakjes.",
-      d14: "Het minteken vermenigvuldigt elke term tussen de haakjes.",
-      d18: "De −2 vermenigvuldigt beide termen tussen zijn haakjes.",
-      d27: "Elk getal of elke letter voor de haakjes vermenigvuldigt beide termen ertussen. Neem daarna de y²-termen en de y-termen samen.",
-    },
   },
 
   brackets: {
@@ -160,15 +136,6 @@ export const nlChapters: ChapterTexts = {
         watch: "`(x + 1)²` is niet `x² + 1`. Probeer maar x = 2: `(2 + 1)² = 9`, maar `2² + 1 = 5`. Het verschil zit in de twee middelste termen, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Sleep de x op de haakjes. Hoe schrijf je x·x?",
-      m2: "Sleep het ene paar haakjes in zijn geheel op het andere. Werk daarna elk stuk uit.",
-      m18: "x·x² is x·x·x, dus x³.",
-      m5: "Kijk naar de twee middelste termen.",
-      m25: "Er zijn drie factoren. Vermenigvuldig er eerst twee, en de uitkomst dan met de derde.",
-      m7: "Tik op de ² om het als (x + 2)(x + 2) te schrijven.",
-      m9: "Het is niet zomaar a² + b². Vermenigvuldig elke term met elke term.",
-    },
   },
 
   balance: {
@@ -194,7 +161,7 @@ export const nlChapters: ChapterTexts = {
           "Bij delen werkt het ook. Bij `x/3 = 4` vermenigvuldig je beide kanten met 3. De 3 uit de noemer gaat naar de andere kant en vermenigvuldigt daar.",
           "Ook een minteken voor een hele kant kan naar de overkant: `−x = 6` wordt `x = −6`.",
         ],
-        steps: ["Sleep de 3 naar de andere kant van het =."],
+        steps: ["Sleep de 3 naar de andere kant van het =.", "Sleep de 4 op de 3."],
       },
       {
         title: "Terugrekenen in omgekeerde volgorde",
@@ -205,15 +172,6 @@ export const nlChapters: ChapterTexts = {
         watch: "Controleer je antwoord door het in te vullen: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Sleep de 3 naar de andere kant van het isgelijkteken.",
-      b10: "Sleep de hele rechterkant naar de overkant om de kanten om te wisselen, of los het op zoals het staat.",
-      b21: "Het antwoord mag een breuk zijn.",
-      b22: "De hele teller wordt door 2 gedeeld. Sleep eerst de 2 naar de overkant.",
-      b7: "Sneller: sleep de 2 naar de overkant voordat je de haakjes wegwerkt.",
-      b12: "Breng eerst de + 1 naar de overkant.",
-      b23: "Een minteken voor haakjes verandert elk teken ertussen.",
-    },
   },
 
   powers: {
@@ -248,17 +206,6 @@ export const nlChapters: ChapterTexts = {
         watch: "`2x³` is `2·x·x·x`: de macht hoort alleen bij de x. `(2x)³` is iets anders: dat is `8x³`.",
       },
     ],
-    hints: {
-      w6: "Sleep de x³ omhoog over de breukstreep.",
-      w1: "Hetzelfde grondtal: sleep de ene macht op de andere en tel de exponenten op.",
-      w11: "Een losse x is x¹.",
-      w5: "Het antwoord heeft een negatieve exponent.",
-      w2: "Sleep de buitenste 3 op de binnenste 2 en vermenigvuldig.",
-      w3: "Haal de 2 uit de haakjes. Ook die gaat tot de derde macht.",
-      w21: "Werk eerst de haakjes weg: x keer x² is x³.",
-      w25: "Vermenigvuldig elke term met x⁻¹. x⁻¹ keer x is x⁰.",
-      w30: "Schrijf het als (x² + 3)(x² + 3) en vermenigvuldig elke term met elke term.",
-    },
   },
 
   factor: {
@@ -293,16 +240,6 @@ export const nlChapters: ChapterTexts = {
         watch: "Controleer een ontbinding altijd door de haakjes weer weg te werken. Dan moet je precies terugkrijgen waarmee je begon.",
       },
     ],
-    hints: {
-      g5: "Beide termen hebben hetzelfde stuk tussen haakjes. Breng dat buiten haakjes.",
-      g1: "Tik op de ² om x² als x·x te schrijven. Dan hebben beide termen een x.",
-      g2: "Tik op de 6 om hem in factoren te splitsen.",
-      g15: "Door welk getal zijn 6 en 9 allebei deelbaar?",
-      g21: "Schrijf het kwadraat als product. Dan hebben beide termen een (x + 1).",
-      g22: "Ontbind 2x + 6. Krijg je dan een (x + 3)?",
-      g6: "Werk per twee: sleep een x uit x² op 2x, en daarna een 3 op de 6.",
-      g29: "Alle vier de termen hebben een factor 2. Breng die eerst buiten haakjes en ontbind de rest dan per twee.",
-    },
   },
 
   formulas: {
@@ -341,13 +278,6 @@ export const nlChapters: ChapterTexts = {
         steps: ["Beide termen hebben een x. Sleep één x naar voren.", "Sleep nu het hele stuk (a + b) naar de overkant."],
       },
     ],
-    hints: {
-      q6: "De A staat in de noemer. Sleep hem naar de overkant.",
-      q8: "Breng eerst de u weg, dan de a.",
-      q16: "x komt twee keer voor. Breng x eerst buiten haakjes.",
-      q17: "P zit in beide termen.",
-      q22: "Zet beide x-termen aan één kant en breng x dan buiten haakjes.",
-    },
   },
 
   inequalities: {
@@ -379,13 +309,6 @@ export const nlChapters: ChapterTexts = {
         watch: "Alleen vermenigvuldigen of delen door een negatief getal laat het teken omklappen. Een term naar de overkant brengen doet dat nooit.",
       },
     ],
-    hints: {
-      i3: "Sleep het minteken naar de overkant. Het teken klapt om.",
-      i1: "Sleep net als bij een vergelijking de 3 naar de overkant.",
-      i8: "Sleep de hele linkerkant naar de overkant: 5 < x + 2 en x + 2 > 5 zeggen hetzelfde.",
-      i5: "Breng eerst het minteken weg, dan de 2.",
-      i26: "Werk eerst de haakjes weg en zet dan de x-termen aan één kant.",
-    },
   },
 
   fractions: {
@@ -422,18 +345,6 @@ export const nlChapters: ChapterTexts = {
         after: "Deel daarna de gemeenschappelijke factoren van teller en noemer weg. Dan krijg je 3/2.",
       },
     ],
-    hints: {
-      f1: "Sleep de 8 op de 6.",
-      f2: "Gelijke noemers: sleep de ene breuk op de andere.",
-      f6: "Haal de 2 uit de teller.",
-      f5: "Sleep de 3 op de 2.",
-      f22: "Ontbind eerst de teller. Dan hebben teller en noemer iets gemeen dat je kunt wegdelen.",
-      f8: "Sleep ¾ omhoog over de breukstreep.",
-      f3: "Sleep de 3 op ½ en de 2 op ⅓, zodat de noemers gelijk worden.",
-      f4: "Tik op de 6 om hem in factoren te splitsen.",
-      f17: "Tik op de 4 om hem te splitsen. 4 is 2·2.",
-      f28: "Maak van 1 + ½ eerst één breuk.",
-    },
   },
 
   simultaneous: {
@@ -469,13 +380,6 @@ export const nlChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y is 3: sleep de y van y = 3 op de y in de andere vergelijking.",
-      e4: "Sleep de y van y = 2x op de y in de andere vergelijking. Weet je x, vul het dan in bij y = 2x.",
-      e18: "Nog geen van beide letters staat alleen. Sleep de −y naar de overkant, dan krijg je x = 1 + y. Substitueer daarna.",
-      e21: "Maak y vrij in de eerste vergelijking: y = 5 − x.",
-      e27: "x = 1 + y, dus 2x wordt 2(1 + y). Gebruik het hele stuk tussen haakjes.",
-    },
   },
 
   roots: {
@@ -510,20 +414,6 @@ export const nlChapters: ChapterTexts = {
         steps: ["Tik op de wortel om hem als macht te schrijven.", "Sleep de ½ naar de andere kant van het =. Daar wordt het een kwadraat.", "Reken het uit."],
       },
     ],
-    hints: {
-      r2: "Tik erop.",
-      r5: "Sleep de ene √x op de andere. Een wortel keer zichzelf geeft wat eronder staat.",
-      r16: "Zie √3 als een letter: 2√3 + √3 gaat net als 2x + x.",
-      r1: "Tik op de √ om het uit te rekenen. Of tik op de 9 om hem in 3·3 te splitsen en breng dan één 3 buiten de wortel.",
-      r8: "Tik op de wortel om hem als macht te schrijven en sleep dan de ½ naar de andere kant van het isgelijkteken.",
-      r6: "Tik op de wortel om hem als macht ½ te schrijven en sleep dan de ½ op de 2.",
-      r3: "Haal de 4 uit de wortel. Hij krijgt zijn eigen √.",
-      r20: "x³ is x²·x, en x² komt als x buiten de wortel.",
-      r11: "Zorg eerst dat √x alleen staat.",
-      r4: "Tik op de 12 om er een kwadraatgetal uit te halen.",
-      r22: "Haal eerst de 4 uit de wortel: dan zijn de √x-termen gelijksoortig.",
-      r29: "Splits de 8 zo dat er een kwadraatgetal onder de wortel staat.",
-    },
   },
 
   explog: {
@@ -554,21 +444,5 @@ export const nlChapters: ChapterTexts = {
         steps: ["Sleep de e naar de andere kant van het =."],
       },
     ],
-    hints: {
-      l2: "Sleep de e op de ln.",
-      l3: "Sleep de ln op wat erin staat.",
-      l4: "Sleep de 3 naar voren.",
-      l19: "Trek je logaritmen van elkaar af, dan deel je wat erin staat.",
-      l8: "Sleep de e naar de andere kant van het isgelijkteken.",
-      l20: "Dezelfde zet als bij e, maar nu wordt de 2 een log₂.",
-      l12: "Een wortel is een macht. Sleep de √ naar voren.",
-      l15: "e tot welke macht geeft 1?",
-      l1: "Sleep de x naar voren, voor de ln. Wat is ln(e)?",
-      l14: "Breng eerst de ½ binnen de ln.",
-      l7: "Tik op de 8 om hem als macht van 2 te schrijven. Sleep dan de 3 naar voren en tik op log₂(2).",
-      l22: "Hetzelfde grondtal, dus tel de exponenten op.",
-      l23: "Splits eerst de ln. Wat is ln(e)?",
-      l26: "Zorg eerst dat de macht alleen staat.",
-    },
   },
 };

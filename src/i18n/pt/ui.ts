@@ -48,21 +48,19 @@ export const pt: Strings = {
   // Chapter page
   backToPath: "← Trilha de aprendizagem",
   exercises: "Exercícios",
-  practiceNote: "Eles começam fáceis e vão ficando mais difíceis. Os últimos também usam o que você aprendeu nos capítulos anteriores.",
+  practiceNote: "Cada exercício é novo, criado só para você. Comece pelos fáceis e suba de nível quando se sentir à vontade.",
   leadsOnToStart: "Prepara para ",
   leadsOnToEnd: ". Você pode ir para lá quando quiser.",
   watchOut: "Atenção.",
+  level: { easy: "Fácil", medium: "Médio", hard: "Difícil" },
+  anotherOne: "Outro →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} de ${total} exercícios resolvidos`,
-  guessedRight: (n: number, total: number) => `${n} de ${total} acertados de primeira`,
   exerciseTitle: (label: string, solved: boolean) => `Exercício ${label}${solved ? " — resolvido" : ""}`,
   solved: "resolvido",
-  guessedRightFirstTime: "acertou de primeira",
-  guessFirstShort: "Pense primeiro",
-  goldNote: "Medalha de ouro. Todos os exercícios resolvidos.",
+  goldNote: "Medalha de ouro. Pode continuar praticando quanto quiser.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? "Falta 1 exercício" : `Faltam ${more} exercícios`} para a medalha de ${TIER[tier + 1]}.`,
+    `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? `Falta 1 exercício ${["fácil", "médio", "difícil"][tier]}` : `Faltam ${more} exercícios ${["fáceis", "médios", "difíceis"][tier]}`} para a medalha de ${TIER[tier + 1]}.`,
 
   // Guided example
   exampleN: (n: number) => `Exemplo ${n}`,
@@ -75,7 +73,6 @@ export const pt: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: lição`,
   nextExercise: "Próximo exercício →",
-  backToThePath: "Voltar à trilha de aprendizagem",
   exercisesNav: "Exercícios",
   previousTitle: (label: string) => `Anterior: exercício ${label}`,
   previousLabel: (label: string) => `Exercício anterior (${label})`,
@@ -91,7 +88,6 @@ export const pt: Strings = {
   notQuite: "Não foi dessa vez. A verde é a certa. Resolva para ver onde a sua deu errado.",
   solvedBefore: "✓ Você já resolveu este. Pode resolver de novo.",
   makeItLookLike: "Transforme em",
-  positiveLetters: "Aqui, as letras representam números positivos.",
   pickFirst: "Escolha uma resposta acima e depois resolva aqui.",
   hint: "Dica",
   undo: "Desfazer",

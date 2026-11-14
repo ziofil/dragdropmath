@@ -132,7 +132,11 @@ export const factorOut: Rule = {
     const f = c.node;
     const stripped = at.s.terms.map((t, i) => stripFactor(t, f, i === at.index));
     if (stripped.some((t) => t === null)) return [];
-    return [{ rule: "factor-out", state: replaceIn(state, at.sumLoc, prod([f, sum(stripped as Expr[], at.s.id)])) }];
+    // Like terms (a√12 + a√12) are added, not factored: a part of one isn't a
+    // handle of its own then, or no press could pick up the whole term.
+    const like = at.s.terms.every((t) => restKey(splitCoef(t)) === restKey(splitCoef(at.s.terms[0])));
+    const part = f.id !== at.s.terms[at.index].id;
+    return [{ rule: "factor-out", state: replaceIn(state, at.sumLoc, prod([f, sum(stripped as Expr[], at.s.id)])), ...(like && part ? { secondary: true } : {}) }];
   },
 };
 

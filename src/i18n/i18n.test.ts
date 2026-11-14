@@ -23,7 +23,6 @@ describe.each(LANGS.filter((l) => l.code !== "en").map((l) => l.code))("%s", (la
       expect(!!other.watch, `${at}: watch out`).toBe(!!part.watch);
       if (part.watch) expect(maths(other.watch!), `${at}: watch out`).toEqual(maths(part.watch));
     });
-    expect(Object.keys(tr.hints).sort(), "hints").toEqual(Object.keys(en.hints).sort());
   });
 
   it("its example set checks out", () => {

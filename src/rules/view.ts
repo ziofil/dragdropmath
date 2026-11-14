@@ -8,7 +8,8 @@
  * same way whatever its shape:
  *
  *   a side, or a bracket, is a list of signed terms (even if there's just one);
- *   a term is a sign × a top (its factors) over a bottom (its factors, maybe none).
+ *   a term is a sign × a top (its factors) over a bottom (its factors, maybe none);
+ *   a number times a fraction is one fraction: 2·(x + 4)/3 is 2(x + 4) over 3.
  *
  * Rules ask this view what the dragged piece is (a term, a factor on top, a
  * factor on the bottom, …) instead of each climbing the tree its own way — so
@@ -44,15 +45,17 @@ export type TermView = {
 export function viewTerm(term: Expr): TermView {
   const negative = term.kind === "neg";
   const body = negative ? term.arg : term;
-  const f = body.kind === "frac" ? body : null;
-  return {
-    term,
-    negative,
-    body,
-    frac: f,
-    top: factorsOf(f ? f.num : body),
-    bottom: f ? factorsOf(f.den) : [],
-  };
+  const f = body.kind === "frac" ? body : fracFactor(body);
+  // A fraction among other factors (2·(x + 4)/3): they join its top, in their place.
+  const top = f && f !== body ? factorsOf(body).flatMap((x) => (x === f ? factorsOf(f.num) : [x])) : factorsOf(f ? f.num : body);
+  return { term, negative, body, frac: f, top, bottom: f ? factorsOf(f.den) : [] };
+}
+
+/** The one fraction among a product's factors (2·(x + 4)/3), if there is exactly one. */
+function fracFactor(e: Expr): Frac | null {
+  if (e.kind !== "prod") return null;
+  const fs = e.factors.filter((x): x is Frac => x.kind === "frac");
+  return fs.length === 1 ? fs[0] : null;
 }
 
 /**
@@ -101,6 +104,9 @@ export function roleOf(state: MathState, id: string): Role | null {
     const r = asTerm(state, loc);
     return r && { ...r, part: "sign", node };
   }
+  // The fraction among other factors (the (x + 4)/3 of 2·(x + 4)/3) isn't a
+  // factor of the term's top (its top and bottom are): no role of its own.
+  if (kindAt(state, parentLoc(loc)) === "prod" && fracFactor(nodeAt(state, parentLoc(loc)!)) === node) return null;
   // Climb from the piece to its term: [factor →] [top/bottom →] [body →] term.
   let at = loc;
   let part: Part = "term";
@@ -117,6 +123,13 @@ export function roleOf(state: MathState, id: string): Role | null {
   } else if (kindAt(state, up) === "frac") {
     part = loc.path.at(-1) === 1 ? "bottom" : "top";
     at = up!;
+  }
+  // A fraction that is a factor (2·(x + 4)/3) belongs to that product's term:
+  // its top is one factor of the term's top, its bottom the term's bottom.
+  const outer = parentLoc(at);
+  if (kindAt(state, at) === "frac" && kindAt(state, outer) === "prod" && fracFactor(nodeAt(state, outer!)) === nodeAt(state, at)) {
+    at = outer!;
+    if (part === "top") part = "top-factor";
   }
   // `at` is now the body (or the term itself, if nothing was climbed).
   const r = asTerm(state, at);

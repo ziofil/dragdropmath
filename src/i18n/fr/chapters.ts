@@ -36,14 +36,6 @@ export const frChapters: ChapterTexts = {
         steps: ["Dépose le 5 sur le 2."],
       },
     ],
-    hints: {
-      s1: "Fais passer le 2 après le x.",
-      s2: "Dépose le 4 sur le 3.",
-      s3: "Dépose un nombre sur l'autre.",
-      s8: "Le 4 garde son signe moins.",
-      s17: "2 − 7 donne un nombre négatif.",
-      s24: "Mets le terme en a en premier et le nombre tout seul à la fin.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const frChapters: ChapterTexts = {
         watch: "`x + x` fait `2x`, pas `x²`. `x²` veut dire `x·x` : on le verra plus tard.",
       },
     ],
-    hints: {
-      c4: "Un nombre moins lui-même, ça fait 0.",
-      c17: "Traite ab comme une seule lettre : 3ab + 2ab se réduit comme 3x + 2x.",
-      c9: "Calcule d'abord 2·3. Ensuite, additionne les termes en x.",
-      c6: "Additionne les termes en x, puis les termes en y.",
-      c27: "Regroupe les b, puis range les lettres dans l'ordre, avec le nombre tout seul à la fin.",
-    },
   },
 
   distribute: {
@@ -122,15 +107,6 @@ export const frChapters: ChapterTexts = {
         steps: ["Dépose le x sur la parenthèse.", "Dépose un x sur l'autre."],
       },
     ],
-    hints: {
-      d1: "Dépose le a sur la parenthèse.",
-      d3: "Sors un a de l'un des deux termes.",
-      d19: "Dépose le signe moins sur la parenthèse.",
-      d6: "Dépose le signe moins sur la parenthèse.",
-      d14: "Le moins multiplie chaque terme de la parenthèse.",
-      d18: "Le −2 multiplie les deux termes de sa parenthèse.",
-      d27: "Chaque facteur placé devant multiplie les deux termes de sa parenthèse. Ensuite, regroupe les termes en y² et les termes en y.",
-    },
   },
 
   brackets: {
@@ -164,15 +140,6 @@ export const frChapters: ChapterTexts = {
           "`(x + 1)²` n'est pas égal à `x² + 1`. Essaie avec x = 2 : `(2 + 1)² = 9`, mais `2² + 1 = 5`. La différence, ce sont les deux termes du milieu : `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Dépose le x sur la parenthèse. Comment s'écrit x·x ?",
-      m2: "Dépose une parenthèse entière sur l'autre. Puis développe chaque morceau.",
-      m18: "x·x², c'est trois x multipliés entre eux : x³.",
-      m5: "Regarde les deux termes du milieu.",
-      m25: "Il y a trois facteurs. Multiplie d'abord deux d'entre eux, puis multiplie le résultat par le troisième.",
-      m7: "Appuie sur le ² pour l'écrire (x + 2)(x + 2).",
-      m9: "Ce n'est pas juste a² + b². Multiplie chaque terme par chaque terme.",
-    },
   },
 
   balance: {
@@ -201,7 +168,7 @@ export const frChapters: ChapterTexts = {
           "Ça marche aussi avec une division. À partir de `x/3 = 4`, on multiplie les deux membres par 3. Le 3 du dénominateur passe de l'autre côté et multiplie l'autre membre.",
           "Un signe moins devant tout un membre peut aussi passer de l'autre côté : `−x = 6` devient `x = −6`.",
         ],
-        steps: ["Fais passer le 3 de l'autre côté du =."],
+        steps: ["Fais passer le 3 de l'autre côté du =.", "Dépose le 4 sur le 3."],
       },
       {
         title: "Défaire dans l'ordre inverse",
@@ -212,15 +179,6 @@ export const frChapters: ChapterTexts = {
         watch: "Vérifie ta solution en la remplaçant dans l'équation : 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Fais passer le 3 de l'autre côté du signe =.",
-      b10: "Fais glisser tout le membre de droite de l'autre côté pour échanger les membres, ou résous l'équation telle quelle.",
-      b21: "La solution peut être une fraction.",
-      b22: "Tout le numérateur est divisé par 2. Commence par faire passer le 2 de l'autre côté.",
-      b7: "Plus rapide : fais passer le 2 de l'autre côté avant de développer.",
-      b12: "Fais d'abord passer le + 1.",
-      b23: "Un signe moins devant une parenthèse change tous les signes à l'intérieur.",
-    },
   },
 
   powers: {
@@ -257,17 +215,6 @@ export const frChapters: ChapterTexts = {
         watch: "`2x³`, c'est `2·x·x·x` : la puissance ne porte que sur le x. `(2x)³`, c'est autre chose : ça fait `8x³`.",
       },
     ],
-    hints: {
-      w6: "Fais monter le x³ de l'autre côté de la barre de fraction.",
-      w1: "Même base : dépose une puissance sur l'autre, puis additionne les exposants.",
-      w11: "x tout seul, c'est x¹.",
-      w2: "Dépose le 3 extérieur sur le 2 intérieur, puis multiplie.",
-      w5: "La réponse a un exposant négatif.",
-      w3: "Sors le 2 de la parenthèse. Lui aussi est élevé au cube.",
-      w21: "Développe d'abord : x fois x², c'est x³.",
-      w25: "Multiplie chaque terme par x⁻¹. x⁻¹ fois x, c'est x⁰.",
-      w30: "Écris-le (x² + 3)(x² + 3), puis multiplie chaque terme par chaque terme.",
-    },
   },
 
   factor: {
@@ -307,16 +254,6 @@ export const frChapters: ChapterTexts = {
         watch: "Vérifie toujours une factorisation en redéveloppant. Tu dois retrouver exactement l'expression de départ.",
       },
     ],
-    hints: {
-      g5: "Les deux termes ont la même parenthèse. Mets-la en facteur.",
-      g1: "Appuie sur le ² pour écrire x² sous la forme x·x. Les deux termes contiennent alors un x.",
-      g2: "Appuie sur le 6 pour le décomposer en facteurs.",
-      g15: "Quel nombre divise à la fois 6 et 9 ?",
-      g21: "Écris le carré sous forme de produit. Les deux termes contiennent alors un (x + 1).",
-      g22: "Factorise 2x + 6. Est-ce que ça fait apparaître un (x + 3) ?",
-      g6: "Par paires : dépose un x de x² sur 2x, puis un 3 sur le 6.",
-      g29: "Les quatre termes ont un facteur 2. Mets-le d'abord en facteur, puis factorise le reste par paires.",
-    },
   },
 
   formulas: {
@@ -361,13 +298,6 @@ export const frChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      q6: "Le A est au dénominateur. Fais-le passer de l'autre côté.",
-      q8: "Fais d'abord partir le u, puis le a.",
-      q16: "x apparaît deux fois. Mets-le d'abord en facteur.",
-      q17: "P apparaît dans les deux termes.",
-      q22: "Rassemble les deux termes en x du même côté, puis mets x en facteur.",
-    },
   },
 
   inequalities: {
@@ -404,13 +334,6 @@ export const frChapters: ChapterTexts = {
         watch: "Seule une multiplication ou une division par un nombre négatif change le sens. Faire passer un terme de l'autre côté, jamais.",
       },
     ],
-    hints: {
-      i3: "Fais passer le signe moins de l'autre côté. Le sens de l'inégalité change.",
-      i1: "Comme pour une équation, fais passer le 3 de l'autre côté.",
-      i8: "Fais glisser tout le membre de gauche de l'autre côté : 5 < x + 2 et x + 2 > 5 disent la même chose.",
-      i5: "Fais d'abord passer le signe moins, puis le 2.",
-      i26: "Développe d'abord la parenthèse, puis rassemble les termes en x du même côté.",
-    },
   },
 
   fractions: {
@@ -450,18 +373,6 @@ export const frChapters: ChapterTexts = {
         after: "Ensuite, simplifie par les facteurs communs au numérateur et au dénominateur pour obtenir 3/2.",
       },
     ],
-    hints: {
-      f1: "Dépose le 8 sur le 6.",
-      f2: "Mêmes dénominateurs : dépose une fraction sur l'autre.",
-      f6: "Sors le 2 du numérateur.",
-      f22: "Factorise d'abord le numérateur. Il aura alors un facteur commun avec le dénominateur, que tu pourras simplifier.",
-      f8: "Fais monter ¾ de l'autre côté de la barre.",
-      f3: "Fais glisser le 3 sur ½, et le 2 sur ⅓, pour avoir le même dénominateur.",
-      f4: "Appuie sur le 6 pour le décomposer en facteurs.",
-      f17: "Appuie sur le 4 pour le décomposer. 4, c'est 2·2.",
-      f5: "Fais glisser le 3 sur le 2.",
-      f28: "Écris d'abord 1 + ½ sous forme d'une seule fraction.",
-    },
   },
 
   simultaneous: {
@@ -503,13 +414,6 @@ export const frChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y vaut 3 : fais glisser le y de y = 3 sur le y de l'autre équation.",
-      e4: "Fais glisser le y de y = 2x sur le y de l'autre équation. Une fois x trouvé, remplace-le dans y = 2x.",
-      e18: "Aucune lettre n'est encore isolée. Fais passer le −y de l'autre côté pour obtenir x = 1 + y. Puis substitue.",
-      e21: "Isole y dans la première équation : y = 5 − x.",
-      e27: "x = 1 + y, donc 2x devient 2(1 + y). Garde toute la parenthèse.",
-    },
   },
 
   roots: {
@@ -549,20 +453,6 @@ export const frChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      r5: "Dépose une √x sur l'autre. Une racine carrée multipliée par elle-même donne ce qu'il y a sous la racine.",
-      r1: "Appuie sur le √ pour la calculer. Ou appuie sur le 9 pour le décomposer en 3·3, puis sors un 3 de la racine.",
-      r8: "Appuie sur la racine pour l'écrire sous forme de puissance, puis fais passer le ½ de l'autre côté du signe =.",
-      r3: "Sors le 4 de la racine. Il a droit à sa propre racine.",
-      r11: "Isole d'abord √x.",
-      r4: "Appuie sur le 12 pour en extraire un carré parfait.",
-      r2: "Appuie dessus.",
-      r16: "Traite √3 comme une lettre : 2√3 + √3 se réduit comme 2x + x.",
-      r6: "Appuie sur la racine pour l'écrire comme une puissance ½, puis dépose le ½ sur le 2.",
-      r20: "x³, c'est x²·x, et x² sort de la racine en devenant x.",
-      r22: "Sors d'abord le 4 : les √x deviennent alors des termes semblables.",
-      r29: "Décompose le 8 pour faire apparaître un carré parfait sous la racine.",
-    },
   },
 
   explog: {
@@ -598,21 +488,5 @@ export const frChapters: ChapterTexts = {
         steps: ["Fais passer le e de l'autre côté du =."],
       },
     ],
-    hints: {
-      l2: "Dépose le e sur le ln.",
-      l3: "Dépose le ln sur ce qu'il contient.",
-      l4: "Fais glisser le 3 devant.",
-      l8: "Fais passer le e de l'autre côté du signe =.",
-      l12: "Une racine est une puissance. Fais glisser le √ devant.",
-      l1: "Fais glisser le x devant le ln. Combien vaut ln(e) ?",
-      l14: "Fais d'abord entrer le ½ dans le ln.",
-      l7: "Appuie sur le 8 pour l'écrire comme une puissance de 2. Puis fais glisser le 3 devant, et appuie sur log₂(2).",
-      l19: "Quand on soustrait des logarithmes, on divise ce qu'il y a dedans.",
-      l20: "Même mouvement qu'avec e, mais le 2 devient log₂.",
-      l15: "e à quelle puissance donne 1 ?",
-      l22: "Même base : additionne les exposants.",
-      l23: "Commence par décomposer le ln. Combien vaut ln(e) ?",
-      l26: "Isole d'abord la puissance.",
-    },
   },
 };

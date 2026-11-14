@@ -48,21 +48,19 @@ export const it: Strings = {
   // Chapter page
   backToPath: "← Percorso",
   exercises: "Esercizi",
-  practiceNote: "Si parte facili e si sale di difficoltà. Gli ultimi usano anche quello che hai imparato nei capitoli precedenti.",
+  practiceNote: "Ogni esercizio è nuovo, creato apposta per te. Comincia da quelli facili e sali di livello quando te la senti.",
   leadsOnToStart: "Poi puoi passare a ",
   leadsOnToEnd: ". Puoi andarci quando vuoi.",
   watchOut: "Attenzione.",
+  level: { easy: "Facile", medium: "Medio", hard: "Difficile" },
+  anotherOne: "Un altro →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} su ${total} esercizi risolti`,
-  guessedRight: (n: number, total: number) => `${n} su ${total} previsioni giuste al primo colpo`,
   exerciseTitle: (label: string, solved: boolean) => `Esercizio ${label}${solved ? " — risolto" : ""}`,
   solved: "risolto",
-  guessedRightFirstTime: "previsione giusta al primo colpo",
-  guessFirstShort: "Prima la previsione",
-  goldNote: "Medaglia d'oro. Hai risolto tutti gli esercizi.",
+  goldNote: "Medaglia d'oro. Puoi continuare quanto vuoi.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${medal[tier]}. ` : ""}${more === 1 ? "Ancora 1 esercizio" : `Ancora ${more} esercizi`} per ${["il bronzo", "l'argento", "l'oro"][tier]}.`,
+    `${tier ? `${medal[tier]}. ` : ""}${more === 1 ? `Ancora 1 esercizio ${["facile", "medio", "difficile"][tier]}` : `Ancora ${more} esercizi ${["facili", "medi", "difficili"][tier]}`} per ${["il bronzo", "l'argento", "l'oro"][tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Esempio ${n}`,
@@ -75,7 +73,6 @@ export const it: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: lezione`,
   nextExercise: "Esercizio successivo →",
-  backToThePath: "Torna al percorso",
   exercisesNav: "Esercizi",
   previousTitle: (label: string) => `Precedente: esercizio ${label}`,
   previousLabel: (label: string) => `Esercizio precedente (${label})`,
@@ -91,7 +88,6 @@ export const it: Strings = {
   notQuite: "Non proprio. Quella giusta è la verde. Risolvilo per capire dove hai sbagliato.",
   solvedBefore: "✓ Questo l'hai già risolto. Puoi risolverlo di nuovo.",
   makeItLookLike: "Trasformalo in",
-  positiveLetters: "Qui le lettere indicano numeri positivi.",
   pickFirst: "Scegli una risposta qui sopra, poi risolvilo qui.",
   hint: "Suggerimento",
   undo: "Annulla",

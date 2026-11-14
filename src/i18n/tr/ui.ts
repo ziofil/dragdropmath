@@ -49,21 +49,19 @@ export const tr: Strings = {
   // Chapter page
   backToPath: "← Öğrenme yolu",
   exercises: "Alıştırmalar",
-  practiceNote: "Kolaydan zora doğru gidiyorlar. Sondakilerde önceki bölümlerde öğrendiklerini de kullanacaksın.",
+  practiceNote: "Her alıştırma yeni, yalnızca senin için hazırlanıyor. Kolaylarla başla, kendini hazır hissettiğinde bir üst seviyeye geç.",
   leadsOnToStart: "Sonra gelenler: ",
   leadsOnToEnd: ". İstediğin zaman geçebilirsin.",
   watchOut: "Dikkat!",
+  level: { easy: "Kolay", medium: "Orta", hard: "Zor" },
+  anotherOne: "Bir tane daha →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done}/${total} alıştırma çözüldü`,
-  guessedRight: (n: number, total: number) => `${n}/${total} ilk seferde doğru`,
   exerciseTitle: (label: string, solved: boolean) => `Alıştırma ${label}${solved ? " — çözüldü" : ""}`,
   solved: "çözüldü",
-  guessedRightFirstTime: "ilk seferde doğru",
-  guessFirstShort: "Önce düşün",
-  goldNote: "Altın rozet. Bütün alıştırmalar çözüldü.",
+  goldNote: "Altın rozet. İstediğin kadar devam edebilirsin.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${more} alıştırma daha.`,
+    `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${more} ${["kolay", "orta düzey", "zor"][tier]} alıştırma daha.`,
 
   // Guided example
   exampleN: (n: number) => `Örnek ${n}`,
@@ -76,7 +74,6 @@ export const tr: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: konu anlatımı`,
   nextExercise: "Sonraki alıştırma →",
-  backToThePath: "Öğrenme yoluna dön",
   exercisesNav: "Alıştırmalar",
   previousTitle: (label: string) => `Önceki: alıştırma ${label}`,
   previousLabel: (label: string) => `Önceki alıştırma (${label})`,
@@ -91,7 +88,6 @@ export const tr: Strings = {
   notQuite: "Olmadı. Doğrusu yeşil olan. Nerede yanıldığını görmek için çöz.",
   solvedBefore: "✓ Bunu daha önce çözmüştün. İstersen yeniden çözebilirsin.",
   makeItLookLike: "Şuna dönüştür",
-  positiveLetters: "Burada harfler pozitif sayıları gösteriyor.",
   pickFirst: "Yukarıdan bir cevap seç, sonra burada çöz.",
   hint: "İpucu",
   undo: "Geri al",

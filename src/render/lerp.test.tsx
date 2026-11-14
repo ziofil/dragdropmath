@@ -13,7 +13,7 @@ import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
 import { allNodes } from "../expr/tree";
 import { candidatesFor, handles, tapFor, type RuleId } from "../rules";
-import { allPuzzles } from "../game/puzzles";
+import { allPuzzles } from "../game/testing/exercises";
 import { neighbours } from "../game/solver";
 import { renderState } from "./typeset";
 

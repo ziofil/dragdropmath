@@ -43,9 +43,10 @@ describe("the learning path", () => {
   });
 
   it("suggests the first chapter, then what the mastered ones open up", () => {
-    expect(suggested(new Set()).map((c) => c.id)).toEqual(["shuffle"]);
-    const solved = new Set(CHAPTERS.slice(0, 2).flatMap((c) => c.puzzles.map((p) => p.id)));
-    expect(suggested(solved).map((c) => c.id)).toEqual(["distribute"]);
+    expect(suggested({}).map((c) => c.id)).toEqual(["shuffle"]);
+    const gold = { easy: 0, medium: 0, hard: 10 };
+    const progress = Object.fromEntries(CHAPTERS.slice(0, 2).map((c) => [c.id, gold]));
+    expect(suggested(progress).map((c) => c.id)).toEqual(["distribute"]);
   });
 });
 

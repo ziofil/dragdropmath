@@ -1,7 +1,94 @@
 /**
- * Which exercises this viewer has solved. Per-viewer convenience only:
- * storage can be missing or blocked, so every access is guarded.
+ * What this viewer has done. Per-viewer convenience only: storage can be
+ * missing or blocked, so every access is guarded.
+ *
+ * A chapter's exercises are made up on the spot (generate/practice.ts), so
+ * progress is how many were solved at each level. Sets of one's own keep
+ * which of their exercises are solved (loadSolved).
  */
+import { LEVELS, type Level } from "./generate/write";
+
+// ---------- a chapter: how many solved at each level ----------
+
+/** Solved at a level for its step of the badge: bronze easy, silver medium, gold hard. */
+export const PER_LEVEL = 10;
+
+export type Counts = Record<Level, number>;
+export type Progress = Record<string, Counts>;
+
+const COUNTS_KEY = "mathbyhand.counts.v1";
+/** The exercises already counted (the latest few): solving one again doesn't count twice. */
+const COUNTED_KEY = "mathbyhand.counted.v1";
+const KEEP_COUNTED = 500;
+
+const none = (): Counts => ({ easy: 0, medium: 0, hard: 0 });
+
+export function loadProgress(): Progress {
+  try {
+    return JSON.parse(localStorage.getItem(COUNTS_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+/** One more exercise solved, unless this one was counted already. */
+export function countSolved(chapterId: string, level: Level, exerciseId: string): void {
+  try {
+    const counted: string[] = JSON.parse(localStorage.getItem(COUNTED_KEY) ?? "[]");
+    if (counted.includes(exerciseId)) return;
+    const progress = loadProgress();
+    const c = { ...none(), ...progress[chapterId] };
+    c[level]++;
+    progress[chapterId] = c;
+    localStorage.setItem(COUNTS_KEY, JSON.stringify(progress));
+    localStorage.setItem(COUNTED_KEY, JSON.stringify([...counted, exerciseId].slice(-KEEP_COUNTED)));
+  } catch {
+    /* storage unavailable: progress just won't persist */
+  }
+}
+
+/** This exercise has been counted already. */
+export function isCounted(exerciseId: string): boolean {
+  try {
+    return (JSON.parse(localStorage.getItem(COUNTED_KEY) ?? "[]") as string[]).includes(exerciseId);
+  } catch {
+    return false;
+  }
+}
+
+export const countsOf = (chapter: { id: string }, p: Progress): Counts => ({ ...none(), ...p[chapter.id] });
+
+/** Solved in a chapter, at any level. */
+export const solvedCount = (chapter: { id: string }, p: Progress) => LEVELS.reduce((n, l) => n + countsOf(chapter, p)[l], 0);
+
+/** How far towards gold on every level, out of GOAL (for the ring on the path). */
+export const GOAL = PER_LEVEL * LEVELS.length;
+export const progressOf = (chapter: { id: string }, p: Progress) => LEVELS.reduce((n, l) => n + Math.min(PER_LEVEL, countsOf(chapter, p)[l]), 0);
+
+/** A chapter's badge: none, bronze, silver, gold. */
+export type Tier = 0 | 1 | 2 | 3;
+export const TIER_NAMES = ["", "bronze", "silver", "gold"] as const;
+
+/** The highest level with enough solved: whoever goes straight to hard ones can earn gold. */
+export function badgeTier(chapter: { id: string }, p: Progress): Tier {
+  const c = countsOf(chapter, p);
+  for (let i = LEVELS.length - 1; i >= 0; i--) if (c[LEVELS[i]] >= PER_LEVEL) return (i + 1) as Tier;
+  return 0;
+}
+
+/** A chapter is mastered at gold. */
+export const isMastered = (chapter: { id: string }, p: Progress) => badgeTier(chapter, p) === 3;
+
+/** The next step of the badge: its level, and how many more to solve there (null at gold). */
+export function toNextTier(chapter: { id: string }, p: Progress): { level: Level; more: number } | null {
+  const tier = badgeTier(chapter, p);
+  if (tier === 3) return null;
+  const level = LEVELS[tier];
+  return { level, more: PER_LEVEL - countsOf(chapter, p)[level] };
+}
+
+// ---------- a set of one's own: which of its exercises are solved ----------
+
 const KEY = "mathbyhand.solved.v1";
 // Earlier names of the app stored progress here (and once, best move counts): still read, so nothing is lost.
 const OLD_KEY = "graspable.solved.v1";
@@ -26,34 +113,4 @@ export function markSolved(exerciseId: string): void {
   } catch {
     /* storage unavailable: progress just won't persist */
   }
-}
-
-type HasPuzzles = { puzzles: { id: string }[] };
-
-/** How many of a chapter's exercises are solved. */
-export const solvedCount = (chapter: HasPuzzles, solved: ReadonlySet<string>) => chapter.puzzles.filter((p) => solved.has(p.id)).length;
-
-/** A chapter is mastered once every one of its exercises is solved. */
-export const isMastered = (chapter: HasPuzzles, solved: ReadonlySet<string>) => solvedCount(chapter, solved) === chapter.puzzles.length;
-
-/** A chapter's badge, earned in steps as its exercises get solved: none, bronze, silver, gold. */
-export type Tier = 0 | 1 | 2 | 3;
-export const TIER_NAMES = ["", "bronze", "silver", "gold"] as const;
-
-/** Exercises solved for each step: bronze a third, silver two thirds, gold all (mastering it). */
-const marks = (chapter: HasPuzzles) => {
-  const n = chapter.puzzles.length;
-  return [Math.ceil(n / 3), Math.ceil((2 * n) / 3), n];
-};
-
-export function badgeTier(chapter: HasPuzzles, solved: ReadonlySet<string>): Tier {
-  const done = solvedCount(chapter, solved);
-  return marks(chapter).filter((m) => done >= m).length as Tier;
-}
-
-/** Solved exercises still needed for the next step of the badge (0 at gold). */
-export function toNextTier(chapter: HasPuzzles, solved: ReadonlySet<string>): number {
-  const done = solvedCount(chapter, solved);
-  const next = marks(chapter).find((m) => m > done);
-  return next === undefined ? 0 : next - done;
 }

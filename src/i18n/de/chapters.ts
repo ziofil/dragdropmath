@@ -36,14 +36,6 @@ export const deChapters: ChapterTexts = {
         steps: ["Zieh die 5 auf die 2."],
       },
     ],
-    hints: {
-      s1: "Zieh die 2 hinter das x.",
-      s2: "Zieh die 4 auf die 3.",
-      s3: "Zieh eine Zahl auf die andere.",
-      s8: "Die 4 behält ihr Minus.",
-      s17: "2 − 7 ist kleiner als null.",
-      s24: "Stell den Term mit a an den Anfang und die reine Zahl ans Ende.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const deChapters: ChapterTexts = {
         watch: "`x + x` ist `2x`, nicht `x²`. `x²` bedeutet `x·x`, das kommt später.",
       },
     ],
-    hints: {
-      c4: "Alles minus sich selbst ist 0.",
-      c17: "Behandle ab wie eine einzige Variable: 3ab + 2ab geht wie 3x + 2x.",
-      c9: "Rechne zuerst 2·3 aus. Dann fass die x-Terme zusammen.",
-      c6: "Fass erst die x-Terme zusammen, dann die y-Terme.",
-      c27: "Fass die b-Terme zusammen. Dann ordne die Variablen alphabetisch und stell die reine Zahl ans Ende.",
-    },
   },
 
   distribute: {
@@ -122,15 +107,6 @@ export const deChapters: ChapterTexts = {
         steps: ["Zieh das x auf die Klammer.", "Zieh ein x auf das andere."],
       },
     ],
-    hints: {
-      d1: "Zieh das a auf die Klammer.",
-      d3: "Zieh aus einem der beiden Terme ein a nach vorn.",
-      d19: "Zieh das Minus auf die Klammer.",
-      d6: "Zieh das Minus auf die Klammer.",
-      d14: "Das Minus gilt für jeden Term in der Klammer.",
-      d18: "Die −2 wird mit beiden Termen in ihrer Klammer multipliziert.",
-      d27: "Jeder Faktor vor einer Klammer wird mit beiden Termen darin multipliziert. Dann fass die y²-Terme und die y-Terme zusammen.",
-    },
   },
 
   brackets: {
@@ -164,15 +140,6 @@ export const deChapters: ChapterTexts = {
           "`(x + 1)²` ist nicht `x² + 1`. Probier x = 2: `(2 + 1)² = 9`, aber `2² + 1 = 5`. Der Unterschied sind die beiden mittleren Terme, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Zieh das x auf die Klammer. Wie schreibt man x·x?",
-      m2: "Zieh eine ganze Klammer auf die andere. Dann multipliziere jeden Teil aus.",
-      m18: "x·x² sind drei x miteinander multipliziert: x³.",
-      m5: "Schau dir die beiden mittleren Terme an.",
-      m25: "Das sind drei Faktoren. Multipliziere zuerst zwei davon, dann das Ergebnis mit dem dritten.",
-      m7: "Tippe auf das ², um (x + 2)(x + 2) daraus zu machen.",
-      m9: "Es ist nicht einfach a² + b². Multipliziere jeden Term mit jedem.",
-    },
   },
 
   balance: {
@@ -201,7 +168,7 @@ export const deChapters: ChapterTexts = {
           "Beim Dividieren klappt das auch. Bei `x/3 = 4` multiplizierst du beide Seiten mit 3. Die 3 im Nenner wandert hinüber und multipliziert die andere Seite.",
           "Auch ein Minus vor einer ganzen Seite kann hinüber: Aus `−x = 6` wird `x = −6`.",
         ],
-        steps: ["Zieh die 3 über das =."],
+        steps: ["Zieh die 3 über das =.", "Zieh die 4 auf die 3."],
       },
       {
         title: "Rückwärts auflösen",
@@ -212,15 +179,6 @@ export const deChapters: ChapterTexts = {
         watch: "Mach die Probe und setz deine Lösung ein: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Zieh die 3 über das Gleichheitszeichen.",
-      b10: "Zieh die ganze rechte Seite hinüber, um die Seiten zu tauschen. Oder löse die Gleichung einfach so, wie sie ist.",
-      b21: "Die Lösung darf ein Bruch sein.",
-      b22: "Der ganze Zähler wird durch 2 geteilt. Zieh zuerst die 2 hinüber.",
-      b7: "Schneller: Zieh die 2 hinüber, bevor du ausmultiplizierst.",
-      b12: "Bring zuerst die + 1 hinüber.",
-      b23: "Ein Minus vor einer Klammer dreht jedes Vorzeichen darin um.",
-    },
   },
 
   powers: {
@@ -257,17 +215,6 @@ export const deChapters: ChapterTexts = {
         watch: "`2x³` ist `2·x·x·x`: Der Exponent gehört nur zum x. `(2x)³` ist etwas anderes: Das ist `8x³`.",
       },
     ],
-    hints: {
-      w6: "Zieh x³ nach oben über den Bruchstrich.",
-      w1: "Gleiche Basis: Zieh eine Potenz auf die andere und addiere dann die Exponenten.",
-      w11: "x allein ist x¹.",
-      w2: "Zieh die äußere 3 auf die innere 2, dann multipliziere.",
-      w5: "Das Ergebnis hat einen negativen Exponenten.",
-      w3: "Zieh die 2 aus der Klammer. Sie wird auch hoch 3 genommen.",
-      w21: "Multipliziere zuerst die Klammer aus: x mal x² ist x³.",
-      w25: "Multipliziere jeden Term mit x⁻¹. x⁻¹ mal x ist x⁰.",
-      w30: "Schreib es als (x² + 3)(x² + 3) und multipliziere dann jeden Term mit jedem.",
-    },
   },
 
   factor: {
@@ -304,16 +251,6 @@ export const deChapters: ChapterTexts = {
         watch: "Mach nach dem Faktorisieren immer die Probe durch Ausmultiplizieren. Es muss genau das herauskommen, womit du angefangen hast.",
       },
     ],
-    hints: {
-      g5: "Beide Terme haben dieselbe Klammer. Klammere sie aus.",
-      g1: "Tippe auf das ², um x² als x·x zu schreiben. Dann haben beide Terme ein x.",
-      g2: "Tippe auf die 6, um sie in Faktoren zu zerlegen.",
-      g15: "Welche Zahl teilt sowohl 6 als auch 9?",
-      g21: "Schreib das Quadrat als Produkt. Dann haben beide Terme ein (x + 1).",
-      g22: "Faktorisiere 2x + 6. Kommt dabei ein (x + 3) heraus?",
-      g6: "Geh paarweise vor: Zieh ein x aus x² auf 2x, dann eine 3 auf die 6.",
-      g29: "Alle vier Terme haben den Faktor 2. Klammere ihn zuerst aus, dann faktorisiere den Rest paarweise.",
-    },
   },
 
   formulas: {
@@ -352,13 +289,6 @@ export const deChapters: ChapterTexts = {
         steps: ["Beide Terme haben ein x. Zieh ein x nach vorn.", "Jetzt zieh die ganze (a + b) hinüber."],
       },
     ],
-    hints: {
-      q6: "Das A steht im Nenner. Zieh es hinüber.",
-      q8: "Bring zuerst das u weg, dann das a.",
-      q16: "x kommt zweimal vor. Klammere es zuerst aus.",
-      q17: "P steckt in beiden Termen.",
-      q22: "Bring beide x-Terme auf eine Seite, dann klammere x aus.",
-    },
   },
 
   inequalities: {
@@ -393,13 +323,6 @@ export const deChapters: ChapterTexts = {
         watch: "Nur Multiplizieren oder Dividieren mit einer negativen Zahl dreht das Zeichen um. Wenn du einen Term hinüberbringst, passiert das nie.",
       },
     ],
-    hints: {
-      i3: "Zieh das Minus hinüber. Das Zeichen dreht sich um.",
-      i1: "Wie bei einer Gleichung: Zieh die 3 hinüber.",
-      i8: "Zieh die ganze linke Seite hinüber: 5 < x + 2 und x + 2 > 5 sagen dasselbe.",
-      i5: "Bring zuerst das Minus hinüber, dann die 2.",
-      i26: "Multipliziere zuerst die Klammer aus, dann bring die x-Terme auf eine Seite.",
-    },
   },
 
   fractions: {
@@ -437,18 +360,6 @@ export const deChapters: ChapterTexts = {
         after: "Dann kürzt du gemeinsame Faktoren von Zähler und Nenner und bekommst 3/2.",
       },
     ],
-    hints: {
-      f1: "Zieh die 8 auf die 6.",
-      f2: "Gleiche Nenner: Zieh einen Bruch auf den anderen.",
-      f6: "Zieh die 2 aus dem Zähler heraus.",
-      f5: "Zieh die 3 auf die 2.",
-      f22: "Faktorisiere zuerst den Zähler. Dann haben Zähler und Nenner etwas gemeinsam, das du kürzen kannst.",
-      f8: "Zieh ¾ nach oben über den Bruchstrich.",
-      f3: "Zieh die 3 auf ½ und die 2 auf ⅓, damit die Nenner gleich werden.",
-      f4: "Tippe auf die 6, um sie in Faktoren zu zerlegen.",
-      f17: "Tippe auf die 4, um sie zu zerlegen. 4 ist 2·2.",
-      f28: "Mach aus 1 + ½ zuerst einen einzigen Bruch.",
-    },
   },
 
   simultaneous: {
@@ -493,13 +404,6 @@ export const deChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y ist 3: Zieh das y aus y = 3 auf das y in der anderen Gleichung.",
-      e4: "Zieh das y aus y = 2x auf das y in der anderen Gleichung. Sobald du x kennst, setz es in y = 2x ein.",
-      e18: "Noch steht keine Variable allein. Zieh das −y hinüber, dann hast du x = 1 + y. Dann setz ein.",
-      e21: "Löse die erste Gleichung nach y auf: y = 5 − x.",
-      e27: "x = 1 + y, also wird aus 2x der Term 2(1 + y). Nimm die ganze Klammer.",
-    },
   },
 
   roots: {
@@ -533,20 +437,6 @@ export const deChapters: ChapterTexts = {
         steps: ["Tippe auf die Wurzel, um sie als Potenz zu schreiben.", "Zieh das ½ über das =. Daraus wird ein Quadrat.", "Rechne aus."],
       },
     ],
-    hints: {
-      r2: "Tippe darauf.",
-      r5: "Zieh ein √x auf das andere. Eine Quadratwurzel mal sich selbst ergibt das, was darunter steht.",
-      r16: "Behandle √3 wie eine Variable: 2√3 + √3 geht wie 2x + x.",
-      r1: "Tippe auf das √, um die Wurzel auszurechnen. Oder tippe auf die 9, zerlege sie in 3·3 und zieh eine 3 aus der Wurzel.",
-      r8: "Tippe auf die Wurzel, um sie als Potenz zu schreiben. Dann zieh das ½ über das Gleichheitszeichen.",
-      r6: "Tippe auf die Wurzel, um sie als Potenz mit ½ zu schreiben. Dann zieh das ½ auf die 2.",
-      r3: "Zieh die 4 aus der Wurzel. Sie bekommt ihre eigene √.",
-      r20: "x³ ist x²·x, und x² kommt als x aus der Wurzel.",
-      r11: "Bring zuerst √x allein auf eine Seite.",
-      r4: "Tippe auf die 12, um eine Quadratzahl abzuspalten.",
-      r22: "Zieh zuerst die 4 heraus: Dann sind die √x gleichartige Terme.",
-      r29: "Zerlege die 8, um darin eine Quadratzahl zu finden.",
-    },
   },
 
   explog: {
@@ -582,21 +472,5 @@ export const deChapters: ChapterTexts = {
         steps: ["Zieh das e über das =."],
       },
     ],
-    hints: {
-      l2: "Zieh das e auf das ln.",
-      l3: "Zieh das ln auf das, was in der Klammer steht.",
-      l4: "Zieh die 3 nach vorn.",
-      l19: "Ziehst du Logarithmen voneinander ab, teilst du, was darin steht.",
-      l8: "Zieh das e über das Gleichheitszeichen.",
-      l20: "Derselbe Schritt wie bei e, nur wird aus der 2 ein log₂.",
-      l12: "Eine Wurzel ist eine Potenz. Zieh das √ vor das ln.",
-      l15: "e hoch wie viel ergibt 1?",
-      l1: "Zieh das x vor das ln. Was ist ln(e)?",
-      l14: "Zieh zuerst das ½ in das ln hinein.",
-      l7: "Tippe auf die 8, um sie als Potenz von 2 zu schreiben. Dann zieh die 3 nach vorn und tippe auf log₂(2).",
-      l22: "Gleiche Basis, also addierst du die Exponenten.",
-      l23: "Teil zuerst das ln auf. Was ist ln(e)?",
-      l26: "Bring zuerst die Potenz allein auf eine Seite.",
-    },
   },
 };

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
-import { allPuzzles, CHAPTERS, rulesFor } from "./puzzles";
+import { CHAPTERS, rulesFor } from "./puzzles";
+import { allPuzzles } from "./testing/exercises";
 import { matchesGoal, moves } from "./solver";
 import { tidied } from "./tidy";
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { chapterById, findPuzzle } from "../game/puzzles";
+import { chapterById } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
-import { exerciseOfPath, PuzzleView } from "./PuzzleView";
 import { SetMaker, SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
+import { ExerciseRoute } from "./Practice";
 import { setDebug, useDebug, useDebugShortcut } from "./debug";
 import { LANGS, setLang, t, useLang, type Lang } from "../i18n";
 
@@ -23,8 +23,6 @@ function useHash() {
 
 export function App() {
   const hash = useHash();
-  const puzzleId = hash.match(/^#\/p\/([\w-]+)$/)?.[1];
-  const ref = puzzleId ? findPuzzle(puzzleId) : undefined;
   const chapterId = hash.match(/^#\/c\/([\w-]+)$/)?.[1];
   const chapter = chapterById(chapterId);
   // The learning path, with a chapter picked out (coming back from it).
@@ -33,6 +31,8 @@ export function App() {
   // Sets of one's own: making one, or one opened from its link (and its exercises).
   const making = hash === "#/sets/new";
   const sandbox = hash === "#/sandbox";
+  // A chapter's exercise: #/ex/<chapter>/<level>/<seed>.
+  const exercise = hash.match(/^#\/ex\/([\w-]+)\/(\w+)\/(\d+)$/);
   const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
   const debug = useDebug();
   useDebugShortcut();
@@ -79,10 +79,10 @@ export function App() {
         <Sandbox />
       ) : making ? (
         <SetMaker />
+      ) : exercise ? (
+        <ExerciseRoute key={hash} chapterId={exercise[1]} level={exercise[2]} seed={Number(exercise[3])} />
       ) : setLink ? (
         <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />
-      ) : ref ? (
-        <PuzzleView key={ref.puzzle.id} exercise={exerciseOfPath(ref)} />
       ) : chapter ? (
         <ChapterView key={chapter.id} chapter={chapter} />
       ) : (

@@ -50,21 +50,19 @@ export const fr: Strings = {
   // Chapter page
   backToPath: "← Parcours",
   exercises: "Exercices",
-  practiceNote: "D'abord faciles, puis de plus en plus durs. Les derniers reprennent aussi ce que tu as vu dans les chapitres précédents.",
+  practiceNote: "Chaque exercice est nouveau, créé rien que pour toi. Commence par les faciles et passe au niveau suivant quand tu le sens.",
   leadsOnToStart: "Ensuite : ",
   leadsOnToEnd: ". Tu peux y aller quand tu veux.",
   watchOut: "Attention !",
+  level: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
+  anotherOne: "Un autre →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} exercice${s(done)} résolu${s(done)} sur ${total}`,
-  guessedRight: (n: number, total: number) => `${n} sur ${total} trouvé${s(n)} du premier coup`,
   exerciseTitle: (label: string, solved: boolean) => `Exercice ${label}${solved ? " — résolu" : ""}`,
   solved: "résolu",
-  guessedRightFirstTime: "trouvé du premier coup",
-  guessFirstShort: "Réfléchis d'abord",
-  goldNote: "Badge d'or. Tous les exercices sont résolus.",
+  goldNote: "Badge d'or. Tu peux continuer autant que tu veux.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} exercice${s(more)} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
+    `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} exercice${s(more)} ${["facile", "moyen", "difficile"][tier]}${s(more)} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Exemple ${n}`,
@@ -77,7 +75,6 @@ export const fr: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter} : le cours`,
   nextExercise: "Exercice suivant →",
-  backToThePath: "Retour au parcours",
   exercisesNav: "Exercices",
   previousTitle: (label: string) => `Précédent : exercice ${label}`,
   previousLabel: (label: string) => `Exercice précédent (${label})`,
@@ -93,7 +90,6 @@ export const fr: Strings = {
   notQuite: "Pas tout à fait. La bonne, c'est la verte. Résous l'exercice pour comprendre où ça coince.",
   solvedBefore: "✓ Tu as déjà résolu cet exercice. Tu peux le refaire.",
   makeItLookLike: "Transforme-la en",
-  positiveLetters: "Ici, les lettres désignent des nombres positifs.",
   pickFirst: "Choisis une réponse ci-dessus, puis résous l'exercice ici.",
   hint: "Indice",
   undo: "Annuler",

@@ -3,7 +3,7 @@
  * that build on it. It's a suggestion of where to go next, never a lock.
  */
 import { CHAPTERS, type Chapter } from "./puzzles";
-import { isMastered } from "./scoring";
+import { isMastered, type Progress } from "./scoring";
 
 export type PathNode = {
   chapter: Chapter;
@@ -64,7 +64,7 @@ export function layoutPath(chapters: readonly Chapter[] = CHAPTERS): PathLayout 
  * Where to go next: chapters not yet mastered whose groundwork is (all
  * mastered: none). In chapter order.
  */
-export function suggested(solved: ReadonlySet<string>, chapters: readonly Chapter[] = CHAPTERS): Chapter[] {
-  const done = new Set(chapters.filter((c) => isMastered(c, solved)).map((c) => c.id));
+export function suggested(progress: Progress, chapters: readonly Chapter[] = CHAPTERS): Chapter[] {
+  const done = new Set(chapters.filter((c) => isMastered(c, progress)).map((c) => c.id));
   return chapters.filter((c) => !done.has(c.id) && c.after.every((id) => done.has(id)));
 }

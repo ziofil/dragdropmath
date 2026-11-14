@@ -1,21 +1,18 @@
 /**
  * Guess first: on every exercise, the learner first picks what the start
  * becomes, out of three answers — the goal, and two
- * that typical mistakes lead to (decoys.ts) — and only then solves it. So
+ * that typical mistakes lead to (autoDecoys.ts) — and only then solves it. So
  * they work it out in their head first, then show it, or see where they
  * went wrong. A right first guess earns a star; "Reveal" skips the guess
  * (no star).
  */
-import { DECOYS } from "./decoys";
-
 export type Guess = "right" | "wrong" | "revealed";
 
 /**
  * The three answers for an exercise, in a fixed shuffled order (the same each
- * visit), or null if it isn't guessed first. `decoys`: its two wrong answers
- * (by default, the built-in ones).
+ * visit), or null if it isn't guessed first. `decoys`: its two wrong answers.
  */
-export function choicesFor(puzzle: { id: string; goal: string }, decoys: readonly string[] | undefined = DECOYS[puzzle.id]): string[] | null {
+export function choicesFor(puzzle: { id: string; goal: string }, decoys: readonly string[] | undefined): string[] | null {
   if (!decoys || decoys.length < 2) return null;
   const all = [puzzle.goal, ...decoys];
   // Where the right answer goes depends on the exercise, not on chance: stable across visits.
@@ -59,6 +56,3 @@ export function saveGuess(id: string, guess: Guess, pick?: string): void {
   }
 }
 
-/** Stars a chapter has: its exercises guessed right first time. */
-export const starsIn = (chapter: { puzzles: { id: string }[] }, guesses: Record<string, Guess>) =>
-  chapter.puzzles.filter((p) => guesses[p.id] === "right").length;

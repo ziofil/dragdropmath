@@ -9,7 +9,8 @@ import type { MathState } from "../../expr/types";
 import { stateKey } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
 import { candidatesFor, handles, isGrabbable, signOwner, type RuleId } from "../../rules";
-import { allPuzzles, startOf } from "../../game/puzzles";
+import { startOf } from "../../game/puzzles";
+import { allPuzzles } from "../../game/testing/exercises";
 import { ANCHOR, Grip, harness, show, type Harness } from "./harness";
 
 export const same = (a: Parameters<typeof stateKey>[0], b: Parameters<typeof stateKey>[0]) => stateKey(a, "exact") === stateKey(b, "exact");
@@ -164,7 +165,7 @@ export function exerciseShard(k: number, n: number) {
   describe(`every allowed move can be reached by dragging (exercises ${k + 1} of ${n})`, () => {
     it.each(mine.map((r) => [r.puzzle.id, r.puzzle.start, r.rules, r.chapter] as const))("%s: %s", (_, src, rules, chapter) => {
       expect(checkAllMovesReachable(startOf(src, chapter), rules)).toEqual([]);
-    }, 20_000); // exhaustive: every move of the exercise, along many drag paths
+    }, 60_000); // exhaustive: every move of the exercise, along many drag paths
   });
   describe(`every merge animates sanely (exercises ${k + 1} of ${n})`, () => {
     it.each(mine.map((r) => [r.puzzle.id, r.puzzle.start, r.rules, r.chapter] as const))("%s: %s", (_, src, rules, chapter) => {

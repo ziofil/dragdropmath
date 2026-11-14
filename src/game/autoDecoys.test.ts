@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allPuzzles } from "./puzzles";
+import { allPuzzles } from "./testing/exercises";
 import { parseState } from "../expr/parse";
 import { autoDecoys } from "./autoDecoys";
 import { follows, isWrong, shapeMismatch } from "./answers";

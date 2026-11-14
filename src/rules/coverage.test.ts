@@ -13,7 +13,8 @@ import { parseState } from "../expr/parse";
 import { print, printState } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
 import { relOf } from "../expr/build";
-import { allPuzzles, CHAPTERS, exerciseLabel, rulesFor } from "../game/puzzles";
+import { CHAPTERS, rulesFor } from "../game/puzzles";
+import { allPuzzles, EXERCISES, exerciseLabel } from "../game/testing/exercises";
 import { allNodes, children } from "../expr/tree";
 import { ALL_RULES, candidatesFor, movesFor, signId, type RuleId } from ".";
 import { termsOf, viewTerm } from "./view";
@@ -39,6 +40,11 @@ const SHAPES = [
   "-x = 6",
   "-x/2 = 3 + x",
   "x + y = 5; x - y = 1",
+  // A number times a fraction is one term, read as one fraction: 2·(x + 4)/3
+  // is 2(x + 4) over 3 (carrying the 2 of (x + 1)/2 across leaves this).
+  "2*((x + 4)/3) = x + 1",
+  "((x - 1)/4)*3 + 2 = x",
+  "x + 1 = 5*(x/2)",
 ];
 
 const isEquation = (s: MathState) => s.sides.length >= 2 && s.sides.length % 2 === 0;
@@ -104,7 +110,7 @@ const KNOWN_STUCK: Record<string, string[]> = {
 describe("every term can be picked up whole", () => {
   const chapters = CHAPTERS.map((ch, ci) => ({ ch, ci, rules: rulesFor(ci) }));
   const cases = chapters.flatMap(({ ch, ci, rules }) =>
-    ch.puzzles.map((p, i): [string, MathState, RuleId[]] => [`${exerciseLabel(ci, i)}: ${p.start}`, parseState(p.start), rules]),
+    (EXERCISES[ch.id] ?? []).map((p, i): [string, MathState, RuleId[]] => [`${exerciseLabel(ci, i)}: ${p.start}`, parseState(p.start), rules]),
   );
   it.each(cases)("%s", (label, s, rules) => {
     const moves = movesFor(s, rules);

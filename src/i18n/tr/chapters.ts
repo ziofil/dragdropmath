@@ -36,14 +36,6 @@ export const trChapters: ChapterTexts = {
         steps: ["5'i 2'nin üstüne bırak."],
       },
     ],
-    hints: {
-      s1: "2'yi x'in öbür yanına sürükle.",
-      s2: "4'ü 3'ün üstüne bırak.",
-      s3: "Sayılardan birini diğerinin üstüne bırak.",
-      s8: "4, eksisini yanında götürür.",
-      s17: "2 − 7 sıfırdan küçüktür.",
-      s24: "a'lı terimi başa, tek başına duran sayıyı sona koy.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const trChapters: ChapterTexts = {
         watch: "`x + x`, `2x` eder; `x²` etmez. `x²`, `x·x` demektir. Ona sonra geleceğiz.",
       },
     ],
-    hints: {
-      c4: "Bir şeyden kendisini çıkarırsan 0 kalır.",
-      c17: "ab'yi tek bir harf gibi düşün: 3ab + 2ab, tıpkı 3x + 2x gibi toplanır.",
-      c9: "Önce 2·3'ü hesapla. Sonra x'li terimleri topla.",
-      c6: "Önce x'li terimleri, sonra y'li terimleri topla.",
-      c27: "Önce b'li terimleri topla. Sonra harfleri sıraya koy; tek başına duran sayı en sona.",
-    },
   },
 
   distribute: {
@@ -121,15 +106,6 @@ export const trChapters: ChapterTexts = {
         steps: ["x'i parantezin üstüne bırak.", "x'lerden birini diğerinin üstüne bırak."],
       },
     ],
-    hints: {
-      d1: "a'yı parantezin üstüne bırak.",
-      d3: "Terimlerden birinden bir a'yı dışarı çek.",
-      d19: "Eksiyi parantezin üstüne bırak.",
-      d6: "Eksiyi parantezin üstüne bırak.",
-      d14: "Eksi, parantezin içindeki her terimle çarpılır.",
-      d18: "−2, kendi parantezindeki iki terimle de çarpılır.",
-      d27: "Öndeki her çarpan, kendi parantezindeki iki terimle de çarpılır. Sonra y²'li terimleri ve y'li terimleri topla.",
-    },
   },
 
   brackets: {
@@ -163,15 +139,6 @@ export const trChapters: ChapterTexts = {
           "`(x + 1)²`, `x² + 1` değildir. x = 2 için dene: `(2 + 1)² = 9`, ama `2² + 1 = 5`. Aradaki fark ortadaki iki terimdir: `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "x'i parantezin üstüne bırak. x·x nasıl yazılır?",
-      m2: "Parantezlerden birini bütün olarak diğerinin üstüne bırak. Sonra her parçayı aç.",
-      m18: "x·x², üç tane x'in çarpımıdır: x³.",
-      m5: "Ortadaki iki terime bak.",
-      m25: "Üç çarpan var. Önce ikisini çarp, sonra çıkanı üçüncüyle çarp.",
-      m7: "Üsteki ²'ye dokun ve (x + 2)(x + 2) olarak yaz.",
-      m9: "Sonuç yalnızca a² + b² değil. Her terimi her terimle çarp.",
-    },
   },
 
   balance: {
@@ -199,7 +166,7 @@ export const trChapters: ChapterTexts = {
           "Bölmede de aynısı geçerli. `x/3 = 4` denkleminde iki tarafı da 3'le çarp. Paydadaki 3 karşıya geçer ve öbür tarafla çarpılır.",
           "Bir tarafın tamamının önündeki eksi de karşıya geçebilir: `−x = 6`, `x = −6` olur.",
         ],
-        steps: ["3'ü = işaretinin karşı tarafına sürükle."],
+        steps: ["3'ü = işaretinin karşı tarafına sürükle.", "4'ü 3'ün üstüne bırak."],
       },
       {
         title: "Ters sırayla geri al",
@@ -210,15 +177,6 @@ export const trChapters: ChapterTexts = {
         watch: "Bulduğun sonucu yerine koyarak sağlamasını yap: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "3'ü = işaretinin karşı tarafına sürükle.",
-      b10: "Sağ tarafın tamamını öbür tarafa sürükleyerek tarafların yerini değiştir. Ya da denklemi olduğu yerde çöz.",
-      b21: "Cevap kesirli çıkabilir.",
-      b22: "Payın tamamı 2'ye bölünüyor. Önce 2'yi karşı tarafa geçir.",
-      b7: "Kısa yol: parantezi açmadan önce 2'yi karşı tarafa geçir.",
-      b12: "Önce + 1'i karşı tarafa geçir.",
-      b23: "Parantezin önündeki eksi, içerideki bütün işaretleri değiştirir.",
-    },
   },
 
   powers: {
@@ -255,17 +213,6 @@ export const trChapters: ChapterTexts = {
         watch: "`2x³`, `2·x·x·x` demektir: üs yalnızca x'e aittir. `(2x)³` ise farklıdır: `8x³` eder.",
       },
     ],
-    hints: {
-      w6: "x³'ü yukarı, kesir çizgisinin öbür tarafına sürükle.",
-      w1: "Tabanlar aynı: birini diğerinin üstüne bırak, sonra üsleri topla.",
-      w11: "Tek başına x, x¹ demektir.",
-      w2: "Dıştaki 3'ü içteki 2'nin üstüne bırak, sonra çarp.",
-      w5: "Cevabın üssü negatif.",
-      w3: "2'yi parantezin dışına çek. Onun da küpü alınır.",
-      w21: "Önce parantezi aç: x çarpı x², x³ eder.",
-      w25: "Her terimi x⁻¹ ile çarp. x⁻¹ çarpı x, x⁰ eder.",
-      w30: "(x² + 3)(x² + 3) olarak yaz, sonra her terimi her terimle çarp.",
-    },
   },
 
   factor: {
@@ -303,16 +250,6 @@ export const trChapters: ChapterTexts = {
         watch: "Çarpanlara ayırdıktan sonra her zaman yeniden çarparak sağlamasını yap. Başladığın ifadenin aynısı çıkmalı.",
       },
     ],
-    hints: {
-      g5: "İki terimde de aynı parantez var. Onu öne al.",
-      g1: "x²'yi x·x olarak yazmak için üsteki ²'ye dokun. Böylece iki terimde de x olur.",
-      g2: "6'yı çarpanlarına ayırmak için ona dokun.",
-      g15: "Hem 6'yı hem 9'u bölen sayı hangisi?",
-      g21: "Kareyi çarpım olarak yaz. Böylece iki terimde de (x + 1) olur.",
-      g22: "2x + 6'yı çarpanlarına ayır. Bir (x + 3) çıkıyor mu?",
-      g6: "İkişer ikişer çalış: x²'deki bir x'i 2x'in üstüne, sonra bir 3'ü 6'nın üstüne bırak.",
-      g29: "Dört terimin hepsinde 2 çarpanı var. Önce onu öne al, sonra kalanları ikişer ikişer çarpanlarına ayır.",
-    },
   },
 
   formulas: {
@@ -351,13 +288,6 @@ export const trChapters: ChapterTexts = {
         steps: ["İki terimde de x var. x'lerden birini öne sürükle.", "Şimdi (a + b)'nin tamamını karşı tarafa geçir."],
       },
     ],
-    hints: {
-      q6: "A paydada. Onu karşı tarafa geçir.",
-      q8: "Önce u'yu, sonra a'yı karşı tarafa geçir.",
-      q16: "x iki yerde geçiyor. Önce onu ortak çarpan olarak öne al.",
-      q17: "P iki terimde de var.",
-      q22: "İki x'li terimi aynı tarafta topla, sonra x'i ortak çarpan olarak öne al.",
-    },
   },
 
   inequalities: {
@@ -391,13 +321,6 @@ export const trChapters: ChapterTexts = {
         watch: "İşaretin yönünü yalnızca negatif bir sayıyla çarpmak ya da bölmek değiştirir. Bir terimi karşı tarafa geçirmek asla değiştirmez.",
       },
     ],
-    hints: {
-      i3: "Eksiyi karşı tarafa sürükle. İşaretin yönü değişir.",
-      i1: "Denklemlerde olduğu gibi 3'ü karşı tarafa geçir.",
-      i8: "Sol tarafın tamamını öbür tarafa sürükle: 5 < x + 2 ile x + 2 > 5 aynı şeyi söyler.",
-      i5: "Önce eksiyi, sonra 2'yi karşı tarafa geçir.",
-      i26: "Önce parantezi aç, sonra x'li terimleri aynı tarafta topla.",
-    },
   },
 
   fractions: {
@@ -434,18 +357,6 @@ export const trChapters: ChapterTexts = {
         after: "Sonra pay ile paydadaki ortak çarpanları sadeleştir; sonuç 3/2 olur.",
       },
     ],
-    hints: {
-      f1: "8'i 6'nın üstüne bırak.",
-      f2: "Paydalar aynı: kesirlerden birini diğerinin üstüne bırak.",
-      f6: "2'yi payın içinden dışarı çek.",
-      f5: "3'ü 2'nin üstüne sürükle.",
-      f22: "Önce payı çarpanlarına ayır. O zaman pay ile paydada sadeleşecek ortak bir çarpan çıkar.",
-      f8: "¾ kesrini yukarı, kesir çizgisinin öbür tarafına sürükle.",
-      f3: "Paydaları eşitlemek için 3'ü ½ kesrinin, 2'yi de ⅓ kesrinin üstüne sürükle.",
-      f4: "6'yı çarpanlarına ayırmak için ona dokun.",
-      f17: "4'ü çarpanlarına ayırmak için ona dokun. 4, 2·2'dir.",
-      f28: "Önce 1 + ½ toplamını tek bir kesre çevir.",
-    },
   },
 
   simultaneous: {
@@ -484,13 +395,6 @@ export const trChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y, 3'e eşit: y = 3 denklemindeki y'yi öbür denklemdeki y'nin üstüne sürükle.",
-      e4: "y = 2x denklemindeki y'yi öbür denklemdeki y'nin üstüne sürükle. x'i bulunca onu y = 2x denkleminde yerine koy.",
-      e18: "Henüz hiçbir harf yalnız değil. −y'yi karşı tarafa geçirip x = 1 + y elde et. Sonra yerine koy.",
-      e21: "Birinci denklemde y'yi yalnız bırak: y = 5 − x.",
-      e27: "x = 1 + y olduğundan 2x, 2(1 + y) olur. Parantezin tamamını kullan.",
-    },
   },
 
   roots: {
@@ -523,20 +427,6 @@ export const trChapters: ChapterTexts = {
         steps: ["Kökü kuvvet olarak yazmak için ona dokun.", "½ üssünü = işaretinin karşı tarafına sürükle. Kare olur.", "Hesapla."],
       },
     ],
-    hints: {
-      r2: "Ona dokun.",
-      r5: "√x'lerden birini diğerinin üstüne bırak. Bir karekökü kendisiyle çarparsan geriye kökün içindeki kalır.",
-      r16: "√3'ü bir harf gibi düşün: 2√3 + √3, tıpkı 2x + x gibi toplanır.",
-      r1: "Hesaplamak için √ işaretine dokun. Ya da 9'a dokunup 3·3'e ayır, sonra 3'lerden birini kökün dışına çıkar.",
-      r8: "Kökü kuvvet olarak yazmak için ona dokun, sonra ½ üssünü = işaretinin karşı tarafına sürükle.",
-      r6: "Köke dokunup onu üssü ½ olan bir kuvvet olarak yaz, sonra ½ üssünü 2'nin üstüne bırak.",
-      r3: "4'ü kökün içinden dışarı çek. Ona ayrı bir √ gelir.",
-      r20: "x³, x²·x demektir; x² de kökün dışına x olarak çıkar.",
-      r11: "Önce √x'i yalnız bırak.",
-      r4: "12'ye dokunup ondan bir tam kare ayır.",
-      r22: "Önce 4'ü dışarı çek: o zaman √x'ler benzer terim olur.",
-      r29: "İçeride bir tam kare bulmak için 8'i çarpanlarına ayır.",
-    },
   },
 
   explog: {
@@ -571,21 +461,5 @@ export const trChapters: ChapterTexts = {
         steps: ["e'yi = işaretinin karşı tarafına sürükle."],
       },
     ],
-    hints: {
-      l2: "e'yi ln'in üstüne bırak.",
-      l3: "ln'i içindeki ifadenin üstüne bırak.",
-      l4: "3'ü öne sürükle.",
-      l19: "Logaritmalar çıkarılırken içlerindekiler bölünür.",
-      l8: "e'yi = işaretinin karşı tarafına sürükle.",
-      l20: "e'deki hamlenin aynısı, ama burada 2, log₂ olur.",
-      l12: "Kök de bir kuvvettir. √ işaretini öne sürükle.",
-      l15: "e'nin kaçıncı kuvveti 1 eder?",
-      l1: "x'i ln'in önüne sürükle. ln(e) kaçtır?",
-      l14: "Önce ½ çarpanını ln'in içine bırak.",
-      l7: "8'e dokunup onu 2'nin kuvveti olarak yaz. Sonra 3'ü öne sürükle ve log₂(2)'ye dokun.",
-      l22: "Tabanlar aynı, o yüzden üsleri topla.",
-      l23: "Önce ln'i ikiye ayır. ln(e) kaçtır?",
-      l26: "Önce kuvveti yalnız bırak.",
-    },
   },
 };

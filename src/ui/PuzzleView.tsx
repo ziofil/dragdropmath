@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { stateKey } from "../expr/key";
-import { allPuzzles, CHAPTERS, lettersPositive, type Chapter, type PuzzleRef } from "../game/puzzles";
+import { CHAPTERS, type Chapter } from "../game/puzzles";
+import type { Level } from "../game/generate/write";
 import type { RuleId } from "../rules";
 import { matchesGoal } from "../game/solver";
-import { badgeTier, loadSolved, markSolved, type Tier } from "../game/scoring";
+import { badgeTier, countSolved, isCounted, loadProgress, loadSolved, markSolved, type Tier } from "../game/scoring";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
-import { choicesFor, loadGuesses, loadPicks, saveGuess } from "../game/guess";
+import { loadGuesses, loadPicks, saveGuess } from "../game/guess";
 import { Badge } from "./Badge";
 import { chapterText, t } from "../i18n";
 import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
@@ -27,6 +28,10 @@ export type Exercise = {
   rules: readonly RuleId[];
   /** "6.26", "3". */
   label: string;
+  /** The heading, when it isn't "Exercise <label>". */
+  title?: string;
+  /** In place of the ‹ title › arrows: the levels to switch between (made-up practice). */
+  levels?: { href: string; text: string; current: boolean }[];
   /** The three answers to guess between, or null to solve it straight away. */
   choices: string[] | null;
   back: Link[];
@@ -34,47 +39,30 @@ export type Exercise = {
   next?: Link;
   /** Once solved: where to go on. */
   onward: Link;
-  /** The chapter whose badge solving it counts towards. */
-  badgeOf?: Chapter;
+  /** A chapter's made-up exercise: solving it counts towards the chapter's badge at this level (nothing else about it is kept). */
+  counts?: { chapter: Chapter; level: Level };
   /** Its letters stand for positive numbers (said on screen; see rules/signs.ts). */
   positiveLetters?: boolean;
 };
 
-/** A learning-path exercise, as the exercise screen shows it. */
-export function exerciseOfPath(pref: PuzzleRef): Exercise {
-  const { puzzle, chapter } = pref;
-  const all = allPuzzles();
-  const at = all.findIndex((r) => r.puzzle.id === puzzle.id);
-  const [prev, next] = [all[at - 1], all[at + 1]];
-  const text = chapterText(chapter);
-  const hint = text.hints[puzzle.id] ?? puzzle.hint;
-  return {
-    puzzle: { ...puzzle, ...(hint ? { hint } : {}) },
-    rules: pref.rules,
-    label: pref.label,
-    choices: choicesFor(puzzle),
-    back: [
-      { href: `#/at/${chapter.id}`, text: t().backToPath },
-      { href: `#/c/${chapter.id}`, text: t().lessonLink(text.title) },
-    ],
-    prev: prev && { href: `#/p/${prev.puzzle.id}`, text: prev.label },
-    next: next && { href: `#/p/${next.puzzle.id}`, text: next.label },
-    onward: next && next.chapter === chapter ? { href: `#/p/${next.puzzle.id}`, text: t().nextExercise } : { href: `#/at/${chapter.id}`, text: t().backToThePath },
-    badgeOf: chapter,
-    positiveLetters: lettersPositive(chapter),
-  };
-}
-
 export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
-  const { puzzle, rules, badgeOf: chapter } = ex;
+  const { puzzle, rules } = ex;
+  const chapter = ex.counts?.chapter;
+  // A set's exercise keeps its prediction and that it's solved; a chapter's made-up one only adds to a count.
+  const keep = !ex.counts;
   const start = useMemo((): MathState => ({ ...parseState(puzzle.start), ...(ex.positiveLetters ? { letters: "positive" as const } : {}) }), [puzzle, ex.positiveLetters]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   // The chapter's badge before this exercise, and with it solved.
   const tiers = useMemo(() => {
-    if (!chapter) return { before: 0 as Tier, after: 0 as Tier };
-    const before = loadSolved();
-    return { before: badgeTier(chapter, before), after: badgeTier(chapter, new Set([...before, puzzle.id])) };
-  }, [chapter, puzzle.id]);
+    if (!ex.counts || isCounted(puzzle.id)) return { before: 0 as Tier, after: 0 as Tier };
+    const { chapter, level } = ex.counts;
+    const before = loadProgress();
+    const c = before[chapter.id] ?? { easy: 0, medium: 0, hard: 0 };
+    const after = { ...before, [chapter.id]: { ...c, [level]: c[level] + 1 } };
+    return { before: badgeTier(chapter, before), after: badgeTier(chapter, after) };
+    // Worked out once, on arriving: once solved it's counted, and the new badge must still show.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [puzzle.id]);
   // Guess first (the chapter's last exercises): pick what it becomes before solving it.
   const choices = ex.choices;
   const [guessed, setGuessed] = useState<string | null>(null);
@@ -83,13 +71,13 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const guessedBefore = before.guess !== undefined;
   const pick = (choice: string) => {
     setGuessed(choice);
-    saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
+    if (keep) saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
   };
   // Skip predicting: the right answer turns green, as if picked (no star, nothing said).
   const [revealed, setRevealed] = useState(false);
   const reveal = () => {
     setRevealed(true);
-    saveGuess(puzzle.id, "revealed");
+    if (keep) saveGuess(puzzle.id, "revealed");
   };
   // The answers to show as answered: this visit's pick or reveal, or an earlier one.
   const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
@@ -106,8 +94,10 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const current = history[history.length - 1].state;
   const solved = matchesGoal(current, goal);
   useEffect(() => {
-    if (solved) markSolved(puzzle.id);
-  }, [solved, puzzle.id]);
+    if (!solved) return;
+    if (ex.counts) countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id);
+    else markSolved(puzzle.id);
+  }, [solved, puzzle.id, ex.counts]);
 
   const onDrop = (next: MathState) => {
     if (stateKey(next, "exact") === stateKey(current, "exact")) return;
@@ -156,23 +146,33 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             </a>
           ))}
         </span>
-        <nav className="ex-nav" aria-label={t().exercisesNav}>
-          {prev ? (
-            <a href={prev.href} className="ex-step" title={t().previousTitle(prev.text)} aria-label={t().previousLabel(prev.text)}>
-              ‹
-            </a>
-          ) : (
-            <span className="ex-step" aria-hidden="true" />
-          )}
-          <div className="title">{t().exerciseN(ex.label)}</div>
-          {next ? (
-            <a href={next.href} className="ex-step" title={t().nextTitle(next.text)} aria-label={t().nextLabel(next.text)}>
-              ›
-            </a>
-          ) : (
-            <span className="ex-step" aria-hidden="true" />
-          )}
-        </nav>
+        {ex.levels ? (
+          <nav className="level-pick" aria-label={ex.title}>
+            {ex.levels.map((l) => (
+              <a key={l.href} href={l.href} aria-current={l.current ? "page" : undefined}>
+                {l.text}
+              </a>
+            ))}
+          </nav>
+        ) : (
+          <nav className="ex-nav" aria-label={t().exercisesNav}>
+            {prev ? (
+              <a href={prev.href} className="ex-step" title={t().previousTitle(prev.text)} aria-label={t().previousLabel(prev.text)}>
+                ‹
+              </a>
+            ) : (
+              <span className="ex-step" aria-hidden="true" />
+            )}
+            <div className="title">{ex.title ?? t().exerciseN(ex.label)}</div>
+            {next ? (
+              <a href={next.href} className="ex-step" title={t().nextTitle(next.text)} aria-label={t().nextLabel(next.text)}>
+                ›
+              </a>
+            ) : (
+              <span className="ex-step" aria-hidden="true" />
+            )}
+          </nav>
+        )}
       </header>
 
       {choices ? (
@@ -225,14 +225,12 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             {t().reveal}
           </button>
           {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
-          {ex.positiveLetters && <p className="assume">{t().positiveLetters}</p>}
         </section>
       ) : (
         <section className="goal">
           {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
           <span className="goal-label">{t().makeItLookLike}</span>
           <StaticMath state={goal} />
-          {ex.positiveLetters && <p className="assume">{t().positiveLetters}</p>}
         </section>
       )}
 

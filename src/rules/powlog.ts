@@ -132,6 +132,22 @@ export const evaluatePower: Rule = {
   },
 };
 
+/** 2³ → 8 by tapping the exponent: the same as dropping it on the base. */
+export const tapPower: Rule = {
+  id: "tap-power",
+  name: "Work out a power",
+  gesture: "Tap a whole-number exponent on a number to work it out: 2³ → 8.",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    const P = c && exponentOf(c);
+    if (!c || !P || P.base.kind !== "num" || c.node.kind !== "num") return [];
+    const v = P.base.value ** c.node.value;
+    if (!Number.isSafeInteger(v) || v > 100_000) return [];
+    return [{ rule: "tap-power", state: replaceIn(state, c.parentLoc!, num(v, P.base.id)) }];
+  },
+};
+
 /** x⁵/x² → x³ (drop a power on the bottom onto one with the same base on top). */
 export const dividePowers: Rule = {
   id: "divide-powers",

@@ -1,14 +1,14 @@
 import { CHAPTERS, leadsTo, rulesFor, type Chapter } from "../game/puzzles";
-import { loadSolved } from "../game/scoring";
+import { loadProgress } from "../game/scoring";
 import { GuidedExample } from "./Guided";
-import { ChapterProgress } from "./ChapterProgress";
 import { MathText } from "./MathText";
+import { ChapterExercises } from "./Practice";
 import { chapterText, t } from "../i18n";
 
 /** A chapter: the lesson (ideas, each tried by hand), then exercises from easy to hard. */
 export function ChapterView({ chapter }: { chapter: Chapter }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const solved = loadSolved();
+  const progress = loadProgress();
   const next = leadsTo(chapter);
   const rules = rulesFor(ci);
   const text = chapterText(chapter);
@@ -51,7 +51,7 @@ export function ChapterView({ chapter }: { chapter: Chapter }) {
       <section className="practice" id="exercises">
         <h2>{t().exercises}</h2>
         <p className="practice-note">{t().practiceNote}</p>
-        <ChapterProgress chapter={chapter} solved={solved} />
+        <ChapterExercises chapter={chapter} progress={progress} />
         {next.length > 0 && (
           <p className="leads-to">
             {t().leadsOnToStart}

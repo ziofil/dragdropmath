@@ -51,23 +51,21 @@ export const en = {
   // Chapter page
   backToPath: "← Learning path",
   exercises: "Exercises",
-  practiceNote: "They start easy and get harder. Later ones also use what you learned in earlier chapters.",
+  practiceNote: "Every exercise is new, made up just for you. Start with easy ones and move up when you feel ready.",
   /** Followed by the chapters' links, then leadsOnToEnd. */
   leadsOnToStart: "Leads on to ",
   leadsOnToEnd: ". You can go there any time.",
   watchOut: "Watch out.",
+  level: { easy: "Easy", medium: "Medium", hard: "Hard" },
+  anotherOne: "Another one →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} of ${total} exercises solved`,
-  guessedRight: (n: number, total: number) => `${n} of ${total} predicted right first time`,
   exerciseTitle: (label: string, solved: boolean) => `Exercise ${label}${solved ? " — solved" : ""}`,
   solved: "solved",
-  guessedRightFirstTime: "predicted right first time",
-  guessFirstShort: "Predict first",
-  goldNote: "Gold badge. Every exercise solved.",
+  goldNote: "Gold badge. Keep going as long as you like.",
   /** The badge so far (`tier`, 0 for none yet), and `more` exercises still to solve for the next one. */
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${["", "Bronze", "Silver"][tier]} badge. ` : ""}${more} more exercise${more === 1 ? "" : "s"} for ${["bronze", "silver", "gold"][tier]}.`,
+    `${tier ? `${["", "Bronze", "Silver"][tier]} badge. ` : ""}${more} more ${["easy", "medium", "hard"][tier]} exercise${more === 1 ? "" : "s"} for ${["bronze", "silver", "gold"][tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Example ${n}`,
@@ -80,7 +78,6 @@ export const en = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: lesson`,
   nextExercise: "Next exercise →",
-  backToThePath: "Back to the learning path",
   exercisesNav: "Exercises",
   previousTitle: (label: string) => `Previous: exercise ${label}`,
   previousLabel: (label: string) => `Previous exercise (${label})`,
@@ -95,7 +92,6 @@ export const en = {
   notQuite: "Not quite. The green one is right. Solve it to see where yours went wrong.",
   solvedBefore: "✓ You've solved this one before. You can solve it again.",
   makeItLookLike: "Make it look like",
-  positiveLetters: "Here, letters stand for positive numbers.",
   pickFirst: "Pick an answer above, then solve it here.",
   hint: "Hint",
   undo: "Undo",

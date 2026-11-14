@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
-import { findPuzzle } from "../game/puzzles";
+import { findPuzzle } from "../game/testing/exercises";
 import { evaluate, variables } from "../expr/eval";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, handles, isGrabbable, operatorTap, RULES, signId, signOwner, tapFor, type RuleId } from ".";
@@ -305,6 +305,8 @@ describe("what a press picks up", () => {
     ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x", "x", "x*2", "-2*x"]],
     // With factoring unlocked, a common factor is its own handle.
     ["ab + ac", ALL_RULES, ["a*b", "a", "a*c", "a"]],
+    // …but not in like terms: they're added, so a press picks up the whole term.
+    ["a√12 + a√12", ALL_RULES, ["a*√(12)", "a*√(12)"]],
   ])("%s", (src, rules, expected) => {
     expect(grabbable(src, rules)).toEqual(expected);
   });
@@ -446,6 +448,35 @@ describe("tapping a root", () => {
   it("works it out when it comes out whole, else shows it as a power", () => {
     expect(tap("√9 + x")).toBe("evaluate-root: 3 + x");
     expect(tap("√12 + x")).toBe("root-notation: 12^(1/2) + x");
+  });
+});
+
+describe("tapping a fraction's bar", () => {
+  const tap = (src: string) => {
+    const s = parseState(src);
+    const f = s.sides.flatMap(allNodes).find((n) => n.kind === "frac")!;
+    const c = tapFor(s, f.id, ALL_RULES);
+    return c && `${c.rule}: ${printState(c.state)}`;
+  };
+  it("works it out when it comes out whole, else does nothing", () => {
+    expect(tap("x = 8/2")).toBe("evaluate-fraction: x = 4");
+    expect(tap("x = 12/3 + 1")).toBe("evaluate-fraction: x = 4 + 1");
+    expect(tap("x = 6/4")).toBeNull();
+    expect(tap("x = 6x/3")).toBeNull();
+  });
+});
+
+describe("tapping a number's exponent", () => {
+  const tap = (src: string) => {
+    const s = parseState(src);
+    const p = s.sides.flatMap(allNodes).find((n) => n.kind === "pow")!;
+    const c = tapFor(s, (p as { exp: { id: string } }).exp.id, ALL_RULES);
+    return c && `${c.rule}: ${printState(c.state)}`;
+  };
+  it("works it out when the base is a number, else writes the power out", () => {
+    expect(tap("2^3 + x")).toBe("tap-power: 8 + x");
+    expect(tap("x = 3^2")).toBe("tap-power: x = 9");
+    expect(tap("x^2")).toBe("power-to-product: x*x");
   });
 });
 

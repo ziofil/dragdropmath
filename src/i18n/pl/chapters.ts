@@ -36,14 +36,6 @@ export const plChapters: ChapterTexts = {
         steps: ["Przeciągnij 5 na 2."],
       },
     ],
-    hints: {
-      s1: "Przesuń 2 za x.",
-      s2: "Przeciągnij 4 na 3.",
-      s3: "Przeciągnij jedną liczbę na drugą.",
-      s8: "4 zabiera ze sobą swój minus.",
-      s17: "2 − 7 to mniej niż zero.",
-      s24: "Wyraz z a ustaw na początku, a samą liczbę na końcu.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const plChapters: ChapterTexts = {
         watch: "`x + x` to `2x`, a nie `x²`. `x²` oznacza `x·x`, ale o tym później.",
       },
     ],
-    hints: {
-      c4: "Wyraz odjąć ten sam wyraz daje 0.",
-      c17: "Traktuj ab jak jedną literę: 3ab + 2ab działa jak 3x + 2x.",
-      c9: "Najpierw oblicz 2·3. Potem dodaj wyrazy z x.",
-      c6: "Dodaj wyrazy z x, potem wyrazy z y.",
-      c27: "Zredukuj wyrazy z b, potem uporządkuj litery, a samą liczbę daj na koniec.",
-    },
   },
 
   distribute: {
@@ -121,15 +106,6 @@ export const plChapters: ChapterTexts = {
         steps: ["Przeciągnij x na nawias.", "Przeciągnij jeden x na drugi."],
       },
     ],
-    hints: {
-      d1: "Przeciągnij a na nawias.",
-      d3: "Wyciągnij a z któregoś wyrazu przed nawias.",
-      d19: "Przeciągnij minus na nawias.",
-      d6: "Przeciągnij minus na nawias.",
-      d14: "Minus mnoży każdy wyraz w nawiasie.",
-      d18: "−2 mnoży oba wyrazy w swoim nawiasie.",
-      d27: "Każdy czynnik przed nawiasem mnoży oba wyrazy w swoim nawiasie. Potem dodaj wyrazy z y² i wyrazy z y.",
-    },
   },
 
   brackets: {
@@ -162,15 +138,6 @@ export const plChapters: ChapterTexts = {
         watch: "`(x + 1)²` to nie `x² + 1`. Sprawdź dla x = 2: `(2 + 1)² = 9`, a `2² + 1 = 5`. Różnica to dwa środkowe wyrazy, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Przeciągnij x na nawias. Jak zapisać x·x?",
-      m2: "Przeciągnij jeden cały nawias na drugi. Potem wymnóż każdą część.",
-      m18: "x·x² to trzy iksy pomnożone przez siebie: x³.",
-      m5: "Spójrz na dwa środkowe wyrazy.",
-      m25: "Są trzy czynniki. Najpierw pomnóż dwa z nich, potem wynik przez trzeci.",
-      m7: "Dotknij ², żeby zapisać to jako (x + 2)(x + 2).",
-      m9: "To nie jest po prostu a² + b². Pomnóż każdy wyraz przez każdy.",
-    },
   },
 
   balance: {
@@ -198,7 +165,7 @@ export const plChapters: ChapterTexts = {
           "Z dzieleniem jest tak samo. Z `x/3 = 4` pomnóż obie strony przez 3. Trójka z mianownika przechodzi na drugą stronę i ją mnoży.",
           "Minus przed całą stroną też można przenieść: `−x = 6` zmienia się w `x = −6`.",
         ],
-        steps: ["Przenieś 3 na drugą stronę =."],
+        steps: ["Przenieś 3 na drugą stronę =.", "Przeciągnij 4 na 3."],
       },
       {
         title: "Cofamy od końca",
@@ -209,15 +176,6 @@ export const plChapters: ChapterTexts = {
         watch: "Sprawdź wynik, podstawiając go z powrotem: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Przenieś 3 na drugą stronę znaku =.",
-      b10: "Przeciągnij całą prawą stronę na drugą stronę, żeby zamienić strony miejscami, albo rozwiąż równanie tak, jak jest.",
-      b21: "Wynik może być ułamkiem.",
-      b22: "Cały licznik jest dzielony przez 2. Najpierw przenieś 2 na drugą stronę.",
-      b7: "Szybciej: przenieś 2 na drugą stronę, zanim wymnożysz nawias.",
-      b12: "Najpierw przenieś + 1.",
-      b23: "Minus przed nawiasem zmienia każdy znak w środku.",
-    },
   },
 
   powers: {
@@ -254,17 +212,6 @@ export const plChapters: ChapterTexts = {
         watch: "`2x³` to `2·x·x·x`: potęga dotyczy tylko x. `(2x)³` to co innego: to `8x³`.",
       },
     ],
-    hints: {
-      w6: "Przeciągnij x³ w górę przez kreskę ułamkową.",
-      w1: "Ta sama podstawa: przeciągnij jedną potęgę na drugą, potem dodaj wykładniki.",
-      w11: "Samo x to x¹.",
-      w5: "Wynik ma ujemny wykładnik.",
-      w2: "Przeciągnij zewnętrzne 3 na wewnętrzne 2, potem pomnóż.",
-      w3: "Wyciągnij 2 z nawiasu. Ją też trzeba podnieść do potęgi 3.",
-      w21: "Najpierw wymnóż nawias: x razy x² to x³.",
-      w25: "Pomnóż każdy wyraz przez x⁻¹. x⁻¹ razy x to x⁰.",
-      w30: "Zapisz to jako (x² + 3)(x² + 3), potem pomnóż każdy wyraz przez każdy.",
-    },
   },
 
   factor: {
@@ -299,16 +246,6 @@ export const plChapters: ChapterTexts = {
         watch: "Rozkład zawsze sprawdzaj, wymnażając go z powrotem. Musi wyjść dokładnie to, od czego zaczynasz.",
       },
     ],
-    hints: {
-      g5: "Oba wyrazy mają ten sam nawias. Wyłącz go na początek.",
-      g1: "Dotknij ², żeby zapisać x² jako x·x. Wtedy oba wyrazy mają x.",
-      g2: "Dotknij 6, żeby rozłożyć ją na czynniki.",
-      g15: "Jaka liczba dzieli i 6, i 9?",
-      g21: "Zapisz kwadrat jako iloczyn. Wtedy oba wyrazy mają (x + 1).",
-      g22: "Rozłóż 2x + 6. Czy wyjdzie (x + 3)?",
-      g6: "Grupuj parami: przeciągnij x z x² na 2x, potem 3 na 6.",
-      g29: "Wszystkie cztery wyrazy mają czynnik 2. Najpierw go wyłącz, potem rozłóż resztę parami.",
-    },
   },
 
   formulas: {
@@ -347,13 +284,6 @@ export const plChapters: ChapterTexts = {
         steps: ["Oba wyrazy mają x. Przeciągnij jeden x na początek.", "Teraz przenieś cały nawias (a + b) na drugą stronę."],
       },
     ],
-    hints: {
-      q6: "A jest w mianowniku. Przenieś je na drugą stronę.",
-      q8: "Najpierw przenieś u, potem a.",
-      q16: "x jest w dwóch miejscach. Najpierw wyłącz go przed nawias.",
-      q17: "P jest w obu wyrazach.",
-      q22: "Zbierz oba wyrazy z x po jednej stronie, potem wyłącz x przed nawias.",
-    },
   },
 
   inequalities: {
@@ -390,13 +320,6 @@ export const plChapters: ChapterTexts = {
         watch: "Zwrot nierówności zmienia tylko mnożenie lub dzielenie przez liczbę ujemną. Przeniesienie wyrazu na drugą stronę nigdy go nie zmienia.",
       },
     ],
-    hints: {
-      i3: "Przenieś minus na drugą stronę. Znak się odwraca.",
-      i1: "Tak jak w równaniu, przenieś 3 na drugą stronę.",
-      i8: "Przeciągnij całą lewą stronę na drugą: 5 < x + 2 i x + 2 > 5 mówią to samo.",
-      i5: "Najpierw przenieś minus, potem 2.",
-      i26: "Najpierw wymnóż nawias, potem zbierz wyrazy z x po jednej stronie.",
-    },
   },
 
   fractions: {
@@ -434,18 +357,6 @@ export const plChapters: ChapterTexts = {
         after: "Potem skróć wspólne czynniki licznika i mianownika, a dostaniesz 3/2.",
       },
     ],
-    hints: {
-      f1: "Przeciągnij 8 na 6.",
-      f2: "Te same mianowniki: przeciągnij jeden ułamek na drugi.",
-      f6: "Wyciągnij 2 z licznika.",
-      f5: "Przeciągnij 3 na 2.",
-      f22: "Najpierw rozłóż licznik na czynniki. Wtedy w liczniku i mianowniku znajdziesz coś do skrócenia.",
-      f8: "Przeciągnij ¾ w górę przez kreskę ułamkową.",
-      f3: "Przeciągnij 3 na ½, a 2 na ⅓, żeby mianowniki były takie same.",
-      f4: "Dotknij 6, żeby rozłożyć ją na czynniki.",
-      f17: "Dotknij 4, żeby ją rozłożyć. 4 to 2·2.",
-      f28: "Najpierw zamień 1 + ½ na jeden ułamek.",
-    },
   },
 
   simultaneous: {
@@ -481,13 +392,6 @@ export const plChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y to 3: przeciągnij y z y = 3 na y w drugim równaniu.",
-      e4: "Przeciągnij y z y = 2x na y w drugim równaniu. Gdy znasz już x, podstaw go do y = 2x.",
-      e18: "Żadna litera nie jest jeszcze sama. Przenieś −y na drugą stronę, żeby dostać x = 1 + y. Potem podstaw.",
-      e21: "Wyznacz y z pierwszego równania: y = 5 − x.",
-      e27: "x = 1 + y, więc 2x zmienia się w 2(1 + y). Użyj całego nawiasu.",
-    },
   },
 
   roots: {
@@ -522,20 +426,6 @@ export const plChapters: ChapterTexts = {
         steps: ["Dotknij pierwiastka, żeby zapisać go jako potęgę.", "Przenieś ½ na drugą stronę =. Zmienia się w kwadrat.", "Oblicz."],
       },
     ],
-    hints: {
-      r2: "Dotknij go.",
-      r5: "Przeciągnij jeden √x na drugi. Pierwiastek kwadratowy pomnożony przez siebie daje to, co jest pod nim.",
-      r16: "Traktuj √3 jak literę: 2√3 + √3 działa jak 2x + x.",
-      r1: "Dotknij √, żeby go obliczyć. Albo dotknij 9, żeby rozłożyć ją na 3·3, i wyciągnij jedną 3 spod pierwiastka.",
-      r8: "Dotknij pierwiastka, żeby zapisać go jako potęgę, potem przenieś ½ na drugą stronę znaku =.",
-      r6: "Dotknij pierwiastka, żeby zapisać go jako potęgę ½, potem przeciągnij ½ na 2.",
-      r3: "Wyciągnij 4 spod pierwiastka. Dostaje swój własny √.",
-      r20: "x³ to x²·x, a x² wychodzi spod pierwiastka jako x.",
-      r11: "Najpierw doprowadź do tego, żeby √x był sam.",
-      r4: "Dotknij 12, żeby wydzielić czynnik, który jest kwadratem liczby naturalnej.",
-      r22: "Najpierw wyciągnij 4: wtedy oba √x są wyrazami podobnymi.",
-      r29: "Rozłóż 8, żeby znaleźć pod pierwiastkiem kwadrat liczby naturalnej.",
-    },
   },
 
   explog: {
@@ -567,21 +457,5 @@ export const plChapters: ChapterTexts = {
         steps: ["Przenieś e na drugą stronę =."],
       },
     ],
-    hints: {
-      l2: "Przeciągnij e na ln.",
-      l3: "Przeciągnij ln na to, co jest w środku.",
-      l4: "Przeciągnij 3 na początek.",
-      l19: "Gdy odejmujesz logarytmy, dzielisz to, co jest w środku.",
-      l8: "Przenieś e na drugą stronę znaku =.",
-      l20: "Ten sam ruch co z e, tylko 2 zmienia się w log₂.",
-      l12: "Pierwiastek to potęga. Przeciągnij √ na początek.",
-      l15: "Do jakiej potęgi trzeba podnieść e, żeby dostać 1?",
-      l1: "Przeciągnij x przed ln. Ile wynosi ln(e)?",
-      l14: "Najpierw wstaw ½ do ln.",
-      l7: "Dotknij 8, żeby zapisać ją jako potęgę 2. Potem przeciągnij 3 na początek i dotknij log₂(2).",
-      l22: "Ta sama podstawa, więc dodaj wykładniki.",
-      l23: "Najpierw rozbij ln. Ile wynosi ln(e)?",
-      l26: "Najpierw doprowadź do tego, żeby potęga była sama.",
-    },
   },
 };

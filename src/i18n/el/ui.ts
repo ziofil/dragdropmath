@@ -49,21 +49,19 @@ export const el: Strings = {
   // Chapter page
   backToPath: "← Διαδρομή μάθησης",
   exercises: "Ασκήσεις",
-  practiceNote: "Ξεκινούν εύκολες και δυσκολεύουν σιγά σιγά. Οι τελευταίες χρειάζονται και όσα έμαθες σε προηγούμενα κεφάλαια.",
+  practiceNote: "Κάθε άσκηση είναι καινούργια, φτιαγμένη μόνο για σένα. Ξεκίνα από τις εύκολες και ανέβα επίπεδο όταν το νιώσεις.",
   leadsOnToStart: "Μετά συνεχίζεις με: ",
   leadsOnToEnd: ". Μπορείς να πας εκεί όποτε θέλεις.",
   watchOut: "Προσοχή.",
+  level: { easy: "Εύκολη", medium: "Μέτρια", hard: "Δύσκολη" },
+  anotherOne: "Άλλη μία →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `Έλυσες ${done} από ${total} ${exercises(total)}`,
-  guessedRight: (n: number, total: number) => `${n} από ${total} σωστές προβλέψεις με την πρώτη`,
   exerciseTitle: (label: string, solved: boolean) => `Άσκηση ${label}${solved ? " — λυμένη" : ""}`,
   solved: "λυμένη",
-  guessedRightFirstTime: "σωστή πρόβλεψη με την πρώτη",
-  guessFirstShort: "Πρώτα πρόβλεψη",
-  goldNote: "Χρυσό μετάλλιο. Έλυσες όλες τις ασκήσεις.",
+  goldNote: "Χρυσό μετάλλιο. Μπορείς να συνεχίσεις όσο θέλεις.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${exercises(more)} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
+    `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${more === 1 ? ["εύκολη", "μέτρια", "δύσκολη"][tier] : ["εύκολες", "μέτριες", "δύσκολες"][tier]} ${exercises(more)} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
 
   // Guided example
   exampleN: (n: number) => `Παράδειγμα ${n}`,
@@ -76,7 +74,6 @@ export const el: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: μάθημα`,
   nextExercise: "Επόμενη άσκηση →",
-  backToThePath: "Πίσω στη διαδρομή μάθησης",
   exercisesNav: "Ασκήσεις",
   previousTitle: (label: string) => `Προηγούμενη: άσκηση ${label}`,
   previousLabel: (label: string) => `Προηγούμενη άσκηση (${label})`,
@@ -92,7 +89,6 @@ export const el: Strings = {
   notQuite: "Όχι ακριβώς. Η σωστή είναι η πράσινη. Λύσε την άσκηση για να δεις πού έκανες λάθος.",
   solvedBefore: "✓ Αυτήν την έχεις ήδη λύσει. Μπορείς να τη λύσεις ξανά.",
   makeItLookLike: "Φέρ' το στη μορφή",
-  positiveLetters: "Εδώ τα γράμματα παριστάνουν θετικούς αριθμούς.",
   pickFirst: "Διάλεξε μια απάντηση από πάνω και μετά λύσε την άσκηση εδώ.",
   hint: "Υπόδειξη",
   undo: "Αναίρεση",

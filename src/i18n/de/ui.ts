@@ -46,21 +46,19 @@ export const de: Strings = {
   // Chapter page
   backToPath: "← Lernpfad",
   exercises: "Aufgaben",
-  practiceNote: "Sie fangen leicht an und werden immer schwerer. Die späteren brauchen auch, was du in früheren Kapiteln gelernt hast.",
+  practiceNote: "Jede Aufgabe ist neu, extra für dich erstellt. Fang mit den leichten an und geh eine Stufe höher, wenn du so weit bist.",
   leadsOnToStart: "Darauf baut auf: ",
   leadsOnToEnd: ". Du kannst jederzeit dorthin wechseln.",
   watchOut: "Vorsicht!",
+  level: { easy: "Leicht", medium: "Mittel", hard: "Schwer" },
+  anotherOne: "Noch eine →",
 
   // Progress
-  solvedOf: (done: number, total: number) => `${done} von ${total} Aufgaben gelöst`,
-  guessedRight: (n: number, total: number) => `${n} von ${total} auf Anhieb richtig vorhergesagt`,
   exerciseTitle: (label: string, solved: boolean) => `Aufgabe ${label}${solved ? " – gelöst" : ""}`,
   solved: "gelöst",
-  guessedRightFirstTime: "auf Anhieb richtig vorhergesagt",
-  guessFirstShort: "Erst überlegen",
-  goldNote: "Goldabzeichen. Alle Aufgaben gelöst.",
+  goldNote: "Goldabzeichen. Üb ruhig weiter, so viel du willst.",
   badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "Aufgabe" : "Aufgaben"} bis ${TIER[tier + 1]}.`,
+    `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${["leichte", "mittelschwere", "schwere"][tier]} ${more === 1 ? "Aufgabe" : "Aufgaben"} bis ${TIER[tier + 1]}.`,
 
   // Guided example
   exampleN: (n: number) => `Beispiel ${n}`,
@@ -73,7 +71,6 @@ export const de: Strings = {
   // Exercise
   lessonLink: (chapter: string) => `${chapter}: Lektion`,
   nextExercise: "Nächste Aufgabe →",
-  backToThePath: "Zurück zum Lernpfad",
   exercisesNav: "Aufgaben",
   previousTitle: (label: string) => `Vorherige: Aufgabe ${label}`,
   previousLabel: (label: string) => `Vorherige Aufgabe (${label})`,
@@ -88,7 +85,6 @@ export const de: Strings = {
   notQuite: "Nicht ganz. Die grüne ist richtig. Rechne es aus, dann siehst du, wo dein Fehler lag.",
   solvedBefore: "✓ Diese Aufgabe hast du schon gelöst. Du kannst sie noch einmal lösen.",
   makeItLookLike: "Mach daraus",
-  positiveLetters: "Hier stehen die Variablen für positive Zahlen.",
   pickFirst: "Wähl oben eine Antwort, dann rechne hier.",
   hint: "Tipp",
   undo: "Rückgängig",

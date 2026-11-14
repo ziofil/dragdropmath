@@ -36,14 +36,6 @@ export const esChapters: ChapterTexts = {
         steps: ["Suelta el 5 sobre el 2."],
       },
     ],
-    hints: {
-      s1: "Arrastra el 2 detrás de la x.",
-      s2: "Suelta el 4 sobre el 3.",
-      s3: "Suelta un número sobre el otro.",
-      s8: "El 4 conserva su signo menos.",
-      s17: "2 − 7 da un número negativo.",
-      s24: "Pon primero el término con a y el número sin letra al final.",
-    },
   },
 
   collect: {
@@ -78,13 +70,6 @@ export const esChapters: ChapterTexts = {
         watch: "`x + x` es `2x`, no `x²`. `x²` significa `x·x`, y eso lo veremos más adelante.",
       },
     ],
-    hints: {
-      c4: "Todo número menos sí mismo da 0.",
-      c17: "Trata ab como si fuera una sola letra: 3ab + 2ab funciona igual que 3x + 2x.",
-      c9: "Calcula primero 2·3. Luego suma los términos con x.",
-      c6: "Suma los términos con x y después los términos con y.",
-      c27: "Agrupa las b y luego ordena las letras, con el número sin letra al final.",
-    },
   },
 
   distribute: {
@@ -121,15 +106,6 @@ export const esChapters: ChapterTexts = {
         steps: ["Suelta la x sobre el paréntesis.", "Suelta una x sobre la otra."],
       },
     ],
-    hints: {
-      d1: "Suelta la a sobre el paréntesis.",
-      d3: "Saca una a de cualquiera de los dos términos.",
-      d19: "Suelta el signo menos sobre el paréntesis.",
-      d6: "Suelta el signo menos sobre el paréntesis.",
-      d14: "El menos multiplica a todos los términos del paréntesis.",
-      d18: "El −2 multiplica a los dos términos de su paréntesis.",
-      d27: "Cada factor de delante multiplica a los dos términos de su paréntesis. Después suma los términos en y² y los términos en y.",
-    },
   },
 
   brackets: {
@@ -162,15 +138,6 @@ export const esChapters: ChapterTexts = {
         watch: "`(x + 1)²` no es `x² + 1`. Prueba con x = 2: `(2 + 1)² = 9`, pero `2² + 1 = 5`. La diferencia son los dos términos del medio, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Suelta la x sobre el paréntesis. ¿Cómo se escribe x·x?",
-      m2: "Suelta un paréntesis entero sobre el otro. Luego desarrolla cada parte.",
-      m18: "x·x² son tres x multiplicadas: x³.",
-      m5: "Fíjate en los dos términos del medio.",
-      m25: "Hay tres factores. Multiplica primero dos de ellos y luego el resultado por el tercero.",
-      m7: "Toca el ² para escribirlo como (x + 2)(x + 2).",
-      m9: "No es simplemente a² + b². Multiplica cada término por cada término.",
-    },
   },
 
   balance: {
@@ -198,7 +165,7 @@ export const esChapters: ChapterTexts = {
           "Con la división también funciona. En `x/3 = 4`, multiplica los dos miembros por 3: el 3 del denominador pasa al otro lado multiplicando.",
           "Un signo menos delante de todo un miembro también puede pasar al otro lado: `−x = 6` se convierte en `x = −6`.",
         ],
-        steps: ["Arrastra el 3 al otro lado del =."],
+        steps: ["Arrastra el 3 al otro lado del =.", "Suelta el 4 sobre el 3."],
       },
       {
         title: "Deshacer en orden inverso",
@@ -209,15 +176,6 @@ export const esChapters: ChapterTexts = {
         watch: "Comprueba la solución sustituyéndola en la ecuación: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Arrastra el 3 al otro lado del signo =.",
-      b10: "Arrastra todo el miembro derecho al otro lado para intercambiar los miembros, o resuélvela tal como está.",
-      b21: "La solución puede ser una fracción.",
-      b22: "Todo el numerador está dividido entre 2. Pasa primero el 2 al otro lado.",
-      b7: "Más rápido: pasa el 2 al otro lado antes de quitar el paréntesis.",
-      b12: "Pasa primero el + 1.",
-      b23: "Un menos delante de un paréntesis cambia todos los signos de dentro.",
-    },
   },
 
   powers: {
@@ -254,17 +212,6 @@ export const esChapters: ChapterTexts = {
         watch: "`2x³` es `2·x·x·x`: el exponente solo afecta a la x. `(2x)³` es otra cosa: es `8x³`.",
       },
     ],
-    hints: {
-      w6: "Arrastra el x³ hacia arriba, al otro lado de la raya de fracción.",
-      w1: "Misma base: suelta una potencia sobre la otra y luego suma los exponentes.",
-      w11: "Una x sola es x¹.",
-      w2: "Suelta el 3 de fuera sobre el 2 de dentro y multiplica.",
-      w5: "El resultado tiene un exponente negativo.",
-      w3: "Saca el 2 del paréntesis. También queda elevado al cubo.",
-      w21: "Primero quita el paréntesis: x por x² es x³.",
-      w25: "Multiplica cada término por x⁻¹. x⁻¹ por x es x⁰.",
-      w30: "Escríbelo como (x² + 3)(x² + 3) y multiplica cada término por cada término.",
-    },
   },
 
   factor: {
@@ -302,16 +249,6 @@ export const esChapters: ChapterTexts = {
         watch: "Comprueba siempre una factorización volviendo a multiplicar. Tiene que darte exactamente lo que tenías al principio.",
       },
     ],
-    hints: {
-      g5: "Los dos términos tienen el mismo paréntesis. Sácalo delante.",
-      g1: "Toca el ² para escribir x² como x·x. Así los dos términos tienen una x.",
-      g2: "Toca el 6 para descomponerlo en factores.",
-      g15: "¿Qué número divide a la vez a 6 y a 9?",
-      g21: "Escribe el cuadrado como producto. Así los dos términos tienen un (x + 1).",
-      g22: "Factoriza 2x + 6. ¿Te sale un (x + 3)?",
-      g6: "Agrupa de dos en dos: suelta una x de x² sobre 2x, y luego un 3 sobre el 6.",
-      g29: "Los cuatro términos tienen un factor 2. Sácalo primero y luego factoriza el resto de dos en dos.",
-    },
   },
 
   formulas: {
@@ -350,13 +287,6 @@ export const esChapters: ChapterTexts = {
         steps: ["Los dos términos tienen una x. Arrastra una x hacia fuera, delante de todo.", "Ahora pasa todo el (a + b) al otro lado."],
       },
     ],
-    hints: {
-      q6: "La A está en el denominador. Pásala al otro lado.",
-      q8: "Pasa primero la u y luego la a.",
-      q16: "La x aparece dos veces. Primero sácala factor común.",
-      q17: "La P está en los dos términos.",
-      q22: "Pon los dos términos con x en el mismo miembro y luego saca la x factor común.",
-    },
   },
 
   inequalities: {
@@ -393,13 +323,6 @@ export const esChapters: ChapterTexts = {
         watch: "La desigualdad solo cambia de sentido al multiplicar o dividir por un número negativo. Pasar un término al otro lado no la cambia nunca.",
       },
     ],
-    hints: {
-      i3: "Pasa el signo menos al otro lado. El signo de desigualdad se da la vuelta.",
-      i1: "Igual que en una ecuación, pasa el 3 al otro lado.",
-      i8: "Arrastra todo el miembro izquierdo al otro lado: 5 < x + 2 y x + 2 > 5 dicen lo mismo.",
-      i5: "Pasa primero el signo menos y luego el 2.",
-      i26: "Primero quita el paréntesis y luego pon los términos con x en el mismo miembro.",
-    },
   },
 
   fractions: {
@@ -439,18 +362,6 @@ export const esChapters: ChapterTexts = {
         after: "Después simplifica los factores comunes del numerador y el denominador, y te queda 3/2.",
       },
     ],
-    hints: {
-      f1: "Suelta el 8 sobre el 6.",
-      f2: "Mismo denominador: suelta una fracción sobre la otra.",
-      f6: "Saca el 2 del numerador.",
-      f5: "Arrastra el 3 sobre el 2.",
-      f22: "Primero factoriza el numerador. Así el numerador y el denominador tienen algo en común que puedes simplificar.",
-      f8: "Arrastra ¾ hacia arriba, al otro lado de la raya.",
-      f3: "Arrastra el 3 sobre ½ y el 2 sobre ⅓ para que los denominadores coincidan.",
-      f4: "Toca el 6 para descomponerlo en factores.",
-      f17: "Toca el 4 para descomponerlo. 4 es 2·2.",
-      f28: "Primero convierte 1 + ½ en una sola fracción.",
-    },
   },
 
   simultaneous: {
@@ -492,13 +403,6 @@ export const esChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "La y vale 3: arrastra la y de y = 3 sobre la y de la otra ecuación.",
-      e4: "Arrastra la y de y = 2x sobre la y de la otra ecuación. Cuando sepas x, sustitúyela en y = 2x.",
-      e18: "Todavía no hay ninguna letra despejada. Pasa el −y al otro lado para obtener x = 1 + y. Luego sustituye.",
-      e21: "Despeja la y en la primera ecuación: y = 5 − x.",
-      e27: "Como x = 1 + y, 2x pasa a ser 2(1 + y). Sustituye con el paréntesis entero.",
-    },
   },
 
   roots: {
@@ -533,20 +437,6 @@ export const esChapters: ChapterTexts = {
         steps: ["Toca la raíz para escribirla como potencia.", "Pasa el ½ al otro lado del =. Se convierte en un cuadrado.", "Calcula."],
       },
     ],
-    hints: {
-      r2: "Tócalo.",
-      r5: "Suelta una √x sobre la otra. Una raíz cuadrada multiplicada por sí misma da lo que hay dentro.",
-      r16: "Trata √3 como si fuera una letra: 2√3 + √3 funciona igual que 2x + x.",
-      r1: "Toca la √ para calcularla. O toca el 9 para descomponerlo en 3·3 y luego saca un 3 de la raíz.",
-      r8: "Toca la raíz para escribirla como potencia y luego pasa el ½ al otro lado del signo =.",
-      r6: "Toca la raíz para escribirla como potencia de exponente ½ y luego suelta el ½ sobre el 2.",
-      r3: "Saca el 4 de la raíz. Cada factor lleva su propia √.",
-      r20: "x³ es x²·x, y x² sale de la raíz como x.",
-      r11: "Primero despeja la √x.",
-      r4: "Toca el 12 para separar un cuadrado perfecto.",
-      r22: "Primero saca el 4: así las √x son términos semejantes.",
-      r29: "Descompón el 8 para encontrar un cuadrado perfecto dentro.",
-    },
   },
 
   explog: {
@@ -582,21 +472,5 @@ export const esChapters: ChapterTexts = {
         steps: ["Pasa la e al otro lado del =."],
       },
     ],
-    hints: {
-      l2: "Suelta la e sobre el ln.",
-      l3: "Suelta el ln sobre lo que tiene dentro.",
-      l4: "Arrastra el 3 hacia fuera, delante.",
-      l19: "Al restar logaritmos, se divide lo que hay dentro.",
-      l8: "Pasa la e al otro lado del signo =.",
-      l20: "El mismo movimiento que con e, pero el 2 se convierte en log₂.",
-      l12: "Una raíz es una potencia. Arrastra la √ hacia fuera, delante.",
-      l15: "¿A qué hay que elevar e para obtener 1?",
-      l1: "Arrastra la x hacia fuera, delante del ln. ¿Cuánto vale ln(e)?",
-      l14: "Primero mete el ½ dentro del ln.",
-      l7: "Toca el 8 para escribirlo como potencia de 2. Luego arrastra el 3 hacia fuera, delante, y toca log₂(2).",
-      l22: "Misma base, así que suma los exponentes.",
-      l23: "Primero separa el ln en dos. ¿Cuánto vale ln(e)?",
-      l26: "Primero despeja la potencia.",
-    },
   },
 };

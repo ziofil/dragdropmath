@@ -8,7 +8,7 @@ import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFir
 import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
 import { substitute } from "./rows";
 import { moveDenominator, moveFactor, moveLetterDenominator, moveLetterFactor, moveSign, moveTerm, swapSides } from "./balance";
-import { cancelFactor, divideNumbers } from "./fractions";
+import { cancelFactor, divideNumbers, evaluateFraction } from "./fractions";
 import {
   combineLogs,
   dividePowers,
@@ -31,8 +31,7 @@ import {
   rootNotation,
   evaluateRoot,
   splitSquare,
-  zeroPower,
-} from "./powlog";
+  zeroPower, tapPower } from "./powlog";
 import { addFractions, divideByFraction, expandFraction, multiplyFractions, splitFraction, splitNumber } from "./fracs";
 
 export type { Candidate, Feel, Rule, RuleId } from "./types";
@@ -66,6 +65,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     moveDenominator,
     moveSign,
     divideNumbers,
+    evaluateFraction,
     cancelFactor,
     powerOfPower,
     zeroPower,
@@ -73,6 +73,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     pullOutOfPower,
     powerOfProduct,
     evaluatePower,
+    tapPower,
     dividePowers,
     flipAcrossBar,
     expOfLog,

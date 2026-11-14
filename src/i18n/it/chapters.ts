@@ -38,14 +38,6 @@ export const itChapters: ChapterTexts = {
         steps: ["Trascina il 5 sul 2."],
       },
     ],
-    hints: {
-      s1: "Trascina il 2 oltre la x.",
-      s2: "Trascina il 4 sul 3.",
-      s3: "Trascina un numero sull'altro.",
-      s8: "Il 4 si porta dietro il suo meno.",
-      s17: "2 − 7 è minore di zero.",
-      s24: "Metti per primo il termine con la a e per ultimo il numero.",
-    },
   },
 
   collect: {
@@ -82,13 +74,6 @@ export const itChapters: ChapterTexts = {
         watch: "`x + x` fa `2x`, non `x²`. `x²` vuol dire `x·x`: lo vedremo più avanti.",
       },
     ],
-    hints: {
-      c4: "Qualsiasi cosa meno se stessa fa 0.",
-      c17: "Tratta ab come se fosse una lettera sola: 3ab + 2ab funziona come 3x + 2x.",
-      c9: "Prima calcola 2·3. Poi somma i termini con la x.",
-      c6: "Somma i termini con la x, poi quelli con la y.",
-      c27: "Riduci i termini con la b, poi metti le lettere in ordine, con il numero per ultimo.",
-    },
   },
 
   distribute: {
@@ -126,15 +111,6 @@ export const itChapters: ChapterTexts = {
         steps: ["Trascina la x sulla parentesi.", "Trascina una x sull'altra."],
       },
     ],
-    hints: {
-      d1: "Trascina la a sulla parentesi.",
-      d3: "Porta fuori una a da uno dei due termini.",
-      d19: "Trascina il meno sulla parentesi.",
-      d6: "Trascina il meno sulla parentesi.",
-      d14: "Il meno moltiplica ogni termine nella parentesi.",
-      d18: "Il −2 moltiplica entrambi i termini della sua parentesi.",
-      d27: "Ogni fattore davanti moltiplica entrambi i termini della sua parentesi. Poi somma i termini in y² e quelli in y.",
-    },
   },
 
   brackets: {
@@ -168,15 +144,6 @@ export const itChapters: ChapterTexts = {
           "`(x + 1)²` non è `x² + 1`. Prova con x = 2: `(2 + 1)² = 9`, ma `2² + 1 = 5`. La differenza sono i due termini centrali, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Trascina la x sulla parentesi. Come si scrive x·x?",
-      m2: "Trascina una parentesi intera sull'altra. Poi sviluppa ogni parte.",
-      m18: "x·x² sono tre x moltiplicate tra loro: x³.",
-      m5: "Guarda i due termini centrali.",
-      m25: "Ci sono tre fattori. Moltiplicane prima due, poi moltiplica il risultato per il terzo.",
-      m7: "Tocca il ² per scriverlo come (x + 2)(x + 2).",
-      m9: "Non è semplicemente a² + b². Moltiplica ogni termine per ogni termine.",
-    },
   },
 
   balance: {
@@ -205,7 +172,7 @@ export const itChapters: ChapterTexts = {
           "Lo stesso vale per la divisione. Da `x/3 = 4`, moltiplica entrambi i membri per 3: il 3 al denominatore passa dall'altra parte e moltiplica l'altro membro.",
           "Anche un meno davanti a tutto un membro può passare dall'altra parte: `−x = 6` diventa `x = −6`.",
         ],
-        steps: ["Trascina il 3 dall'altra parte dell'=."],
+        steps: ["Trascina il 3 dall'altra parte dell'=.", "Trascina il 4 sul 3."],
       },
       {
         title: "A ritroso",
@@ -216,15 +183,6 @@ export const itChapters: ChapterTexts = {
         watch: "Fai la verifica: sostituisci la soluzione nell'equazione. 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Trascina il 3 dall'altra parte del segno =.",
-      b10: "Trascina tutto il secondo membro dall'altra parte per scambiare i membri, oppure risolvila così com'è.",
-      b21: "La soluzione può essere una frazione.",
-      b22: "Tutto il numeratore è diviso per 2. Prima porta il 2 dall'altra parte.",
-      b7: "Più veloce: porta il 2 dall'altra parte prima di sviluppare.",
-      b12: "Prima sposta il + 1.",
-      b23: "Un meno davanti a una parentesi cambia tutti i segni al suo interno.",
-    },
   },
 
   powers: {
@@ -261,17 +219,6 @@ export const itChapters: ChapterTexts = {
         watch: "`2x³` è `2·x·x·x`: l'esponente riguarda solo la x. `(2x)³` è diverso: fa `8x³`.",
       },
     ],
-    hints: {
-      w1: "Stessa base: trascina una potenza sull'altra, poi somma gli esponenti.",
-      w2: "Trascina il 3 esterno sul 2 interno, poi moltiplica.",
-      w3: "Porta il 2 fuori dalla parentesi. Va elevato al cubo anche lui.",
-      w6: "Trascina x³ in su, oltre la linea di frazione.",
-      w11: "Una x da sola è x¹.",
-      w5: "Il risultato ha un esponente negativo.",
-      w21: "Prima sviluppa il prodotto: x per x² fa x³.",
-      w25: "Moltiplica ogni termine per x⁻¹. x⁻¹ per x fa x⁰.",
-      w30: "Scrivilo come (x² + 3)(x² + 3), poi moltiplica ogni termine per ogni termine.",
-    },
   },
 
   factor: {
@@ -311,16 +258,6 @@ export const itChapters: ChapterTexts = {
         watch: "Verifica sempre una scomposizione rifacendo la moltiplicazione: devi ritrovare esattamente l'espressione di partenza.",
       },
     ],
-    hints: {
-      g5: "Entrambi i termini hanno la stessa parentesi. Raccoglila.",
-      g1: "Tocca il ² per scrivere x² come x·x. Così entrambi i termini hanno una x.",
-      g2: "Tocca il 6 per scomporlo in fattori.",
-      g15: "Quale numero divide sia 6 sia 9?",
-      g21: "Scrivi il quadrato come prodotto. Così entrambi i termini contengono (x + 1).",
-      g22: "Scomponi 2x + 6. Salta fuori una (x + 3)?",
-      g6: "Lavora a coppie: trascina una x da x² su 2x, poi un 3 sul 6.",
-      g29: "Tutti e quattro i termini hanno il fattore 2. Raccoglilo per primo, poi scomponi il resto a coppie.",
-    },
   },
 
   formulas: {
@@ -362,13 +299,6 @@ export const itChapters: ChapterTexts = {
         steps: ["Entrambi i termini hanno una x. Trascina una x fuori, davanti.", "Ora porta tutta la (a + b) dall'altra parte."],
       },
     ],
-    hints: {
-      q6: "La A è al denominatore. Portala dall'altra parte.",
-      q8: "Prima sposta la u, poi la a.",
-      q16: "La x compare due volte. Prima raccoglila.",
-      q17: "La P compare in entrambi i termini.",
-      q22: "Porta i due termini con la x nello stesso membro, poi raccogli la x.",
-    },
   },
 
   inequalities: {
@@ -403,13 +333,6 @@ export const itChapters: ChapterTexts = {
         watch: "Il verso si inverte solo se moltiplichi o dividi per un numero negativo. Spostare un termine dall'altra parte non lo cambia mai.",
       },
     ],
-    hints: {
-      i3: "Porta il meno dall'altra parte. Il verso si inverte.",
-      i1: "Come in un'equazione, porta il 3 dall'altra parte.",
-      i8: "Trascina tutto il primo membro dall'altra parte: 5 < x + 2 e x + 2 > 5 dicono la stessa cosa.",
-      i5: "Prima sposta il meno, poi il 2.",
-      i26: "Prima sviluppa la parentesi, poi porta i termini con la x nello stesso membro.",
-    },
   },
 
   fractions: {
@@ -449,18 +372,6 @@ export const itChapters: ChapterTexts = {
         after: "Poi semplifica i fattori comuni a numeratore e denominatore e ottieni 3/2.",
       },
     ],
-    hints: {
-      f1: "Trascina l'8 sul 6.",
-      f2: "Stesso denominatore: trascina una frazione sull'altra.",
-      f5: "Trascina il 3 sul 2.",
-      f6: "Porta il 2 fuori dal numeratore.",
-      f22: "Prima scomponi il numeratore. Poi numeratore e denominatore avranno un fattore comune da semplificare.",
-      f8: "Trascina ¾ in su, oltre la linea di frazione.",
-      f3: "Trascina il 3 su ½ e il 2 su ⅓, così i denominatori diventano uguali.",
-      f4: "Tocca il 6 per scomporlo in fattori.",
-      f17: "Tocca il 4 per scomporlo: 4 è 2·2.",
-      f28: "Prima trasforma 1 + ½ in un'unica frazione.",
-    },
   },
 
   simultaneous: {
@@ -505,13 +416,6 @@ export const itChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y vale 3: trascina la y di y = 3 sulla y dell'altra equazione.",
-      e4: "Trascina la y di y = 2x sulla y dell'altra equazione. Quando conosci x, sostituiscila in y = 2x.",
-      e18: "Nessuna lettera è ancora isolata. Porta il −y dall'altra parte per ottenere x = 1 + y. Poi sostituisci.",
-      e21: "Ricava y dalla prima equazione: y = 5 − x.",
-      e27: "x = 1 + y, quindi 2x diventa 2(1 + y). Usa tutta la parentesi.",
-    },
   },
 
   roots: {
@@ -547,20 +451,6 @@ export const itChapters: ChapterTexts = {
         steps: ["Tocca la radice per scriverla come potenza.", "Trascina l'esponente ½ dall'altra parte dell'=. Diventa un quadrato.", "Calcola."],
       },
     ],
-    hints: {
-      r2: "Toccala.",
-      r5: "Trascina una √x sull'altra. Una radice quadrata moltiplicata per se stessa dà quello che c'è sotto.",
-      r1: "Tocca la √ per calcolarla. Oppure tocca il 9 per scomporlo in 3·3, poi porta un 3 fuori dalla radice.",
-      r16: "Tratta √3 come una lettera: 2√3 + √3 funziona come 2x + x.",
-      r8: "Tocca la radice per scriverla come potenza, poi trascina l'esponente ½ dall'altra parte del segno =.",
-      r6: "Tocca la radice per scriverla come potenza con esponente ½, poi trascina il ½ sul 2.",
-      r3: "Porta il 4 fuori dalla radice. Avrà una radice tutta sua.",
-      r20: "x³ è x²·x, e x² esce dalla radice come x.",
-      r11: "Prima isola la √x.",
-      r22: "Prima porta fuori il 4: così le √x diventano termini simili.",
-      r4: "Tocca il 12 per separare un quadrato perfetto.",
-      r29: "Scomponi l'8 per trovare un quadrato perfetto sotto radice.",
-    },
   },
 
   explog: {
@@ -596,21 +486,5 @@ export const itChapters: ChapterTexts = {
         steps: ["Trascina la e dall'altra parte dell'=."],
       },
     ],
-    hints: {
-      l2: "Trascina la e sul ln.",
-      l3: "Trascina il ln su quello che c'è dentro.",
-      l4: "Trascina il 3 fuori, davanti.",
-      l8: "Trascina la e dall'altra parte del segno =.",
-      l12: "Una radice è una potenza. Trascina la √ fuori, davanti.",
-      l1: "Trascina la x fuori, davanti al ln. Quanto fa ln(e)?",
-      l14: "Prima porta il fattore ½ dentro il ln.",
-      l7: "Tocca l'8 per scriverlo come potenza di 2. Poi trascina il 3 fuori, davanti, e tocca log₂(2).",
-      l15: "A quale esponente va elevato e per ottenere 1?",
-      l19: "Quando sottrai due logaritmi, dividi gli argomenti.",
-      l20: "È la stessa mossa che con la e, ma il 2 diventa log₂.",
-      l22: "Stessa base: somma gli esponenti.",
-      l23: "Prima spezza il ln. Quanto fa ln(e)?",
-      l26: "Prima isola la potenza.",
-    },
   },
 };

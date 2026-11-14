@@ -1,5 +1,5 @@
 import type { Chapter } from "../game/puzzles";
-import { badgeTier, TIER_NAMES, toNextTier, type Tier } from "../game/scoring";
+import { badgeTier, TIER_NAMES, toNextTier, type Progress, type Tier } from "../game/scoring";
 import { t } from "../i18n";
 
 /** A chapter's badge: a small medal with the chapter's number, coloured by how far it's earned (faint until then). */
@@ -25,9 +25,9 @@ export function Badge({ tier, n, size = 28, title }: { tier: Tier; n: number; si
 }
 
 /** Where the chapter's badge stands, and what the next step takes. */
-export function BadgeNote({ chapter, solved }: { chapter: Chapter; solved: ReadonlySet<string> }) {
-  const tier = badgeTier(chapter, solved);
-  const more = toNextTier(chapter, solved);
-  if (tier === 3) return <span className="badge-note">{t().goldNote}</span>;
-  return <span className="badge-note">{t().badgeNote(tier, more)}</span>;
+export function BadgeNote({ chapter, progress }: { chapter: Chapter; progress: Progress }) {
+  const tier = badgeTier(chapter, progress);
+  const next = toNextTier(chapter, progress);
+  if (tier === 3 || !next) return <span className="badge-note">{t().goldNote}</span>;
+  return <span className="badge-note">{t().badgeNote(tier as 0 | 1 | 2, next.more)}</span>;
 }

@@ -2,10 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from 
 import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
 import { layoutPath, suggested, type PathNode } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, isMastered, loadSolved, solvedCount } from "../game/scoring";
+import { badgeTier, GOAL, isMastered, loadProgress, progressOf, solvedCount, type Progress } from "../game/scoring";
 import { chapterText, t } from "../i18n";
 import { Badge } from "./Badge";
-import { ChapterProgress } from "./ChapterProgress";
+import { ChapterExercises } from "./Practice";
 
 /** Height of one row of the path. */
 const ROW = 136;
@@ -18,8 +18,8 @@ const MAX_W = 620;
 
 /** The learning path. `at`: a chapter to pick out (coming back from it). */
 export function Home({ at }: { at?: Chapter }) {
-  const solved = useMemo(() => loadSolved(), []);
-  const next = useMemo(() => suggested(solved), [solved]);
+  const progress = useMemo(() => loadProgress(), []);
+  const next = useMemo(() => suggested(progress), [progress]);
   const [selected, setSelected] = useState<Chapter>(at ?? next[0] ?? CHAPTERS[0]);
   const panel = useRef<HTMLElement>(null);
   const pathRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export function Home({ at }: { at?: Chapter }) {
         <p>{t().heroText}</p>
       </section>
 
-      <Shelf solved={solved} onSelect={select} />
+      <Shelf progress={progress} onSelect={select} />
 
       <div className="path-layout" ref={pathRef}>
         <section className="path-card" aria-label={t().learningPath}>
@@ -58,10 +58,10 @@ export function Home({ at }: { at?: Chapter }) {
             </span>
             <span className="path-open">{t().everyChapterOpen}</span>
           </div>
-          <PathMap solved={solved} next={next} selected={selected} onSelect={select} />
+          <PathMap progress={progress} next={next} selected={selected} onSelect={select} />
         </section>
 
-        <ChapterPanel panelRef={panel} chapter={selected} solved={solved} isNext={next.includes(selected)} />
+        <ChapterPanel panelRef={panel} chapter={selected} progress={progress} isNext={next.includes(selected)} />
       </div>
 
       <section className="chapter sandbox-link">
@@ -77,12 +77,12 @@ export function Home({ at }: { at?: Chapter }) {
 
 /** The chapters as a graph, each arrow pointing to what builds on it. */
 function PathMap({
-  solved,
+  progress,
   next,
   selected,
   onSelect,
 }: {
-  solved: ReadonlySet<string>;
+  progress: Progress;
   next: readonly Chapter[];
   selected: Chapter;
   onSelect: (c: Chapter) => void;
@@ -132,7 +132,7 @@ function PathMap({
               const bottom = b.y - R - 8;
               const mid = (top + bottom) / 2;
               const d = `M ${a.x} ${top} C ${a.x} ${mid}, ${b.x} ${mid}, ${b.x} ${bottom}`;
-              const done = isMastered(from.chapter, solved);
+              const done = isMastered(from.chapter, progress);
               return (
                 <path
                   key={`${from.chapter.id}-${to.chapter.id}`}
@@ -146,8 +146,8 @@ function PathMap({
           {nodes.map((n) => {
             const p = at(n);
             const c = n.chapter;
-            const done = solvedCount(c, solved);
-            const state = isMastered(c, solved) ? "done" : next.includes(c) ? "next" : done > 0 ? "started" : "open";
+            const done = progressOf(c, progress);
+            const state = isMastered(c, progress) ? "done" : next.includes(c) ? "next" : solvedCount(c, progress) > 0 ? "started" : "open";
             return (
               <button
                 key={c.id}
@@ -155,13 +155,13 @@ function PathMap({
                 style={{ left: p.x, top: p.y - R, width: room(n) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
-                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title, done, c.puzzles.length)}
+                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title, done, GOAL)}
               >
                 <span className="node-ring">
-                  <Ring done={done} total={c.puzzles.length} label={String(n.index + 1)} />
-                  {badgeTier(c, solved) > 0 && (
+                  <Ring done={done} total={GOAL} label={String(n.index + 1)} />
+                  {badgeTier(c, progress) > 0 && (
                     <span className="node-medal">
-                      <Badge tier={badgeTier(c, solved)} n={n.index + 1} size={22} />
+                      <Badge tier={badgeTier(c, progress)} n={n.index + 1} size={22} />
                     </span>
                   )}
                 </span>
@@ -204,19 +204,19 @@ function Ring({ done, total, label }: { done: number; total: number; label: stri
 function ChapterPanel({
   panelRef,
   chapter,
-  solved,
+  progress,
   isNext,
 }: {
   panelRef: Ref<HTMLElement>;
   chapter: Chapter;
-  solved: ReadonlySet<string>;
+  progress: Progress;
   isNext: boolean;
 }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const started = solvedCount(chapter, solved) > 0;
-  const mastered = isMastered(chapter, solved);
+  const started = solvedCount(chapter, progress) > 0;
+  const mastered = isMastered(chapter, progress);
   const builds = chapter.after.map((id) => chapterById(id)!);
-  const missing = builds.filter((c) => !isMastered(c, solved));
+  const missing = builds.filter((c) => !isMastered(c, progress));
   const opens = leadsTo(chapter);
   const text = chapterText(chapter);
   const titles = (cs: Chapter[]) => t().list(cs.map((c) => chapterText(c).title));
@@ -243,7 +243,7 @@ function ChapterPanel({
         {started ? t().backToLesson : t().startLesson}
       </a>
 
-      <ChapterProgress chapter={chapter} solved={solved} />
+      <ChapterExercises chapter={chapter} progress={progress} />
 
       {opens.length > 0 && <p className="panel-opens">{t().leadsOnTo(titles(opens))}</p>}
     </section>
@@ -251,8 +251,8 @@ function ChapterPanel({
 }
 
 /** Every chapter's badge, earned or not yet: a small reason to come back, nothing more. */
-function Shelf({ solved, onSelect }: { solved: ReadonlySet<string>; onSelect: (c: Chapter) => void }) {
-  const tiers = CHAPTERS.map((c) => badgeTier(c, solved));
+function Shelf({ progress, onSelect }: { progress: Progress; onSelect: (c: Chapter) => void }) {
+  const tiers = CHAPTERS.map((c) => badgeTier(c, progress));
   const earned = tiers.filter((t) => t > 0).length;
   return (
     <section className="shelf" aria-label={t().badges}>

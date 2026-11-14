@@ -5,7 +5,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { parseState } from "../../expr/parse";
-import { allPuzzles, startOf } from "../puzzles";
+import { startOf } from "../puzzles";
+import { allPuzzles } from "./exercises";
 import { solutionVia } from "../solver";
 
 /** Every `n`th exercise from the `k`th. */

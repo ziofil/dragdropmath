@@ -38,14 +38,6 @@ export const ptChapters: ChapterTexts = {
         steps: ["Arraste o 5 até o 2."],
       },
     ],
-    hints: {
-      s1: "Arraste o 2 para depois do x.",
-      s2: "Arraste o 4 até o 3.",
-      s3: "Arraste um número até o outro.",
-      s8: "O 4 leva o seu menos junto.",
-      s17: "2 − 7 dá menos que zero.",
-      s24: "Coloque primeiro o termo com a e, por último, o número sozinho.",
-    },
   },
 
   collect: {
@@ -82,13 +74,6 @@ export const ptChapters: ChapterTexts = {
         watch: "`x + x` é `2x`, e não `x²`. `x²` quer dizer `x·x`, e isso vem mais adiante.",
       },
     ],
-    hints: {
-      c4: "Qualquer coisa menos ela mesma dá 0.",
-      c17: "Trate ab como se fosse uma letra só: 3ab + 2ab funciona como 3x + 2x.",
-      c9: "Faça 2·3 primeiro. Depois some os termos em x.",
-      c6: "Some os termos em x e depois os termos em y.",
-      c27: "Junte os termos em b e depois coloque as letras em ordem, com o número sozinho no final.",
-    },
   },
 
   distribute: {
@@ -126,15 +111,6 @@ export const ptChapters: ChapterTexts = {
         steps: ["Arraste o x até os parênteses.", "Arraste um x até o outro."],
       },
     ],
-    hints: {
-      d1: "Arraste o a até os parênteses.",
-      d3: "Coloque o a em evidência: arraste para fora o a de um dos termos.",
-      d19: "Arraste o menos até os parênteses.",
-      d6: "Arraste o menos até os parênteses.",
-      d14: "O menos multiplica cada termo dentro dos parênteses.",
-      d18: "O −2 multiplica os dois termos dos parênteses dele.",
-      d27: "Cada fator da frente multiplica os dois termos dos seus parênteses. Depois some os termos em y² e os termos em y.",
-    },
   },
 
   brackets: {
@@ -168,15 +144,6 @@ export const ptChapters: ChapterTexts = {
           "`(x + 1)²` não é `x² + 1`. Teste com x = 2: `(2 + 1)² = 9`, mas `2² + 1 = 5`. A diferença são os dois termos do meio, `x + x = 2x`.",
       },
     ],
-    hints: {
-      m1: "Arraste o x até os parênteses. Como se escreve x·x?",
-      m2: "Arraste um parêntese inteiro até o outro. Depois aplique a distributiva em cada parte.",
-      m18: "x·x² são três x multiplicados: x³.",
-      m5: "Olhe para os dois termos do meio.",
-      m25: "São três fatores. Multiplique dois deles primeiro e depois multiplique pelo terceiro.",
-      m7: "Toque no ² para escrever como (x + 2)(x + 2).",
-      m9: "Não é só a² + b². Multiplique cada termo por cada termo.",
-    },
   },
 
   balance: {
@@ -205,7 +172,7 @@ export const ptChapters: ChapterTexts = {
           "Com a divisão também funciona. Em `x/3 = 4`, multiplique os dois membros por 3. O 3 do denominador passa para o outro lado multiplicando.",
           "Um menos na frente de um membro inteiro também pode passar: `−x = 6` vira `x = −6`.",
         ],
-        steps: ["Passe o 3 para o outro lado do =."],
+        steps: ["Passe o 3 para o outro lado do =.", "Arraste o 4 até o 3."],
       },
       {
         title: "Desfaça na ordem inversa",
@@ -216,15 +183,6 @@ export const ptChapters: ChapterTexts = {
         watch: "Tire a prova colocando a resposta de volta na equação: 3·4 + 1 = 13. ✓",
       },
     ],
-    hints: {
-      b1: "Passe o 3 para o outro lado do =.",
-      b10: "Passe o membro da direita inteiro para o outro lado para trocar os membros de lugar, ou resolva do jeito que está.",
-      b21: "A resposta pode ser uma fração.",
-      b22: "O numerador inteiro está dividido por 2. Passe o 2 para o outro lado primeiro.",
-      b7: "Mais rápido: passe o 2 para o outro lado antes de aplicar a distributiva.",
-      b12: "Passe o + 1 primeiro.",
-      b23: "Um menos na frente dos parênteses troca todos os sinais de dentro.",
-    },
   },
 
   powers: {
@@ -261,17 +219,6 @@ export const ptChapters: ChapterTexts = {
         watch: "`2x³` é `2·x·x·x`: o expoente é só do x. `(2x)³` é diferente: dá `8x³`.",
       },
     ],
-    hints: {
-      w6: "Arraste o x³ para cima, atravessando o traço da fração.",
-      w1: "Mesma base: arraste uma potência até a outra e depois some os expoentes.",
-      w11: "x sozinho é x¹.",
-      w2: "Arraste o 3 de fora até o 2 de dentro e depois multiplique.",
-      w5: "A resposta tem expoente negativo.",
-      w3: "Tire o 2 de dentro dos parênteses. Ele também fica elevado ao cubo.",
-      w21: "Aplique a distributiva primeiro: x vezes x² dá x³.",
-      w25: "Multiplique cada termo por x⁻¹. x⁻¹ vezes x dá x⁰.",
-      w30: "Escreva como (x² + 3)(x² + 3) e multiplique cada termo por cada termo.",
-    },
   },
 
   factor: {
@@ -311,16 +258,6 @@ export const ptChapters: ChapterTexts = {
         watch: "Sempre tire a prova de uma fatoração aplicando a distributiva. Tem que dar exatamente o que você tinha no começo.",
       },
     ],
-    hints: {
-      g5: "Os dois termos têm o mesmo parêntese. Coloque-o em evidência.",
-      g1: "Toque no ² para escrever x² como x·x. Aí os dois termos têm um x.",
-      g2: "Toque no 6 para decompô-lo em fatores.",
-      g15: "Que número divide 6 e 9 ao mesmo tempo?",
-      g21: "Escreva o quadrado como um produto. Aí os dois termos têm um (x + 1).",
-      g22: "Fatore 2x + 6. Aparece um (x + 3)?",
-      g6: "Agrupe em pares: arraste um x do x² até o 2x e depois um 3 até o 6.",
-      g29: "Os quatro termos têm o fator 2. Coloque-o em evidência primeiro e depois fatore o resto em pares.",
-    },
   },
 
   formulas: {
@@ -359,13 +296,6 @@ export const ptChapters: ChapterTexts = {
         steps: ["Os dois termos têm um x. Arraste um x para fora, na frente.", "Agora passe o (a + b) inteiro para o outro lado."],
       },
     ],
-    hints: {
-      q6: "O A está no denominador. Passe-o para o outro lado.",
-      q8: "Passe o u primeiro, depois o a.",
-      q16: "O x aparece em dois lugares. Coloque-o em evidência primeiro.",
-      q17: "O P está nos dois termos.",
-      q22: "Leve os dois termos em x para o mesmo membro e depois coloque o x em evidência.",
-    },
   },
 
   inequalities: {
@@ -401,13 +331,6 @@ export const ptChapters: ChapterTexts = {
         watch: "Só multiplicar ou dividir por um número negativo inverte o sinal. Passar um termo para o outro lado nunca inverte.",
       },
     ],
-    hints: {
-      i3: "Passe o menos para o outro lado. O sinal se inverte.",
-      i1: "Como numa equação, passe o 3 para o outro lado.",
-      i8: "Passe o membro da esquerda inteiro para o outro lado: 5 < x + 2 e x + 2 > 5 dizem a mesma coisa.",
-      i5: "Passe primeiro o menos, depois o 2.",
-      i26: "Aplique a distributiva primeiro e depois leve os termos em x para o mesmo membro.",
-    },
   },
 
   fractions: {
@@ -447,18 +370,6 @@ export const ptChapters: ChapterTexts = {
         after: "Depois simplifique os fatores comuns do numerador e do denominador e você chega a 3/2.",
       },
     ],
-    hints: {
-      f1: "Arraste o 8 até o 6.",
-      f2: "Mesmos denominadores: arraste uma fração até a outra.",
-      f6: "Tire o 2 do numerador.",
-      f5: "Arraste o 3 até o 2.",
-      f22: "Fatore o numerador primeiro. Aí o numerador e o denominador têm algo em comum para simplificar.",
-      f8: "Arraste o ¾ para cima, atravessando o traço da fração.",
-      f3: "Arraste o 3 até ½ e o 2 até ⅓, para igualar os denominadores.",
-      f4: "Toque no 6 para decompô-lo em fatores.",
-      f17: "Toque no 4 para decompô-lo. 4 é 2·2.",
-      f28: "Primeiro transforme 1 + ½ numa fração só.",
-    },
   },
 
   simultaneous: {
@@ -497,13 +408,6 @@ export const ptChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      e1: "y vale 3: arraste o y de y = 3 até o y da outra equação.",
-      e4: "Arraste o y de y = 2x até o y da outra equação. Quando souber o x, substitua em y = 2x.",
-      e18: "Nenhuma letra está isolada ainda. Passe o −y para o outro lado para obter x = 1 + y. Depois substitua.",
-      e21: "Isole o y na primeira equação: y = 5 − x.",
-      e27: "x = 1 + y, então 2x vira 2(1 + y). Use o parêntese inteiro.",
-    },
   },
 
   roots: {
@@ -542,20 +446,6 @@ export const ptChapters: ChapterTexts = {
         ],
       },
     ],
-    hints: {
-      r2: "Toque nela.",
-      r5: "Arraste um √x até o outro. Uma raiz quadrada vezes ela mesma dá o que está dentro.",
-      r16: "Trate √3 como uma letra: 2√3 + √3 funciona como 2x + x.",
-      r1: "Toque no √ para calcular. Ou toque no 9 para decompô-lo em 3·3 e depois tire um 3 de dentro da raiz.",
-      r8: "Toque na raiz para escrevê-la como potência e depois passe o ½ para o outro lado do =.",
-      r6: "Toque na raiz para escrevê-la como potência de ½ e depois arraste o ½ até o 2.",
-      r3: "Tire o 4 de dentro da raiz. Ele ganha uma raiz só para ele.",
-      r20: "x³ é x²·x, e o x² sai da raiz como x.",
-      r11: "Isole o √x primeiro.",
-      r4: "Toque no 12 para separar um quadrado perfeito.",
-      r22: "Tire o 4 primeiro: aí os √x viram termos semelhantes.",
-      r29: "Decomponha o 8 para achar um quadrado perfeito lá dentro.",
-    },
   },
 
   explog: {
@@ -591,21 +481,5 @@ export const ptChapters: ChapterTexts = {
         steps: ["Passe o e para o outro lado do =."],
       },
     ],
-    hints: {
-      l2: "Arraste o e até o ln.",
-      l3: "Arraste o ln até o que está dentro dele.",
-      l4: "Arraste o 3 para a frente.",
-      l19: "Quando você subtrai logaritmos, divide o que está dentro.",
-      l8: "Passe o e para o outro lado do =.",
-      l20: "É o mesmo movimento do e, mas o 2 vira log₂.",
-      l12: "Uma raiz é uma potência. Arraste o √ para a frente.",
-      l15: "e elevado a quanto dá 1?",
-      l1: "Arraste o x para a frente do ln. Quanto vale ln(e)?",
-      l14: "Primeiro arraste o ½ para dentro do ln.",
-      l7: "Toque no 8 para escrevê-lo como potência de 2. Depois arraste o 3 para a frente e toque em log₂(2).",
-      l22: "Mesma base: some os expoentes.",
-      l23: "Separe o ln primeiro. Quanto vale ln(e)?",
-      l26: "Isole a potência primeiro.",
-    },
   },
 };

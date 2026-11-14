@@ -1,0 +1,239 @@
+<title>Equation Shapes Round 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;1,400&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* Layout: the app's own look — a column of shape sections, each a grid of candidate cards. */
+:root {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-2: #efece4;
+  --ink: #1d1b26;
+  --ink-soft: #5d5a6b;
+  --line: #dcd8cc;
+  --accent: #5b3df5;
+  --var: #3a2bb8;
+  --good: #0f9d74;
+  --good-soft: #d6f5ea;
+  --warn: #c2410c;
+  --warn-soft: #fde4d6;
+  --ui: "Space Grotesk", system-ui, sans-serif;
+  --math: "STIX Two Text", "Times New Roman", serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14131a; --surface: #1d1c25; --surface-2: #25232f; --ink: #f1eff8; --ink-soft: #a6a3b8; --line: #34323f;
+    --accent: #8b74ff; --var: #b7a8ff; --good: #3dd6a5; --good-soft: #163a30; --warn: #fb923c; --warn-soft: #3d2216;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14131a; --surface: #1d1c25; --surface-2: #25232f; --ink: #f1eff8; --ink-soft: #a6a3b8; --line: #34323f;
+  --accent: #8b74ff; --var: #b7a8ff; --good: #3dd6a5; --good-soft: #163a30; --warn: #fb923c; --warn-soft: #3d2216;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 64px;
+}
+main { max-width: 1040px; margin: 0 auto; display: grid; gap: 36px; }
+header { display: grid; gap: 8px; }
+h1 { font-size: 1.9rem; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.lede { color: var(--ink-soft); margin: 0; max-width: 62ch; }
+.tally { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.tally b { font-weight: 700; }
+.status { color: var(--ink-soft); font-size: 0.9rem; min-height: 1.4em; margin: 0; }
+section { display: grid; gap: 12px; }
+h2 { font-size: 1.15rem; margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+h2 small { font-weight: 400; color: var(--ink-soft); font-size: 0.85rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.card.up { border-color: var(--good); }
+.card.down { border-color: var(--warn); opacity: 0.75; }
+.math { display: block; width: 100%; height: 72px; }
+.facts { display: flex; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+details summary { cursor: pointer; color: var(--ink-soft); font-size: 0.85rem; }
+.way { display: grid; gap: 2px; margin-top: 6px; }
+.way .math { height: 34px; }
+.choice { display: flex; gap: 8px; }
+.choice button {
+  flex: 1;
+  font: inherit;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+}
+.choice button:focus-visible, .note:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choice .keep[aria-pressed="true"] { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+.choice .drop[aria-pressed="true"] { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+.choice button:disabled { opacity: 0.5; cursor: default; }
+.note {
+  font: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+}
+/* The app's maths styles. */
+.m-num, .m-var, .m-op, .m-const, .m-fn { font-family: var(--math); fill: var(--ink); }
+.m-var, .m-const { font-style: italic; }
+.m-var { fill: var(--var); }
+.m-bar { fill: var(--ink); }
+.m-root { fill: none; stroke: var(--ink); stroke-linejoin: round; stroke-linecap: round; }
+.m-hit { fill: transparent; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color 0.2s, opacity 0.2s; } }
+</style>
+
+<main>
+  <header>
+    <h1>Equation Shapes, Round 1</h1>
+    <p class="lede">Exercises the generator made for Solving equations, the best few of each shape by its beauty score. Each one was checked move by move in the app's engine. Keep the ones you'd put in the app, drop the rest. A few words on why helps me tune the rules.</p>
+    <div class="tally" aria-live="polite"><span><b id="n-up">0</b> kept</span><span><b id="n-down">0</b> dropped</span><span><b id="n-left">0</b> to go</span></div>
+    <p class="status" id="status">Loading your marks…</p>
+  </header>
+  <div id="shapes"></div>
+</main>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+const cands = JSON.parse(document.getElementById("data").textContent);
+const marks = {}; // id → { vote, note }
+let db = null;
+const status = document.getElementById("status");
+
+// ---- render (from the candidates and the marks) ----
+const byShape = new Map();
+for (const c of cands) {
+  if (!byShape.has(c.shape)) byShape.set(c.shape, []);
+  byShape.get(c.shape).push(c);
+}
+const host = document.getElementById("shapes");
+host.style.display = "grid";
+host.style.gap = "36px";
+const cardEls = {};
+for (const [shape, list] of byShape) {
+  const sec = document.createElement("section");
+  const moves = list.map((c) => c.moves);
+  sec.innerHTML = `<h2>${list[0].shapeName}<small>${list.length} candidates · ${Math.min(...moves) === Math.max(...moves) ? Math.min(...moves) : Math.min(...moves) + "–" + Math.max(...moves)} moves</small></h2><div class="cards"></div>`;
+  const grid = sec.querySelector(".cards");
+  for (const c of list) {
+    const card = document.createElement("article");
+    card.className = "card";
+    const way = [c.svg.start, ...c.svg.via, c.svg.goal].map((s) => s.replace("<svg ", '<svg class="math" ')).join("");
+    card.innerHTML = `
+      ${c.svg.start.replace('class="static-math"', 'class="math" role="img" aria-label="' + c.start + '"')}
+      <div class="facts"><span>answer ${c.goal.replace("x = ", "x = ")}</span><span>${c.moves} moves</span></div>
+      <details><summary>The way, milestone by milestone</summary><div class="way">${way.replace(/class="static-math"/g, "")}</div></details>
+      <div class="choice">
+        <button type="button" class="keep" id="keep-${c.id}" aria-pressed="false">Keep</button>
+        <button type="button" class="drop" id="drop-${c.id}" aria-pressed="false">Drop</button>
+      </div>
+      <input class="note" id="note-${c.id}" placeholder="Why? (optional)" aria-label="Note on ${c.start}">`;
+    card.querySelector(".keep").addEventListener("click", () => vote(c.id, "up"));
+    card.querySelector(".drop").addEventListener("click", () => vote(c.id, "down"));
+    card.querySelector(".note").addEventListener("change", (e) => saveNote(c.id, e.target.value.trim()));
+    grid.appendChild(card);
+    cardEls[c.id] = card;
+  }
+  host.appendChild(sec);
+}
+
+function paint() {
+  let up = 0, down = 0;
+  for (const c of cands) {
+    const m = marks[c.id] ?? {};
+    const card = cardEls[c.id];
+    card.classList.toggle("up", m.vote === "up");
+    card.classList.toggle("down", m.vote === "down");
+    card.querySelector(".keep").setAttribute("aria-pressed", String(m.vote === "up"));
+    card.querySelector(".drop").setAttribute("aria-pressed", String(m.vote === "down"));
+    const note = card.querySelector(".note");
+    if (document.activeElement !== note) note.value = m.note ?? "";
+    if (m.vote === "up") up++;
+    if (m.vote === "down") down++;
+  }
+  document.getElementById("n-up").textContent = up;
+  document.getElementById("n-down").textContent = down;
+  document.getElementById("n-left").textContent = cands.length - up - down;
+}
+paint();
+
+// ---- saving (one write at a time per candidate) ----
+const writing = {};
+async function write(id, next) {
+  marks[id] = next;
+  paint();
+  if (!db) return;
+  if (writing[id]) { writing[id].again = true; return; }
+  writing[id] = { again: false };
+  try {
+    do {
+      writing[id].again = false;
+      await db.collection("marks").doc(id).set({ ...marks[id], start: cands.find((c) => c.id === id).start });
+    } while (writing[id].again);
+    status.textContent = "Saved.";
+  } catch (e) {
+    status.textContent = e.code === "invalid_argument" ? "This view can't save marks." : "Couldn't save just now. Try that mark again.";
+  } finally {
+    delete writing[id];
+  }
+}
+function vote(id, v) {
+  const m = marks[id] ?? {};
+  write(id, { vote: m.vote === v ? null : v, note: m.note ?? "" });
+}
+function saveNote(id, note) {
+  const m = marks[id] ?? {};
+  if ((m.note ?? "") === note) return;
+  write(id, { vote: m.vote ?? null, note });
+}
+
+// ---- the store ----
+(async () => {
+  const timer = setTimeout(() => (status.textContent = "Your saved marks can't be reached yet; new marks will save when they can."), 10000);
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) {
+    clearTimeout(timer);
+    status.textContent = "Marks can't be saved in this view: open the page on claude.ai to mark candidates.";
+    for (const b of document.querySelectorAll(".choice button, .note")) b.disabled = true;
+    return;
+  }
+  db.collection("marks").onSnapshot(
+    (snap) => {
+      for (const d of snap.docs) {
+        if (writing[d.id]) continue;
+        const v = d.data();
+        marks[d.id] = { vote: v.vote ?? null, note: v.note ?? "" };
+      }
+      if (!snap.metadata.fromCache) {
+        clearTimeout(timer);
+        if (status.textContent.startsWith("Loading") || status.textContent.startsWith("Your saved")) status.textContent = "Marks save as you go.";
+      }
+      paint();
+    },
+    () => {
+      clearTimeout(timer);
+      status.textContent = "Saved marks can't be loaded in this view.";
+    },
+  );
+})();
+</script>
