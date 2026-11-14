@@ -1,4 +1,5 @@
 /** Solving equations: linear, one unknown. */
+import { NESTED } from "./nested";
 import { answer, ax, bracket, gcd, lin, pickAnswer, plus, type Draft, type Level, type Rng, type Shape } from "../write";
 
 // ---------- mixed exercises: everything from the chapters before at once ----------
@@ -496,5 +497,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("one-step", "times", "two-step", "over-plus", "bracket", "both-sides", "bracket-plus"),
   medium: pick("brackets-both", "minus-bracket", "fraction", "brackets-and-x", "minus-times-bracket", "two-fractions", "fractions-ax", "nested", "bracket-over"),
-  hard: pick("two-brackets-mixed", "fractions-minus", "minus-fraction"),
+  // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
+  hard: NESTED.balance,
 };

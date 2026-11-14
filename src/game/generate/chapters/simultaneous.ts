@@ -4,6 +4,7 @@
  * first, whole and positive, and builds the equations around it. Milestones:
  * the letter on its own, substituted, collected, one letter found.
  */
+import { NESTED } from "./nested";
 import { ax, type Level, type Rng, type Shape } from "../write";
 
 /** The two letters: mostly x and y, now and then a and b. */
@@ -385,5 +386,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("known-x", "known-y", "multiple", "linear", "take-away"),
   medium: pick("sum-difference", "sum-and-other", "bracket-sub", "minus-bracket"),
-  hard: pick("tidy-factor", "tidy-bracket", "minus-bracket-sub"),
+  // And brackets inside brackets: chapters/nested.ts.
+  hard: [...pick("tidy-factor", "tidy-bracket", "minus-bracket-sub"), ...NESTED.simultaneous],
 };

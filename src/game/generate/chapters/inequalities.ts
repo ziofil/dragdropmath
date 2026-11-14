@@ -1,4 +1,5 @@
 /** Exercise shapes for the chapter "inequalities" (see ../write.ts): linear, one unknown, like balance's, with the sign turning round when a negative multiplies or divides. */
+import { NESTED } from "./nested";
 import { ax, bracket, lin, pickAnswer, plus, type Level, type Rng, type Shape } from "../write";
 import { finish, fractionsMinus, minusFraction, twoBracketsMixed } from "./balance";
 
@@ -310,5 +311,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("add", "times", "divided", "two-step", "over-plus", "bracket", "both-sides"),
   medium: pick("brackets-both", "bracket-less", "minus-bracket"),
-  hard: pick("two-brackets-mixed", "fractions-minus", "minus-fraction"),
+  // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
+  hard: NESTED.inequalities,
 };

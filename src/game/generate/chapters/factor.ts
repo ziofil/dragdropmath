@@ -1,4 +1,5 @@
 /** Factoring: take a common factor out in front, a number, a letter or a whole bracket. Built from the factors, then multiplied out. */
+import { NESTED } from "./nested";
 import { gcd, lin, type Level, type Rng, type Shape } from "../write";
 
 /** c·v as a person writes it: "3x^2", "x", "-x", "7" (v empty: a number). */
@@ -363,5 +364,6 @@ const pick = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) =
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("number-out", "letter-out", "bracket-out", "square-and-bracket", "number-and-letter", "half-done", "pairs"),
   medium: pick("pairs-numbers", "pairs-cube", "number-then-pairs"),
-  hard: pick("square-minus-number", "product-minus-number", "two-terms-common"),
+  // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
+  hard: NESTED.factor,
 };

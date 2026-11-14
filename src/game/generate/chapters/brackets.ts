@@ -1,4 +1,5 @@
 /** Multiplying brackets: each term of one by each term of the other, then collect. */
+import { NESTED } from "./nested";
 import { lin, plus, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** c·v as a person writes it: "3x^2", "x", "-x", "7" (v empty: a number). */
@@ -458,5 +459,6 @@ const byId = (...ids: string[]) => ids.map((id) => [...all, ...mixed].find((s) =
 export const shapes: Record<Level, Shape[]> = {
   easy: byId("letter-times", "power-times", "then-collect", "two-plus", "signs", "times-square", "then-take"),
   medium: byId("both-numbers", "square", "number-times", "three-factors"),
-  hard: byId("square-minus-product", "two-squares", "scaled-square", "product-minus-product"),
+  // Hard nests one thing in another (with x and y where the chapter allows): chapters/nested.ts.
+  hard: NESTED.brackets,
 };

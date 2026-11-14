@@ -1,4 +1,5 @@
 /** Exercise shapes for the chapter "distribute": multiplying out brackets, and taking a factor out (see ../write.ts). */
+import { NESTED } from "./nested";
 import { ax, gcd, lin, type Level, type Rng, type Shape } from "../write";
 
 const one = <T>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
@@ -368,5 +369,6 @@ const pick = (...ids: string[]) => ids.map((id) => all.find((s) => s.id === id)!
 export const shapes: Record<Level, Shape[]> = {
   easy: pick("expand", "factor", "expand-cancel", "expand-and-add", "simple-brackets", "square"),
   medium: pick("two-brackets", "two-letters", "letter-brackets"),
-  hard: pick("products-and-brackets", "three-brackets", "square-brackets", "number-minus-bracket"),
+  // And brackets inside brackets: chapters/nested.ts.
+  hard: [...pick("products-and-brackets", "three-brackets", "square-brackets", "number-minus-bracket"), ...NESTED.distribute],
 };

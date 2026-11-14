@@ -337,5 +337,251 @@ const explog: Shape[] = [
   },
 ];
 
-/** Each nesting chapter's hard shapes. */
-export const NESTED: Record<string, Shape[]> = { powers, roots, fractions, explog };
+/** A term after another: " + 3y", " - y", " - 2xy" (nothing for 0). */
+const then = (c: number, s: string) => (c === 0 ? "" : c < 0 ? ` - ${co(-c, s)}` : ` + ${co(c, s)}`);
+/** A first term: "3y", "-y". */
+const first = (c: number, s: string) => (c < 0 ? `-${co(-c, s)}` : co(c, s));
+
+const distribute: Shape[] = [
+  {
+    id: "bracket-in-bracket",
+    name: "a bracket inside a bracket, with x and y",
+    make: (r) => {
+      // a(x + b(x − y)) + cy → a(1 + b)x + (c − ab)y
+      const a = r.int(2, 3);
+      const b = r.int(2, 3);
+      const c = r.int(1, 9);
+      if (c === a * b) return null;
+      return {
+        shape: "bracket-in-bracket",
+        start: `${a}(x + ${b}(x - y)) + ${co(c, "y")}`,
+        goal: `${a * (1 + b)}x${then(c - a * b, "y")}`,
+        via: [`${a}(x + ${b}x - ${b}y) + ${co(c, "y")}`, `${a}(${1 + b}x - ${b}y) + ${co(c, "y")}`, `${a * (1 + b)}x - ${a * b}y + ${co(c, "y")}`],
+        numbers: [a, b, c],
+        along: [1 + b, a * (1 + b), a * b, c - a * b],
+      };
+    },
+  },
+  {
+    id: "minus-bracket-in-bracket",
+    name: "a minus in front of a bracket with a bracket inside",
+    make: (r) => {
+      // x − (ay − b(x − y)) → (1 + b)x − (a + b)y
+      const a = r.int(1, 4);
+      const b = r.int(2, 4);
+      return {
+        shape: "minus-bracket-in-bracket",
+        start: `x - (${co(a, "y")} - ${b}(x - y))`,
+        goal: `${1 + b}x - ${a + b}y`,
+        via: [`x - (${co(a, "y")} - ${b}x + ${b}y)`, `x - (${a + b}y - ${b}x)`, `x - ${a + b}y + ${b}x`],
+        numbers: [a, b],
+        along: [a + b, 1 + b],
+      };
+    },
+  },
+  {
+    id: "letter-times-nested",
+    name: "x times a bracket with a bracket inside",
+    make: (r) => {
+      // x(y + b(x − y)) → bx² − (b − 1)xy
+      const b = r.int(2, 5);
+      return {
+        shape: "letter-times-nested",
+        start: `x(y + ${b}(x - y))`,
+        goal: `${b}x^2 - ${co(b - 1, "xy")}`,
+        via: [`x(y + ${b}x - ${b}y)`, `x(${b}x - ${co(b - 1, "y")})`],
+        numbers: [b],
+        along: [b - 1],
+      };
+    },
+  },
+];
+
+const brackets: Shape[] = [
+  {
+    id: "two-letter-product-minus",
+    name: "two brackets of x and y multiplied, take away x times a bracket",
+    make: (r) => {
+      // (x + ay)(x − by) − x(x + cy) → (a − b − c)xy − ab·y²
+      const a = r.int(1, 3);
+      const b = r.int(1, 3);
+      const c = r.int(1, 3);
+      const k = a - b - c;
+      if (a === b || k === 0) return null;
+      const A = co(a, "y");
+      const B = co(b, "y");
+      const C = co(c, "y");
+      const tail = ` - x(x + ${C})`;
+      return {
+        shape: "two-letter-product-minus",
+        start: `(x + ${A})(x - ${B})${tail}`,
+        goal: `${first(k, "xy")} - ${co(a * b, "y^2")}`,
+        via: [`(x + ${A})x - (x + ${A})·${B}${tail}`, `x^2 + ${co(a, "xy")} - (x + ${A})·${B}${tail}`, `x^2 + ${co(a, "xy")} - (${co(b, "xy")} + ${co(a * b, "y^2")})${tail}`, `x^2${then(a - b, "xy")} - ${co(a * b, "y^2")}${tail}`, `x^2${then(a - b, "xy")} - ${co(a * b, "y^2")} - x^2 - ${co(c, "xy")}`],
+        numbers: [a, b, c],
+        along: [a - b, a * b, k],
+      };
+    },
+  },
+  {
+    id: "letter-bracket-minus-product",
+    name: "x times a bracket, take away two brackets of x and y multiplied",
+    make: (r) => {
+      // x(x + ay) − (x + ay)(x − ay) → axy + a²y²
+      const a = r.int(1, 3);
+      const A = co(a, "y");
+      return {
+        shape: "letter-bracket-minus-product",
+        start: `x(x + ${A}) - (x + ${A})(x - ${A})`,
+        goal: `${co(a, "xy")} + ${co(a * a, "y^2")}`,
+        via: [
+          `x^2 + ${co(a, "xy")} - (x + ${A})(x - ${A})`,
+          `x^2 + ${co(a, "xy")} - ((x + ${A})x - (x + ${A})·${A})`,
+          `x^2 + ${co(a, "xy")} - (x^2 + ${co(a, "xy")} - (x + ${A})·${A})`,
+          `x^2 + ${co(a, "xy")} - (x^2 + ${co(a, "xy")} - ${co(a, "xy")} - ${co(a * a, "y^2")})`,
+          `x^2 + ${co(a, "xy")} - (x^2 - ${co(a * a, "y^2")})`,
+        ],
+        numbers: [a],
+        along: [a * a],
+      };
+    },
+  },
+];
+
+/** Solving with brackets inside brackets: one letter, the answer a whole number (balance, inequalities). */
+function nestedSolve(rel: string, id: string): Shape[] {
+  return [
+    {
+      id: `${id}nested-brackets`,
+      name: "a bracket inside a bracket, the letter on both sides",
+      make: (r) => {
+        // a(b(x − c) + d) rel e·x + f, solved: x rel x0
+        const a = r.int(2, 3);
+        const b = r.int(2, 3);
+        const c = r.int(1, 4);
+        const d = r.int(1, 6);
+        const e = r.int(1, a * b - 1);
+        const x0 = r.int(1, 6);
+        const k = d - b * c; // inside: b·x + k
+        const f = (a * b - e) * x0 + a * k;
+        if (k === 0 || f === 0 || Math.abs(f) > 30) return null;
+        const rhs = `${co(e, "x")}${f < 0 ? ` - ${-f}` : ` + ${f}`}`;
+        return {
+          shape: `${id}nested-brackets`,
+          start: `${a}(${b}(x - ${c}) + ${d}) ${rel} ${rhs}`,
+          goal: `x ${rel} ${x0}`,
+          via: [`${a}(${b}x - ${b * c} + ${d}) ${rel} ${rhs}`, `${a}(${b}x${k < 0 ? ` - ${-k}` : ` + ${k}`}) ${rel} ${rhs}`, `${a * b}x${a * k < 0 ? ` - ${-a * k}` : ` + ${a * k}`} ${rel} ${rhs}`, `${co(a * b - e, "x")} ${rel} ${(a * b - e) * x0}`],
+          answer: x0,
+          numbers: [a, b, c, d, e, f],
+          along: [b * c, k, a * b, a * k, a * b - e, (a * b - e) * x0],
+        };
+      },
+    },
+    {
+      id: `${id}bracket-in-fraction`,
+      name: "a bracket inside a fraction, with more x beside it",
+      make: (r) => {
+        // (b(x + c) + x)/a rel q → x rel x0
+        const a = r.int(2, 5);
+        const b = r.int(2, 3);
+        const c = r.int(1, 4);
+        const x0 = r.int(1, 6);
+        const top = (b + 1) * x0 + b * c;
+        if (top % a !== 0) return null;
+        const q = top / a;
+        return {
+          shape: `${id}bracket-in-fraction`,
+          start: `(${b}(x + ${c}) + x)/${a} ${rel} ${q}`,
+          goal: `x ${rel} ${x0}`,
+          via: [`${b}(x + ${c}) + x ${rel} ${top}`, `${b}x + ${b * c} + x ${rel} ${top}`, `${b + 1}x + ${b * c} ${rel} ${top}`, `${b + 1}x ${rel} ${(b + 1) * x0}`],
+          answer: x0,
+          numbers: [a, b, c, q],
+          along: [top, b * c, b + 1, (b + 1) * x0],
+        };
+      },
+    },
+  ];
+}
+
+const factor: Shape[] = [
+  {
+    id: "common-xy",
+    name: "a number, x and y in common",
+    make: (r) => {
+      // g·p·x²y + g·q·xy² − g·s·xy → g·xy(px + qy − s)
+      const g = r.int(2, 3); // a prime: it splits off in one tap
+      const [p, q] = pick(r, COPRIME);
+      const t = r.int(1, 5);
+      if (g * q > 30 || g * t > 30) return null;
+      return {
+        shape: "common-xy",
+        start: `${g * p}x^2y + ${g * q}xy^2 - ${g * t}xy`,
+        goal: `${g}xy(${p}x + ${q}y - ${t})`,
+        via: [`${g}·${p}x^2y + ${g}·${q}xy^2 - ${g}·${co(t, "xy")}`, `${g}(${p}x^2y + ${q}xy^2 - ${co(t, "xy")})`, `${g}x(${p}xy + ${q}y^2 - ${co(t, "y")})`],
+        numbers: [g * p, g * q, g * t],
+        along: [g, p, q, t],
+      };
+    },
+  },
+  {
+    id: "pairs-x-y",
+    name: "four terms in x and y, factored in pairs",
+    make: (r) => {
+      // p·x² + pa·xy + q·xy + qa·y² → (x + ay)(px + qy)
+      const [p, q] = pick(r, COPRIME);
+      const a = r.int(2, 3);
+      const A = `x + ${a}y`;
+      if (q * a > 30) return null;
+      return {
+        shape: "pairs-x-y",
+        start: `${p}x^2 + ${p * a}xy + ${q}xy + ${q * a}y^2`,
+        goal: `(${A})(${p}x + ${q}y)`,
+        via: [`${p}(x^2 + ${a}xy) + ${q}xy + ${q * a}y^2`, `${p}x(${A}) + ${q}xy + ${q * a}y^2`, `${p}x(${A}) + ${q}(xy + ${a}y^2)`, `${p}x(${A}) + ${q}y(${A})`],
+        numbers: [p, p * a, q, q * a],
+        along: [a],
+      };
+    },
+  },
+];
+
+const simultaneous: Shape[] = [
+  {
+    id: "nested-then-substitute",
+    name: "a bracket inside a bracket to undo, then substitute",
+    make: (r) => {
+      // a(x + b(y − c)) = R; x − y = d
+      const a = r.int(2, 3);
+      const b = r.int(2, 3);
+      const y0 = r.int(1, 5);
+      const x0 = r.int(y0 + 1, y0 + 4);
+      const c = r.int(1, 3);
+      const d = x0 - y0;
+      const inner = x0 + b * (y0 - c);
+      const R = a * inner;
+      const S = inner + b * c; // x + by = S
+      if (inner <= 0 || R > 30) return null;
+      const eq2 = `x - y = ${d}`;
+      return {
+        shape: "nested-then-substitute",
+        start: `${a}(x + ${b}(y - ${c})) = ${R}; ${eq2}`,
+        goal: `x = ${x0}; y = ${y0}`,
+        via: [`${a}(x + ${b}y - ${b * c}) = ${R}; ${eq2}`, `x + ${b}y - ${b * c} = ${inner}; ${eq2}`, `x + ${b}y = ${S}; x = ${d} + y`, `${d} + y + ${b}y = ${S}; x = ${d} + y`, `y = ${y0}; x = ${d} + y`],
+        numbers: [a, b, c, R, d],
+        along: [inner, S, b * c],
+      };
+    },
+  },
+];
+
+/** Each chapter's nested hard shapes. */
+export const NESTED: Record<string, Shape[]> = {
+  powers,
+  roots,
+  fractions,
+  explog,
+  distribute,
+  brackets,
+  balance: nestedSolve("=", ""),
+  inequalities: nestedSolve("<", "ineq-"),
+  factor,
+  simultaneous,
+};
