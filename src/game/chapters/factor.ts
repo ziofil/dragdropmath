@@ -5,5 +5,5 @@ export const factor: Chapter = {
   title: "Factoring",
   blurb: "Factoring is expanding in reverse. Find a factor that every term has, and take it out in front of brackets.",
   after: ["brackets"],
-  unlocks: ["split-number", "factor-shared"],
+  unlocks: ["factor-out", "split-number", "factor-shared", "split-term", "difference-of-squares"],
 };

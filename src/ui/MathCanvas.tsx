@@ -281,22 +281,31 @@ function useTaps(ref: RefObject<HTMLElement | null>, held: RefObject<boolean>, o
   handler.current = onTap;
   useEffect(() => {
     let down: PointerEvent | null = null;
+    // A press that ever went further than PRESS_SLOP was a drag, even if it came back where it started.
+    let wandered = false;
     const onDown = (e: PointerEvent) => {
-      if (e.isTrusted && ref.current?.contains(e.target as Node)) down = e;
+      if (!e.isTrusted || !ref.current?.contains(e.target as Node)) return;
+      down = e;
+      wandered = false;
+    };
+    const onMove = (e: PointerEvent) => {
+      if (down && e.isTrusted && e.pointerId === down.pointerId && Math.hypot(e.clientX - down.clientX, e.clientY - down.clientY) > PRESS_SLOP) wandered = true;
     };
     const onUp = (e: PointerEvent) => {
       const d = down;
       down = null;
-      // A press held long enough to pick a piece up isn't a tap.
-      if (!d || !e.isTrusted || e.pointerId !== d.pointerId || held.current) return;
+      // A press held long enough to pick a piece up isn't a tap, nor is a drag brought back.
+      if (!d || !e.isTrusted || e.pointerId !== d.pointerId || held.current || wandered) return;
       // After the drag engine has let go of the press too: a press on a piece
       // it could drag ends with it putting back the state it started from.
       if (Math.hypot(e.clientX - d.clientX, e.clientY - d.clientY) <= PRESS_SLOP) setTimeout(() => handler.current(d.clientX, d.clientY), 0);
     };
     document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("pointermove", onMove, true);
     document.addEventListener("pointerup", onUp, true);
     return () => {
       document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("pointermove", onMove, true);
       document.removeEventListener("pointerup", onUp, true);
     };
   }, [ref, held]);

@@ -13,7 +13,6 @@ export const powers: Chapter = {
     "divide-powers",
     "flip-across-bar",
     "power-one",
-    "pull-out-of-power",
     "power-of-product",
     "split-exponent",
   ],

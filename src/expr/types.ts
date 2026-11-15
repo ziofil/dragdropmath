@@ -21,7 +21,12 @@ type Base = { id: string; from?: string };
 export type Num = Base & { kind: "num"; value: number; explicit?: boolean };
 export type Var = Base & { kind: "var"; name: string };
 export type Neg = Base & { kind: "neg"; arg: Expr };
-export type Sum = Base & { kind: "sum"; terms: Expr[] };
+/**
+ * `grouped`: a bracket that a move just multiplied into (2(x + 3) + 1 →
+ * (2x + 2·3) + 1), kept for a moment so what went inside can be seen inside;
+ * tidying (game/tidy.ts) then lets it go, unless a minus holds it.
+ */
+export type Sum = Base & { kind: "sum"; terms: Expr[]; grouped?: true };
 export type Prod = Base & { kind: "prod"; factors: Expr[] };
 export type Frac = Base & { kind: "frac"; num: Expr; den: Expr };
 /** `radical`: draw x^(1/n) as ⁿ√x (notation: values ignore it; ordered keys count it, see key.ts). */

@@ -56,7 +56,10 @@ export type RuleId =
   | "log-across"
   | "power-of-base"
   | "split-exponent"
-  | "move-exponent-term";
+  | "move-exponent-term"
+  | "split-term"
+  | "difference-of-squares"
+  | "join-powers";
 
 /**
  * A state the dragged node can lead to.

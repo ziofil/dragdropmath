@@ -6,7 +6,7 @@ import { num } from "../expr/build";
 import { roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
-import { distribute, distributeNeg, factorOut, factorShared } from "./distribute";
+import { differenceOfSquares, distribute, distributeNeg, factorOut, factorShared, splitTerm } from "./distribute";
 import { substitute } from "./rows";
 import { moveDenominator, moveFactor, moveLetterDenominator, moveLetterFactor, moveSign, moveTerm, swapSides } from "./balance";
 import { cancelFactor, divideNumbers, evaluateFraction } from "./fractions";
@@ -18,6 +18,7 @@ import {
   powerOfBase,
   splitExponent,
   moveExponentTerm,
+  joinPowers,
   expAcross,
   expOfLog,
   flipAcrossBar,
@@ -58,6 +59,8 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     distributeNeg,
     factorOut,
     factorShared,
+    splitTerm,
+    differenceOfSquares,
     powerToProduct,
     moveTerm,
     swapSides,
@@ -88,6 +91,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     powerOfBase,
     splitExponent,
     moveExponentTerm,
+    joinPowers,
     rootNotation,
     evaluateRoot,
     splitSquare,

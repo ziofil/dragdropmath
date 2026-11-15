@@ -321,8 +321,8 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.terms.flatMap((t, i) =>
           i > 0 && t.kind !== "neg"
-            ? [separator("plus", `plus-${t.id}`, size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null)]
-            : [layoutNode(t, rc, size, i > 0 ? "minus" : null)],
+            ? [separator("plus", `plus-${t.id}`, size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null, { parens: t.kind === "sum" })]
+            : [layoutNode(t, rc, size, i > 0 ? "minus" : null, { parens: t.kind === "sum" })],
         ),
       );
     }
@@ -467,7 +467,7 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   rc.canvas = { W, H };
   if (rc.state.sides.length > 2) return renderRows(rc, W, H);
   const build = (size: number) => {
-    const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null));
+    const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped }));
     const eqW = Math.max(textWidth("=", size), textWidth(relGlyph(relOf(rc.state)).text, size));
     const space = 0.35 * size;
     return { sides, eqW, space };
@@ -515,7 +515,7 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
  */
 function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const n = rc.state.sides.length / 2;
-  const build = (size: number) => ({ sides: rc.state.sides.map((s) => layoutNode(s, rc, size, null)), size });
+  const build = (size: number) => ({ sides: rc.state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped })), size });
   const fit = (b: ReturnType<typeof build>) => {
     const eqW = textWidth("=", b.size);
     const space = 0.35 * b.size;

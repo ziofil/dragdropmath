@@ -1,4 +1,5 @@
 import type { Expr, MathState } from "../expr/types";
+import { allNodes } from "../expr/tree";
 import { cloneFresh, frac, isNum, neg, prod, relOf, sum, withFlippedRel } from "../expr/build";
 import { evaluate, isConstant } from "../expr/eval";
 import { adopt, dragCtx, isEquation, partner, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
@@ -106,14 +107,14 @@ export const moveTerm: Rule = {
  * of its own, and a press on it could then no longer pick up the term 2x.
  * (Factor out first: 2x + 4 = 10 → 2(x + 2) = 10.)
  */
-function moveFactorRule(id: "move-factor" | "move-letter-factor", allowed: (e: Expr, state: MathState) => boolean, gesture: string): Rule {
+function moveFactorRule(id: "move-factor" | "move-letter-factor", allowed: (e: Expr, state: MathState, rest: Expr[]) => boolean, gesture: string): Rule {
   return {
     id,
     name: "Divide both sides",
     gesture,
     apply(state, dragged) {
       const r = onSide(state, dragged);
-      if (!r || r.part !== "top-factor" || r.terms.length !== 1 || !allowed(r.node, state)) return [];
+      if (!r || r.part !== "top-factor" || r.terms.length !== 1 || !allowed(r.node, state, [...r.term.top, ...r.term.bottom].filter((f) => f.id !== r.node.id))) return [];
       const t = r.term;
       const remaining = rebuildTerm(t, t.top.filter((f) => f.id !== r.node.id), t.bottom);
       const other = state.sides[r.other];
@@ -162,10 +163,24 @@ function moveDenominatorRule(id: "move-denominator" | "move-letter-denominator",
  */
 const letterFactor = (e: Expr, state: MathState) => !isConstant(e) && (relOf(state) === "=" || isPositive(e, assumeOf(state)));
 
+/**
+ * Dividing both sides by something with letters loses the answers that make it
+ * 0: x(x − 3) = 0 divided by x is x − 3 = 0, and x = 0 is gone. So not by a
+ * factor sharing a letter with the rest of its side — what's left would still
+ * hold the unknown it could be 0 for. (A formula's other quantities are fine:
+ * x(a − 2) = b − a divided by a − 2, v − u = at by a.)
+ */
+const letterDivisor = (e: Expr, state: MathState, rest: Expr[]) => {
+  if (!letterFactor(e, state)) return false;
+  const names = (x: Expr) => allNodes(x).flatMap((n) => (n.kind === "var" ? [n.name] : []));
+  const mine = new Set(names(e));
+  return !rest.some((f) => names(f).some((n) => mine.has(n)));
+};
+
 export const moveFactor = moveFactorRule("move-factor", usefulFactor, "Drag a number multiplying a whole side across = — it divides the other side.");
 export const moveDenominator = moveDenominatorRule("move-denominator", nonzeroConstant, "Drag the bottom of a fraction across = — it multiplies the other side.");
 /** Formulas: v − u = at → (v − u)/a = t. */
-export const moveLetterFactor = moveFactorRule("move-letter-factor", letterFactor, "Drag a letter multiplying a whole side across = — it divides the other side.");
+export const moveLetterFactor = moveFactorRule("move-letter-factor", letterDivisor, "Drag a letter multiplying a whole side across = — it divides the other side.");
 /** Formulas: P = F/A → PA = F. */
 export const moveLetterDenominator = moveDenominatorRule("move-letter-denominator", letterFactor, "Drag a letter on the bottom of a fraction across = — it multiplies the other side.");
 

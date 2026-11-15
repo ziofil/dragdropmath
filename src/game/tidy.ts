@@ -8,7 +8,8 @@
  */
 import type { Expr, MathState } from "../expr/types";
 import { key, stateKey } from "../expr/key";
-import { allNodes, children } from "../expr/tree";
+import { allNodes, children, mapTree } from "../expr/tree";
+import { normalize } from "../expr/build";
 import { candidatesFor, handles, signOwner, tapFor, type RuleId } from "../rules";
 
 const TIDY_RULES: RuleId[] = ["numbers-first", "power-one"];
@@ -60,7 +61,34 @@ export function tidySteps(before: MathState, after: MathState, earlier: readonly
 /** Where a move ends up once tidied. */
 export const tidied = (before: MathState, after: MathState): MathState => tidySteps(before, after).at(-1) ?? after;
 
+/**
+ * A bracket a move multiplied into (Sum.grouped) lets go once it's been seen:
+ * its terms join the sum around it (or it's a whole side). Under a minus, or
+ * as a factor, the bracket is needed, and stays.
+ */
+function ungroup(state: MathState): MathState | null {
+  for (let i = 0; i < state.sides.length; i++) {
+    const free = (e: Expr, parent: Expr | null): Expr | null => {
+      if (e.kind === "sum" && e.grouped && (parent === null || parent.kind === "sum")) return e;
+      for (const c of children(e)) {
+        const found = free(c, e);
+        if (found) return found;
+      }
+      return null;
+    };
+    const g = free(state.sides[i], null);
+    if (!g) continue;
+    const sides = state.sides.slice();
+    sides[i] = normalize(mapTree(sides[i], (e) => (e.id === g.id && e.kind === "sum" ? { kind: "sum", id: e.id, terms: e.terms, ...(e.from ? { from: e.from } : {}) } : e)));
+    return { ...state, sides };
+  }
+  return null;
+}
+
 function nextStep(state: MathState, touched: ReadonlySet<string>, seen: ReadonlySet<string>): MathState | null {
+  // First a bracket that has been seen lets go, then the usual tidying.
+  const open = ungroup(state);
+  if (open && !seen.has(stateKey(open, "exact"))) return open;
   for (const id of handles(state)) {
     const owner = signOwner(id) ?? id;
     const tap = tapFor(state, id, TIDY_RULES);

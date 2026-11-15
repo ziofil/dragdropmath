@@ -149,6 +149,31 @@ function workOutPower(state: MathState, id: string, rule: "evaluate-power" | "ta
   return [rule === "evaluate-power" ? { rule, state: state2, targetId: P.base.id } : { rule, state: state2 }];
 }
 
+/**
+ * √2·√3 → √(2·3), x³·y³ → (x·y)³ (drop a power onto another with the same
+ * exponent: the bases share it; the way back of splitting a power). For roots
+ * and other exponents that aren't whole, only as splitsOver allows.
+ */
+export const joinPowers: Rule = {
+  id: "join-powers",
+  name: "Same exponent: join the bases",
+  gesture: "Drop a power onto another with the same exponent — the bases go under one: √2·√3 = √(2·3).",
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    const me = c?.node;
+    if (c?.parent?.kind !== "prod" || me?.kind !== "pow") return [];
+    const factors = c.parent.factors;
+    return factors.flatMap((f, j): Candidate[] => {
+      if (j === c.index || f.kind !== "pow" || !!f.radical !== !!me.radical || key(f.exp) !== key(me.exp) || key(f.base) === key(me.base)) return [];
+      if (!whole(me.exp) && !splitsOver([me.base, f.base], assumeOf(state))) return [];
+      // Left to right as they stood; the joined power takes the target's place and identity.
+      const bases = j < c.index ? [f.base, me.base] : [me.base, f.base];
+      const joined: Expr = { ...pow(prod(bases), f.exp, f.id), ...(f.radical ? { radical: true } : {}) } as Expr;
+      return [{ rule: "join-powers", state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, joined), targetId: f.id }];
+    });
+  },
+};
+
 /** x⁵/x² → x³ (drop a power on the bottom onto one with the same base on top). */
 export const dividePowers: Rule = {
   id: "divide-powers",

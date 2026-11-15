@@ -28,7 +28,8 @@ export function key(e: Expr, ordered: Ordering = false, notation = ordered !== f
     case "neg":
       return `-(${k(e.arg)})`;
     case "sum":
-      return `+(${list(e.terms, ordered !== false)})`;
+      // A bracket kept for a moment (Sum.grouped) is a state of its own: tidying lets it go.
+      return `${e.grouped ? "()" : ""}+(${list(e.terms, ordered !== false)})`;
     case "prod":
       return `*(${list(e.factors, ordered === "exact")})`;
     case "frac":
@@ -66,8 +67,9 @@ export const rootIndex = (e: Expr): number | null => (e.kind === "pow" && e.radi
 
 /** Plain-text rendering, mostly for tests and debugging. */
 export function print(e: Expr): string {
+  // (A bracket held for a moment, Sum.grouped, prints its own brackets.)
   const wrap = (x: Expr, kinds: Expr["kind"][]) =>
-    kinds.includes(x.kind) ? `(${print(x)})` : print(x);
+    kinds.includes(x.kind) && !(x.kind === "sum" && x.grouped) ? `(${print(x)})` : print(x);
   switch (e.kind) {
     case "num":
       return String(e.value);
@@ -75,12 +77,14 @@ export function print(e: Expr): string {
       return e.name;
     case "neg":
       return `-${wrap(e.arg, ["sum", "neg"])}`;
-    case "sum":
-      return e.terms
+    case "sum": {
+      const inner = e.terms
         .map((t, i) =>
           t.kind === "neg" ? `${i ? " - " : "-"}${wrap(t.arg, ["sum", "neg"])}` : `${i ? " + " : ""}${print(t)}`,
         )
         .join("");
+      return e.grouped ? `(${inner})` : inner;
+    }
     case "prod":
       return e.factors.map((f) => wrap(f, ["sum", "neg", "frac"])).join("*");
     case "frac":

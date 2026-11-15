@@ -74,7 +74,7 @@ function normalizeNode(e: Expr): Expr {
       return e;
     }
     case "sum": {
-      let terms = e.terms.flatMap((t) => (t.kind === "sum" ? t.terms : [t]));
+      let terms = e.terms.flatMap((t) => (t.kind === "sum" && !t.grouped ? t.terms : [t]));
       if (terms.length > 1) terms = terms.filter((t) => !isNum(t, 0));
       if (terms.length === 0) return num(0);
       if (terms.length === 1) return terms[0];

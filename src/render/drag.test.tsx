@@ -179,8 +179,8 @@ describe("a merge holds while the piece is over its target, and undoes the way i
   // Exercise 3.1: the a carried into a(b + c) showed ab + ac just before the b,
   // then faded on past the b while still inside the brackets.
   it.each([
-    ["a(b + c)", 1, "a*b + a*c"],
-    ["(b + c)a", -1, "b*a + c*a"],
+    ["a(b + c)", 1, "(a*b + a*c)"],
+    ["(b + c)a", -1, "(b*a + c*a)"],
   ])("%s: the a carried across the brackets", (src, dir, merged) => {
     const h = harness(src);
     const grip = h.grab(h.find("a").id);
@@ -206,7 +206,7 @@ describe("a copy made by distributing is an ordinary piece afterwards", () => {
     let state = parseState("2(x + 3)");
     const first2 = state.sides.flatMap(allNodes).find((n) => n.kind === "num" && n.value === 2)!;
     state = candidatesFor(state, first2.id, ALL_RULES).find((c) => c.rule === "distribute")!.state;
-    expect(show(state)).toBe("2*x + 2*3");
+    expect(show(state)).toBe("(2*x + 2*3)");
     const h = harness(state);
     const twos = state.sides.flatMap(allNodes).filter((n): n is Expr => n.kind === "num" && n.value === 2);
     expect(twos.some((n) => n.from)).toBe(true);
@@ -326,11 +326,11 @@ describe("a piece absorbed into its target: the target stays put and changes the
 describe("multiplying brackets: the carried bracket goes in, a copy splits off", () => {
   it.each([
     // [start, carried, stays put (nth match), makes room (nth match), result]
-    ["(x + 4)(x - 1)", "x + 4", ["x", 1], ["1", 0], "(x + 4)*x - (x + 4)*1"],
+    ["(x + 4)(x - 1)", "x + 4", ["x", 1], ["1", 0], "((x + 4)*x - (x + 4)*1)"],
     // Carried in from the right, it goes after each term.
-    ["(x - 1)(x + 4)", "x + 4", ["1", 0], ["x", 0], "x*(x + 4) - 1*(x + 4)"],
-    ["(2x + 1)(x + 3)", "x + 3", ["1", 0], ["2", 0], "2*x*(x + 3) + 1*(x + 3)"],
-    ["2(x + 1)", "2", ["x", 0], ["1", 0], "2*x + 2*1"],
+    ["(x - 1)(x + 4)", "x + 4", ["1", 0], ["x", 0], "(x*(x + 4) - 1*(x + 4))"],
+    ["(2x + 1)(x + 3)", "x + 3", ["1", 0], ["2", 0], "(2*x*(x + 3) + 1*(x + 3))"],
+    ["2(x + 1)", "2", ["x", 0], ["1", 0], "(2*x + 2*1)"],
   ] as const)("%s: carrying %s in, one term stays put, the other makes room", (src, what, [stays, si], [moves, mi], result) => {
     const h = harness(src);
     const piece = h.find(what);
@@ -362,7 +362,7 @@ describe("multiplying brackets: the carried bracket goes in, a copy splits off",
 describe("a bracket onto the same bracket", () => {
   // (x + 1)(x + 1): carried to the first term inside, it multiplies out; carried right over its twin, it's a square.
   it.each([
-    ["distribute", "(x + 1)*x + (x + 1)*1"],
+    ["distribute", "((x + 1)*x + (x + 1)*1)"],
     ["merge-powers", "(x + 1)^2"],
   ] as const)("%s: carried to where that move completes, it drops as %s", (rule, result) => {
     const h = harness("(x + 1)(x + 1)");

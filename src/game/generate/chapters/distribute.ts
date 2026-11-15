@@ -1,5 +1,5 @@
 /**
- * The distributive law: multiplying out brackets, and taking a factor out.
+ * The distributive law: multiplying out brackets (taking a factor out is the Factoring chapter).
  * Each shape picks its pieces and numbers; the answer and the way to it are
  * worked out from them (../composeExpr.ts).
  */
@@ -31,23 +31,6 @@ const expand = shape("expand", "multiply out one bracket", (r) => {
   }
   return [times(k, "", lin(1, n, v))];
 });
-
-/** Taking the shared factor out: the other way round, no milestones. */
-const factor: Shape = {
-  id: "factor",
-  name: "take the shared factor out",
-  make: (r) => {
-    const [a, b] = pair(r);
-    const k = r.int(2, 9);
-    const [start, goal] = one(r, [
-      [`${k}${a} + ${k}${b}`, `${k}(${a} + ${b})`],
-      [`${k}${a} + ${k}`, `${k}(${a} + 1)`],
-      [`${a}${b} + ${a}`, `${a}(${b} + 1)`],
-      ((pqs: readonly string[]) => [`${pqs[0]}${pqs[1]} + ${pqs[0]}${pqs[2]}`, `${pqs[0]}(${pqs[1]} + ${pqs[2]})`])(one(r, [["x", "y", "z"], ["a", "b", "c"]])),
-    ]);
-    return { shape: "factor", start, goal, via: [] };
-  },
-};
 
 const expandCancel = shape("expand-cancel", "multiply out, and a term cancels", (r) => {
   const [a, b] = pair(r);
@@ -178,7 +161,7 @@ const minusBracketInBracket = shape("minus-bracket-in-bracket", "a minus in fron
 const letterTimesNested = shape("letter-times-nested", "x times a bracket with a bracket inside", (r) => [nested(1, "x", P("y"), r.int(2, 5), P("x - y"))]);
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: [expand, factor, expandCancel, expandAndAdd, simpleBrackets, square, composedExpression("distribute", "easy", 4)],
+  easy: [expand, expandCancel, expandAndAdd, simpleBrackets, square, composedExpression("distribute", "easy", 4)],
   medium: [twoBrackets, twoLetters, letterBrackets, composedExpression("distribute", "medium", 4)],
   hard: [productsAndBrackets, threeBrackets, squareBrackets, numberMinusBracket, bracketInBracket, minusBracketInBracket, letterTimesNested, composedExpression("distribute", "hard", 4)],
 };

@@ -1,5 +1,5 @@
 import type { Expr } from "../expr/types";
-import { cloneFresh, neg, negate, prod, sum } from "../expr/build";
+import { cloneFresh, neg, negate, num, pow, prod, sum, variable } from "../expr/build";
 import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
 import { nodeAt, type Loc } from "../expr/tree";
 import { divideOut, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
@@ -35,7 +35,12 @@ export const distribute: Rule = {
         const times = (u: Expr) => prod(fromLeft ? [g, visibleOne(u)] : [visibleOne(u), g]);
         return t.kind === "neg" ? neg(times(t.arg), t.id) : times(t);
       };
-      const spread = sum(s.terms.map(each), s.id);
+      // Still in its bracket for a moment, so the factor is seen to have gone inside (see Sum.grouped) —
+      // where the bracket would otherwise vanish: into a sum, or as a whole side. (As a factor, or under
+      // a minus, it keeps its brackets anyway.)
+      const holder = dragCtx(state, c.parent!.id)?.parent ?? null;
+      const vanishes = factors.length === 2 && (holder === null || holder.kind === "sum");
+      const spread: Expr = vanishes ? ({ ...sum(s.terms.map(each), s.id), grouped: true } as Expr) : sum(s.terms.map(each), s.id);
       return [
         {
           rule: "distribute",
@@ -164,5 +169,94 @@ export const factorShared: Rule = {
       const newTerms = terms.map((x, k) => (k === lo ? shared : x)).filter((_, k) => k !== hi);
       return [{ rule: "factor-shared", state: replaceIn(state, at.sumLoc, sum(newTerms, at.s.id)), targetId: t.id }];
     });
+  },
+};
+
+/** A term as a whole number times a power of one letter: 3x² → (3, x, 2), −5x → (−5, x, 1), 6 → (6, null, 0). Null for anything else. */
+function monomial(t: Expr): { k: number; x: string | null; n: number } | null {
+  const v = viewTerm(t);
+  if (v.frac) return null;
+  let k = v.negative ? -1 : 1;
+  let x: string | null = null;
+  let n = 0;
+  for (const f of v.top) {
+    const p = wholePower(f);
+    if (f.kind === "num" && Number.isInteger(f.value)) k *= f.value;
+    else if (p.base.kind === "var" && (x === null || x === p.base.name)) {
+      x = p.base.name;
+      n += p.n;
+    } else return null;
+  }
+  return { k, x, n };
+}
+
+/** The term k·xⁿ, written as a person writes it (with a fresh id unless given). */
+function writeTerm(k: number, x: string, n: number, id?: string): Expr {
+  const body = (m: number): Expr => {
+    const letter = n === 0 ? null : n === 1 ? variable(x) : pow(variable(x), num(n));
+    return letter === null ? num(m, id) : m === 1 ? { ...letter, ...(id ? { id } : {}) } : prod([num(m), letter], id);
+  };
+  return k < 0 ? neg(body(-k)) : body(k);
+}
+
+/**
+ * x² + 5x + 6 → x² + 2x + 3x + 6 (tap the middle term of a quadratic: it splits
+ * into the two whose numbers multiply to the first times the last, ready to
+ * factor in pairs). Only when such whole numbers exist.
+ */
+export const splitTerm: Rule = {
+  id: "split-term",
+  name: "Split the middle term",
+  gesture: "Tap the middle term of something like x² + 5x + 6: it splits in two (2x + 3x), ready to factor in pairs.",
+  tap: true,
+  apply(state, id) {
+    const r = roleOf(state, id);
+    if (!r || r.part !== "term" || r.terms.length !== 3) return [];
+    const ms = r.terms.map(monomial);
+    if (ms.some((m) => m === null)) return [];
+    const sq = ms.find((m) => m!.n === 2);
+    const lin = ms.find((m) => m!.n === 1);
+    const con = ms.find((m) => m!.n === 0);
+    if (!sq || !lin || !con || ms[r.index] !== lin || sq.x !== lin.x) return [];
+    const x = lin.x!;
+    const target = sq.k * con.k;
+    for (let p = -Math.abs(target); p <= Math.abs(target); p++) {
+      if (p === 0 || target % p !== 0) continue;
+      const q = target / p;
+      if (p + q !== lin.k || q === 0 || Math.abs(p) > Math.abs(q)) continue;
+      const parts = [writeTerm(p, x, 1, r.node.id), writeTerm(q, x, 1)];
+      const terms = r.terms.flatMap((t, i) => (i === r.index ? parts : [t]));
+      return [{ rule: "split-term", state: replaceIn(state, r.holderLoc, sum(terms, nodeAt(state, r.holderLoc).id)) }];
+    }
+    return [];
+  },
+};
+
+/** √ of a term k·xⁿ, when it's a whole square (9 → 3, 4x² → 2x, x⁴ → x²). */
+function rootOf(m: { k: number; x: string | null; n: number }): { k: number; n: number } | null {
+  const s = Math.round(Math.sqrt(m.k));
+  return m.k > 0 && s * s === m.k && m.n % 2 === 0 ? { k: s, n: m.n / 2 } : null;
+}
+
+/** x² − 9 → (x − 3)(x + 3) (tap the minus between two squares). */
+export const differenceOfSquares: Rule = {
+  id: "difference-of-squares",
+  name: "Difference of two squares",
+  gesture: "Tap the minus between two squares: a² − b² = (a − b)(a + b).",
+  tap: true,
+  apply(state, id) {
+    const owner = signOwner(id);
+    const r = owner ? roleOf(state, owner) : null;
+    if (!r || r.terms.length !== 2 || r.index !== 1 || r.node.kind !== "neg") return [];
+    const [m1, m2] = r.terms.map(monomial);
+    if (!m1 || !m2 || m1.k <= 0 || m2.k >= 0) return [];
+    const a = rootOf(m1);
+    const b = rootOf({ ...m2, k: -m2.k });
+    // Letters in it somewhere (9 − 4 is worked out, not factored), and one letter at most.
+    if (!a || !b || (m1.x === null && m2.x === null) || (m1.x && m2.x && m1.x !== m2.x)) return [];
+    const A = writeTerm(a.k, m1.x ?? "", a.n);
+    const B = writeTerm(b.k, m2.x ?? "", b.n);
+    const result = prod([sum([A, neg(B)]), sum([cloneFresh(A), cloneFresh(B)])]);
+    return [{ rule: "difference-of-squares", state: replaceIn(state, r.holderLoc, result) }];
   },
 };

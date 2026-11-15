@@ -36,8 +36,8 @@ describe("rules do what they say", () => {
     ["2·x·5", "multiply-numbers", "5", ["10*x"]],
     ["x·x", "merge-powers", "x", ["x^2"], 1], // the one shortcut: x·x is x²
     ["x·x^2", "merge-powers", "x", ["x^(1 + 2)"]], // otherwise the sum shows first
-    ["a(b + c)", "distribute", "a", ["a*b + a*c"]],
-    ["2(x - 1)", "distribute", "2", ["2*x - 2*1"]],
+    ["a(b + c)", "distribute", "a", ["(a*b + a*c)"]],
+    ["2(x - 1)", "distribute", "2", ["(2*x - 2*1)"]],
     ["x^2 + 3x", "power-to-product", "2", ["x*x + 3*x"]], // a square is something times itself
     ["(x + 2)^2", "power-to-product", "2", ["(x + 2)*(x + 2)"], 1], // the exponent (the first 2 is in the brackets)
     ["x^3", "power-to-product", "3", ["x*x*x"]],
@@ -128,6 +128,23 @@ describe("rules do what they say", () => {
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
     ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // Factoring a quadratic: the middle term splits into two whose numbers multiply to first × last.
+    ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
+    ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
+    ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // A difference of two squares: tap the minus.
+    ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
+    ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
+    ["x^2 - 7", "difference-of-squares", "sign:-7", []], // 7 isn't a square
+    // Same exponent: the bases join under it.
+    ["√2·√3", "join-powers", "√(3)", ["√(2*3)"]],
+    ["x^3·y^3", "join-powers", "y^3", ["(x*y)^3"]],
+    ["√x·√y", "join-powers", "√(y)", []], // x and y could both be negative
+    // Dividing by something that could be 0 loses answers: never by a factor sharing a letter with the rest of its side.
+    ["(x - 2)(x + 3) = 0", "move-letter-factor", "x - 2", []],
+    ["x(x - 3) = 0", "move-letter-factor", "x", []],
+    ["v - u = a*t", "move-letter-factor", "a", ["(v - u)/a = t"]],
+    ["x(a - 2) = b - a", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
     // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
     ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
     ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
@@ -185,6 +202,23 @@ describe("rules do what they say", () => {
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
     ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // Factoring a quadratic: the middle term splits into two whose numbers multiply to first × last.
+    ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
+    ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
+    ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // A difference of two squares: tap the minus.
+    ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
+    ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
+    ["x^2 - 7", "difference-of-squares", "sign:-7", []], // 7 isn't a square
+    // Same exponent: the bases join under it.
+    ["√2·√3", "join-powers", "√(3)", ["√(2*3)"]],
+    ["x^3·y^3", "join-powers", "y^3", ["(x*y)^3"]],
+    ["√x·√y", "join-powers", "√(y)", []], // x and y could both be negative
+    // Dividing by something that could be 0 loses answers: never by a factor sharing a letter with the rest of its side.
+    ["(x - 2)(x + 3) = 0", "move-letter-factor", "x - 2", []],
+    ["x(x - 3) = 0", "move-letter-factor", "x", []],
+    ["v - u = a*t", "move-letter-factor", "a", ["(v - u)/a = t"]],
+    ["x(a - 2) = b - a", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
     // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
     ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
     ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
@@ -492,7 +526,7 @@ describe("inequalities", () => {
 
   it("moves that don't cross keep the relation", () => {
     expect(moves("3x + 2x < 10", "2*x")).toContain("5*x < 10");
-    expect(moves("2(x + 1) ≥ 4", "2")).toContain("2*x + 2*1 ≥ 4");
+    expect(moves("2(x + 1) ≥ 4", "2")).toContain("(2*x + 2*1) ≥ 4");
   });
 });
 

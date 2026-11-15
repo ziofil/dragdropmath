@@ -63,11 +63,6 @@ export const DRILLS: Record<string, Drill[]> = {
     d("distribute-neg", (r) => `-(${letter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
     // x(x + 2) gives x·x + 2x. Powers with exponents come in the Powers chapter.
     d("x-times-x", (r) => `x·x + ${r.int(2, 9)}x`, "merge-powers"),
-    d("factor-out", (r) => {
-      const [x, y] = letters2(r);
-      const a = r.int(2, 7);
-      return `${a}${x} + ${a}${y}`;
-    }),
   ],
   brackets: [
     d("bracket-times-bracket", (r) => {
@@ -142,6 +137,11 @@ export const DRILLS: Record<string, Drill[]> = {
     }),
   ],
   factor: [
+    d("factor-out", (r) => {
+      const [x, y] = letters2(r);
+      const a = r.int(2, 7);
+      return `${a}${x} + ${a}${y}`;
+    }),
     d("split-number", (r) => {
       // a·b splits as a·b when a is its smallest prime: 2·anything, 3·odd, 5·(5, 7).
       const [a, b] = pick(r, [[2, 3], [2, 5], [2, 7], [3, 5], [3, 7], [2, 9], [5, 7]] as const);
@@ -159,6 +159,16 @@ export const DRILLS: Record<string, Drill[]> = {
       const a = r.int(1, 5);
       const b = pick(r, [2, 3, 4, 5, 6].filter((n) => n !== a));
       return { start: `x·x + ${term(a, "x")} + ${b}x + ${a * b}`, want: `x*(x + ${a})`, goal: `(x + ${a})(x + ${b})` };
+    }),
+    // x² + 5x + 6: the middle term splits into the two pairs factor-shared then works on.
+    d("split-term", (r) => {
+      const x = letter(r);
+      const [p, q] = pick(r, [[1, 2], [1, 3], [2, 3], [1, 4], [2, 4], [3, 4], [2, 5], [3, 5]] as const);
+      return { start: `${x}^2 + ${p + q}${x} + ${p * q}`, goal: `${x}^2 + ${term(p, x)} + ${q}${x} + ${p * q}` };
+    }),
+    d("difference-of-squares", (r) => {
+      const [x, k] = [letter(r), r.int(2, 9)];
+      return { start: `${x}^2 - ${k * k}`, goal: `(${x} - ${k})(${x} + ${k})` };
     }),
   ],
   formulas: [
@@ -254,6 +264,10 @@ export const DRILLS: Record<string, Drill[]> = {
       }
       const a = r.int(2, 3);
       return { start: `root_3(${a ** 3}${x})`, goal: `${a}root_3(${x})` };
+    }),
+    d("join-powers", (r) => {
+      const [a, b] = pick(r, [[2, 3], [2, 5], [3, 5], [2, 7], [3, 7], [5, 7]] as const);
+      return { start: `√${a}·√${b}`, goal: `√(${a}*${b})` };
     }),
     d("root-notation", (r) => `${r.next() < 0.6 ? "√" : `root_${r.int(3, 4)}`}(${letter(r)}) + ${r.int(2, 9)}`),
   ],
