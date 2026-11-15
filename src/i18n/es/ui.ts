@@ -36,7 +36,6 @@ export const es: Translation = {
   notMasteredYet: (titles: string) => ` Aún no dominas: ${titles}. Puedes empezar igualmente.`,
   startLesson: "Empezar la lección →",
   backToLesson: "Volver a la lección →",
-  leadsOnTo: (titles: string) => `Te prepara para ${titles}.`,
   badges: "Insignias",
   noBadgesYet: "Ponte a prueba en cualquier capítulo para ganar su insignia.",
   badgesEarned: (n: number, total: number) => `${n} de ${total}`,
@@ -46,17 +45,15 @@ export const es: Translation = {
 
   // Chapter page
   backToPath: "← Ruta de aprendizaje",
-  practiceNote: "Cada ejercicio es nuevo, creado solo para ti. Empieza por los fáciles y sube de nivel cuando quieras.",
   leadsOnToStart: "Te prepara para ",
   leadsOnToEnd: ". Puedes ir cuando quieras.",
-  watchOut: "¡Ojo!",
   level: { easy: "Fácil", medium: "Medio", hard: "Difícil" },
   anotherOne: "Otro →",
   practice: "Practica",
-  testSkills: "Ponte a prueba",
-  testNote: "Calcula la respuesta mentalmente y luego elígela. Las respuestas correctas te dan la insignia del capítulo: 10 en Fácil para la de bronce, en Medio para la de plata y en Difícil para la de oro.",
+  predict: "Ponte a prueba",
+  predictNote: "Calcula la respuesta mentalmente y luego elígela. Las respuestas correctas te dan la insignia del capítulo: 10 en Fácil para la de bronce, en Medio para la de plata y en Difícil para la de oro.",
   solvedN: (n: number) => (n === 1 ? "1 resuelto" : `${n} resueltos`),
-  testRight: "¡Correcto! Cuenta para la insignia.",
+  predictRight: "¡Correcto! Cuenta para la insignia.",
   drills: {
     commute: { name: "Cambiar el orden", how: "Arrastra un término más allá del de al lado. Al sumar y al multiplicar, el orden no importa." },
     combine: { name: "Sumar números", how: "Suelta un número sobre el otro para sumarlos." },
@@ -123,9 +120,7 @@ export const es: Translation = {
     `${tier ? `Insignia de ${TIER[tier]}. ` : ""}${more === 1 ? "Te falta 1 respuesta correcta" : `Te faltan ${more} respuestas correctas`} en ${["Fácil", "Medio", "Difícil"][tier]} para la insignia de ${TIER[tier + 1]}.`,
 
   // Guided example
-  notThisStep: "Ese movimiento es correcto, pero no es el de este paso. Lo devuelvo a su sitio.",
   done: "Hecho.",
-  keepGoing: "Puedes seguir: ahora vale cualquier movimiento.",
   startOver: "Empezar de nuevo",
 
   // Exercise
@@ -137,10 +132,10 @@ export const es: Translation = {
   nextTitle: (label: string) => `Siguiente: ejercicio ${label}`,
   nextLabel: (label: string) => `Ejercicio siguiente (${label})`,
   exerciseN: (label: string) => `Ejercicio ${label}`,
-  guessPrompt: "Primero, predice: ¿cómo queda?",
+  predictPrompt: "Primero, predice: ¿cómo queda?",
   reveal: "Mostrar",
-  guessedBeforeRight: "Este lo acertaste a la primera.",
-  guessedBeforeWrong: (picked: boolean) => `Tu primera respuesta fue ${picked ? "la roja" : "incorrecta"}. La verde es la correcta.`,
+  predictedBeforeRight: "Este lo acertaste a la primera.",
+  predictedBeforeWrong: (picked: boolean) => `Tu primera respuesta fue ${picked ? "la roja" : "incorrecta"}. La verde es la correcta.`,
   rightFirstTime: "¡A la primera! Ahora resuélvelo.",
   notQuite: "Casi. La verde es la correcta. Resuélvelo para ver dónde fallaba la tuya.",
   solvedBefore: "✓ Ya resolviste este. Puedes volver a resolverlo.",
@@ -148,10 +143,8 @@ export const es: Translation = {
   pickFirst: "Elige una respuesta arriba y luego resuélvelo aquí.",
   hint: "Pista",
   undo: "Deshacer",
-  reset: "Reiniciar",
   solvedBang: "¡Resuelto!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `Insignia de ${TIER[tier]} en ${chapter}.`,
-  theExercise: "el ejercicio",
   moveCrashed: "Algo salió mal con ese movimiento.",
   moveCrashedDetails: "Los detalles están en la consola del navegador.",
   tryAgain: "Volver a intentarlo",

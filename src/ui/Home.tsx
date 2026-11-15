@@ -1,11 +1,13 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
-import { chapterById, CHAPTERS, leadsTo, type Chapter } from "../game/puzzles";
+import { useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
+import { chapterById, CHAPTERS, type Chapter } from "../game/puzzles";
 import { layoutPath, suggested, type PathNode } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, GOAL, isMastered, loadProgress, progressOf, solvedCount, type Progress } from "../game/scoring";
+import { badgeTier, GOAL, isMastered, loadProgress, progressOf, solvedCount, streakOf, type Progress } from "../game/scoring";
 import { chapterText, t } from "../i18n";
 import { Badge } from "./Badge";
-import { ChapterLinks } from "./Practice";
+import { BadgeRow, LevelButtons } from "./Practice";
+import { LeadsTo } from "./ChapterView";
+import { href } from "./routes";
 
 /** Height of one row of the path. */
 const ROW = 136;
@@ -22,11 +24,6 @@ export function Home({ at }: { at?: Chapter }) {
   const next = useMemo(() => suggested(progress), [progress]);
   const [selected, setSelected] = useState<Chapter>(at ?? next[0] ?? CHAPTERS[0]);
   const panel = useRef<HTMLElement>(null);
-  const pathRef = useRef<HTMLDivElement>(null);
-  // Coming back to a chapter: show the path, not the top of the page.
-  useEffect(() => {
-    if (at) pathRef.current?.scrollIntoView({ block: "start" });
-  }, [at]);
 
   const select = (c: Chapter) => {
     setSelected(c);
@@ -36,7 +33,7 @@ export function Home({ at }: { at?: Chapter }) {
 
   return (
     <main className="home">
-      <section className="hero">
+      <section className="home-hero">
         <h1>
           {t().heroBefore}
           <FeelWord word={t().heroWord} />
@@ -47,14 +44,15 @@ export function Home({ at }: { at?: Chapter }) {
 
       <Shelf progress={progress} onSelect={select} />
 
-      <div className="path-layout" ref={pathRef}>
-        <section className="path-card" aria-label={t().learningPath}>
+      {/* Coming back from a chapter, the page opens here (routes.ts). */}
+      <div className="path-layout" id="path">
+        <section className="card path-card" aria-label={t().learningPath}>
           <div className="path-legend">
             <span>
-              <i className="dot dot-next" /> {t().nextUp}
+              <i className="path-dot is-next" /> {t().nextUp}
             </span>
             <span>
-              <i className="dot dot-done" /> {t().mastered}
+              <i className="path-dot is-done" /> {t().mastered}
             </span>
             <span className="path-open">{t().everyChapterOpen}</span>
           </div>
@@ -64,13 +62,12 @@ export function Home({ at }: { at?: Chapter }) {
         <ChapterPanel panelRef={panel} chapter={selected} progress={progress} isNext={next.includes(selected)} />
       </div>
 
-      <section className="chapter sandbox-link">
-        <a href="#/sandbox" className="button">
+      <section className="card home-sandbox">
+        <a href={href({ page: "sandbox" })} className="button">
           {t().openSandbox}
         </a>
         <p>{t().sandboxIntro}</p>
       </section>
-
     </main>
   );
 }
@@ -151,7 +148,7 @@ function PathMap({
             return (
               <button
                 key={c.id}
-                className={`path-node node-${state} ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
+                className={`bare path-node node-${state} ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
                 style={{ left: p.x, top: p.y - R, width: room(n) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
@@ -213,22 +210,22 @@ function ChapterPanel({
   isNext: boolean;
 }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const started = solvedCount(chapter, progress) > 0;
+  const practice = loadProgress("practice");
+  const started = solvedCount(chapter, progress) > 0 || solvedCount(chapter, practice) > 0;
   const mastered = isMastered(chapter, progress);
   const builds = chapter.after.map((id) => chapterById(id)!);
   const missing = builds.filter((c) => !isMastered(c, progress));
-  const opens = leadsTo(chapter);
   const text = chapterText(chapter);
   const titles = (cs: Chapter[]) => t().list(cs.map((c) => chapterText(c).title));
 
   return (
-    <section className="chapter path-panel" ref={panelRef}>
+    <section className="card path-panel" ref={panelRef}>
       <div className="panel-kicker">
         {t().chapterN(ci + 1)}
-        {mastered ? <span className="tag tag-done">{t().mastered}</span> : isNext && <span className="tag tag-next">{t().nextUp}</span>}
+        {mastered ? <span className="panel-tag is-done">{t().mastered}</span> : isNext && <span className="panel-tag is-next">{t().nextUp}</span>}
       </div>
       <h2 className="panel-title">
-        <a href={`#/c/${chapter.id}`}>{text.title}</a>
+        <a href={href({ page: "chapter", chapter: chapter.id })}>{text.title}</a>
       </h2>
       <p className="panel-blurb">{text.blurb}</p>
 
@@ -239,13 +236,26 @@ function ChapterPanel({
         </p>
       )}
 
-      <a className="button primary panel-start" href={`#/c/${chapter.id}`}>
-        {started ? t().backToLesson : t().startLesson}
-      </a>
-
-      <ChapterLinks chapter={chapter} progress={progress} />
-
-      {opens.length > 0 && <p className="panel-opens">{t().leadsOnTo(titles(opens))}</p>}
+      {/* The three ways into a chapter, from its node: the lesson, practice, and the mind's eye. */}
+      <div className="panel-mode">
+        <h3 className="panel-mode-name">{t().lesson}</h3>
+        <a className="button primary" href={href({ page: "chapter", chapter: chapter.id })}>
+          {started ? t().backToLesson : t().startLesson}
+        </a>
+      </div>
+      <div className="panel-mode">
+        <h3 className="panel-mode-name">{t().practice}</h3>
+        <LevelButtons mode="practice" chapter={chapter} progress={practice} />
+        <p className="panel-mode-note">{t().triedTotal(solvedCount(chapter, practice))}</p>
+      </div>
+      <div className="panel-mode">
+        <h3 className="panel-mode-name">{t().predict}</h3>
+        <LevelButtons mode="predict" chapter={chapter} progress={progress} />
+        <p className="panel-mode-note">{t().predictNote}</p>
+        <BadgeRow chapter={chapter} progress={progress} />
+        <p className="panel-mode-note">{t().bestStreak(streakOf(chapter).best)}</p>
+      </div>
+      <LeadsTo chapter={chapter} />
     </section>
   );
 }
@@ -255,7 +265,7 @@ function Shelf({ progress, onSelect }: { progress: Progress; onSelect: (c: Chapt
   const tiers = CHAPTERS.map((c) => badgeTier(c, progress));
   const earned = tiers.filter((t) => t > 0).length;
   return (
-    <section className="shelf" aria-label={t().badges}>
+    <section className="card shelf" aria-label={t().badges}>
       <div className="shelf-head">
         {t().badges} <span>{earned === 0 ? t().noBadgesYet : t().badgesEarned(earned, CHAPTERS.length)}</span>
       </div>
@@ -263,7 +273,7 @@ function Shelf({ progress, onSelect }: { progress: Progress; onSelect: (c: Chapt
         {CHAPTERS.map((c, i) => (
           <li key={c.id}>
             <button
-              className="shelf-badge"
+              className="bare shelf-badge"
               onClick={() => onSelect(c)}
               title={t().shelfTitle(chapterText(c).title, tiers[i])}
               aria-label={t().shelfTitle(chapterText(c).title, tiers[i])}

@@ -42,8 +42,10 @@ export type RenderCtx = {
 };
 
 export type Interact = {
-  /** Can this piece (a node id, or a minus sign's handle) be picked up by itself? */
+  /** Can this piece (a node id, or a minus sign's handle) be picked up by itself (by a quick press or a held one)? */
   grabbable(id: string): boolean;
+  /** Does a quick press pick it up (else it goes through to its term)? */
+  pressable(id: string): boolean;
   /** What tapping the + or − in front of this term does (two plain numbers: add them up). */
   opTap(termId: string): MathState | null;
   /** What tapping it gives, if anything. */
@@ -73,9 +75,19 @@ export const ASC = 0.72;
 export const DESC = 0.24;
 
 /** A text decoration (keyed, so Dragology can match and fade it between states). */
+/**
+ * A decoration's React key, from its name (its dragologyKey: how Dragology
+ * matches it across states inside its piece); both are always set together. Blending two states,
+ * Dragology keeps React's keys; left to list positions, a glyph fading out and
+ * another fading in at the same position share one, and React leaves one
+ * behind on screen (a stray + after an undo). Keys starting with "." are the
+ * ones Dragology accepts.
+ */
+export const named = (name: string) => `.k:${name}`;
+
 export function glyph(gkey: string, text: string, x: number, y: number, size: number, cls: string) {
   return (
-    <text dragologyKey={gkey} transform={translate(x, y)} fontSize={size} className={cls}>
+    <text key={named(gkey)} dragologyKey={gkey} transform={translate(x, y)} fontSize={size} className={cls}>
       {text}
     </text>
   );
@@ -102,6 +114,9 @@ function layoutNode(
   // One that can only be tapped (the 4 of √4: tap to split it) takes the tap,
   // but dragging it carries what encloses it (the whole √4).
   const grabbable = interactive && rc.interact!.grabbable(e.id);
+  // Inside a term among others (the x of 3xy + 2), a quick press goes through to the
+  // term; a press held still picks the piece up (ui/MathCanvas.tsx, useHold).
+  const pressable = grabbable && rc.interact!.pressable(e.id);
   const tap = interactive ? rc.interact!.tap(e.id) : null;
   rc.sizes?.set(e.id, { w, asc, desc, lead: leadW });
   rc.fontSizes?.set(e.id, size);
@@ -123,14 +138,14 @@ function layoutNode(
         // Only pieces you can carry take presses. One you can only tap lets
         // them through to what it's part of, so 2√x is grabbed anywhere; taps
         // are found by position instead (ui/MathCanvas.tsx, tapAt).
-        style={interactive ? { pointerEvents: grabbable ? "auto" : "none", cursor: grabbable ? "grab" : undefined } : undefined}
+        style={interactive ? { pointerEvents: pressable ? "auto" : "none", cursor: pressable ? "grab" : undefined } : undefined}
         {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(e.id), dragologyZIndex: rc.draggedId === e.id ? "/1" : false } : {})}
         // Copies (from distributing) fly out of their source fully visible —
         // every part of them, grabbable or not (the 2 and x of a copied 2x too).
         dragologyEmergeFrom={e.from}
         dragologyEmergeMode={e.from ? ("clone" as const) : undefined}
       >
-        <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
+        <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
         {L &&
           (e.kind === "neg" && interactive
             ? signHandle(rc, e.id, L, size)
@@ -152,6 +167,7 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   const asc = ASC * size;
   const desc = DESC * size;
   const grabbable = rc.interact!.grabbable(id);
+  const pressable = grabbable && rc.interact!.pressable(id);
   // 10 − 4: tapping the − works it out (dragging still carries the term). Found by position (OP_TAP).
   const tappable = hasOpTap(rc, negId);
   return (
@@ -159,10 +175,10 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
       id={id}
       transform={translate(L.left * size, 0)}
       className={grabbable ? "m-node" : undefined}
-      style={{ pointerEvents: grabbable ? "auto" : "none" }}
+      style={{ pointerEvents: pressable ? "auto" : "none" }}
       {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false } : {})}
     >
-      <rect dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" {...(tappable ? { [OP_TAP]: negId } : {})} />
+      <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" {...(tappable ? { [OP_TAP]: negId } : {})} />
       {glyph("t-sign", L.glyph, 0, 0, size, "m-op")}
     </g>
   );
@@ -195,7 +211,7 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
     asc: -g.top + g.stroke,
     desc: g.bottom + g.stroke,
     parts: (x0) => [
-      <path dragologyKey="root" transform={translate(x0, 0)} d={d} strokeWidth={g.stroke} className="m-root" />,
+      <path key={named("root")} dragologyKey="root" transform={translate(x0, 0)} d={d} strokeWidth={g.stroke} className="m-root" />,
       ...(n === 2 ? [] : [glyph("rootidx", String(n), x0, tickY - 0.12 * size, idxSize, "m-num")]),
     ],
   };
@@ -214,19 +230,18 @@ function separator(kind: "plus" | "dot", key: string, size: number, tapFor?: str
     w,
     asc: ASC * size,
     desc: DESC * size,
-    draw: (x, y) =>
-      tapFor ? (
-        <g dragologyKey={`tap-${key}`}>
-          <rect dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" {...{ [OP_TAP]: tapFor }} />
-          {glyph(key, L.glyph, x + L.left * size, y, size, "m-op")}
-        </g>
-      ) : (
-        glyph(key, L.glyph, x + L.left * size, y, size, "m-op")
-      ),
+    // Always in its own group, tappable or not, so the glyph sits at the same
+    // path in every state and slides along when terms reorder.
+    draw: (x, y) => (
+      <g key={named(`tap-${key}`)} dragologyKey={`tap-${key}`}>
+        {tapFor && <rect key={named(`hit-${key}`)} dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" {...{ [OP_TAP]: tapFor }} />}
+        {glyph(key, L.glyph, x + L.left * size, y, size, "m-op")}
+      </g>
+    ),
   };
 }
 
-/** Does tapping the + or − in front of term `termId` do something? */
+/** Does tapping the +, − or · in front of `termId` (a term or a factor) do something? */
 const hasOpTap = (rc: RenderCtx, termId: string) => !!rc.interact?.opTap(termId);
 
 /** Marks the + or − whose tap works out the sum in front of a term (the term's id). */
@@ -238,7 +253,7 @@ function withParens(c: Content, size: number, parens: boolean): Content {
   const sy = Math.max(1, (c.asc + c.desc) / ((ASC + DESC) * size));
   const shiftY = (c.desc - c.asc) / 2 + ((ASC - DESC) / 2) * size * sy;
   const paren = (pkey: string, ch: string, x: number) => (
-    <text dragologyKey={pkey} transform={`${translate(x, shiftY)} scale(1, ${sy})`} fontSize={size} className="m-op">
+    <text key={named(pkey)} dragologyKey={pkey} transform={`${translate(x, shiftY)} scale(1, ${sy})`} fontSize={size} className="m-op">
       {ch}
     </text>
   );
@@ -316,7 +331,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.factors.flatMap((f, i) => {
           const factor = layoutNode(f, rc, size, null, { parens: f.kind === "sum" || f.kind === "neg" });
-          return i > 0 && needsDot(e.factors[i - 1], f) ? [separator("dot", `dot-${f.id}`, size), factor] : [factor];
+          return i > 0 && needsDot(e.factors[i - 1], f) ? [separator("dot", `dot-${f.id}`, size, hasOpTap(rc, f.id) ? f.id : null), factor] : [factor];
         }),
         0.03 * size,
       );
@@ -338,7 +353,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
         desc: gap + d.asc + d.desc - axis,
         parts: (x0) => [
           n.draw(x0 + (w - n.w) / 2, nY),
-          <rect dragologyKey="bar" transform={translate(x0, -axis - thick / 2)} width={w} height={thick} className="m-bar" />,
+          <rect key={named("bar")} dragologyKey="bar" transform={translate(x0, -axis - thick / 2)} width={w} height={thick} className="m-bar" />,
           d.draw(x0 + (w - d.w) / 2, dY),
         ],
       };
@@ -365,7 +380,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
           parts: (x0) => [
             sign.draw(x0, 0),
             <rect
-              dragologyKey="overline"
+              key={named("overline")} dragologyKey="overline"
               transform={translate(x0 + sign.w - geo.stroke / 2, geo.top - geo.stroke / 2)}
               width={gap + base.w + pad + geo.stroke / 2}
               height={geo.stroke}
@@ -462,8 +477,11 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   let { sides, eqW, space } = build(size);
   const halfWidth = (s: typeof sides) => (s.length === 1 ? s[0].w / 2 : Math.max(s[0].w, s[1].w) + space + eqW / 2);
   const maxHalf = W / 2 - 16;
-  if (halfWidth(sides) > maxHalf) {
-    size *= maxHalf / halfWidth(sides);
+  // Too wide or too tall (a fraction of fractions): drawn smaller, to fit.
+  const tall = (s: typeof sides) => Math.max(...s.map((x) => x.asc)) + Math.max(...s.map((x) => x.desc));
+  const scale = Math.min(1, maxHalf / halfWidth(sides), (H - 16) / tall(sides));
+  if (scale < 1) {
+    size *= scale;
     ({ sides, eqW, space } = build(size));
   }
 
@@ -473,26 +491,19 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
   const cx = W / 2;
   const xs = sides.length === 1 ? [cx - sides[0].w / 2] : [cx - eqW / 2 - space - sides[0].w, cx + eqW / 2 + space];
 
-  // A pinned piece: shift its side so the piece's symbol starts where asked.
-  const pin = rc.state.pin;
-  const pinSide = pin ? rc.state.sides.findIndex((s) => allNodes(s).some((n) => n.id === pin.id)) : -1;
-  if (pin && pinSide >= 0) {
-    const at = originsOf(sides[pinSide].draw(xs[pinSide], baseline)).get(pin.id);
-    if (at) xs[pinSide] += pin.x - (at.x + (rc.sizes.get(pin.id)?.lead ?? 0));
-    // Never pushed off the canvas: near an edge, the pinned piece gives way instead.
-    const margin = 4;
-    xs[pinSide] = Math.min(Math.max(xs[pinSide], margin), W - margin - sides[pinSide].w);
-  }
+  const dx = pinShift(rc, sides, xs, [baseline, baseline], W)?.dx ?? 0;
+  xs.forEach((_, k) => (xs[k] += dx));
 
   if (sides.length === 1) {
     return <g>{sides[0].draw(xs[0], baseline)}</g>;
   }
-  // The = sign stays put in the middle, like the pivot of a balance.
-  rc.eq = { left: cx - eqW / 2, right: cx + eqW / 2, centre: cx, baseline, size };
+  // The = sign stays put in the middle, like the pivot of a balance (unless a pinned piece moves its whole row).
+  const mid = cx + dx;
+  rc.eq = { left: mid - eqW / 2, right: mid + eqW / 2, centre: mid, baseline, size };
   return (
     <g>
       {sides[0].draw(xs[0], baseline)}
-      {relation(rc.state, cx, baseline, size)}
+      {relation(rc.state, mid, baseline, size)}
       {sides[1].draw(xs[1], baseline)}
     </g>
   );
@@ -526,16 +537,43 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const { size } = b;
   const cx = W / 2;
   const top = H / 2 - (n * f.rowH) / 2;
+  const gap = { left: cx - f.eqW / 2 - f.space, right: cx + f.eqW / 2 + f.space };
+  const baselines = b.sides.map((_, k) => {
+    const [L, R] = [b.sides[k - (k % 2)], b.sides[k - (k % 2) + 1]];
+    return top + Math.floor(k / 2) * f.rowH + f.rowH / 2 + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
+  });
+  const xs = b.sides.map((s, k) => (k % 2 === 0 ? gap.left - s.w : gap.right));
+  const pinned = pinShift(rc, b.sides, xs, baselines, W);
+  const dxOf = (r: number) => (pinned && pinned.row === r ? pinned.dx : 0);
   const parts: Svgx[] = [];
   for (let r = 0; r < n; r++) {
-    const [L, R] = [b.sides[2 * r], b.sides[2 * r + 1]];
-    const baseline = top + r * f.rowH + f.rowH / 2 + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
-    parts.push(L.draw(cx - f.eqW / 2 - f.space - L.w, baseline));
-    parts.push(relation(rc.state, cx, baseline, size, 0, r === 0 ? REL : `${REL}${r}`));
-    parts.push(R.draw(cx + f.eqW / 2 + f.space, baseline));
-    if (r === 0) rc.eq = { left: cx - f.eqW / 2, right: cx + f.eqW / 2, centre: cx, baseline, size };
+    const dx = dxOf(r);
+    parts.push(b.sides[2 * r].draw(xs[2 * r] + dx, baselines[2 * r]));
+    parts.push(relation(rc.state, cx + dx, baselines[2 * r], size, 0, r === 0 ? REL : `${REL}${r}`));
+    parts.push(b.sides[2 * r + 1].draw(xs[2 * r + 1] + dx, baselines[2 * r]));
+    if (r === 0) rc.eq = { left: cx + dx - f.eqW / 2, right: cx + dx + f.eqW / 2, centre: cx + dx, baseline: baselines[0], size };
   }
   return <g>{parts}</g>;
+}
+
+/**
+ * A pinned piece (MathState.pin: a move keeps it where it was while its
+ * result is shown): how far its whole row (both sides and the relation, so
+ * nothing runs into anything) shifts for the piece's symbol to start where
+ * asked. Never off the canvas: near an edge, the pinned piece gives way.
+ */
+function pinShift(rc: RenderCtx, sides: Box[], xs: number[], baselines: number[], W: number): { row: number; dx: number } | null {
+  const pin = rc.state.pin;
+  const k = pin ? rc.state.sides.findIndex((s) => allNodes(s).some((n) => n.id === pin.id)) : -1;
+  if (!pin || k < 0) return null;
+  const at = originsOf(sides[k].draw(xs[k], baselines[k])).get(pin.id);
+  if (!at) return null;
+  const dx = pin.x - (at.x + (rc.sizes?.get(pin.id)?.lead ?? 0));
+  const row = sides.length === 1 ? [0] : [k - (k % 2), k - (k % 2) + 1];
+  const margin = 4;
+  const left = Math.min(...row.map((j) => xs[j]));
+  const right = Math.max(...row.map((j) => xs[j] + sides[j].w));
+  return { row: Math.floor(k / 2), dx: Math.min(Math.max(dx, margin - left), W - margin - right) };
 }
 
 /** Canvas origin of every id'd element in a drawn tree (following the translates). */

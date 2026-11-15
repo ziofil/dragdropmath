@@ -1,4 +1,21 @@
-export const MATH_FONT = `"STIX Two Text", "Times New Roman", serif`;
+/** The font the maths is drawn in (a skin can change it: see ui/skins.ts). */
+let MATH_FONT = `"STIX Two Text", "Times New Roman", serif`;
+
+/** Draw (and measure) the maths in this font family from now on. */
+export function setMathFamily(family: string): void {
+  MATH_FONT = `${family}, "STIX Two Text", "Times New Roman", serif`;
+  clearTextWidths();
+}
+
+// Widths change with the font: what was laid out with the old one is drawn again (useFontEpoch).
+let epoch = 0;
+const listeners = new Set<() => void>();
+/** Changes whenever measured widths do. */
+export const fontEpoch = () => epoch;
+export function subscribeFont(f: () => void): () => void {
+  listeners.add(f);
+  return () => listeners.delete(f);
+}
 
 const cache = new Map<string, number>();
 let ctx: CanvasRenderingContext2D | null = null;
@@ -6,6 +23,8 @@ let ctx: CanvasRenderingContext2D | null = null;
 /** Forget measured widths (the math font arrived after they were taken with a fallback). */
 export function clearTextWidths(): void {
   cache.clear();
+  epoch++;
+  listeners.forEach((f) => f());
 }
 
 /** Advance width of `text` in px. Wait for fonts (see main.tsx) before the first call. */

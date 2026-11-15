@@ -36,7 +36,6 @@ export const pt: Translation = {
   notMasteredYet: (titles: string) => ` Você ainda não domina: ${titles}. Mas pode começar mesmo assim.`,
   startLesson: "Começar a lição →",
   backToLesson: "Voltar à lição →",
-  leadsOnTo: (titles: string) => `Prepara para ${titles}.`,
   badges: "Medalhas",
   noBadgesYet: "Faça o teste de qualquer capítulo para ganhar a medalha dele.",
   badgesEarned: (n: number, total: number) => `${n} de ${total}`,
@@ -47,18 +46,16 @@ export const pt: Translation = {
 
   // Chapter page
   backToPath: "← Trilha de aprendizagem",
-  practiceNote: "Cada exercício é novo, criado só para você. Comece pelos fáceis e suba de nível quando se sentir à vontade.",
   leadsOnToStart: "Prepara para ",
   leadsOnToEnd: ". Você pode ir para lá quando quiser.",
-  watchOut: "Atenção.",
   level: { easy: "Fácil", medium: "Médio", hard: "Difícil" },
   anotherOne: "Outro →",
   practice: "Prática",
-  testSkills: "Teste o que você aprendeu",
-  testNote:
+  predict: "Teste o que você aprendeu",
+  predictNote:
     "Resolva de cabeça e depois escolha a resposta. Os acertos valem a medalha do capítulo: 10 no Fácil para o bronze, no Médio para a prata e no Difícil para o ouro.",
   solvedN: (n: number) => `${n} ${n === 1 ? "resolvido" : "resolvidos"}`,
-  testRight: "Acertou! Conta para a medalha.",
+  predictRight: "Acertou! Conta para a medalha.",
   drills: {
     commute: { name: "Trocar a ordem", how: "Arraste um termo para além do termo ao lado. Com + e ×, a ordem não importa." },
     combine: { name: "Somar números", how: "Arraste um número até o outro para somá-los." },
@@ -125,9 +122,7 @@ export const pt: Translation = {
     `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? "Falta 1 acerto" : `Faltam ${more} acertos`} no ${["Fácil", "Médio", "Difícil"][tier]} para a medalha de ${TIER[tier + 1]}.`,
 
   // Guided example
-  notThisStep: "Esse movimento vale, mas não é o deste passo. Vou desfazer.",
   done: "Pronto.",
-  keepGoing: "Pode continuar: agora vale qualquer movimento.",
   startOver: "Recomeçar",
 
   // Exercise
@@ -139,11 +134,11 @@ export const pt: Translation = {
   nextTitle: (label: string) => `Próximo: exercício ${label}`,
   nextLabel: (label: string) => `Próximo exercício (${label})`,
   exerciseN: (label: string) => `Exercício ${label}`,
-  guessPrompt: "Pense primeiro: no que isso vai dar?",
+  predictPrompt: "Pense primeiro: no que isso vai dar?",
   reveal: "Mostrar",
-  guessedBeforeWrong: (picked: boolean) =>
+  predictedBeforeWrong: (picked: boolean) =>
     `Sua primeira resposta ${picked ? "foi a vermelha" : "estava errada"}. A verde é a certa.`,
-  guessedBeforeRight: "Você acertou este de primeira.",
+  predictedBeforeRight: "Você acertou este de primeira.",
   rightFirstTime: "Acertou de primeira! Agora resolva.",
   notQuite: "Não foi dessa vez. A verde é a certa. Resolva para ver onde a sua deu errado.",
   solvedBefore: "✓ Você já resolveu este. Pode resolver de novo.",
@@ -151,10 +146,8 @@ export const pt: Translation = {
   pickFirst: "Escolha uma resposta acima e depois resolva aqui.",
   hint: "Dica",
   undo: "Desfazer",
-  reset: "Recomeçar",
   solvedBang: "Resolvido!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `Medalha de ${TIER[tier]} em ${chapter}.`,
-  theExercise: "o exercício",
   moveCrashed: "Algo deu errado com esse movimento.",
   moveCrashedDetails: "Os detalhes estão no console do navegador.",
   tryAgain: "Tentar de novo",

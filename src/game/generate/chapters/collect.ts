@@ -1,5 +1,6 @@
 /** Exercise shapes for the chapter "collect": like terms added together (see ../write.ts). */
-import { byIds, one, shuffled, signedSum, term, type Draft, type Level, type Rng, type Shape } from "../write";
+import { composedExpression, expression, product, term, type Piece } from "../composeExpr";
+import { byIds, one, shuffled, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** k as a product of two small numbers, if it is one: 6 → [2, 3]. */
 function factors(r: Rng, k: number): [number, number] | null {
@@ -26,77 +27,26 @@ function split(r: Rng, total: number, n: number, max = 6): number[] | null {
 
 /**
  * The exercise from its groups of like terms: the start is every piece, in a
- * jumble (no two like terms side by side when there are unlike ones); the goal
- * is each group added up, in the groups' order, cancelled ones left out.
+ * jumble (no two like terms side by side when there are unlike ones), the
+ * biggest of a group written as a product (2·x·3); the goal each group added
+ * up, those that cancel left out (../composeExpr.ts works out the way).
  */
-function build(r: Rng, shape: string, groups: Group[], opts: { firstMinus?: boolean } = {}): Draft | null {
-  type Piece = { k: number; mono: string; prod: boolean };
-  const pieces: Piece[] = groups.flatMap((g) => {
+function build(r: Rng, shape: string, groups: Group[]): Draft | null {
+  const pieces: (Piece | null)[] = groups.flatMap((g) => {
     const big = g.parts.map((k, i) => [Math.abs(k), i]).sort((x, y) => y[0] - x[0]).slice(0, g.prod ?? 0).map(([, i]) => i);
-    return g.parts.map((k, i) => ({ k, mono: g.mono, prod: big.includes(i) }));
-  });
-  let order: Piece[] | null = null;
-  for (let t = 0; t < 30 && !order; t++) {
-    const o = shuffled(r, pieces);
-    if (!opts.firstMinus && o[0].k < 0) continue;
-    if (groups.length > 1 && o.some((p, i) => i > 0 && o[i - 1].mono === p.mono)) continue;
-    order = o;
-  }
-  if (!order) return null;
-  const numbers: number[] = [];
-  const along: number[] = [];
-  const texts: string[] = [];
-  for (const { k, mono, prod } of order) {
-    const f = prod ? factors(r, k) : null;
-    if (prod && !f) return null;
-    if (f) {
-      numbers.push(...f);
-      along.push(k);
+    return g.parts.map((k, i) => {
+      if (!big.includes(i)) return term(k, g.mono);
+      const f = factors(r, k);
+      if (!f) return null;
       const [p, q] = f;
-      const body =
-        mono === ""
-          ? `${p}·${q}`
-          : /^[a-z]{2}$/.test(mono)
-            ? // Two letters with the numbers among them: 2·a·3·b, a·2·b·3, 2·a·b·3. (Letters kept in order:
-              // in a sum, the engine can't turn b·a round into ab, see the report on y·x + 4.)
-              one(r, [`${p}·${mono[0]}·${q}·${mono[1]}`, `${mono[0]}·${p}·${mono[1]}·${q}`, `${p}·${mono[0]}·${mono[1]}·${q}`])
-            : one(r, [`${p}·${mono}·${q}`, `${mono}·${p}·${q}`, `${p}·${q}·${mono}`]);
-      texts.push(k < 0 ? `-${body}` : body);
-    } else {
-      if (Math.abs(k) > 1 || mono === "") numbers.push(Math.abs(k));
-      texts.push(term(k, mono));
-    }
-  }
-  const totals = groups.map((g) => ({ mono: g.mono, k: g.parts.reduce((s, p) => s + p, 0) })).filter((g) => g.k !== 0);
-  if (!totals.length || totals[0].k < 0) return null;
-  along.push(...totals.map((g) => g.k));
-  const goal = signedSum(totals.map((g) => term(g.k, g.mono)));
-  const start = signedSum(texts);
-  if (start === goal) return null;
-  // Milestones, for the longer ones: each product worked out, then each group added up, where its first term stood.
-  const via: string[] = [];
-  if (pieces.length > 4) {
-    const now: (string | null)[] = texts.slice();
-    order.forEach((p, i) => {
-      if (now[i] === term(p.k, p.mono)) return;
-      now[i] = term(p.k, p.mono);
-      via.push(signedSum(now.filter((t): t is string => t !== null)));
+      // Two letters with the numbers among them, kept in order (in a sum, b·a can't be turned round into ab).
+      const text = g.mono === "" ? `${p}·${q}` : /^[a-z]{2}$/.test(g.mono) ? one(r, [`${p}·${g.mono[0]}·${q}·${g.mono[1]}`, `${g.mono[0]}·${p}·${g.mono[1]}·${q}`, `${p}·${g.mono[0]}·${g.mono[1]}·${q}`]) : one(r, [`${p}·${g.mono}·${q}`, `${g.mono}·${p}·${q}`, `${p}·${q}·${g.mono}`]);
+      return product(k, g.mono, text);
     });
-    for (const g of groups) {
-      const at = order.map((p, i) => (p.mono === g.mono ? i : -1)).filter((i) => i >= 0);
-      if (at.length < 2) continue;
-      // One term at a time onto the first.
-      let k = order[at[0]].k;
-      for (const i of at.slice(1)) {
-        k += order[i].k;
-        now[at[0]] = k !== 0 ? term(k, g.mono) : null;
-        now[i] = null;
-        const left = now.filter((t): t is string => t !== null);
-        if (left.length) via.push(signedSum(left));
-      }
-    }
-  }
-  return { shape, start, goal, via: via.filter((v, i) => v !== goal && via.indexOf(v) === i), numbers, along };
+  });
+  if (pieces.some((p) => !p)) return null;
+  const d = expression(shape, pieces as Piece[], r, { order: "shuffled", apart: true });
+  return d && !d.goal.startsWith("-") ? d : null;
 }
 
 const letter = (r: Rng) => one(r, ["x", "y", "a", "b"]);
@@ -303,7 +253,7 @@ const all: Shape[] = [
 ];
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: byIds(all, "two-like", "cancel-or-product", "letter-and-numbers", "two-letters", "products-and-like"),
-  medium: byIds(all, "letters-and-number", "mixed-terms", "cancel-out"),
-  hard: byIds(all, "letter-products", "square-products", "partly-cancel"),
+  easy: [...byIds(all, "two-like", "cancel-or-product", "letter-and-numbers", "two-letters", "products-and-like"), composedExpression("collect", "easy", 4)],
+  medium: [...byIds(all, "letters-and-number", "mixed-terms", "cancel-out"), composedExpression("collect", "medium", 4)],
+  hard: [...byIds(all, "letter-products", "square-products", "partly-cancel"), composedExpression("collect", "hard", 4)],
 };

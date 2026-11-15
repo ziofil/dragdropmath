@@ -6,55 +6,26 @@
  *
  * On with `?debug` in the address, or Shift+D (remembered in this browser).
  */
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 import type { Expr, MathState } from "../expr/types";
 import { printState, stateKey } from "../expr/key";
 import { allNodes, children } from "../expr/tree";
 import { movesFor, signId, type RuleId } from "../rules";
 import type { Recording } from "../render/testing/recording";
+import { createStore } from "../util/store";
+import { setDebug, settings, useSettings } from "./settings";
 
-// ---------- on/off ----------
-
-const STORAGE_KEY = "mathbyhand.debug";
-let enabled = initial();
-const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((l) => l());
-
-function initial(): boolean {
-  if (new URLSearchParams(window.location.search).has("debug")) return true;
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-export function setDebug(on: boolean) {
-  enabled = on;
-  try {
-    localStorage.setItem(STORAGE_KEY, on ? "1" : "0");
-  } catch {
-    /* fine: just won't be remembered */
-  }
-  notify();
-}
-
-const subscribe = (l: () => void) => {
-  listeners.add(l);
-  return () => listeners.delete(l);
-};
+// ---------- on/off (a setting: settings.ts) ----------
 
 /** Whether debug mode is on (re-renders when it changes). */
-export function useDebug(): boolean {
-  return useSyncExternalStore(subscribe, () => enabled);
-}
+export const useDebug = (): boolean => useSettings().debug;
 
 /** Shift+D toggles debug mode (not while typing in a field). */
 export function useDebugShortcut() {
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       const typing = e.target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(e.target.tagName);
-      if (!typing && e.shiftKey && e.key.toLowerCase() === "d") setDebug(!enabled);
+      if (!typing && e.shiftKey && e.key.toLowerCase() === "d") setDebug(!settings().debug);
     };
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
@@ -63,22 +34,17 @@ export function useDebugShortcut() {
 
 // ---------- the last drag ----------
 
-let last: { rec: Recording; frames: number } | null = null;
+const lastDrag = createStore<{ rec: Recording; frames: number } | null>(null);
 
 /** Called by the recorder on every frame of a drag. */
-export function noteRecording(rec: Recording) {
-  last = { rec, frames: rec.pointers.length };
-  notify();
-}
-
-const useLastRecording = () => useSyncExternalStore(subscribe, () => last);
+export const noteRecording = (rec: Recording) => lastDrag.set({ rec, frames: rec.pointers.length });
 
 // ---------- panel ----------
 
 const show = (e: Expr) => printState({ sides: [e] });
 
 export function DebugPanel({ state, rules }: { state: MathState; rules: readonly RuleId[] }) {
-  const lastDrag = useLastRecording();
+  const last = lastDrag.use();
   const moves = movesFor(state, rules);
   return (
     <section className="debug-panel" aria-label="Debug">
@@ -89,8 +55,8 @@ export function DebugPanel({ state, rules }: { state: MathState; rules: readonly
 
       <div className="debug-block">
         <div className="debug-title">Last drag</div>
-        {lastDrag ? (
-          <LastDrag rec={lastDrag.rec} frames={lastDrag.frames} />
+        {last ? (
+          <LastDrag rec={last.rec} frames={last.frames} />
         ) : (
           <p className="debug-muted">Drag a piece: its path is recorded so it can be replayed as a test.</p>
         )}
@@ -179,7 +145,7 @@ function Node({ e, depth, label, moves }: { e: Expr; depth: number; label?: stri
                 {h !== e.id && "(its −) "}
                 {c.rule}
                 {c.targetId && <> onto <span className="debug-id">#{c.targetId}</span></>}
-                {c.secondary && " (secondary)"} → <code>{printState(c.state)}</code>
+                → <code>{printState(c.state)}</code>
               </li>
             ))}
             {tap && (

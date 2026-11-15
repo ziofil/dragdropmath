@@ -37,7 +37,7 @@ export const substitute: Rule = {
           // …and the carried x is absorbed into it, while the x of x = 4 stays
           // where it was (a piece of its own, so the carried one doesn't fly back).
           sides[c.loc.side] = { ...c.node, id: freshId() };
-          return { rule: "substitute", state: { ...setSides(sides), rel: state.rel, join: state.join }, targetId: target.id };
+          return { rule: "substitute", state: setSides(sides), targetId: target.id };
         });
     });
   },

@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
-import { findPuzzle } from "../game/testing/exercises";
+import { rulesOf } from "../game/puzzles";
 import { evaluate, variables } from "../expr/eval";
 import { allNodes } from "../expr/tree";
-import { ALL_RULES, candidatesFor, handles, isGrabbable, operatorTap, RULES, signId, signOwner, tapFor, type RuleId } from ".";
+import { ALL_RULES, candidatesFor, handles, isGrabbable, isPressable, operatorTap, RULES, signId, signOwner, tapFor, type RuleId } from ".";
 
 /** Apply one rule to one node (found by its printed form) and print the results. */
 /**
@@ -29,8 +29,9 @@ describe("rules do what they say", () => {
     ["a + b + c", "commute", "a", ["b + a + c", "b + c + a"]],
     ["3x + 2x", "combine", "2*x", ["5*x"]],
     ["a + b - a", "combine", "-a", ["b"]],
-    ["3ln(x) - ln(x)", "combine", "ln(x)", ["2*ln(x)"], 1], // holding just the ln(x) of −ln(x)…
-    ["3ln(x) - ln(x)", "combine", "ln(x)", ["2*ln(x)"], 0], // …or of 3ln(x)
+    ["3ln(x) - ln(x)", "combine", "-ln(x)", ["2*ln(x)"]], // whole terms, either onto the other
+    ["3ln(x) - ln(x)", "combine", "3*ln(x)", ["2*ln(x)"]],
+    ["2·3 + 4", "combine", "4", []], // 2·3 is worked out first, not hidden in the sum
     ["10 - 3", "combine", "-3", ["7"]],
     ["2·x·5", "multiply-numbers", "5", ["10*x"]],
     ["x·x", "merge-powers", "x", ["x^2"], 1], // the one shortcut: x·x is x²
@@ -73,6 +74,13 @@ describe("rules do what they say", () => {
     ["(2·3)/(2·5)", "cancel-factor", "2", ["3/5"], 0], // top 2 onto bottom 2…
     ["(2·3)/(2·5)", "cancel-factor", "2", ["3/5"], 1], // …or bottom onto top
     ["ab/b", "cancel-factor", "b", ["a"], 0],
+    // A fraction is read with what multiplies it, and its bottom may have letters too.
+    ["3·(x/3)", "cancel-factor", "3", ["x"], 1],
+    ["3·(x/3)", "cancel-factor", "3", ["x"], 0],
+    ["6x/(3y)", "divide-numbers", "3", ["(2*x)/y"]],
+    // A power of a common factor comes out of a higher power.
+    ["x^3 + x^2", "factor-out", "x^2", ["x^2*(x + 1)"]],
+    ["x^3 + x^2", "factor-out", "x", ["x*(x^2 + x)"]],
     ["1/6", "split-number", "6", ["1/(2*3)"]],
     ["1/2 + 1/3", "expand-fraction", "3", ["(1*3)/(2*3) + 1/3"]], // copies of the 3, top and bottom
     ["1/2 + 1/3", "expand-fraction", "2", ["1/2 + (1*2)/(3*2)"]],
@@ -106,6 +114,24 @@ describe("rules do what they say", () => {
     ["√(4x) (letters > 0)", "pull-out-of-power", "4", ["√(4)*√(x)"]], // pull the 4 out…
     ["√(4x) (letters > 0)", "pull-out-of-power", "x", ["√(4)*√(x)"]], // …or the x
     ["√(x·y)", "pull-out-of-power", "x", []], // x and y could both be negative
+    ["√(4x)", "pull-out-of-power", "4", ["√(4)*√(x)"]], // a positive number out: under the √, x can't be negative
+    ["√(4(3 - x))", "pull-out-of-power", "4", ["√(4)*√(3 - x)"]],
+    // The same rule for a log as for a root: where ln(2x) is defined, x > 0.
+    ["ln(2x)", "log-of-product", "2", ["ln(2) + ln(x)"]],
+    ["ln(x·y)", "log-of-product", "x", []], // x and y could both be negative
+    // 16 as a power of the base it's used with (2^(x − 3) = 16), and an exponent split (the way back of adding them).
+    ["2^(x - 3) = 16", "power-of-base", "16", ["2^(x - 3) = 2^4"]],
+    ["x^2 = 16", "power-of-base", "16", []], // no number base to go with
+    ["2^(x - 3) = 16", "split-exponent", "-3", ["2^x*2^(-3) = 16"]],
+    ["2^(x + 1)", "split-exponent", "x", ["2^x*2^1"]],
+    // A negative exponent with no bar to cross: it goes under one of its own, or works out to one over the power.
+    ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
+    ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
+    ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
+    ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
+    ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
+    ["(1/2)^(x - 3) < (1/2)^4", "move-exponent-term", "-3", []], // a base below 1 would turn the relation
     ["(2x)^3", "pull-out-of-power", "2", ["2^3*x^3"]], // a whole power splits anyway
     ["(2x)^3", "pull-out-of-power", "2", ["2^3*x^3"]],
     ["(x^2·y)^3", "pull-out-of-power", "y", ["x^(2*3)*y^3"]],
@@ -126,6 +152,7 @@ describe("rules do what they say", () => {
     ["ln(√x) (letters > 0)", "log-of-power", "1/2", ["(1/2)*ln(x)"]],
     ["ln(x^2) = 4", "log-of-power", "2", []], // would lose x = −e²
     ["1/2", "flip-across-bar", "2", []], // numbers don't flip into 2⁻¹
+    ["7/(2/6)", "flip-across-bar", "2/6", []], // nor fractions into (2/6)⁻¹
     ["(1/2)·ln(x)", "multiply-fractions", "1/2", []], // a number on a log goes into it…
     ["(1/2)·ln(x)", "power-into-log", "1/2", ["ln(x^(1/2))"]], // …like this
     ["(x^2)^3", "power-of-power", "3", ["x^(2*3)"]],
@@ -149,6 +176,19 @@ describe("rules do what they say", () => {
     ["ln(2x) (letters > 0)", "log-of-product", "x", ["ln(2) + ln(x)"]],
     ["ln(x/y) (letters > 0)", "log-of-product", "y", ["ln(x) - ln(y)"]],
     ["ln(x·y)", "log-of-product", "x", []], // x and y could both be negative
+    // 16 as a power of the base it's used with (2^(x − 3) = 16), and an exponent split (the way back of adding them).
+    ["2^(x - 3) = 16", "power-of-base", "16", ["2^(x - 3) = 2^4"]],
+    ["x^2 = 16", "power-of-base", "16", []], // no number base to go with
+    ["2^(x - 3) = 16", "split-exponent", "-3", ["2^x*2^(-3) = 16"]],
+    ["2^(x + 1)", "split-exponent", "x", ["2^x*2^1"]],
+    // A negative exponent with no bar to cross: it goes under one of its own, or works out to one over the power.
+    ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
+    ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
+    ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
+    ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
+    ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
+    ["(1/2)^(x - 3) < (1/2)^4", "move-exponent-term", "-3", []], // a base below 1 would turn the relation
     ["ln(x/y) (letters > 0)", "log-of-product", "x", ["ln(x) - ln(y)"]],
     ["(1/3)^x > 9", "exp-across", "1/3", ["x < log_(1/3)(9)"]], // a base below 1 turns the inequality round
     ["2^x = -8", "exp-across", "2", []], // no solution: no log of −8
@@ -299,32 +339,34 @@ describe("every rule is sound", () => {
 });
 
 describe("what a press picks up", () => {
-  /** Printed forms of every node that can be grabbed by itself. */
-  const grabbable = (src: string, puzzleRules: RuleId[]) => {
+  /** Printed forms of every node a quick press picks up, and of those a held press does. */
+  const picks = (src: string, puzzleRules: RuleId[]) => {
     const state = parseState(src);
-    return state.sides
-      .flatMap(allNodes)
-      .filter((n) => isGrabbable(state, n.id, puzzleRules))
-      .map((n) => printState({ sides: [n] }));
+    const show = (f: (id: string) => boolean) =>
+      state.sides
+        .flatMap(allNodes)
+        .filter((n) => f(n.id))
+        .map((n) => printState({ sides: [n] }));
+    return { quick: show((id) => isPressable(state, id, puzzleRules)), held: show((id) => isGrabbable(state, id, puzzleRules)) };
   };
   const SHUFFLE: RuleId[] = ["commute", "combine", "multiply-numbers"];
 
-  it.each<[string, RuleId[], string[]]>([
-    // 2 and x can only swap with each other, so they hand the press to their term.
-    ["3x + 2x", SHUFFLE, ["3*x", "2*x"]],
-    // The 2 can multiply into the 3, so it's its own handle; the y isn't.
-    ["3·y·2 + 1 + x", SHUFFLE, ["3*y*2", "3", "2", "1", "x"]],
-    // The 2 can cross the =; each whole side can too (swapping the sides); and,
-    // with formulas' moves, so can the x (dividing by a letter).
-    ["2x = 8", ALL_RULES, ["2*x", "2", "x", "8"]],
-    // QA #7: in x·2 (from distributing), the 2 can only swap places, so a press picks up the term.
-    ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x", "x", "x*2", "-2*x"]],
-    // With factoring unlocked, a common factor is its own handle.
-    ["ab + ac", ALL_RULES, ["a*b", "a", "a*c", "a"]],
-    // …but not in like terms: they're added, so a press picks up the whole term.
-    ["a√12 + a√12", ALL_RULES, ["a*√(12)", "a*√(12)"]],
-  ])("%s", (src, rules, expected) => {
-    expect(grabbable(src, rules)).toEqual(expected);
+  it.each<[string, RuleId[], string[], string[]]>([
+    // In a sum, a quick press takes the whole term; holding takes a piece with a move of its own.
+    ["3x + 2x", SHUFFLE, ["3*x", "2*x"], ["3*x", "2*x"]],
+    ["3·y·2 + 1 + x", SHUFFLE, ["3*y*2", "1", "x"], ["3*y*2", "3", "2", "1", "x"]],
+    // In no sum, a press takes the piece itself: the 2 can cross the =, each whole side
+    // can (swapping the sides), and with formulas' moves so can the x (dividing by a letter).
+    ["2x = 8", ALL_RULES, ["2*x", "2", "x", "8"], ["2*x", "2", "x", "8"]],
+    ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x*2", "-2*x"], ["x*x", "x", "x", "x*2", "-2*x"]],
+    // Set apart on screen, a piece is pressed directly: a fraction's bottom, an exponent.
+    ["2^((2x + 4)/2 - 5) = 2^4", ALL_RULES, ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"], ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"]],
+    // An exponent written as a sum, with a move of its own, is pressed as a whole; its terms by holding.
+    ["log_2(2^(x - 3)) = 4", ALL_RULES, ["log_2(2^(x - 3))", "2", "x - 3", "4"], ["log_2(2^(x - 3))", "2", "x - 3", "x", "-3", "4"]],
+    // A common factor comes out of its term by holding it (b and c could only swap: nothing to hold them for).
+    ["ab + ac", ALL_RULES, ["a*b", "a*c"], ["a*b", "a", "a*c", "a"]],
+  ])("%s", (src, rules, quick, held) => {
+    expect(picks(src, rules)).toEqual({ quick, held });
   });
 });
 
@@ -396,9 +438,9 @@ describe("QA regressions", () => {
     expect(RULES["move-factor"].apply(s, one.id)).toEqual([]);
   });
 
-  it("exercise 6.21: after bringing y up as y⁻¹, the pieces can still be grabbed", () => {
-    const ref = findPuzzle("w9")!;
-    let s = parseState(ref.puzzle.start); // (x²·y)³/y
+  it("(x²y)³/y: after bringing y up as y⁻¹, the pieces can still be grabbed", () => {
+    const ref = { rules: rulesOf("powers") };
+    let s = parseState("(x^2·y)^3/y");
     const y = s.sides.flatMap(allNodes).filter((n) => n.kind === "var" && n.name === "y").at(-1)!;
     s = candidatesFor(s, y.id, ref.rules).find((c) => c.rule === "flip-across-bar")!.state;
     expect(printState(s)).toBe("(x^2*y)^3*y^(-1)");
@@ -474,11 +516,34 @@ describe("tapping a fraction's bar", () => {
     const c = tapFor(s, f.id, ALL_RULES);
     return c && `${c.rule}: ${printState(c.state)}`;
   };
-  it("works it out when it comes out whole, else does nothing", () => {
+  it("works it out when it comes out whole, else simplifies it", () => {
     expect(tap("x = 8/2")).toBe("evaluate-fraction: x = 4");
     expect(tap("x = 12/3 + 1")).toBe("evaluate-fraction: x = 4 + 1");
-    expect(tap("x = 6/4")).toBeNull();
+    expect(tap("x = 6/4")).toBe("evaluate-fraction: x = 3/2");
+    expect(tap("x = 3/5")).toBeNull();
     expect(tap("x = 6x/3")).toBeNull();
+  });
+});
+
+describe("tapping the +, − or · between two pieces", () => {
+  const tap = (src: string, after: string) => {
+    const s = parseState(src);
+    const n = s.sides.flatMap(allNodes).find((m) => printState({ sides: [m] }) === after)!;
+    const r = operatorTap(s, n.id, ALL_RULES);
+    return r && printState(r);
+  };
+  it("does what dropping one on the other would", () => {
+    expect(tap("3 + 4", "4")).toBe("7");
+    expect(tap("3x + 2x", "2*x")).toBe("5*x");
+    expect(tap("3x - x", "-x")).toBe("2*x");
+    expect(tap("1/5 + 2/5", "2/5")).toBe("(1 + 2)/5");
+    expect(tap("2·3·x", "3")).toBe("6*x");
+    expect(tap("x^2·x^3", "x^3")).toBe("x^(2 + 3)");
+    expect(tap("x + 2", "2")).toBeNull();
+  });
+  it("works a number times a fraction out as one fraction", () => {
+    expect(tap("6·(1/12)", "1/12")).toBe("6/12");
+    expect(tap("(2/3)·(9/4)", "9/4")).toBe("18/12");
   });
 });
 
@@ -513,5 +578,17 @@ describe("tapping + or − between two numbers works it out", () => {
     ["3 + 4", "3", null], // nothing in front of the first term
   ])("%s, tapping in front of %s", (src, text, expected) => {
     expect(tapOp(src, text)).toBe(expected);
+  });
+});
+
+describe("factoring out of a power keeps every piece one piece", () => {
+  it.each(["x^2·x - 6x^2", "x·x^3 + x^2", "x^3 + x^2"])("%s", (src) => {
+    const s = parseState(src);
+    const xs = s.sides.flatMap(allNodes).filter((n) => n.kind === "var");
+    for (const x of xs)
+      for (const c of candidatesFor(s, x.id, ALL_RULES).filter((k) => k.rule === "factor-out")) {
+        const ids = c.state.sides.flatMap(allNodes).map((n) => n.id);
+        expect(new Set(ids).size, printState(c.state)).toBe(ids.length);
+      }
   });
 });

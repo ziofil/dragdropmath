@@ -32,6 +32,7 @@ export function interactive(opts: {
     draggedId,
     interact: {
       grabbable: moves.grabbable,
+      pressable: moves.pressable,
       opTap: (termId) => operatorTap(state, termId, rules),
       tap: (id) => moves.tap(id)?.state ?? null,
       onTap,

@@ -1,11 +1,14 @@
 /**
- * What every chapter's exercise shapes are written with (chapters/*.ts).
- * A shape is a textbook pattern with blanks. It picks the answer first, then
- * the numbers, and works out the rest so everything stays whole: built
- * backward from the solution. It also writes the natural milestones of
- * solving it (expanded, unknowns on one side, ...), which the move engine
- * then checks leg by leg (verify.ts).
+ * What every chapter's exercise shapes are made with (chapters/*.ts): a
+ * seeded random source, the draft a shape makes, and a few ways of writing
+ * maths as a person would for the shapes still written as text. Most shapes
+ * are recipes now, built backwards from their answer on trees (unmove.ts,
+ * linear.ts, equations.ts, systems.ts, compose.ts) or from pieces
+ * (composeExpr.ts, composeFrac.ts), their milestones derived; the rest
+ * write theirs, and every one is checked with the move engine (verify.ts).
  */
+
+import type { RuleId } from "../../rules";
 
 export const LEVELS = ["easy", "medium", "hard"] as const;
 export type Level = (typeof LEVELS)[number];
@@ -28,8 +31,17 @@ export function rng(seed: number) {
 }
 export type Rng = ReturnType<typeof rng>;
 
+/** xⁿ as written: "x", "x^3", "x^-2". */
+export const pw = (x: string, n: number) => (n === 1 ? x : `${x}^${n}`);
+
 /** One of the list, at random. */
 export const one = <T,>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
+
+/** A letter: mostly x, now and then one of `others`. */
+export const letter = (r: Rng, others: readonly string[] = ["y", "a", "t", "n"]) => (r.next() < 0.6 ? "x" : one(r, others));
+
+/** Two different letters: mostly x and y, now and then a and b. */
+export const letterPair = (r: Rng): [string, string] => (r.next() < 0.8 ? ["x", "y"] : ["a", "b"]);
 
 /** The list in a random order. */
 export function shuffled<T>(r: Rng, xs: readonly T[]): T[] {
@@ -45,13 +57,12 @@ export type Draft = {
   shape: string;
   start: string;
   goal: string;
-  /** Milestones on the way, in order. */
+  /** Milestones on the way, in order (for checking it can be done: verify.ts). */
   via: string[];
-  /** The answer, when the exercise is solving for one number; and every number the start is written with (for the beauty rules). */
-  answer?: number;
-  numbers: number[];
-  /** Numbers met on the way (products, sums), for the beauty rules. */
-  along: number[];
+  /** Its letters stand for positive numbers (said on screen; see rules/signs.ts). */
+  positive?: boolean;
+  /** The moves each stretch takes (start → first milestone, …, last → goal), when known: checking searches with those first. */
+  legs?: RuleId[][];
 };
 
 // ---------- writing maths as a person would ----------
@@ -74,19 +85,17 @@ export const timesBracket = (d: number, inside: string) => `${d < 0 ? " - " : " 
 export const plus = (b: number) => (b < 0 ? ` - ${-b}` : ` + ${b}`);
 /** a·x + b. */
 export const lin = (a: number, b: number, x = "x") => `${ax(a, x)}${b === 0 ? "" : plus(b)}`;
-/** a(x + b), or (x + b) when a is 1. */
-export const bracket = (a: number, b: number, x = "x") => `${a === 1 ? "" : a === -1 ? "-" : a}(${lin(1, b, x)})`;
-/** A sum written as a person would (a 0 leaves its term out): terms(2, "x", -3, "", 1, "x") → "2x - 3 + x". */
-export function terms(...parts: (number | string)[]): string {
-  const ts: [number, string][] = [];
-  for (let i = 0; i < parts.length; i += 2) ts.push([parts[i] as number, parts[i + 1] as string]);
-  return poly(ts);
-}
-
-/** The answer as the goal reads it. */
-export const answer = (x: number) => `x = ${x}`;
-
-export type Shape = { id: string; name: string; make: (r: Rng) => Draft | null };
+export type Shape = {
+  id: string;
+  name: string;
+  make: (r: Rng) => Draft | null;
+  /** How often it comes up, against the level's other shapes (1 each by default). */
+  weight?: number;
+  /** Its letters stand for positive numbers (when its drafts don't say; else its chapter's). */
+  positive?: boolean;
+  /** Written by hand, numbers and all (real formulas): not held to the beauty rules (beauty.ts). */
+  curated?: boolean;
+};
 
 /** The shapes with these ids, in this order: a level's list. */
 export function byIds(shapes: readonly Shape[], ...ids: string[]): Shape[] {
@@ -99,7 +108,3 @@ export function byIds(shapes: readonly Shape[], ...ids: string[]): Shape[] {
 
 export const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 
-/** Mostly small positive answers, now and then a negative one. */
-export function pickAnswer(r: Rng): number {
-  return r.next() < 0.15 ? -r.int(1, 5) : r.int(1, 9);
-}

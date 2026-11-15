@@ -36,7 +36,6 @@ export const el: Translation = {
   notMasteredYet: (titles: string) => ` Δεν έχεις ολοκληρώσει ακόμα: ${titles}. Μπορείς όμως να ξεκινήσεις κανονικά.`,
   startLesson: "Ξεκίνα το μάθημα →",
   backToLesson: "Πίσω στο μάθημα →",
-  leadsOnTo: (titles: string) => `Μετά συνεχίζεις με: ${titles}.`,
   badges: "Μετάλλια",
   noBadgesYet: "Κάνε το τεστ σε οποιοδήποτε κεφάλαιο για να κερδίσεις το μετάλλιό του.",
   badgesEarned: (n: number, total: number) => `${n} από ${total}`,
@@ -47,18 +46,16 @@ export const el: Translation = {
 
   // Chapter page
   backToPath: "← Διαδρομή μάθησης",
-  practiceNote: "Κάθε άσκηση είναι καινούργια, φτιαγμένη μόνο για σένα. Ξεκίνα από τις εύκολες και ανέβα επίπεδο όταν το νιώσεις.",
   leadsOnToStart: "Μετά συνεχίζεις με: ",
   leadsOnToEnd: ". Μπορείς να πας εκεί όποτε θέλεις.",
-  watchOut: "Προσοχή.",
   level: { easy: "Εύκολη", medium: "Μέτρια", hard: "Δύσκολη" },
   anotherOne: "Άλλη μία →",
   practice: "Εξάσκηση",
-  testSkills: "Δοκίμασε τον εαυτό σου",
-  testNote:
+  predict: "Δοκίμασε τον εαυτό σου",
+  predictNote:
     "Βρες την απάντηση με το μυαλό και μετά διάλεξέ τη. Οι σωστές απαντήσεις σού δίνουν το μετάλλιο του κεφαλαίου: 10 στις εύκολες για το χάλκινο, στις μέτριες για το ασημένιο και στις δύσκολες για το χρυσό.",
   solvedN: (n: number) => `${n} ${n === 1 ? "λυμένη" : "λυμένες"}`,
-  testRight: "Σωστά! Μετράει για το μετάλλιο.",
+  predictRight: "Σωστά! Μετράει για το μετάλλιο.",
   drills: {
     commute: { name: "Άλλαξε τη σειρά", how: "Σύρε έναν όρο πέρα από τον διπλανό του. Στο + και στο × η σειρά δεν παίζει ρόλο." },
     combine: { name: "Πρόσθεσε αριθμούς", how: "Σύρε τον έναν αριθμό πάνω στον άλλον για να τους προσθέσεις." },
@@ -125,9 +122,7 @@ export const el: Translation = {
     `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${more === 1 ? "σωστή απάντηση" : "σωστές απαντήσεις"} στις ${["εύκολες", "μέτριες", "δύσκολες"][tier]} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
 
   // Guided example
-  notThisStep: "Η κίνηση είναι σωστή, αλλά δεν είναι αυτή που θέλουμε σε αυτό το βήμα. Την παίρνω πίσω.",
   done: "Έτοιμο.",
-  keepGoing: "Μπορείς να συνεχίσεις: τώρα επιτρέπεται κάθε κίνηση.",
   startOver: "Από την αρχή",
 
   // Exercise
@@ -139,10 +134,10 @@ export const el: Translation = {
   nextTitle: (label: string) => `Επόμενη: άσκηση ${label}`,
   nextLabel: (label: string) => `Επόμενη άσκηση (${label})`,
   exerciseN: (label: string) => `Άσκηση ${label}`,
-  guessPrompt: "Σκέψου πρώτα: τι θα γίνει;",
+  predictPrompt: "Σκέψου πρώτα: τι θα γίνει;",
   reveal: "Δείξε μου",
-  guessedBeforeRight: "Σε αυτήν η πρόβλεψή σου ήταν σωστή με την πρώτη.",
-  guessedBeforeWrong: (picked: boolean) =>
+  predictedBeforeRight: "Σε αυτήν η πρόβλεψή σου ήταν σωστή με την πρώτη.",
+  predictedBeforeWrong: (picked: boolean) =>
     `${picked ? "Την πρώτη φορά είχες προβλέψει την κόκκινη" : "Η πρώτη σου πρόβλεψη ήταν λάθος"}. Η σωστή είναι η πράσινη.`,
   rightFirstTime: "Σωστή πρόβλεψη με την πρώτη! Τώρα λύσε την άσκηση.",
   notQuite: "Όχι ακριβώς. Η σωστή είναι η πράσινη. Λύσε την άσκηση για να δεις πού έκανες λάθος.",
@@ -151,10 +146,8 @@ export const el: Translation = {
   pickFirst: "Διάλεξε μια απάντηση από πάνω και μετά λύσε την άσκηση εδώ.",
   hint: "Υπόδειξη",
   undo: "Αναίρεση",
-  reset: "Επαναφορά",
   solvedBang: "Λύθηκε!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} στο κεφάλαιο «${chapter}».`,
-  theExercise: "η άσκηση",
   moveCrashed: "Κάτι πήγε στραβά με αυτή την κίνηση.",
   moveCrashedDetails: "Θα βρεις λεπτομέρειες στην κονσόλα του προγράμματος περιήγησης.",
   tryAgain: "Δοκίμασε ξανά",

@@ -37,7 +37,6 @@ export const nl: Translation = {
   notMasteredYet: (titles: string) => ` Nog niet beheerst: ${titles}. Je kunt toch al beginnen.`,
   startLesson: "Begin met de les →",
   backToLesson: "Terug naar de les →",
-  leadsOnTo: (titles: string) => `Hierna komt ${titles}.`,
   badges: "Badges",
   noBadgesYet: "Maak de test in een hoofdstuk om de badge ervan te verdienen.",
   badgesEarned: (n: number, total: number) => `${n} van ${total}`,
@@ -48,18 +47,16 @@ export const nl: Translation = {
 
   // Chapter page
   backToPath: "← Leerpad",
-  practiceNote: "Elke oefening is nieuw, speciaal voor jou gemaakt. Begin met de makkelijke en ga een niveau hoger als je er klaar voor bent.",
   leadsOnToStart: "Hierna komt ",
   leadsOnToEnd: ". Daar kun je altijd heen.",
-  watchOut: "Let op.",
   level: { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" },
   anotherOne: "Nog een →",
   practice: "Oefenen",
-  testSkills: "Test jezelf",
-  testNote:
+  predict: "Test jezelf",
+  predictNote:
     "Reken het antwoord uit in je hoofd en kies het dan. Met goede antwoorden verdien je de badge van het hoofdstuk: 10 bij Makkelijk voor brons, bij Gemiddeld voor zilver, bij Moeilijk voor goud.",
   solvedN: (n: number) => `${n} opgelost`,
-  testRight: "Goed! Deze telt mee voor de badge.",
+  predictRight: "Goed! Deze telt mee voor de badge.",
   drills: {
     commute: { name: "Volgorde omwisselen", how: "Sleep een term langs zijn buurman. Bij + en × maakt de volgorde niet uit." },
     combine: { name: "Getallen optellen", how: "Sleep het ene getal op het andere om ze op te tellen." },
@@ -126,9 +123,7 @@ export const nl: Translation = {
     `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "goed antwoord" : "goede antwoorden"} bij ${["Makkelijk", "Gemiddeld", "Moeilijk"][tier]} voor ${metal[tier]}.`,
 
   // Guided example
-  notThisStep: "Die zet mag wel, maar hij hoort niet bij deze stap. We zetten hem terug.",
   done: "Klaar.",
-  keepGoing: "Je mag verder gaan: nu is elke zet toegestaan.",
   startOver: "Opnieuw beginnen",
 
   // Exercise
@@ -140,10 +135,10 @@ export const nl: Translation = {
   nextTitle: (label: string) => `Volgende: oefening ${label}`,
   nextLabel: (label: string) => `Volgende oefening (${label})`,
   exerciseN: (label: string) => `Oefening ${label}`,
-  guessPrompt: "Voorspel eerst: wat komt eruit?",
+  predictPrompt: "Voorspel eerst: wat komt eruit?",
   reveal: "Laat zien",
-  guessedBeforeRight: "Deze had je in één keer goed voorspeld.",
-  guessedBeforeWrong: (picked: boolean) =>
+  predictedBeforeRight: "Deze had je in één keer goed voorspeld.",
+  predictedBeforeWrong: (picked: boolean) =>
     `${picked ? "Je koos eerst de rode" : "Je eerste antwoord was fout"}. De groene is goed.`,
   rightFirstTime: "In één keer goed. Los hem nu op.",
   notQuite: "Net niet. De groene is goed. Los hem op, dan zie je waar het bij jou misging.",
@@ -152,10 +147,8 @@ export const nl: Translation = {
   pickFirst: "Kies hierboven een antwoord en los het dan hier op.",
   hint: "Tip",
   undo: "Ongedaan maken",
-  reset: "Opnieuw",
   solvedBang: "Opgelost!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${tierName[tier]} badge voor ${chapter}.`,
-  theExercise: "de oefening",
   moveCrashed: "Er ging iets mis bij die zet.",
   moveCrashedDetails: "Details staan in de console van de browser.",
   tryAgain: "Probeer opnieuw",

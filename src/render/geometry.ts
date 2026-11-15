@@ -10,10 +10,21 @@ import type { RenderCtx } from "./typeset";
  */
 export type CanvasBox = { symLeft: Vec2; symRight: Vec2; centre: Vec2; w: number; h: number };
 
-/** Canvas position of node `id`'s origin (baseline-left) when the canvas shows `state`. */
+/**
+ * Canvas position of node `id`'s origin (baseline-left) when the canvas shows
+ * `state`. Each lookup renders the whole board, and a drag asks the same ones
+ * again and again (a piece's place in a state never changes): kept per state
+ * and drawing.
+ */
 export function originOf(ctx: DragInitContext<MathState>, id: string, state: MathState): Vec2 | null {
-  return getElementPositionCheap({ ...ctx, draggedId: id, draggedPath: id, anchorPos: Vec2(0, 0) }, state);
+  let byDrawing = origins.get(state);
+  if (!byDrawing) origins.set(state, (byDrawing = new WeakMap()));
+  let byId = byDrawing.get(ctx.draggable);
+  if (!byId) byDrawing.set(ctx.draggable, (byId = new Map()));
+  if (!byId.has(id)) byId.set(id, getElementPositionCheap({ ...ctx, draggedId: id, draggedPath: id, anchorPos: Vec2(0, 0) }, state));
+  return byId.get(id)!;
 }
+const origins = new WeakMap<MathState, WeakMap<object, Map<string, Vec2 | null>>>();
 
 /** Where node `id` is on the canvas when it shows `rc.state` (laid out, so its size is known). */
 export function canvasBox(rc: RenderCtx, ctx: DragInitContext<MathState>, id: string): CanvasBox {

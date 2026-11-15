@@ -3,6 +3,8 @@ import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { TIDY_STEP_MS, tidySteps } from "../game/tidy";
 
+export type MoveHistory = ReturnType<typeof useMoveHistory>;
+
 /** A state reached: by the learner's own move, or by tidying after it. */
 type Entry = { state: MathState; tidy?: true };
 

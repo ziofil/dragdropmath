@@ -2,6 +2,7 @@ import type { MathState } from "../expr/types";
 import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
 import { stateKey, type Ordering } from "../expr/key";
+import { allNodes } from "../expr/tree";
 import { candidatesFor, forgetMoves, handles, isGrabbable, tapFor, type RuleId } from "../rules";
 
 /**
@@ -45,16 +46,22 @@ export function moves(state: MathState, rules: readonly RuleId[]): MathState[] {
 /** Every state one move away, tidied as the app tidies it. */
 export const neighbours = (state: MathState, rules: readonly RuleId[]): MathState[] => moves(state, rules).map((n) => tidied(state, n));
 
-type SearchOpts = { ordered?: Ordering; maxDepth?: number; maxStates?: number };
+export type SearchOpts = { ordered?: Ordering; maxDepth?: number; maxStates?: number };
 
 /**
  * A shortest way from start to goal (breadth-first): every state on the way,
  * start and goal-matching end included, exactly as the moves make them (with
  * their marks, as a learner would have them). Null if none within `maxDepth`.
  */
-export function solution(
+export function solution(start: MathState, goal: MathState, rules: readonly RuleId[], opts: SearchOpts = {}): MathState[] | null {
+  const ordered = opts.ordered ?? "exact";
+  return search(start, (s) => matchesGoal(s, goal, ordered), rules, opts);
+}
+
+/** A shortest way from start to a state that is `done` (see solution). */
+export function search(
   start: MathState,
-  goal: MathState,
+  done: (s: MathState) => boolean,
   rules: readonly RuleId[],
   { ordered = "exact", maxDepth = 8, maxStates = 50_000 }: SearchOpts = {},
 ): MathState[] | null {
@@ -63,12 +70,13 @@ export function solution(
   // Seen with notation: √x and x^(1/2) are a move apart, even where a goal doesn't mind which.
   const seen = new Set([stateKey(start, ordered, true)]);
   for (let depth = 0; depth <= maxDepth; depth++) {
-    const done = frontier.find((s) => matchesGoal(s, goal, ordered));
-    if (done) {
-      const path = [done];
+    const found = frontier.find(done);
+    if (found) {
+      const path = [found];
       while (parent.has(path[0])) path.unshift(parent.get(path[0])!);
       return path;
     }
+    if (depth === maxDepth) break;
     const next: MathState[] = [];
     for (const s of frontier) {
       const ns = neighbours(s, rules);
@@ -89,20 +97,66 @@ export function solution(
   return null;
 }
 
+/** How big a state is (its nodes): what simplifying mostly makes smaller. */
+const sizeOf = (s: MathState) => s.sides.reduce((n, e) => n + allNodes(e).length, 0);
+
 /**
- * A way through an exercise: from start, by each checkpoint (`via`), to the
- * goal — the states on the way, or null if a stretch can't be done in
- * `maxDepth` moves. Without checkpoints, a shortest way.
+ * A way from start to a state that is `done`, found best-first: fewest moves
+ * plus smallest states first (simplifying and solving mostly make a state
+ * smaller). Not always the shortest way, but where an exercise takes ten
+ * moves it finds one after a few hundred states, where breadth-first gives
+ * up after tens of thousands. Null if none within `maxStates`.
  */
-export function solutionVia(start: MathState, goal: MathState, via: readonly MathState[], rules: readonly RuleId[], opts: SearchOpts = {}): MathState[] | null {
-  if (via.length === 0) return solution(start, goal, rules, opts);
-  const out: MathState[] = [start];
-  for (const target of [...via, goal]) {
-    const leg = solution(out[out.length - 1], target, rules, { ...opts, maxDepth: 4 });
-    if (!leg) return null;
-    out.push(...leg.slice(1));
+export function searchBest(start: MathState, done: (s: MathState) => boolean, rules: readonly RuleId[], { ordered = "exact" as Ordering, maxStates = 15_000 } = {}): MathState[] | null {
+  type Node = { s: MathState; g: number; f: number; parent: Node | null };
+  // A binary heap on f.
+  const heap: Node[] = [];
+  const push = (n: Node) => {
+    heap.push(n);
+    for (let i = heap.length - 1; i > 0; ) {
+      const p = (i - 1) >> 1;
+      if (heap[p].f <= heap[i].f) break;
+      [heap[p], heap[i]] = [heap[i], heap[p]];
+      i = p;
+    }
+  };
+  const pop = (): Node => {
+    const top = heap[0];
+    const last = heap.pop()!;
+    if (heap.length) {
+      heap[0] = last;
+      for (let i = 0; ; ) {
+        const [l, r] = [2 * i + 1, 2 * i + 2];
+        let m = i;
+        if (l < heap.length && heap[l].f < heap[m].f) m = l;
+        if (r < heap.length && heap[r].f < heap[m].f) m = r;
+        if (m === i) break;
+        [heap[m], heap[i]] = [heap[i], heap[m]];
+        i = m;
+      }
+    }
+    return top;
+  };
+  push({ s: start, g: 0, f: sizeOf(start), parent: null });
+  const seen = new Set([stateKey(start, ordered, true)]);
+  while (heap.length) {
+    const at = pop();
+    if (done(at.s)) {
+      const path: MathState[] = [];
+      for (let n: Node | null = at; n; n = n.parent) path.unshift(n.s);
+      return path;
+    }
+    const ns = neighbours(at.s, rules);
+    forgetMoves(at.s);
+    for (const n of ns) {
+      const k = stateKey(n, ordered, true);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      if (seen.size > maxStates) return null;
+      push({ s: n, g: at.g + 1, f: at.g + 1 + sizeOf(n), parent: at });
+    }
   }
-  return out;
+  return null;
 }
 
 /**

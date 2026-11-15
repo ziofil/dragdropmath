@@ -26,23 +26,23 @@ export type PathLayout = {
 /**
  * Where each chapter sits, by hand: the graph is small, and a hand layout
  * keeps arrows from crossing or running through a chapter (checked in
- * path.test.ts). Expressions on the left, equations on the right.
+ * path.test.ts). Expressions first, then equations, which use them all.
  */
 const COLS = 4;
 const PLACES: Record<string, [col: number, row: number]> = {
   shuffle: [1.5, 0],
   collect: [1.5, 1],
   distribute: [1.5, 2],
-  brackets: [0.5, 3],
-  balance: [2.5, 3],
-  powers: [0, 4],
-  factor: [1, 4],
-  formulas: [2, 4],
-  inequalities: [3, 4],
-  fractions: [2, 5],
-  simultaneous: [3, 5],
+  brackets: [1.5, 3],
+  factor: [0.5, 4],
+  powers: [2.5, 4],
+  fractions: [1.5, 5],
   roots: [1.5, 6],
   explog: [1.5, 7],
+  balance: [1.5, 8],
+  inequalities: [0.5, 9],
+  formulas: [2.5, 9],
+  simultaneous: [2.5, 10],
 };
 
 export function layoutPath(chapters: readonly Chapter[] = CHAPTERS): PathLayout {

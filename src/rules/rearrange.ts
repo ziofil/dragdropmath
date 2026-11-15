@@ -2,7 +2,7 @@ import type { Expr } from "../expr/types";
 import { num, pow, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { allNodes, nodeAt, withChildren } from "../expr/tree";
-import { roleOf } from "./view";
+import { roleOf, viewTerm } from "./view";
 import { buildTerm, restKey, splitCoef } from "./monomial";
 import { asPower } from "./shapes";
 import { adopt, dragCtx, mergeInto, moveItem, replaceIn, siblings, without, type Candidate, type Rule } from "./types";
@@ -36,25 +36,22 @@ export const combine: Rule = {
   name: "Combine like terms",
   gesture: "Drop a term onto a term of the same kind to add them up.",
   apply(state, id) {
-    // Holding the symbol part of a term (the ln(x) in 3ln(x) or −ln(x)) and
-    // dropping it on a like term combines the whole terms. Marked secondary:
-    // it never makes that symbol grabbable by itself, so in 3x + 2x a press on
-    // the x still picks up the term.
+    // Whole terms only: a quick press picks up a term, and its pieces (held) have moves of their own.
     const r = roleOf(state, id);
-    if (!r || r.term.frac || r.terms.length < 2) return [];
-    const sole = r.part === "top-factor" && splitCoef(r.term.body).rest.length === 1 && splitCoef(r.term.body).rest[0].id === id;
-    if (!(r.part === "term" || r.part === "body" || sole)) return [];
-    const secondary = r.part !== "term";
+    if (!r || r.term.frac || r.terms.length < 2 || r.part !== "term") return [];
     const S = nodeAt(state, r.holderLoc) as Extract<Expr, { kind: "sum" }>;
     const c = { node: r.term.term, index: r.index, parent: S, parentLoc: r.holderLoc };
     const terms = c.parent.terms;
     const mine = splitCoef(c.node);
     const isFraction = (m: { rest: Expr[] }) => m.rest.length === 1 && m.rest[0].kind === "frac";
     if (isFraction(mine)) return []; // fractions are added with add-fractions
+    // 2·3 + 4: the 2·3 is worked out first (multiply-numbers), not hidden inside the sum.
+    const oneNumber = (t: Expr) => viewTerm(t).top.filter((f) => f.kind === "num").length <= 1;
+    if (!oneNumber(c.node)) return [];
     return terms.flatMap((t, j): Candidate[] => {
       if (j === c.index) return [];
       const theirs = splitCoef(t);
-      if (isFraction(theirs)) return [];
+      if (isFraction(theirs) || !oneNumber(t)) return [];
       if (restKey(mine) !== restKey(theirs)) return [];
       // The result takes over the target's identity — unless the target itself
       // survives inside it (x + x → 2·x keeps that x), which would duplicate the id.
@@ -65,7 +62,6 @@ export const combine: Rule = {
           rule: "combine",
           state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged),
           targetId: t.id,
-          secondary,
         },
       ];
     });

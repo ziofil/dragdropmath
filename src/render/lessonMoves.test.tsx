@@ -6,11 +6,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { harness } from "./testing/harness";
-import { CHAPTERS, rulesFor, startOf } from "../game/puzzles";
-import { DRILLS, drillExercise } from "../game/generate/moves";
+import { CHAPTERS, rulesOf, startOf } from "../game/puzzles";
+import { DRILLS, drillExercise, oneMove } from "../game/generate/moves";
 import { allNodes } from "../expr/tree";
 import { handles, RULES, tapFor } from "../rules";
-import { parseState } from "../expr/parse";
 import { stepDone } from "../game/solver";
 
 const cases = Object.entries(DRILLS).flatMap(([chapterId, drills]) =>
@@ -20,12 +19,14 @@ const cases = Object.entries(DRILLS).flatMap(([chapterId, drills]) =>
 describe("lesson moves, by hand", () => {
   it.each(cases)("%s: %s", (chapterId, drillId) => {
     const ch = CHAPTERS.find((c) => c.id === chapterId)!;
-    const rules = rulesFor(CHAPTERS.indexOf(ch));
+    const rules = rulesOf(ch.id);
     for (const seed of [11, 222, 3333]) {
       const ex = drillExercise(chapterId, drillId, seed)!;
       const state = startOf(ex.start, ch);
-      const wants = [ex.goal, ...ex.also].map((g) => parseState(g));
-      const done = (s: ReturnType<typeof parseState>) => wants.some((w) => stepDone(state, s, w));
+      // The move itself (whatever the board then goes on to finish).
+      const drill = DRILLS[chapterId].find((d) => d.id === drillId)!;
+      const wants = oneMove(state, drill.rule, rules);
+      const done = (s: (typeof wants)[number]) => wants.some((w) => stepDone(state, s, w));
       const h = harness(state, rules);
       const nodes = state.sides.flatMap(allNodes);
       const ways = handles(state).flatMap((a) => {

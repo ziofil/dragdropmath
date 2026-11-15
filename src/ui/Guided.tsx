@@ -1,34 +1,36 @@
 import { useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
-import { stateKey } from "../expr/key";
 import type { RuleId } from "../rules";
 import { stepDone } from "../game/solver";
-import { TIDY_STEP_MS, tidied } from "../game/tidy";
-import { MathCanvas } from "./MathCanvas";
+import type { ShowMove } from "./MathCanvas";
+import { Board } from "./Board";
 import { MathText } from "./MathText";
+import { useMoveHistory } from "./useMoveHistory";
 import { t } from "../i18n";
 
 /**
- * One move to make by hand, on a board of its own (a chapter's lesson is a
- * row of these). Whichever way the move is made counts (`goals`: everything
- * it can make there). Other moves are real moves, just not this one's:
- * they're shown, then gently put back. Once it's made, the board stays live.
+ * One move to learn, on a board of its own (a chapter's lesson is a row of
+ * these): every move is allowed, as in an exercise, and it's done once the
+ * board shows one of `goals` (in any order) — what the move makes, or where
+ * the board finishes when the move alone would leave it half done.
  */
 export function MoveBoard({
   start: startText,
   goals,
   how,
   rules,
+  rule,
   positive,
   more,
 }: {
   start: string;
-  /** What the move can make (the same terms in another order count too). */
   goals: string[];
   /** What to do, in the reader's language. */
   how: string;
   rules: readonly RuleId[];
+  /** The move it teaches (what Show plays). */
+  rule: RuleId;
   /** Its letters stand for positive numbers. */
   positive?: boolean;
   /** A button for a fresh one. */
@@ -36,69 +38,51 @@ export function MoveBoard({
 }) {
   const start = useMemo((): MathState => ({ ...parseState(startText), ...(positive ? { letters: "positive" as const } : {}) }), [startText, positive]);
   const wants = useMemo(() => goals.map((g) => parseState(g)), [goals]);
-  const [states, setStates] = useState<MathState[]>([start]);
-  const [detour, setDetour] = useState<MathState | null>(null);
-  const done = states.length > 1;
-  const current = detour ?? states[states.length - 1];
-
-  // Tidying (x·2 → 2x) happens on its own here too, just after the move. A
-  // move made before it shows takes it over (tidying from where it started).
-  const tidyFrom = useRef<MathState | null>(null);
-  const accept = (next: MathState) => {
-    const from = tidyFrom.current ?? current;
-    setStates((ss) => [...ss, next]);
-    const neat = tidied(from, next);
-    tidyFrom.current = neat === next ? null : from;
-    if (neat === next) return;
-    setTimeout(() => {
-      setStates((ss) => (ss[ss.length - 1] === next ? [...ss.slice(0, -1), neat] : ss));
-      if (tidyFrom.current === from) tidyFrom.current = null;
-    }, TIDY_STEP_MS);
-  };
-
-  const onDrop = (next: MathState) => {
-    if (detour || stateKey(next, "exact") === stateKey(current, "exact")) return;
-    if (done || wants.some((w) => stepDone(current, next, w))) return accept(next);
-    // A fine move, but not the one this board is about: show it, then go back.
-    setDetour(next);
-    setTimeout(() => setDetour(null), 900);
+  const reached = (s: MathState) => wants.some((w) => stepDone(start, s, w));
+  const moves = useMoveHistory(start, reached);
+  const { current, undo, reset, canUndo } = moves;
+  const showMove = useRef<ShowMove | null>(null);
+  const [showing, setShowing] = useState(false);
+  const done = reached(current) && !showing;
+  // Show: the move played on the board (from the start), then taken back for the learner to try.
+  const show = async () => {
+    if (showing) return;
+    setShowing(true);
+    if (canUndo) {
+      reset();
+      await new Promise((r) => setTimeout(r, 450));
+    }
+    const ok = await showMove.current?.(rule, reached);
+    if (ok) {
+      await new Promise((r) => setTimeout(r, 1300));
+      undo();
+    }
+    setShowing(false);
   };
 
   return (
-    <div className={`guided ${done ? "guided-done" : ""}`}>
-      <div className="guided-head">
-        <p className="guided-say">
-          <MathText text={how} />
-        </p>
-      </div>
-      <div className="board guided-board">
-        <MathCanvas state={current} rules={rules} onDrop={onDrop} height={160} />
-        <div className="board-bar">
-          <p className="guided-status" role="status">
-            {detour ? (
-              t().notThisStep
-            ) : done ? (
-              <>
-                {t().done} <span className="guided-free">{t().keepGoing}</span>
-              </>
-            ) : null}
-          </p>
-          <div className="actions">
-            <button
-              onClick={() => {
-                tidyFrom.current = null;
-                setStates([start]);
-              }}
-              disabled={!done}
-            >
-              {t().startOver}
-            </button>
-            <button className={done ? "primary" : ""} onClick={more.onClick}>
-              {more.text}
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="lesson-move">
+      <p className="lesson-how">
+        <MathText text={how} />
+      </p>
+      <Board
+        moves={moves}
+        rules={rules}
+        height={160}
+        show={showMove}
+        busy={showing}
+        status={done && t().done}
+        before={
+          <button onClick={show} disabled={showing}>
+            {t().showMove}
+          </button>
+        }
+        after={
+          <button className={done ? "primary" : ""} onClick={more.onClick}>
+            {more.text}
+          </button>
+        }
+      />
     </div>
   );
 }

@@ -1,12 +1,11 @@
 import type { Expr } from "../expr/types";
 import { cloneFresh, neg, negate, prod, sum } from "../expr/build";
-import { key } from "../expr/key";
 import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
 import { nodeAt, type Loc } from "../expr/tree";
-import { roleOf } from "./view";
+import { divideOut, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
 import type { MathState } from "../expr/types";
 import { restKey, splitCoef } from "./monomial";
-import { dropFactor, visibleOne } from "./shapes";
+import { visibleOne } from "./shapes";
 
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
 export const distribute: Rule = {
@@ -95,22 +94,32 @@ function termOf(state: MathState, id: string): { sumLoc: Loc; s: Extract<Expr, {
 }
 
 /**
- * A term with one copy of factor `f` taken out (the dragged copy itself when
- * `mine`, else any factor equal to it): 3x → 3, −2xy → −2y, x → 1. Null if `f`
- * isn't a factor of it.
+ * A term with one copy of factor `f` taken out (see divideOut): 3x → 3,
+ * −2xy → −2y, x → 1, x³ → x². `taken`: which copy, in the dragged piece's own
+ * term. Null if `f` isn't a factor of it (or it's a fraction).
  */
-function stripFactor(t: Expr, f: Expr, mine: boolean): Expr | null {
-  const fKey = key(f);
-  if (t.kind === "neg") {
-    const inner = stripFactor(t.arg, f, mine);
-    return inner && negate(inner);
-  }
-  return dropFactor(t, (x) => (mine ? x.id === f.id : key(x) === fKey));
+function stripFactor(t: Expr, f: Expr, taken?: Taken): Expr | null {
+  const v = viewTerm(t);
+  if (v.frac) return null;
+  // The whole term carried out (ab + a → a(b + 1)): 1 is left.
+  if (taken && "id" in taken && (taken.id === t.id || taken.id === v.body.id)) return rebuildTerm(v, [], []);
+  const top = divideOut(v.top, f, taken);
+  return top && rebuildTerm(v, top, []);
+}
+
+/** The piece carried out of its term, and which copy of it that is (the x of x³: one copy of x). */
+function carried(state: MathState, id: string) {
+  const c = dragCtx(state, id);
+  const P = c?.parent;
+  const ofPower = P?.kind === "pow" && c!.index === 0 && wholePower(P).n >= 2;
+  const at = c && termOf(state, ofPower ? P!.id : id);
+  if (!c || !at) return null;
+  return { f: c.node, at, taken: (ofPower ? { powerOf: P!.id } : { id }) as Taken };
 }
 
 /**
  * ab + ac → a(b + c) (drag a factor out of one term; it must appear in every term).
- * Also covers a whole term: ab + a → a(b + 1).
+ * Also covers a whole term: ab + a → a(b + 1), and powers: x³ + x² → x²(x + 1).
  */
 export const factorOut: Rule = {
   id: "factor-out",
@@ -118,17 +127,12 @@ export const factorOut: Rule = {
   name: "Factor out",
   gesture: "Pull a factor that's in every term out in front of brackets.",
   apply(state, id) {
-    const c = dragCtx(state, id);
-    const at = c && termOf(state, id);
-    if (!c || !at) return [];
-    const f = c.node;
-    const stripped = at.s.terms.map((t, i) => stripFactor(t, f, i === at.index));
+    const m = carried(state, id);
+    if (!m) return [];
+    const { f, at, taken } = m;
+    const stripped = at.s.terms.map((t, i) => stripFactor(t, f, i === at.index ? taken : undefined));
     if (stripped.some((t) => t === null)) return [];
-    // Like terms (a√12 + a√12) are added, not factored: a part of one isn't a
-    // handle of its own then, or no press could pick up the whole term.
-    const like = at.s.terms.every((t) => restKey(splitCoef(t)) === restKey(splitCoef(at.s.terms[0])));
-    const part = f.id !== at.s.terms[at.index].id;
-    return [{ rule: "factor-out", state: replaceIn(state, at.sumLoc, prod([f, sum(stripped as Expr[], at.s.id)])), ...(like && part ? { secondary: true } : {}) }];
+    return [{ rule: "factor-out", state: replaceIn(state, at.sumLoc, prod([f, sum(stripped as Expr[], at.s.id)])) }];
   },
 };
 
@@ -143,15 +147,15 @@ export const factorShared: Rule = {
   name: "Share a factor",
   gesture: "Drop a factor onto another term that has it too — the two terms share it: x·x + 2x → x(x + 2).",
   apply(state, id) {
-    const c = dragCtx(state, id);
-    const at = c && termOf(state, id);
-    if (!c || !at || at.s.terms.length < 3) return []; // two terms: that's factoring out the whole thing
-    const f = c.node;
+    const m = carried(state, id);
+    if (!m || m.at.s.terms.length < 3) return []; // two terms: that's factoring out the whole thing
+    const { f, at, taken } = m;
     const terms = at.s.terms;
-    const mine = stripFactor(terms[at.index], f, true)!;
+    const mine = stripFactor(terms[at.index], f, taken);
+    if (!mine) return [];
     return terms.flatMap((t, j): Candidate[] => {
       if (j === at.index) return [];
-      const theirs = stripFactor(t, f, false);
+      const theirs = stripFactor(t, f);
       if (!theirs) return [];
       if (restKey(splitCoef(terms[at.index])) === restKey(splitCoef(t))) return []; // like terms
       const [lo, hi] = j < at.index ? [j, at.index] : [at.index, j];

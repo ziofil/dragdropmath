@@ -54,7 +54,9 @@ export type RuleId =
   | "evaluate-log"
   | "exp-across"
   | "log-across"
-  | "power-of-base";
+  | "power-of-base"
+  | "split-exponent"
+  | "move-exponent-term";
 
 /**
  * A state the dragged node can lead to.
@@ -67,17 +69,14 @@ export type RuleId =
  *   the dragged node disappears, everything inside it must disappear too, or
  *   its contents would be drawn twice (Dragology throws "duplicate id").
  */
-/**
- * `secondary`: offered when the node is already being dragged for another
- * reason, but never on its own a reason to make the node grabbable.
- */
 export type Candidate = {
   rule: RuleId;
   state: MathState;
   targetId?: string;
-  secondary?: boolean;
   /** A piece that stays where it is on screen while the move is previewed (the rest is laid out around it). */
   stays?: string;
+  /** How this one is carried, when it differs from its rule's (see Feel). */
+  carry?: Feel["carry"];
 };
 
 export type Rule = {

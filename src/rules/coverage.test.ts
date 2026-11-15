@@ -13,8 +13,7 @@ import { parseState } from "../expr/parse";
 import { print, printState } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
 import { relOf } from "../expr/build";
-import { CHAPTERS, rulesFor } from "../game/puzzles";
-import { allPuzzles, EXERCISES, exerciseLabel } from "../game/testing/exercises";
+import { corpus } from "../game/testing/corpus";
 import { allNodes, children } from "../expr/tree";
 import { ALL_RULES, candidatesFor, movesFor, signId, type RuleId } from ".";
 import { termsOf, viewTerm } from "./view";
@@ -50,7 +49,7 @@ const SHAPES = [
 const isEquation = (s: MathState) => s.sides.length >= 2 && s.sides.length % 2 === 0;
 const STATES: [string, MathState][] = [
   ...SHAPES.map((src): [string, MathState] => [src, parseState(src)]),
-  ...allPuzzles().map((p): [string, MathState] => [`${p.label}: ${p.puzzle.start}`, parseState(p.puzzle.start)]),
+  ...corpus().map((c): [string, MathState] => [`${c.id}: ${c.start}`, parseState(c.start)]),
 ].filter(([, s]) => isEquation(s));
 
 const value = (e: Expr) => evaluate(e, {});
@@ -93,26 +92,9 @@ describe("every hand step across = is a move", () => {
  * at least one of its symbols — under every chapter's moves, so unlocking a
  * move never makes a term impossible to carry.
  */
-/**
- * Known exceptions: a product whose every factor is a handle of its own (the x
- * and the bracket of x(x + 2) can each be carried, to distribute or factor) has
- * no symbol left that picks up the whole term. Open design question.
- */
-const KNOWN_STUCK: Record<string, string[]> = {
-  "x(x + 2) + 3(x + 2)": ["x*(x + 2)"],
-  "(x + 1)(x - 1) + 1": ["(x + 1)*(x - 1)"],
-  "(a + 1)(a + 2) - a^2": ["(a + 1)*(a + 2)"],
-  "(a + 3)(a - 1) - 2a": ["(a + 3)*(a - 1)"],
-  "x(x + 1) - 2(x + 1)": ["x*(x + 1)"],
-  "ab + 2a + 3b + 6": ["a*b"],
-};
-
 describe("every term can be picked up whole", () => {
-  const chapters = CHAPTERS.map((ch, ci) => ({ ch, ci, rules: rulesFor(ci) }));
-  const cases = chapters.flatMap(({ ch, ci, rules }) =>
-    (EXERCISES[ch.id] ?? []).map((p, i): [string, MathState, RuleId[]] => [`${exerciseLabel(ci, i)}: ${p.start}`, parseState(p.start), rules]),
-  );
-  it.each(cases)("%s", (label, s, rules) => {
+  const cases = corpus().map((c): [string, MathState, RuleId[]] => [`${c.id}: ${c.start}`, parseState(c.start), c.rules]);
+  it.each(cases)("%s", (_, s, rules) => {
     const moves = movesFor(s, rules);
     /**
      * Spots a press can land on inside `e`, each with the pieces it passes
@@ -139,10 +121,10 @@ describe("every term can be picked up whole", () => {
         if (sm.kind === "sum")
           for (const t of sm.terms) {
             if (!moves.grabbable(t.id)) continue;
-            // From some spot, nothing between it and the term takes the press first.
-            const free = spots(t, [], sm).some((path) => path.slice(1).every((id) => !moves.grabbable(id)));
+            // From some spot, nothing between it and the term takes a quick press first (a held one may).
+            const free = spots(t, [], sm).some((path) => path.slice(1).every((id) => !moves.pressable(id)));
             if (!free) stuck.push(print(t));
           }
-    expect(stuck, printState(s)).toEqual(KNOWN_STUCK[label.replace(/^[\d.]+: /, "")] ?? []);
+    expect(stuck, printState(s)).toEqual([]);
   });
 });

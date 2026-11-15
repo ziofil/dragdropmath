@@ -17,8 +17,10 @@
  * just as much a term as one in a long sum.
  */
 import type { Expr, Frac, MathState } from "../expr/types";
-import { frac, neg, num, prod, sum } from "../expr/build";
+import { cloneFresh, frac, neg, num, pow, prod, sum } from "../expr/build";
+import { key } from "../expr/key";
 import { locate, nodeAt, parentLoc, type Loc } from "../expr/tree";
+import { without } from "../util/array";
 import { signOwner } from "./types";
 
 /** The terms of a side, or of anything else read as a sum: a non-sum is one term. */
@@ -179,4 +181,77 @@ export function rebuildTerm(t: TermView, top: Expr[], bottom: Expr[]): Expr {
 /** A side or bracket from its terms, keeping the sum's id. */
 export function fromTerms(terms: Expr[], was: Expr): Expr {
   return terms.length === 1 ? terms[0] : sum(terms, was.kind === "sum" ? was.id : undefined);
+}
+
+/** A factor as a whole power of its base: x³ → (x, 3); anything else is its own base, to the power 1. */
+export function wholePower(e: Expr): { base: Expr; n: number } {
+  return e.kind === "pow" && !e.radical && e.exp.kind === "num" && Number.isInteger(e.exp.value) && e.exp.value >= 1 ? { base: e.base, n: e.exp.value } : { base: e, n: 1 };
+}
+
+/** Which copy of a factor comes out: the carried factor itself, or one copy of the base carried out of its power (the x of x³). */
+export type Taken = { id: string } | { powerOf: string };
+
+/**
+ * The one way a factor comes out of a list of factors (a term's top or
+ * bottom), for every move that takes one out — factoring, sharing, cancelling:
+ * the carried factor itself (`taken`), or else a factor equal to `f`, or one
+ * high enough a power of its base (x out of x³ leaves x², x² out of x³ leaves
+ * x). Null if there's none.
+ */
+export function divideOut(fs: Expr[], f: Expr, taken?: Taken): Expr[] | null {
+  const lower = (i: number, by: number, fresh: boolean): Expr[] => {
+    const g = fs[i];
+    const p = wholePower(g);
+    const base = fresh ? cloneFresh(p.base) : p.base;
+    const left = p.n - by;
+    const rest = left === 1 ? base : pow(base, num(left, g.kind === "pow" ? g.exp.id : undefined), g.id);
+    return fs.map((x, k) => (k === i ? rest : x));
+  };
+  if (taken && "id" in taken) {
+    const i = fs.findIndex((x) => x.id === taken.id);
+    return i < 0 ? null : without(fs, i);
+  }
+  if (taken) {
+    // The dragged base goes out in front with its own id; the power keeps a fresh copy.
+    const i = fs.findIndex((x) => x.id === taken.powerOf);
+    return i < 0 || wholePower(fs[i]).n < 2 ? null : lower(i, 1, true);
+  }
+  const same = fs.findIndex((x) => key(x) === key(f));
+  if (same >= 0) return without(fs, same);
+  const { base, n } = wholePower(f);
+  const higher = fs.findIndex((x) => key(wholePower(x).base) === key(base) && wholePower(x).n > n);
+  return higher < 0 ? null : lower(higher, n, false);
+}
+
+/**
+ * A piece of a fraction, read with whatever multiplies the fraction as one
+ * top over one bottom (3·(x/3) is 3x over 3; 6x/(3y) is 6·x over 3·y): where
+ * that whole is, how it reads, and which side the piece is on. The piece is a
+ * whole top or bottom, a factor of one, or a factor multiplying the fraction.
+ */
+export function fractionOf(state: MathState, id: string): { loc: Loc; view: TermView; onTop: boolean } | null {
+  const loc = locate(state, id);
+  const up = loc && parentLoc(loc);
+  if (!loc || !up) return null;
+  const P = nodeAt(state, up);
+  let fracLoc: Loc | null = null;
+  let onTop = true;
+  if (P.kind === "frac") {
+    fracLoc = up;
+    onTop = loc.path.at(-1) === 0;
+  } else if (P.kind === "prod") {
+    const upUp = parentLoc(up);
+    if (upUp && nodeAt(state, upUp).kind === "frac") {
+      fracLoc = upUp;
+      onTop = up.path.at(-1) === 0;
+    } else if (fracFactor(P) && fracFactor(P) !== nodeAt(state, loc)) {
+      return { loc: up, view: viewTerm(P), onTop: true };
+    }
+  }
+  if (!fracLoc) return null;
+  const F = nodeAt(state, fracLoc);
+  const outer = parentLoc(fracLoc);
+  const O = outer && nodeAt(state, outer);
+  if (O?.kind === "prod" && fracFactor(O) === F) return { loc: outer!, view: viewTerm(O), onTop };
+  return { loc: fracLoc, view: viewTerm(F), onTop };
 }

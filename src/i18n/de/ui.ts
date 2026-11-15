@@ -35,7 +35,6 @@ export const de: Translation = {
   notMasteredYet: (titles: string) => ` Noch nicht gemeistert: ${titles}. Du kannst trotzdem anfangen.`,
   startLesson: "Zur Lektion →",
   backToLesson: "Zurück zur Lektion →",
-  leadsOnTo: (titles: string) => `Darauf baut auf: ${titles}.`,
   badges: "Abzeichen",
   noBadgesYet: "Mach in einem Kapitel den Test, um sein Abzeichen zu bekommen.",
   badgesEarned: (n: number, total: number) => `${n} von ${total}`,
@@ -45,18 +44,16 @@ export const de: Translation = {
 
   // Chapter page
   backToPath: "← Lernpfad",
-  practiceNote: "Jede Aufgabe ist neu, extra für dich erstellt. Fang mit den leichten an und geh eine Stufe höher, wenn du so weit bist.",
   leadsOnToStart: "Darauf baut auf: ",
   leadsOnToEnd: ". Du kannst jederzeit dorthin wechseln.",
-  watchOut: "Vorsicht!",
   level: { easy: "Leicht", medium: "Mittel", hard: "Schwer" },
   anotherOne: "Noch eine →",
   practice: "Üben",
-  testSkills: "Teste dein Können",
-  testNote:
+  predict: "Teste dein Können",
+  predictNote:
     "Rechne die Antwort im Kopf aus und wähl sie dann aus. Richtige Antworten bringen dir das Abzeichen des Kapitels: 10 bei „Leicht“ für Bronze, bei „Mittel“ für Silber, bei „Schwer“ für Gold.",
   solvedN: (n: number) => `${n} gelöst`,
-  testRight: "Richtig! Das zählt für das Abzeichen.",
+  predictRight: "Richtig! Das zählt für das Abzeichen.",
   drills: {
     commute: { name: "Reihenfolge tauschen", how: "Zieh einen Term an seinem Nachbarn vorbei. Bei + und × ist die Reihenfolge egal." },
     combine: { name: "Zahlen addieren", how: "Zieh eine Zahl auf die andere, um sie zu addieren." },
@@ -123,9 +120,7 @@ export const de: Translation = {
     `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "richtige Antwort" : "richtige Antworten"} bei „${["Leicht", "Mittel", "Schwer"][tier]}“ bis ${TIER[tier + 1]}.`,
 
   // Guided example
-  notThisStep: "Das geht zwar, ist aber nicht der Schritt, um den es hier geht. Er wird zurückgenommen.",
   done: "Fertig.",
-  keepGoing: "Du kannst weitermachen: Jetzt ist jeder Schritt erlaubt.",
   startOver: "Von vorn",
 
   // Exercise
@@ -137,10 +132,10 @@ export const de: Translation = {
   nextTitle: (label: string) => `Nächste: Aufgabe ${label}`,
   nextLabel: (label: string) => `Nächste Aufgabe (${label})`,
   exerciseN: (label: string) => `Aufgabe ${label}`,
-  guessPrompt: "Erst überlegen: Was kommt heraus?",
+  predictPrompt: "Erst überlegen: Was kommt heraus?",
   reveal: "Auflösen",
-  guessedBeforeRight: "Diese hast du auf Anhieb richtig vorhergesagt.",
-  guessedBeforeWrong: (picked: boolean) => `Deine erste Antwort war ${picked ? "die rote" : "falsch"}. Die grüne ist richtig.`,
+  predictedBeforeRight: "Diese hast du auf Anhieb richtig vorhergesagt.",
+  predictedBeforeWrong: (picked: boolean) => `Deine erste Antwort war ${picked ? "die rote" : "falsch"}. Die grüne ist richtig.`,
   rightFirstTime: "Auf Anhieb richtig. Jetzt rechne es aus.",
   notQuite: "Nicht ganz. Die grüne ist richtig. Rechne es aus, dann siehst du, wo dein Fehler lag.",
   solvedBefore: "✓ Diese Aufgabe hast du schon gelöst. Du kannst sie noch einmal lösen.",
@@ -148,10 +143,8 @@ export const de: Translation = {
   pickFirst: "Wähl oben eine Antwort, dann rechne hier.",
   hint: "Tipp",
   undo: "Rückgängig",
-  reset: "Zurücksetzen",
   solvedBang: "Gelöst!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${TIER[tier]}abzeichen für ${chapter}.`,
-  theExercise: "die Aufgabe",
   moveCrashed: "Bei diesem Schritt ist etwas schiefgegangen.",
   moveCrashedDetails: "Details stehen in der Browser-Konsole.",
   tryAgain: "Nochmal versuchen",

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseState } from "../expr/parse";
 import { CHAPTERS } from "./puzzles";
-import { allPuzzles } from "./testing/exercises";
 import { matchesGoal } from "./solver";
 import { drillsOf } from "./generate/moves";
 import { en } from "../i18n";
@@ -28,17 +27,6 @@ describe("goals are matched as shown", () => {
     expect(matchesGoal(parseState("x < 3"), parseState("x ≤ 3"))).toBe(false);
     expect(matchesGoal(parseState("x = 3"), parseState("x < 3"))).toBe(false);
   });
-});
-
-describe("exercises", () => {
-  const refs = allPuzzles();
-
-  it("have unique ids", () => {
-    const ids = refs.map((r) => r.puzzle.id);
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  // Solvability is checked in solvable.*.test.ts (split, to run in parallel).
 });
 
 describe("lessons", () => {

@@ -17,7 +17,7 @@
  */
 type Base = { id: string; from?: string };
 
-/** `explicit`: a ·1 a learner should see and simplify themselves (left behind by distributing). */
+/** `explicit`: a ·1 normalizing keeps (one written in an exercise, or one a move shows landing before tidying; see rules/shapes.ts visibleOne). */
 export type Num = Base & { kind: "num"; value: number; explicit?: boolean };
 export type Var = Base & { kind: "var"; name: string };
 export type Neg = Base & { kind: "neg"; arg: Expr };

@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { allPuzzles } from "./testing/exercises";
+import { corpus } from "./testing/corpus";
 import { parseState } from "../expr/parse";
 import { autoDecoys } from "./autoDecoys";
 import { follows, isWrong, shapeMismatch } from "./answers";
 
 describe("automatic wrong answers", () => {
-  const refs = allPuzzles();
-  const made = refs.map((r) => ({ id: r.puzzle.id, start: parseState(r.puzzle.start), goal: parseState(r.puzzle.goal), decoys: autoDecoys(parseState(r.puzzle.start), parseState(r.puzzle.goal)) }));
+  // The exercises learners predict (the test's), not the one-move boards.
+  const made = corpus()
+    .filter((c) => c.kind === "practice")
+    .map((c) => ({ id: c.id, start: parseState(c.start), goal: parseState(c.goal), decoys: autoDecoys(parseState(c.start), parseState(c.goal)) }));
 
   it("are wrong, look like answers, and differ from each other", () => {
     for (const m of made) {
@@ -20,7 +22,7 @@ describe("automatic wrong answers", () => {
     }
   });
 
-  it("can be made for nearly every built-in exercise", () => {
+  it("can be made for every exercise", () => {
     const short = made.filter((m) => m.decoys.length < 2).map((m) => m.id);
     expect(short.length / made.length, `without two: ${short.join(", ")}`).toBeLessThan(0.05);
   });

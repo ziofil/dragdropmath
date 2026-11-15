@@ -1,33 +1,66 @@
 /**
- * Checking a candidate with the real move engine: from the start, by each
- * milestone, to the goal, a few moves at a time (any order of terms at a
- * milestone; the goal exactly as shown). The way found is a real solution,
- * drag by drag, with only the moves the chapter allows — and its length is
- * how many moves the exercise takes.
+ * The one check that an exercise can be done by hand: from the start, by each
+ * milestone, to a finish the app accepts (task.ts), a few moves at a time
+ * (any order of terms at a milestone), with only the chapter's moves. The way
+ * found is a real solution, drag by drag, every state as the moves and
+ * tidying make it. Exercises built backwards (unmove.ts) say which moves
+ * each stretch takes: searched with those alone first, a check takes
+ * milliseconds.
  */
 import { parseState } from "../../expr/parse";
 import { printState } from "../../expr/key";
 import type { MathState } from "../../expr/types";
 import type { RuleId } from "../../rules";
-import { solution } from "../solver";
-import type { Draft } from "./write";
+import { matchesGoal, search } from "../solver";
+import { isDone, taskOf } from "../task";
 
-/** Moves allowed between two milestones. */
+export type Checkable = { start: string; goal: string; via: readonly string[]; positive?: boolean; legs?: readonly (readonly RuleId[])[] };
+
+/** The way through, every state from start to finish; or the stretch it couldn't do. */
+export type Checked = { path: MathState[] } | { stuck: string };
+
+/** Moves allowed between two milestones; states looked at per stretch. */
 const LEG = 5;
+const STATES = 40_000;
+const QUICK_STATES = 600;
 
-export type Checked = { moves: number; way: string[] } | { moves: null; stuck: string };
-
-/** `positive`: the chapter's letters stand for positive numbers (see lettersPositive). */
-export function verify(d: Draft, rules: readonly RuleId[], positive = false): Checked {
-  let at: MathState = { ...parseState(d.start), ...(positive ? { letters: "positive" as const } : {}) };
-  const way = [printState(at)];
-  const targets = [...d.via, d.goal];
-  for (let i = 0; i < targets.length; i++) {
+/**
+ * `quick`: only the moves each stretch says it takes, a few hundred states a
+ * stretch (milliseconds, mostly); a draft that doesn't say isn't checked.
+ */
+export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, states = STATES, quick = false } = {}): Checked {
+  if (quick && !d.legs) return { path: [] };
+  const start = parseState(d.start);
+  const goal = parseState(d.goal);
+  const path: MathState[] = [d.positive ? { ...start, letters: "positive" } : start];
+  const targets = [...d.via.map(parseState), goal];
+  // Terms in any order count, except at the end of a "make it look like this" (task.ts).
+  const exact = taskOf(goal).kind === "match";
+  const allowed = new Set(rules);
+  const reorder = rules.filter((x) => REORDER.includes(x));
+  for (const [i, target] of targets.entries()) {
     const last = i === targets.length - 1;
-    const leg = solution(at, parseState(targets[i]), rules, { ordered: last ? "exact" : false, maxDepth: LEG, maxStates: 40_000 });
-    if (!leg) return { moves: null, stuck: `${printState(at)} ⇢ ${targets[i]}` };
-    way.push(...leg.slice(1).map(printState));
-    at = leg[leg.length - 1];
+    const at = path[path.length - 1];
+    // The moves the stretch takes, when the draft knows them (a few, so quick), else (or failing that) all the chapter's.
+    const own = d.legs?.[i]?.filter((x) => allowed.has(x));
+    const find = (done: (s: MathState) => boolean, from: MathState, opts: { ordered: false | "exact"; maxDepth: number; maxStates: number }) =>
+      quick ? search(from, done, own ?? [], { ...opts, maxStates: QUICK_STATES }) : (own && search(from, done, own, opts)) || search(from, done, rules, opts);
+    let way: MathState[] | null;
+    if (last && exact) {
+      // A goal to match exactly: its terms in any order first (the work), then put in its order (a few drags).
+      const loose = find((s) => matchesGoal(s, goal, false), at, { ordered: false, maxDepth: leg, maxStates: states });
+      const tight = loose && search(loose[loose.length - 1], (s) => isDone(goal, s), reorder, { ordered: "exact", maxDepth: leg, maxStates: states });
+      way = loose && tight ? [...loose, ...tight.slice(1)] : find((s) => isDone(goal, s), at, { ordered: "exact", maxDepth: leg, maxStates: states });
+    } else way = find(last ? (s) => isDone(goal, s) : (s) => matchesGoal(s, target, false), at, { ordered: false, maxDepth: leg, maxStates: states });
+    if (!way) return { stuck: `${printState(at)} ⇢ ${printState(target)}` };
+    path.push(...way.slice(1));
   }
-  return { moves: way.length - 1, way };
+  return { path };
 }
+
+/** Moves that only put terms in another order (or a number in front). */
+const REORDER: RuleId[] = ["commute", "numbers-first"];
+
+/** Its stuck stretch, for a test's message ("" when it went through). */
+export const stuckOf = (c: Checked) => ("stuck" in c ? c.stuck : "");
+

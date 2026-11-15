@@ -1,7 +1,10 @@
 /**
  * More practice: a fresh exercise for a chapter, at a level, made up on the
  * spot from a seed (so its link always gives the same one). No search runs
- * here: every shape is checked with the move engine in practice.test.ts.
+ * here (a few milliseconds an exercise): exercises built backwards
+ * (unmove.ts) are right by construction, and every shape is checked with
+ * the move engine in the tests (testing/practiceChecks.ts), quickly with the
+ * moves each stretch says it takes, and fully.
  */
 import { LEVELS, rng, type Draft, type Level, type Rng, type Shape } from "./write";
 import { SHAPES } from "./chapters";
@@ -10,6 +13,9 @@ import { parseState } from "../../expr/parse";
 import { autoDecoys } from "../autoDecoys";
 
 export { LEVELS, type Level };
+
+/** An exercise as practice serves it: whether its letters are positive is always said. */
+export type Exercise = Draft & { positive: boolean };
 
 /** The chapters with practice, and the shapes at each level. */
 export const PRACTICE = SHAPES;
@@ -23,27 +29,38 @@ const NEAR_BEST = 10;
 
 /**
  * The exercise for this seed: a shape of the level, the nicest of a few
- * tries. A shape that makes nothing usable from this seed hands over to the
- * level's next one, so a level never comes up empty.
+ * tries. Which shape is drawn by weight from the seed and the shapes' ids
+ * alone (each shape's draw is its own), and each shape's tries are seeded
+ * by the seed and its id: adding or removing a shape leaves the other
+ * shapes' links as they were. A shape that makes nothing usable from this
+ * seed hands over to the next best drawn, so a level never comes up empty.
  */
-export function practiceExercise(chapterId: string, level: Level, seed: number): Draft | null {
-  const shapes = PRACTICE[chapterId]?.[level];
-  if (!shapes?.length) return null;
-  const r = rng(seed);
-  const first = r.int(0, shapes.length - 1);
-  for (let k = 0; k < shapes.length; k++) {
-    const d = nicest(shapes[(first + k) % shapes.length], r);
-    if (d) return d;
+export const practiceExercise = (chapterId: string, level: Level, seed: number): Exercise | null => exerciseOf(PRACTICE[chapterId]?.[level] ?? [], seed);
+
+/** The exercise for this seed among these shapes (see practiceExercise). */
+export function exerciseOf(shapes: readonly Shape[], seed: number): Exercise | null {
+  // Weighted rendezvous: each shape draws u in (0, 1) from (seed, id); the largest u^(1/weight) wins.
+  const drawn = shapes.map((s) => ({ s, at: Math.log(rng(mix(seed, s.id)).next() || Number.MIN_VALUE) / (s.weight ?? 1) })).sort((a, b) => b.at - a.at);
+  for (const { s } of drawn) {
+    const d = nicest(s, rng(mix(seed, s.id) ^ 0x5bd1e995));
+    if (d) return { ...d, positive: d.positive ?? false };
   }
   return null;
 }
 
-function nicest(s: Shape, r: Rng): Draft | null {
+/** The seed mixed with a shape's id (FNV-1a), so each shape's draw is its own. */
+function mix(seed: number, id: string): number {
+  let h = (2166136261 ^ seed) >>> 0;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619) >>> 0;
+  return h;
+}
+
+export function nicest(s: Shape, r: Rng): Draft | null {
   const found: { d: Draft; score: number }[] = [];
   for (let tries = 0; found.length < POOL && tries < 500; tries++) {
     const d = s.make(r);
     if (!d) continue;
-    const v = judge(d);
+    const v = s.curated ? { ok: true, score: 0 } : judge(d);
     if (!v.ok || !predictable(d)) continue;
     found.push({ d, score: v.score });
   }

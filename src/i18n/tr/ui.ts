@@ -37,7 +37,6 @@ export const tr: Translation = {
   notMasteredYet: (titles: string) => ` Henüz tamamlamadığın: ${titles}. Yine de başlayabilirsin.`,
   startLesson: "Konuya başla →",
   backToLesson: "Konuya dön →",
-  leadsOnTo: (titles: string) => `Sonra gelenler: ${titles}.`,
   badges: "Rozetler",
   noBadgesYet: "Bir bölümün rozetini kazanmak için o bölümün testini çöz.",
   badgesEarned: (n: number, total: number) => `${n}/${total}`,
@@ -48,18 +47,16 @@ export const tr: Translation = {
 
   // Chapter page
   backToPath: "← Öğrenme yolu",
-  practiceNote: "Her alıştırma yeni, yalnızca senin için hazırlanıyor. Kolaylarla başla, kendini hazır hissettiğinde bir üst seviyeye geç.",
   leadsOnToStart: "Sonra gelenler: ",
   leadsOnToEnd: ". İstediğin zaman geçebilirsin.",
-  watchOut: "Dikkat!",
   level: { easy: "Kolay", medium: "Orta", hard: "Zor" },
   anotherOne: "Bir tane daha →",
   practice: "Alıştırma yap",
-  testSkills: "Kendini sına",
-  testNote:
+  predict: "Kendini sına",
+  predictNote:
     "Cevabı aklından bul, sonra seç. Doğru cevaplar bölümün rozetini kazandırır: Kolay seviyede 10 doğru bronz, Orta seviyede gümüş, Zor seviyede altın rozet getirir.",
   solvedN: (n: number) => `${n} çözüldü`,
-  testRight: "Doğru! Rozet için sayıldı.",
+  predictRight: "Doğru! Rozet için sayıldı.",
   drills: {
     commute: { name: "Sırayı değiştir", how: "Bir terimi yanındakinin öbür yanına sürükle. + ve × işlemlerinde sıra fark etmez." },
     combine: { name: "Sayıları topla", how: "Toplamak için bir sayıyı diğerinin üstüne bırak." },
@@ -126,9 +123,7 @@ export const tr: Translation = {
     `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${["Kolay", "Orta", "Zor"][tier]} seviyede ${more} doğru cevap daha.`,
 
   // Guided example
-  notThisStep: "Bu hamle geçerli, ama bu adımda yapılacak olan bu değil. Geri alıyorum.",
   done: "Tamam.",
-  keepGoing: "Devam edebilirsin: artık her hamle serbest.",
   startOver: "Baştan başla",
 
   // Exercise
@@ -140,10 +135,10 @@ export const tr: Translation = {
   nextTitle: (label: string) => `Sonraki: alıştırma ${label}`,
   nextLabel: (label: string) => `Sonraki alıştırma (${label})`,
   exerciseN: (label: string) => `Alıştırma ${label}`,
-  guessPrompt: "Önce düşün: sonuç ne olur?",
+  predictPrompt: "Önce düşün: sonuç ne olur?",
   reveal: "Göster",
-  guessedBeforeRight: "Bunu ilk seferde doğru bulmuştun.",
-  guessedBeforeWrong: (picked: boolean) => `İlk cevabın ${picked ? "kırmızı olandı" : "yanlıştı"}. Doğrusu yeşil olan.`,
+  predictedBeforeRight: "Bunu ilk seferde doğru bulmuştun.",
+  predictedBeforeWrong: (picked: boolean) => `İlk cevabın ${picked ? "kırmızı olandı" : "yanlıştı"}. Doğrusu yeşil olan.`,
   rightFirstTime: "İlk seferde doğru. Şimdi çöz.",
   notQuite: "Olmadı. Doğrusu yeşil olan. Nerede yanıldığını görmek için çöz.",
   solvedBefore: "✓ Bunu daha önce çözmüştün. İstersen yeniden çözebilirsin.",
@@ -151,10 +146,8 @@ export const tr: Translation = {
   pickFirst: "Yukarıdan bir cevap seç, sonra burada çöz.",
   hint: "İpucu",
   undo: "Geri al",
-  reset: "Sıfırla",
   solvedBang: "Çözdün!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${["", "Bronz", "Gümüş", "Altın"][tier]} rozet: ${chapter}.`,
-  theExercise: "alıştırma",
   moveCrashed: "Bu hamlede bir şeyler ters gitti.",
   moveCrashedDetails: "Ayrıntılar tarayıcı konsolunda.",
   tryAgain: "Yeniden dene",

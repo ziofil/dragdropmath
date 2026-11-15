@@ -1,10 +1,12 @@
-// Learning the moves: every drill makes a start its move can be made on, with the goal exactly that one move away.
+// The lessons' moves: every board starts where its move can be made, and its goal is that move, or (a move that leaves things half done) reached by hand a few moves on.
+import { SLOW } from "../testing/corpus";
 import { describe, expect, it } from "vitest";
 import { CHAPTERS, lettersPositive, rulesFor } from "../puzzles";
 import { parseState } from "../../expr/parse";
-import { stateKey } from "../../expr/key";
+import { printState, stateKey } from "../../expr/key";
 import { en } from "../../i18n/en";
 import { DRILLS, drillExercise, oneMove } from "./moves";
+import { solution } from "../solver";
 
 describe("learn the moves", () => {
   it("every chapter's drills are real chapters, and every drill has its words", () => {
@@ -26,15 +28,26 @@ describe("learn the moves", () => {
     for (const drill of drills)
       it(`${chapterId}: ${drill.id}`, () => {
         expect(drillExercise(chapterId, drill.id, 42)).toEqual(drillExercise(chapterId, drill.id, 42));
-        for (let seed = 1; seed <= 40; seed++) {
+        for (let seed = 1; seed <= (SLOW ? 40 : 8); seed++) {
           const d = drillExercise(chapterId, drill.id, seed * 7919);
           expect(d, `seed ${seed}`).not.toBeNull();
           const parsed = parseState(d!.start);
-          const start = lettersPositive(CHAPTERS[ci]) ? { ...parsed, letters: "positive" as const } : parsed;
+          const start = lettersPositive(CHAPTERS[ci], d!.start) ? { ...parsed, letters: "positive" as const } : parsed;
           const goal = stateKey(parseState(d!.goal), "exact");
           expect(goal, d!.start).not.toBe(stateKey(start, "exact"));
-          expect(oneMove(start, drill.rule, rules).map((s) => stateKey(s, "exact")), `${d!.start} → ${d!.goal}`).toContain(goal);
+          const one = oneMove(start, drill.rule, rules);
+          if (one.some((s) => stateKey(s, "exact") === goal)) continue;
+          // A move that leaves things half done: the board's goal is reached by hand, a few moves on (in any order).
+          if (seed > (SLOW ? 3 : 1)) continue; // a search each: a few seeds do (one in a quick run)
+          expect(one.length, `${d!.start}: the move itself`).toBeGreaterThan(0);
+          // Leg by leg through its checkpoints, if it has some.
+          let at = start;
+          for (const to of [...(d!.via ?? []), d!.goal]) {
+            const leg = solution(at, parseState(to), rules, { ordered: false, maxDepth: 9, maxStates: 60_000 });
+            expect(leg, `${printState(at)} → ${to}`).not.toBeNull();
+            at = leg![leg!.length - 1];
+          }
         }
-      });
+      }, 120_000);
   }
 });

@@ -39,7 +39,6 @@ export const fr: Translation = {
   notMasteredYet: (titles: string) => ` Tu ne maîtrises pas encore : ${titles}. Tu peux commencer quand même.`,
   startLesson: "Commencer le cours →",
   backToLesson: "Retour au cours →",
-  leadsOnTo: (titles: string) => `Ensuite : ${titles}.`,
   badges: "Badges",
   noBadgesYet: "Fais le test d'un chapitre pour gagner son badge.",
   badgesEarned: (n: number, total: number) => `${n} sur ${total}`,
@@ -49,17 +48,15 @@ export const fr: Translation = {
 
   // Chapter page
   backToPath: "← Parcours",
-  practiceNote: "Chaque exercice est nouveau, créé rien que pour toi. Commence par les faciles et passe au niveau suivant quand tu le sens.",
   leadsOnToStart: "Ensuite : ",
   leadsOnToEnd: ". Tu peux y aller quand tu veux.",
-  watchOut: "Attention !",
   level: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
   anotherOne: "Un autre →",
   practice: "Entraîne-toi",
-  testSkills: "Teste-toi",
-  testNote: "Trouve la réponse de tête, puis choisis-la. Les bonnes réponses font gagner le badge du chapitre : 10 au niveau Facile pour le bronze, au niveau Moyen pour l'argent, au niveau Difficile pour l'or.",
+  predict: "Teste-toi",
+  predictNote: "Trouve la réponse de tête, puis choisis-la. Les bonnes réponses font gagner le badge du chapitre : 10 au niveau Facile pour le bronze, au niveau Moyen pour l'argent, au niveau Difficile pour l'or.",
   solvedN: (n: number) => `${n} résolu${s(n)}`,
-  testRight: "Bonne réponse ! Elle compte pour le badge.",
+  predictRight: "Bonne réponse ! Elle compte pour le badge.",
   drills: {
     commute: { name: "Changer l'ordre", how: "Fais glisser un terme au-delà de son voisin. Avec + et ×, l'ordre ne compte pas." },
     combine: { name: "Additionner des nombres", how: "Dépose un nombre sur l'autre pour les additionner." },
@@ -126,9 +123,7 @@ export const fr: Translation = {
     `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} bonne${s(more)} réponse${s(more)} au niveau ${["Facile", "Moyen", "Difficile"][tier]} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
 
   // Guided example
-  notThisStep: "Ce mouvement est correct, mais ce n'est pas celui de cette étape. On le remet en place.",
   done: "Terminé.",
-  keepGoing: "Tu peux continuer : maintenant, tous les mouvements sont permis.",
   startOver: "Recommencer",
 
   // Exercise
@@ -140,10 +135,10 @@ export const fr: Translation = {
   nextTitle: (label: string) => `Suivant : exercice ${label}`,
   nextLabel: (label: string) => `Exercice suivant (${label})`,
   exerciseN: (label: string) => `Exercice ${label}`,
-  guessPrompt: "Réfléchis d'abord : qu'est-ce que ça donne ?",
+  predictPrompt: "Réfléchis d'abord : qu'est-ce que ça donne ?",
   reveal: "Voir",
-  guessedBeforeRight: "Tu avais trouvé celui-ci du premier coup.",
-  guessedBeforeWrong: (picked: boolean) =>
+  predictedBeforeRight: "Tu avais trouvé celui-ci du premier coup.",
+  predictedBeforeWrong: (picked: boolean) =>
     `Ta première réponse ${picked ? "était la rouge" : "était fausse"}. La bonne, c'est la verte.`,
   rightFirstTime: "Trouvé du premier coup. Maintenant, résous-le.",
   notQuite: "Pas tout à fait. La bonne, c'est la verte. Résous l'exercice pour comprendre où ça coince.",
@@ -152,10 +147,8 @@ export const fr: Translation = {
   pickFirst: "Choisis une réponse ci-dessus, puis résous l'exercice ici.",
   hint: "Indice",
   undo: "Annuler",
-  reset: "Remettre à zéro",
   solvedBang: "Résolu !",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `Badge ${BADGE[tier]} : ${chapter}.`,
-  theExercise: "l'exercice",
   moveCrashed: "Ce mouvement a provoqué une erreur.",
   moveCrashedDetails: "Les détails sont dans la console du navigateur.",
   tryAgain: "Réessayer",

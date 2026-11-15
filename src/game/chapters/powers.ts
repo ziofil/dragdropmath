@@ -15,5 +15,7 @@ export const powers: Chapter = {
     "power-one",
     "pull-out-of-power",
     "power-of-product",
+    "split-exponent",
   ],
+  positive: true,
 };

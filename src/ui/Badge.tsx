@@ -7,7 +7,7 @@ export function Badge({ tier, n, size = 28, title }: { tier: Tier; n: number; si
   const r = size / 2;
   return (
     <svg
-      className={`badge badge-${tier ? TIER_NAMES[tier] : "none"}`}
+      className={`badge badge-${TIER_NAMES[tier]}`}
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}

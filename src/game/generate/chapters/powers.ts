@@ -1,15 +1,13 @@
 /** Powers: multiply, divide, a power of a power, negative exponents, numbers in front. Letters are positive. */
 import { NESTED } from "./nested";
-import { byIds, type Draft, type Level, type Rng, type Shape } from "../write";
+import { byIds, one, pw, type Draft, type Level, type Rng, type Shape } from "../write";
 
-/** x^e as written: "x" for e = 1, "x^-2" for a negative one. */
-const pw = (x: string, e: number) => (e === 1 ? x : `${x}^${e}`);
 /** c·x^e: "3x^5", "x^4", "-x". */
 const mono = (c: number, x: string, e: number) => `${c === 1 ? "" : c === -1 ? "-" : c}${pw(x, e)}`;
 /** " + 2x", " - x^3" after a term. */
 const then = (c: number, x: string, e: number) => (c < 0 ? ` - ${mono(-c, x, e)}` : ` + ${mono(c, x, e)}`);
 
-const letter = (r: Rng) => ["x", "x", "y", "a"][r.int(0, 3)];
+const letter = (r: Rng) => one(r, ["x", "x", "y", "a"]);
 
 /** A draft from another shape, written as this one (a shape that's sometimes made the other way). */
 const another = (id: string, r: Rng, as: string): Draft | null => {
@@ -27,7 +25,7 @@ const all: Shape[] = [
       const x = letter(r);
       const m = r.next() < 0.2 ? 1 : r.int(2, 6);
       const n = r.int(2, 6);
-      return { shape: "multiply", start: `${pw(x, m)}·${pw(x, n)}`, goal: pw(x, m + n), via: [], numbers: [m, n], along: [m + n] };
+      return { shape: "multiply", start: `${pw(x, m)}·${pw(x, n)}`, goal: pw(x, m + n), via: [] };
     },
   },
   {
@@ -39,7 +37,7 @@ const all: Shape[] = [
       const x = letter(r);
       const n = r.int(2, 5);
       const m = n + r.int(2, 5);
-      return { shape: "divide", start: `${pw(x, m)}/${pw(x, n)}`, goal: pw(x, m - n), via: [], numbers: [m, n], along: [m - n] };
+      return { shape: "divide", start: `${pw(x, m)}/${pw(x, n)}`, goal: pw(x, m - n), via: [] };
     },
   },
   {
@@ -51,7 +49,7 @@ const all: Shape[] = [
       const m = r.int(2, 5);
       const n = r.int(2, 4);
       if (m * n > 15) return null;
-      return { shape: "power-of-power", start: `(${pw(x, m)})^${n}`, goal: pw(x, m * n), via: [], numbers: [m, n], along: [m * n] };
+      return { shape: "power-of-power", start: `(${pw(x, m)})^${n}`, goal: pw(x, m * n), via: [] };
     },
   },
   {
@@ -64,7 +62,7 @@ const all: Shape[] = [
       const k = r.int(2, 5);
       const n = r.int(2, 3);
       if (k ** n > 30) return null;
-      return { shape: "number-inside", start: `(${k}${x})^${n}`, goal: mono(k ** n, x, n), via: [], numbers: [k, n], along: [k ** n] };
+      return { shape: "number-inside", start: `(${k}${x})^${n}`, goal: mono(k ** n, x, n), via: [] };
     },
   },
   {
@@ -76,13 +74,13 @@ const all: Shape[] = [
         // x^m/x^n with more on the bottom = x^-(n-m)
         const m = r.int(1, 5);
         const n = m + r.int(1, 4);
-        return { shape: "negative", start: `${pw(x, m)}/${pw(x, n)}`, goal: pw(x, m - n), via: [], numbers: [m, n], along: [m - n] };
+        return { shape: "negative", start: `${pw(x, m)}/${pw(x, n)}`, goal: pw(x, m - n), via: [] };
       }
       // x^-m·x^n = x^(n-m)
       const m = r.int(1, 5);
       const n = r.int(2, 7);
       if (n === m) return null;
-      return { shape: "negative", start: `${pw(x, -m)}·${pw(x, n)}`, goal: pw(x, n - m), via: [], numbers: [m, n], along: [n - m] };
+      return { shape: "negative", start: `${pw(x, -m)}·${pw(x, n)}`, goal: pw(x, n - m), via: [] };
     },
   },
   {
@@ -96,7 +94,7 @@ const all: Shape[] = [
       const m = r.int(1, 4);
       const n = r.int(2, 4);
       if (a * b > 20) return null;
-      return { shape: "numbers-in-front", start: `${mono(a, x, m)}·${mono(b, x, n)}`, goal: mono(a * b, x, m + n), via: [], numbers: [a, b, m, n], along: [a * b, m + n] };
+      return { shape: "numbers-in-front", start: `${mono(a, x, m)}·${mono(b, x, n)}`, goal: mono(a * b, x, m + n), via: [] };
     },
   },
   {
@@ -109,7 +107,7 @@ const all: Shape[] = [
       const m = r.int(2, 4);
       const n = r.int(2, 3);
       if (k ** n > 27 || m * n > 12) return null;
-      return { shape: "term-power", start: `(${mono(k, x, m)})^${n}`, goal: mono(k ** n, x, m * n), via: [], numbers: [k, m, n], along: [k ** n, m * n] };
+      return { shape: "term-power", start: `(${mono(k, x, m)})^${n}`, goal: mono(k ** n, x, m * n), via: [] };
     },
   },
   {
@@ -123,14 +121,14 @@ const all: Shape[] = [
         const n = r.int(2, 3);
         const p = r.int(1, 4);
         if (m * n + p > 15) return null;
-        return { shape: "three-powers", start: `(${pw(x, m)})^${n}·${pw(x, p)}`, goal: pw(x, m * n + p), via: [`${pw(x, m * n)}·${pw(x, p)}`], numbers: [m, n, p], along: [m * n, m * n + p] };
+        return { shape: "three-powers", start: `(${pw(x, m)})^${n}·${pw(x, p)}`, goal: pw(x, m * n + p), via: [`${pw(x, m * n)}·${pw(x, p)}`] };
       }
       // (x^a·x^b)/x^c = x^(a+b-c)
       const a = r.int(2, 5);
       const b = r.int(1, 4);
       const c = r.int(2, 6);
       if (a + b - c < 1 || c === a || c === b) return null;
-      return { shape: "three-powers", start: `(${pw(x, a)}·${pw(x, b)})/${pw(x, c)}`, goal: pw(x, a + b - c), via: [`${pw(x, a + b)}/${pw(x, c)}`], numbers: [a, b, c], along: [a + b, a + b - c] };
+      return { shape: "three-powers", start: `(${pw(x, a)}·${pw(x, b)})/${pw(x, c)}`, goal: pw(x, a + b - c), via: [`${pw(x, a + b)}/${pw(x, c)}`] };
     },
   },
   {
@@ -149,8 +147,6 @@ const all: Shape[] = [
           start: `(${pw(x, a)}·${pw(y, b)})/(${pw(x, c)}·${pw(y, d)})`,
           goal: `${pw(x, a - c)}·${pw(y, b - d)}`,
           via: [`(${pw(x, a - c)}·${pw(y, b)})/${pw(y, d)}`],
-          numbers: [a, b, c, d],
-          along: [a - c, b - d],
         };
       }
       // (x^m·y)^n/y^k = x^(mn)·y^(n-k)
@@ -163,8 +159,6 @@ const all: Shape[] = [
         start: `(${pw(x, m)}·${y})^${n}/${pw(y, k)}`,
         goal: `${pw(x, m * n)}·${pw(y, n - k)}`,
         via: [`(${pw(x, m * n)}·${pw(y, n)})/${pw(y, k)}`],
-        numbers: [m, n, k],
-        along: [m * n, n - k],
       };
     },
   },
@@ -187,8 +181,6 @@ const all: Shape[] = [
           ...(a > 1 ? [`${a}${pw("x", m)}*${pw("x", n)}${then(-a * k, "x", m)} + ${mono(a * k, "x", m)}`] : []),
           `${mono(a, "x", m + n)}${then(-a * k, "x", m)} + ${mono(a * k, "x", m)}`,
         ],
-        numbers: [a, m, n, k, a * k],
-        along: [m + n, a * k],
       };
     },
   },
@@ -207,8 +199,6 @@ const all: Shape[] = [
         start: `(${mono(k, "x", m)})^2 + ${pw("x", p)}(${pw("x", q)} - ${b})`,
         goal: `${mono(k * k + 1, "x", 2 * m)} - ${mono(b, "x", p)}`,
         via: [`${mono(k * k, "x", 2 * m)} + ${pw("x", p)}(${pw("x", q)} - ${b})`, `${mono(k * k, "x", 2 * m)} + ${pw("x", 2 * m)} - ${mono(b, "x", p)}`],
-        numbers: [k, m, p, q, b],
-        along: [k * k, k * k + 1, 2 * m],
       };
     },
   },
@@ -231,8 +221,6 @@ const all: Shape[] = [
         start: `(${mono(k, "x", a)})^${n}·(${mono(c, "x", b)})^${p}`,
         goal: mono(big, "x", e),
         via: [`${mono(k ** n, "x", a * n)}·(${mono(c, "x", b)})^${p}`, `${mono(k ** n, "x", a * n)}·${mono(c ** p, "x", b * p)}`],
-        numbers: [k, a, n, c, b, p],
-        along: [k ** n, c ** p, big, a * n, b * p, e],
       };
     },
   },
@@ -254,8 +242,6 @@ const all: Shape[] = [
         start: `(${k}${pw(x, a)}·${y})^${n}/(${pw(x, c)}·${pw(y, d)})`,
         goal: `${k ** n}${pw(x, a * n - c)}·${pw(y, n - d)}`,
         via: [`${top}/(${pw(x, c)}·${pw(y, d)})`, `${k ** n}${pw(x, a * n - c)}·${pw(y, n)}/${pw(y, d)}`],
-        numbers: [k, a, n, c, d],
-        along: [k ** n, a * n, a * n - c, n - d],
       };
     },
   },
@@ -272,8 +258,6 @@ const all: Shape[] = [
         start: `(${inside})^2`,
         goal: `${pw("x", 2 * m)}${then(2 * p, "x", m)} + ${p * p}`,
         via: [`(${inside})(${inside})`, `${pw("x", 2 * m)}${then(p, "x", m)}${p < 0 ? " - " : " + "}${Math.abs(p)}(${inside})`, `${pw("x", 2 * m)}${then(p, "x", m)}${then(p, "x", m)} + ${p * p}`],
-        numbers: [m, p],
-        along: [2 * m, 2 * p, p * p],
       };
     },
   },
@@ -290,8 +274,6 @@ const all: Shape[] = [
           start: `${pw("x", -m)}·(${pw("x", m + a)} + ${pw("x", m)})`,
           goal: `${pw("x", a)} + 1`,
           via: [`${pw("x", a)} + ${pw("x", -m)}·${pw("x", m)}`],
-          numbers: [m, m + a],
-          along: [a],
         };
       }
       // ax(x^2 + b) - cx^3 = (a - c)x^3 + abx
@@ -303,8 +285,6 @@ const all: Shape[] = [
         start: `${a}x(x^2${b < 0 ? " - " : " + "}${Math.abs(b)}) - ${mono(c, "x", 3)}`,
         goal: `${mono(a - c, "x", 3)}${then(a * b, "x", 1)}`,
         via: [`${mono(a, "x", 3)}${then(a * b, "x", 1)} - ${mono(c, "x", 3)}`],
-        numbers: [a, b, c],
-        along: [a * b, a - c],
       };
     },
   },

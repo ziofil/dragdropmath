@@ -20,8 +20,14 @@ export function evaluate(e: Expr, env: Env): number {
       return e.factors.reduce((acc, f) => acc * evaluate(f, env), 1);
     case "frac":
       return evaluate(e.num, env) / evaluate(e.den, env);
-    case "pow":
-      return evaluate(e.base, env) ** evaluate(e.exp, env);
+    case "pow": {
+      const b = evaluate(e.base, env);
+      const x = evaluate(e.exp, env);
+      // An odd root of a negative number is real: ∛(−8) = −2 (JavaScript's ** says NaN).
+      const n = Math.round(1 / x);
+      if (b < 0 && n % 2 !== 0 && Math.abs(1 / x - n) < 1e-9) return -((-b) ** x);
+      return b ** x;
+    }
     case "const":
       return Math.E;
     case "log":

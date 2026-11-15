@@ -117,6 +117,26 @@ export function mergePlan(
   /** A piece the move keeps where it is while held (see Candidate.stays). */
   stays?: string,
 ): { aim: Vec2; pinned: boolean; shown: MathState } {
+  const plan = mergePlanUnclamped(rc, ctx, draggedId, result, targetId, stays);
+  // Wherever it completes, the carried piece stays on the canvas: an aim that would put
+  // part of it past an edge (a wide bracket carried left onto its 2) is moved in.
+  const me = canvasBox(rc, ctx, draggedId);
+  const W = rc.canvas?.W;
+  if (W === undefined) return plan;
+  const margin = 4;
+  const half = me.w / 2;
+  const x = Math.min(Math.max(plan.aim.x, margin + half), Math.max(margin + half, W - margin - half));
+  return x === plan.aim.x ? plan : { ...plan, aim: Vec2(x, plan.aim.y) };
+}
+
+function mergePlanUnclamped(
+  rc: RenderCtx,
+  ctx: DragInitContext<MathState>,
+  draggedId: string,
+  result: MathState,
+  targetId: string,
+  stays?: string,
+): { aim: Vec2; pinned: boolean; shown: MathState } {
   const target = canvasBox(rc, ctx, targetId);
   const home = canvasBox(rc, ctx, draggedId).centre;
   const pinAt = (id: string): MathState => ({ ...result, pin: { id, x: canvasBox(rc, ctx, id).symLeft.x } });

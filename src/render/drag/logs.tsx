@@ -27,7 +27,7 @@ import { dragCtx } from "../../rules/types";
 import { along, approach, canvasBox, carriedCentre } from "../geometry";
 import { textWidth } from "../measure";
 import { fadeGlyphs, fadeLayer, layerChildren, redrawLayer } from "../preview";
-import { ASC, DESC, glyph, type RenderCtx, type Size } from "../typeset";
+import { ASC, DESC, glyph, named, type RenderCtx, type Size } from "../typeset";
 import { pullOutAim } from "./carry";
 import { mergeAim } from "./merge";
 
@@ -78,7 +78,7 @@ class GrowLog extends Modifier<MathState> {
 
   private dress(layers: LayeredSvgx, opacity: number, onSplit: boolean): LayeredSvgx {
     const shell = (
-      <g dragologyKey="carry-shell" opacity={opacity} style={{ pointerEvents: "none" }}>
+      <g key={named("carry-shell")} dragologyKey="carry-shell" opacity={opacity} style={{ pointerEvents: "none" }}>
         {this.shell}
       </g>
     );
@@ -157,7 +157,7 @@ function logShell(L: Log, size: number, me: Size): Svgx[] {
   const sy = Math.max(1, (me.asc + me.desc) / ((ASC + DESC) * size));
   const shiftY = (me.desc - me.asc) / 2 + ((ASC - DESC) / 2) * size * sy;
   const paren = (pkey: string, ch: string, x: number) => (
-    <text dragologyKey={pkey} transform={`${translate(x, shiftY)} scale(1, ${sy})`} fontSize={size} className="m-op">
+    <text key={named(pkey)} dragologyKey={pkey} transform={`${translate(x, shiftY)} scale(1, ${sy})`} fontSize={size} className="m-op">
       {ch}
     </text>
   );

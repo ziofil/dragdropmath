@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { parseState } from "../expr/parse";
 import { ALL_RULES } from "../rules";
-import { MathCanvas } from "./MathCanvas";
+import { Board } from "./Board";
 import { useMoveHistory } from "./useMoveHistory";
 import { t } from "../i18n";
+import { href } from "./routes";
 
 const START = "2(x + 3) - x";
 
@@ -12,12 +13,12 @@ export function Sandbox() {
   const [text, setText] = useState(START);
   const [error, setError] = useState<string | null>(null);
   // Tidying (x·2 → 2x) follows a move on its own, as in the exercises.
-  const { current, onDrop, undo, reset, canUndo, load: start } = useMoveHistory(parseState(START));
+  const moves = useMoveHistory(parseState(START));
 
   const load = (e: FormEvent) => {
     e.preventDefault();
     try {
-      start(parseState(text));
+      moves.load(parseState(text));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -27,10 +28,10 @@ export function Sandbox() {
   return (
     <main className="puzzle">
       <header className="puzzle-head">
-        <a href="#/" className="back">
+        <a href={href({ page: "home" })} className="back-link">
           {t().backToPath}
         </a>
-        <div className="title">{t().sandbox}</div>
+        <div className="puzzle-title">{t().sandbox}</div>
       </header>
 
       <form className="sandbox-form" onSubmit={load}>
@@ -47,21 +48,9 @@ export function Sandbox() {
           {t().sandboxLoad}
         </button>
       </form>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="sandbox-error">{error}</p>}
 
-      <section className="board">
-        <MathCanvas state={current} rules={ALL_RULES} onDrop={onDrop} />
-        <div className="board-bar">
-          <div className="actions">
-            <button onClick={undo} disabled={!canUndo}>
-              {t().undo}
-            </button>
-            <button onClick={reset} disabled={!canUndo}>
-              {t().reset}
-            </button>
-          </div>
-        </div>
-      </section>
+      <Board moves={moves} rules={ALL_RULES} />
     </main>
   );
 }

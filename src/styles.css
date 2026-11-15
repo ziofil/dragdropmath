@@ -1,8 +1,8 @@
-:root:lang(el) {
-  /* Greek: Manrope for the letters Space Grotesk lacks. Only here, or other
-     pages would fetch it too, for the odd symbol Space Grotesk doesn't have. */
-  --ui: "Space Grotesk", "Manrope", system-ui, sans-serif;
-}
+/* ================= Tokens =================
+ * Everything a skin changes is a token here; the rules below only read them.
+ * A skin (ui/settings.ts) is one block of tokens on :root[data-skin=…], plus
+ * at most the page behind everything (body, body::before/::after). */
+
 :root {
   --bg: #f6f4ef;
   --surface: #ffffff;
@@ -24,14 +24,70 @@
   --silver-face: #eef0f4;
   --bronze: #b8703a;
   --bronze-face: #f8e3d2;
-  --radius: 14px;
-  --ui: "Space Grotesk", system-ui, sans-serif;
-  --math: "STIX Two Text", "Times New Roman", serif;
+
+  /* The page behind everything. */
+  --page-bg: var(--bg);
+  --app-width: 920px;
+
+  /* Type. */
+  --font-ui: "Space Grotesk", system-ui, sans-serif;
+  --font-math: "STIX Two Text", "Times New Roman", serif;
+  --font-heading: var(--font-ui);
+  --heading-spacing: -0.02em;
+  --heading-shadow: none;
+  --logo-animation: none;
+  /* A heading's first letter (an initial, in a manuscript). */
+  --initial-ink: inherit;
+  --initial-size: 1em;
+  /* Small labels over things ("Predict first", "Practice"). */
+  --label-case: uppercase;
+  --label-spacing: 0.08em;
+  --label-weight: 500;
+  --label-ink: var(--ink-soft);
+  --link-line: auto;
+
+  /* Buttons, and anything one presses or types in. */
+  --btn-radius: 999px;
+  --btn-border: 1px solid var(--line);
+  --btn-bg: var(--surface);
+  --btn-ink: var(--ink);
+  --btn-shadow: none;
+  --btn-case: none;
+  --btn-variant: normal;
+  --btn-spacing: normal;
+  --btn-hover-border: var(--accent);
+  --btn-hover-shadow: var(--btn-shadow);
+  --primary-bg: var(--accent);
+  --primary-ink: var(--accent-ink);
+  --primary-border: var(--accent);
+  --primary-shadow: var(--btn-shadow);
+
+  /* Cards: every framed box. */
+  --card-bg: var(--surface);
+  --card-border: 1px solid var(--line);
+  /* Which sides are drawn (a border-width). */
+  --card-sides: 1px;
+  --card-radius: 14px;
+  --card-shadow: none;
+  --card-blur: none;
+  /* Small cards: the answers, a set's exercises, a level's button. */
+  --choice-radius: 12px;
+
+  /* The maths, drawn (a filter on the boards and the answers). */
+  --math-filter: none;
+
   color-scheme: light;
 }
 
+/* Greek: Manrope for the letters Space Grotesk lacks (only here, or every page would fetch it). */
+:root:lang(el) {
+  --font-ui: "Space Grotesk", "Manrope", system-ui, sans-serif;
+}
+
+/* ---------- Classic: the default, light or dark as the system is. ---------- */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-skin]),
+  :root[data-skin="classic"] {
     --bg: #14131a;
     --surface: #1d1c25;
     --surface-2: #26252f;
@@ -56,222 +112,474 @@
   }
 }
 
+/* ---------- Codex: Leonardo's notebooks. Iron-gall ink, red chalk, parchment. ---------- */
+:root[data-skin="codex"] {
+  --bg: #ecdcb6;
+  --surface: rgba(250, 240, 212, 0.62);
+  --surface-2: rgba(222, 202, 158, 0.55);
+  --ink: #3a2414;
+  --ink-soft: #6e5235;
+  --line: #b7966174;
+  --accent: #8c2f14;
+  --accent-ink: #f8eed4;
+  --accent-soft: #e7c9a4;
+  --var: #9a3412;
+  --good: #4f6b23;
+  --good-soft: #dfe0b4;
+  /* "Solved!" is a fresh sheet laid on the page, written in red chalk. */
+  /* "Solved!" is a fresh sheet laid on the page, written in red chalk: grain and fibres, an ink
+     blot by its far edge, edges browned with age, and an outline worn uneven (the shadow follows it). */
+  --solved-bg:
+    radial-gradient(circle at calc(100% - 18px) calc(100% - 12px), rgba(44, 24, 9, 0.82) 0 6px, rgba(44, 24, 9, 0.34) 7.5px, transparent 11px),
+    radial-gradient(ellipse 9px 6px at calc(100% - 27px) calc(100% - 15px), rgba(44, 24, 9, 0.7) 0 55%, transparent 80%),
+    radial-gradient(ellipse 26px 16px at calc(100% - 11px) calc(100% - 16px), rgba(48, 26, 10, 0.45), rgba(48, 26, 10, 0.12) 60%, transparent 74%),
+    radial-gradient(circle at calc(100% - 31px) calc(100% - 6px), rgba(48, 26, 10, 0.6) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at calc(100% - 6px) calc(100% - 27px), rgba(48, 26, 10, 0.5) 0 1.2px, transparent 2.2px),
+    radial-gradient(ellipse at 20% 0%, rgba(255, 252, 240, 0.85), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.09' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.3  0 0 0 0 0.12  0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.27  0 0 0 0 0.1  0 0 0 0.11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    linear-gradient(176deg, #f8eed6, #f1e2bf 70%, #ead6ad);
+  --solved-border: rgba(120, 80, 30, 0.22);
+  --solved-shadow: inset 0 0 22px rgba(130, 78, 22, 0.32), inset 0 0 4px rgba(96, 56, 14, 0.35);
+  --solved-filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.035' numOctaves='3' seed='11'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='5'/%3E%3C/filter%3E%3C/svg%3E#r") drop-shadow(0 9px 10px rgba(70, 40, 10, 0.32)) drop-shadow(0 1px 2px rgba(70, 40, 10, 0.25));
+  --solved-radius: 3px 14px 6px 11px / 10px 4px 12px 5px;
+  --solved-tilt: -0.6deg;
+  --solved-ink: #8c2f14;
+  --warn: #a2370f;
+  --warn-soft: #efcfae;
+  --gold: #a87a16;
+  --gold-face: #f2dfa6;
+  --silver: #7d7566;
+  --silver-face: #e6dcc6;
+  --bronze: #8f5527;
+  --bronze-face: #ecd2b3;
+  --page-bg:
+    radial-gradient(ellipse at 12% 8%, rgba(120, 72, 20, 0.16), transparent 42%),
+    radial-gradient(ellipse at 88% 92%, rgba(110, 60, 15, 0.2), transparent 45%),
+    radial-gradient(circle at 70% 30%, rgba(160, 110, 40, 0.1), transparent 30%),
+    radial-gradient(ellipse at center, transparent 55%, rgba(90, 50, 10, 0.28) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.22 0 0 0 0 0.08 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--bg);
+  --font-ui: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --font-math: "IM Fell English", "STIX Two Text", serif;
+  --font-heading: "IM Fell English SC", "IM Fell English", serif;
+  --heading-spacing: 0.02em;
+  --initial-ink: var(--accent);
+  --initial-size: 1.25em;
+  /* A hand-cut edge: no two corners alike. */
+  --btn-radius: 3px 7px 4px 8px / 7px 3px 8px 4px;
+  --btn-border: 1px solid rgba(58, 36, 20, 0.55);
+  --btn-bg: rgba(250, 240, 212, 0.5);
+  --btn-shadow: 1px 1px 0 rgba(58, 36, 20, 0.18);
+  --card-border: 1px solid rgba(90, 60, 30, 0.35);
+  --card-radius: 6px;
+  --card-shadow: inset 0 0 40px rgba(120, 80, 30, 0.12);
+  --choice-radius: 4px 8px 5px 9px / 8px 4px 9px 5px;
+  /* Letters in red chalk, the rest in ink: a sketch, slightly soft. */
+  --math-filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='i'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='1.2'/%3E%3C/filter%3E%3C/svg%3E#i");
+  color-scheme: light;
+}
+/* A note in the margin, in mirror writing, as he wrote (where there's a margin for it). */
+@media (min-width: 1241px) {
+  :root[data-skin="codex"] body::before {
+    content: "Nessuna umana investigazione si può dimandare vera scienzia, s'essa non passa per le matematiche dimostrazioni.";
+    position: fixed;
+    left: -170px;
+    top: 45%;
+    width: 360px;
+    transform: rotate(-90deg) scaleX(-1);
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: rgba(80, 45, 15, 0.22);
+    pointer-events: none;
+  }
+}
+
+/* ---------- Paper: a LaTeX article. Black on white, a serif, hairlines and small caps. ---------- */
+:root[data-skin="paper"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f5f5;
+  --ink: #000000;
+  --ink-soft: #3a3a3a;
+  --line: #000000;
+  --accent: #000000;
+  --accent-ink: #ffffff;
+  --accent-soft: #eeeeee;
+  --var: #000000;
+  --good: #1f5d1f;
+  --good-soft: #eef5ee;
+  --warn: #8b0000;
+  --warn-soft: #f8eaea;
+  --gold: #000000;
+  --gold-face: #ffffff;
+  --silver: #6b6b6b;
+  --silver-face: #ffffff;
+  --bronze: #9a9a9a;
+  --bronze-face: #ffffff;
+  --app-width: 820px;
+  --font-ui: "STIX Two Text", "Latin Modern Roman", "Times New Roman", serif;
+  --font-math: "STIX Two Text", serif;
+  --heading-spacing: 0;
+  --label-case: none;
+  --label-spacing: 0;
+  --label-weight: 700;
+  --label-ink: var(--ink);
+  --link-line: 0.5px;
+  --btn-radius: 0;
+  --btn-border: 0.5px solid #000;
+  --btn-variant: small-caps;
+  --btn-spacing: 0.03em;
+  --btn-hover-border: #000;
+  /* Rules above and below, as a table in an article: no boxes, no corners. */
+  --card-border: 0.5px solid #000;
+  --card-sides: 0.5px 0;
+  --card-radius: 0;
+  --choice-radius: 0;
+  color-scheme: light;
+}
+
+/* ---------- Neon: the future, over the top. ---------- */
+:root[data-skin="neon"] {
+  --bg: #05010f;
+  --surface: rgba(14, 6, 38, 0.78);
+  --surface-2: rgba(30, 14, 70, 0.7);
+  --ink: #eafcff;
+  --ink-soft: #9fb4e8;
+  --line: #3b2a8a;
+  --accent: #ff2bd6;
+  --accent-ink: #05010f;
+  --accent-soft: #3a0d4a;
+  --var: #00f0ff;
+  --good: #39ff14;
+  --good-soft: #0d3312;
+  --warn: #ffb000;
+  --warn-soft: #3a2600;
+  --gold: #ffe600;
+  --gold-face: #3a3300;
+  --silver: #c9d6ff;
+  --silver-face: #1d2140;
+  --bronze: #ff8a3d;
+  --bronze-face: #3a1d0b;
+  /* A sun going down behind the grid, in stripes. */
+  --page-bg:
+    repeating-linear-gradient(180deg, transparent 0 14px, #12033a 14px 18px) 50% calc(100% - 17vh) / 340px 170px no-repeat,
+    radial-gradient(circle at 50% 100%, rgba(255, 210, 63, 0.75) 0%, rgba(255, 122, 47, 0.7) 35%, rgba(255, 43, 214, 0.6) 70%, transparent 71%) 50% calc(100% - 17vh) / 340px 170px no-repeat,
+    linear-gradient(180deg, #05010f 0%, #12033a 55%, #2a0548 100%);
+  --font-ui: "Exo 2", "Space Grotesk", system-ui, sans-serif;
+  --font-math: "STIX Two Text", serif;
+  --font-heading: "Orbitron", "Exo 2", sans-serif;
+  --heading-spacing: 0.04em;
+  --heading-shadow: 0 0 6px var(--accent), 0 0 18px rgba(255, 43, 214, 0.6);
+  --logo-animation: neon-flicker 5s infinite;
+  --btn-radius: 4px;
+  --btn-border: 1px solid var(--var);
+  --btn-bg: rgba(0, 240, 255, 0.06);
+  --btn-shadow: 0 0 8px rgba(0, 240, 255, 0.45), inset 0 0 8px rgba(0, 240, 255, 0.2);
+  --btn-case: uppercase;
+  --btn-spacing: 0.06em;
+  --btn-hover-border: var(--var);
+  --btn-hover-shadow: 0 0 14px var(--var), 0 0 32px rgba(0, 240, 255, 0.5), inset 0 0 12px rgba(0, 240, 255, 0.35);
+  --primary-bg: linear-gradient(90deg, #ff2bd6, #7b2bff);
+  --primary-ink: #fff;
+  --primary-shadow: 0 0 14px var(--accent), 0 0 34px rgba(255, 43, 214, 0.55);
+  --card-border: 1px solid rgba(0, 240, 255, 0.5);
+  --card-radius: 4px;
+  --card-shadow: 0 0 18px rgba(0, 240, 255, 0.25), inset 0 0 30px rgba(123, 43, 255, 0.18);
+  --card-blur: blur(6px);
+  --choice-radius: 4px;
+  /* The maths glows. */
+  --math-filter: drop-shadow(0 0 3px rgba(0, 240, 255, 0.85)) drop-shadow(0 0 10px rgba(255, 43, 214, 0.45));
+  color-scheme: dark;
+}
+/* A horizon of glowing grid, and scanlines over everything. */
+:root[data-skin="neon"] body::before {
+  content: "";
+  position: fixed;
+  left: -50%;
+  right: -50%;
+  bottom: 0;
+  height: 45vh;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 43, 214, 0.75) 0 2px, transparent 2px 80px),
+    repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.65) 0 2px, transparent 2px 60px);
+  transform: perspective(900px) rotateX(58deg);
+  transform-origin: bottom;
+  -webkit-mask-image: linear-gradient(to top, black 20%, transparent 95%);
+  mask-image: linear-gradient(to top, black 20%, transparent 95%);
+  animation: neon-grid 6s linear infinite;
+  pointer-events: none;
+}
+:root[data-skin="neon"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  z-index: 50;
+}
+@keyframes neon-grid {
+  to {
+    background-position: 0 60px, 0 60px;
+  }
+}
+@keyframes neon-flicker {
+  0%, 18%, 22%, 62%, 64%, 100% { opacity: 1; }
+  20%, 63% { opacity: 0.55; }
+}
+
+/* ================= The page ================= */
+
 * {
   box-sizing: border-box;
 }
-
+html {
+  /* No double-tap zoom (two quick taps on Undo), pinch zoom still works. */
+  touch-action: manipulation;
+  /* iOS enlarges text when the phone is turned sideways. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* No grey flash over whatever is tapped (a piece, a card). */
+  -webkit-tap-highlight-color: transparent;
+}
+html,
+body {
+  /* A piece carried past the screen's edge (the board has no frame) doesn't widen the page. */
+  overflow-x: clip;
+}
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page-bg);
+  background-attachment: fixed;
   color: var(--ink);
-  font-family: var(--ui);
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }
-
 a {
   color: inherit;
+  text-decoration-thickness: var(--link-line);
 }
-
+/* Above whatever a skin draws behind the page. */
 .app {
-  max-width: 920px;
+  position: relative;
+  z-index: 1;
+  max-width: var(--app-width);
   margin: 0 auto;
   padding: 0 16px 64px;
 }
-
-/* ---------- top bar ---------- */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 0;
+h1,
+h2,
+.topbar-logo,
+.panel-title {
+  font-family: var(--font-heading);
+  letter-spacing: var(--heading-spacing);
+  text-shadow: var(--heading-shadow);
 }
-.topbar a {
+h1 {
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 12px 0 10px;
+}
+h1::first-letter {
+  color: var(--initial-ink);
+  font-size: var(--initial-size);
+}
+.page-intro {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  max-width: 62ch;
+  margin: 0 0 16px;
+}
+.puzzle-label {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: var(--label-weight);
+  text-transform: var(--label-case);
+  letter-spacing: var(--label-spacing);
+  color: var(--label-ink);
+}
+.back-link {
   text-decoration: none;
-  font-weight: 500;
+  color: var(--ink-soft);
 }
-.logo {
-  white-space: nowrap;
-  font-weight: 700 !important;
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
-}
-.logo span {
-  color: var(--accent);
+.star {
+  color: var(--gold);
 }
 
-/* ---------- buttons ---------- */
+/* ---------- buttons, fields, cards: one look each ---------- */
 button,
 .button {
+  display: inline-block;
   font: inherit;
   font-weight: 500;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
   padding: 8px 14px;
-  border-radius: 999px;
-  cursor: pointer;
+  color: var(--btn-ink);
+  background: var(--btn-bg);
+  border: var(--btn-border);
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+  text-transform: var(--btn-case);
+  font-variant: var(--btn-variant);
+  letter-spacing: var(--btn-spacing);
   text-decoration: none;
-  display: inline-block;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
-@media (hover: hover) {
-  button:hover:not(:disabled),
-  .button:hover {
-    border-color: var(--accent);
-  }
+.primary {
+  color: var(--primary-ink);
+  background: var(--primary-bg);
+  border-color: var(--primary-border);
+  box-shadow: var(--primary-shadow);
+}
+/* Quieter: the top bar's. */
+.quiet {
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.quiet[aria-current="page"] {
+  color: var(--ink);
+  border-color: var(--accent);
 }
 button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-button[aria-pressed="true"] {
+button:not(.bare)[aria-pressed="true"] {
   background: var(--accent-soft);
 }
-.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-}
-
-/* ---------- home ---------- */
-.hero {
-  padding: 32px 0 24px;
-}
-.hero h1 {
-  font-size: clamp(2.2rem, 6vw, 3.6rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin: 0 0 12px;
-}
-/* "feel" in the title: letters you can drag around (FeelWord.tsx). */
-.feel-word {
-  display: inline-block;
-  vertical-align: -0.3em;
-  margin: 0 -0.08em;
-}
-.feel-word svg {
-  display: block;
-}
-.feel-letter {
-  font-family: var(--math);
-  font-style: italic;
-  fill: var(--accent);
-  user-select: none;
-}
-.feel-hit {
-  fill: transparent;
-}
-.hero p {
-  max-width: 560px;
-  color: var(--ink-soft);
-  font-size: 1.1rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.chapter {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-top: 16px;
-}
-
-.exercises {
-  list-style: none;
+/* A button that doesn't look like one (a chapter on the path, a badge). */
+.bare {
   padding: 0;
-  margin: 16px 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 10px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  border-radius: 0;
 }
-.ex-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 6px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  text-decoration: none;
-  border: 2px solid transparent;
+/* What a button's look puts on its words (capitals, small caps) stays off what's inside a card or a bare button. */
+.bare,
+.card {
+  text-transform: none;
+  font-variant: normal;
+  letter-spacing: normal;
 }
-@media (hover: hover) {
-  .ex-card:hover {
-    border-color: var(--accent);
-  }
+input,
+textarea,
+select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: var(--btn-border);
+  border-radius: var(--btn-radius);
+  padding: 8px 14px;
 }
-.ex-check {
-  color: var(--good);
-  font-weight: 700;
-  font-size: 0.85rem;
+textarea {
+  border-radius: var(--card-radius);
 }
-.ex-num {
-  font-size: 1.4rem;
-  font-weight: 700;
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
-.ex-card.solved {
-  background: var(--good-soft);
+.card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-width: var(--card-sides);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--card-blur);
+  padding: 16px 20px;
 }
 
-/* ---------- puzzle ---------- */
-.puzzle-head {
+/* ---------- top bar ---------- */
+.topbar {
   display: flex;
-  /* On a narrow phone, "‹ Exercise 4.26 ›" goes on a line of its own rather than off the screen. */
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  gap: 8px 12px;
-  padding: 8px 0 12px;
+  gap: 10px;
+  padding: 18px 0;
 }
-.back {
-  text-decoration: none;
-  color: var(--ink-soft);
-}
-/* ‹ Exercise 4.5 ›: step to the previous / next exercise. */
-.ex-nav {
-  flex: none;
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.ex-step {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 1.4rem;
-  line-height: 1;
-}
-@media (hover: hover) {
-  a.ex-step:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-}
-span.ex-step {
-  visibility: hidden;
-}
-.title {
+.topbar-logo {
+  white-space: nowrap;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
+  text-decoration: none;
+  animation: var(--logo-animation);
 }
-/* No panel around the goal or the answers: the answer cards are the only frames. */
-.goal {
+.topbar-logo span {
+  color: var(--accent);
+}
+.topbar-links {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
-  gap: 12px;
+  gap: 6px 12px;
+  margin-left: auto;
 }
-.goal-label {
-  flex: none;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
+.topbar-links .button {
+  white-space: nowrap;
+}
+.topbar-debug {
+  font: 600 0.75rem var(--font-ui);
+  color: var(--warn);
+  border: 1px dashed var(--warn);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+/* A drop-down: the select's own arrow sits too far right, so it's drawn here. */
+.topbar-pick {
+  position: relative;
+  display: inline-flex;
+}
+.topbar-pick::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid var(--ink-soft);
+  border-bottom: 1.5px solid var(--ink-soft);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.topbar-pick .quiet {
+  appearance: none;
+  -webkit-appearance: none;
+  /* 16px: iPhone zooms into a smaller form field (and stays zoomed). */
+  font-size: 1rem;
+  padding-right: 28px;
+}
+
+/* ---------- the maths ---------- */
+.canvas {
+  position: relative;
+  width: 100%;
+  touch-action: none;
+  /* A long press on a piece is a drag, not a call for iOS's copy menu. */
+  -webkit-touch-callout: none;
+}
+.canvas svg {
+  display: block;
+  /* Its own compositing layer: WebKit (iOS) otherwise leaves trails of
+     moving pieces behind, repainting only part of an SVG drawn outside its box. */
+  transform: translateZ(0);
+}
+.canvas svg,
+svg.static-math {
+  filter: var(--math-filter);
+}
+/* Safari repaints a glyph only within its box, and an italic x leans out of
+   its box: as it moves, the lean was left behind as a dotted trail. An
+   invisible outline widens what gets repainted. */
+.canvas svg text {
+  stroke: transparent;
+  stroke-width: 0.3em;
 }
 /* A fixed height, not a max: Safari (iOS) sizes a grid cell from an SVG's
    aspect ratio and ignores max-height, so answer cards grew far too tall. */
@@ -280,39 +588,75 @@ span.ex-step {
   width: 100%;
   height: 90px;
 }
-/* On a phone, the goal gets the whole width (beside the label it was tiny). */
-@media (max-width: 600px) {
-  .goal {
-    flex-direction: column;
-    align-items: stretch;
+.m-num,
+.m-var,
+.m-op,
+.m-const,
+.m-fn {
+  font-family: var(--font-math);
+  fill: var(--ink);
+  user-select: none;
+}
+.m-var,
+.m-const {
+  font-style: italic;
+}
+.m-var {
+  fill: var(--var);
+}
+.m-bar {
+  fill: var(--ink);
+}
+path.m-root {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.m-hit {
+  fill: transparent;
+}
+.m-node:active {
+  cursor: grabbing;
+}
+/* The finger that plays a move to watch (Show, in a lesson). */
+.demo-finger {
+  position: absolute;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  pointer-events: none;
+  transition: transform 0.15s;
+}
+.demo-finger.down {
+  transform: scale(0.75);
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+/* A press held long enough: the piece under it, not its term, comes up. */
+.held-ring {
+  position: absolute;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  animation: held-ring 0.45s ease-out forwards;
+}
+@keyframes held-ring {
+  from {
+    transform: scale(0.4);
+    opacity: 0.9;
   }
-  .static-math {
-    height: 64px;
+  to {
+    transform: scale(1.3);
+    opacity: 0;
   }
-}
-
-/* The board has no frame: the maths sits on the page, its buttons under it.
-   Nothing can cut off a piece carried past its edge (a finger carries it
-   above itself, lift.ts). */
-.board {
-  margin-top: 14px;
-}
-.canvas {
-  width: 100%;
-  touch-action: none;
-}
-.canvas svg {
-  display: block;
-  /* Its own compositing layer: WebKit (iOS) otherwise leaves trails of
-     moving pieces behind, repainting only part of an SVG drawn outside its box. */
-  transform: translateZ(0);
-}
-/* Safari repaints a glyph only within its box, and an italic x leans out of
-   its box: as it moves, the lean was left behind as a dotted trail. An
-   invisible outline widens what gets repainted. */
-.canvas svg text {
-  stroke: transparent;
-  stroke-width: 0.3em;
 }
 .canvas-error {
   display: flex;
@@ -327,72 +671,262 @@ span.ex-step {
 .canvas-error span {
   color: var(--ink-soft);
 }
-.board-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0 0;
+/* Maths in prose (MathText): `x^2`, `√(9 + 16)`. */
+.m-inline {
+  font-family: var(--font-math);
+  font-size: 1.15em;
+  white-space: nowrap;
+  color: var(--var);
 }
-.actions {
+.m-inline-root {
+  white-space: nowrap;
+}
+.m-sup {
+  font-size: 0.7em;
+  line-height: 0;
+}
+/* A root as by hand: the bar over what it covers joins the top of the √. */
+.m-radicand {
+  border-top: 0.06em solid currentColor;
+  padding: 0.08em 0.06em 0 0.04em;
+  margin-left: -0.04em;
+}
+
+/* ---------- a board (Board.tsx): no frame in any skin ---------- */
+.board {
+  margin-top: 14px;
+}
+/* Waiting for a prediction: drawn the same, a little faded. */
+.board-locked .canvas {
+  opacity: 0.55;
+}
+/* The buttons keep their place whatever the status says: beside it, or above it on a phone. */
+.board-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "status actions";
+  align-items: start;
+  gap: 8px 12px;
+  padding-top: 6px;
+}
+.board-actions {
+  grid-area: actions;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+.board-status {
+  grid-area: status;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--ink-soft);
+}
+
+/* ---------- an exercise (PuzzleView.tsx) ---------- */
+.puzzle-head {
+  display: flex;
+  /* On a narrow phone, "‹ Exercise 4 of 6 ›" goes on a line of its own rather than off the screen. */
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 0 12px;
+}
+.puzzle-back {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+.puzzle-back .back-link + .back-link {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+.puzzle-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+/* ‹ Exercise 4 of 6 ›: to the previous / next exercise. */
+.puzzle-nav {
+  flex: none;
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-@media (max-width: 480px) {
-  .board-bar button {
-    padding: 7px 11px;
-    font-size: 0.9rem;
-  }
+.puzzle-step {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: var(--btn-border);
+  border-radius: var(--btn-radius);
+  background: var(--btn-bg);
+  text-decoration: none;
+  font-size: 1.4rem;
+  line-height: 1;
 }
-.hint {
+span.puzzle-step {
+  visibility: hidden;
+}
+/* Easy · Medium · Hard on a chapter's exercise: the current one filled in. */
+.level-pick {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: var(--btn-border);
+  border-radius: var(--btn-radius);
+  background: var(--btn-bg);
+}
+.level-pick a {
+  padding: 5px 14px;
+  border-radius: var(--btn-radius);
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-weight: 500;
+  font-variant: var(--btn-variant);
+  text-transform: var(--btn-case);
+  letter-spacing: var(--btn-spacing);
+}
+.level-pick a[aria-current="page"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+/* No panel around the goal or the answers: the answer cards are the only frames. */
+.puzzle-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.puzzle-goal .puzzle-label {
+  flex: none;
+}
+.puzzle-goal.predict {
+  flex-wrap: wrap;
+}
+.puzzle-goal.predict .puzzle-label {
+  flex-basis: 100%;
+}
+.puzzle-task {
+  margin: 0;
+  font-size: 1.25rem;
+}
+/* Maths drawn inline in a sentence ("Make it look like …"), at the size of the words around it: crisp, without a skin's hand-drawn wobble. */
+svg.static-math-inline {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  height: 2em;
+  vertical-align: -0.6em;
+  filter: none;
+}
+.puzzle-task .m-inline {
+  font-style: italic;
+}
+.predict-choices {
+  flex-basis: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.predict-choice {
+  padding: 4px 8px;
+  border-radius: var(--choice-radius);
+}
+div.predict-choice {
+  cursor: default;
+}
+.predict-choice.is-right {
+  border-color: var(--good);
+  background: var(--good-soft);
+  box-shadow: inset 0 0 0 1px var(--good);
+}
+.predict-choice.is-picked {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+  box-shadow: inset 0 0 0 1px var(--warn);
+}
+.said-right {
+  color: var(--good);
+  font-weight: 600;
+}
+.said-wrong {
+  color: var(--warn);
+  font-weight: 600;
+}
+.said-streak {
+  margin-left: 6px;
+}
+.said-mark {
+  color: var(--gold);
+}
+.puzzle-before {
+  color: var(--good);
+  font-size: 0.9rem;
+}
+.puzzle-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.puzzle-hint {
   margin: 0;
   padding: 10px 0 0;
   color: var(--ink-soft);
 }
-
-.result {
+.puzzle-solved {
   margin-top: 14px;
-  padding: 18px;
-  border-radius: var(--radius);
-  background: var(--good-soft);
+  position: relative;
+  isolation: isolate;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  transform: rotate(var(--solved-tilt, 0deg));
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 4px 16px;
   animation: pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
-.result-name {
+/* The sheet itself, a layer under what's written on it: a skin can wear its edges (a filter) without blurring the words. */
+.puzzle-solved::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--solved-bg, var(--good-soft));
+  border: 1px solid var(--solved-border, var(--line));
+  border-radius: var(--solved-radius, var(--card-radius));
+  box-shadow: var(--solved-shadow, none);
+  filter: var(--solved-filter, none);
+}
+.puzzle-solved-name {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--good);
+  color: var(--solved-ink, var(--good));
 }
-
-.result .button {
+.puzzle-solved .button {
   white-space: nowrap;
   grid-row: 1 / span 2;
   grid-column: 2;
 }
+.puzzle-solved .puzzle-badge {
+  grid-row: 2;
+}
 @keyframes pop {
   from {
-    transform: scale(0.92);
+    transform: rotate(var(--solved-tilt, 0deg)) scale(0.92);
     opacity: 0;
   }
 }
 
-.sandbox-link {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.sandbox-link p {
-  margin: 0;
-  color: var(--ink-soft);
-}
+/* ---------- the sandbox ---------- */
 .sandbox-form {
   display: flex;
   gap: 8px;
@@ -400,210 +934,98 @@ span.ex-step {
 .sandbox-form input {
   flex: 1;
   min-width: 0;
-  font: inherit;
-  font-family: var(--math);
+  font-family: var(--font-math);
   font-size: 1.2rem;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
 }
-.error {
+.sandbox-error {
   color: var(--warn);
 }
 
-/* ---------- math glyphs (SVG) ---------- */
-.m-num,
-.m-var,
-.m-op {
-  font-family: var(--math);
-  fill: var(--ink);
-  user-select: none;
+/* ---------- home: the learning path ---------- */
+.home-hero {
+  padding: 32px 0 24px;
 }
-.m-var {
+.home-hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1.05;
+  margin: 0 0 12px;
+}
+.home-hero p {
+  max-width: 560px;
+  color: var(--ink-soft);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+/* "feel" in the title: letters you can drag around (FeelWord.tsx). */
+.feel-word {
+  display: inline-block;
+  vertical-align: -0.3em;
+  margin: 0 -0.08em;
+  -webkit-touch-callout: none;
+}
+.feel-word svg {
+  display: block;
+}
+.feel-letter {
+  font-family: var(--font-math);
   font-style: italic;
-  fill: var(--var);
-}
-.m-const {
-  font-family: var(--math);
-  font-style: italic;
-  fill: var(--ink);
+  fill: var(--accent);
   user-select: none;
 }
-.m-fn {
-  font-family: var(--math);
-  fill: var(--ink);
-  user-select: none;
-}
-.m-bar {
-  fill: var(--ink);
-}
-.m-root {
-  fill: none;
-  stroke: var(--ink);
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.m-hit {
+.feel-hit {
   fill: transparent;
 }
-/* Cursor: set per piece (grab, or pointer for one that can only be tapped). */
-.m-node:active {
-  cursor: grabbing;
-}
-
-/* ---------- debug mode (Shift+D) ---------- */
-
-.debug-badge {
-  font: 600 0.75rem var(--ui);
-  color: var(--warn);
-  background: none;
-  border: 1px dashed var(--warn);
-  border-radius: 999px;
-  padding: 2px 10px;
-  cursor: pointer;
-}
-.debug-panel {
-  border-top: 1px dashed var(--line);
-  padding: 12px 16px 16px;
-  font: 0.82rem/1.5 var(--ui);
-  color: var(--ink);
-}
-.debug-head {
+.home-sandbox {
+  margin-top: 16px;
   display: flex;
+  gap: 16px;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  align-items: baseline;
-  margin-bottom: 8px;
 }
-.debug-head span,
-.debug-muted {
+.home-sandbox p {
+  margin: 0;
   color: var(--ink-soft);
 }
-.debug-block {
-  margin-top: 10px;
+.shelf {
+  padding: 12px 16px;
+  margin-bottom: 16px;
 }
-.debug-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-  overflow-wrap: anywhere;
+.shelf-head {
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
 }
-.debug-panel code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.78rem;
-  overflow-wrap: anywhere;
+.shelf-head span {
+  font-weight: 400;
+  color: var(--ink-soft);
 }
-.debug-panel p {
-  margin: 4px 0;
-}
-.debug-actions {
+.shelf-row {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.debug-tree,
-.debug-tree ul,
-.debug-moves ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.shelf-badge {
+  border-radius: 50%;
+  transition: transform 0.15s;
 }
-.debug-node {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 6px;
-  align-items: baseline;
+.shelf-badge:active {
+  transform: scale(1.1);
 }
-.debug-id {
-  color: var(--ink-soft);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.75rem;
-}
-.debug-flag {
-  font-size: 0.72rem;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-.debug-grab {
-  background: var(--good-soft);
-}
-.debug-moves summary {
-  cursor: pointer;
-  color: var(--ink-soft);
-}
-
-/* Chapters: the idea, guided examples, practice */
-
-.chapter-page {
-  max-width: 760px;
-  margin: 0 auto;
-  /* Sideways margin: the app's own (16px), not twice that. */
-  padding: 0 0 64px;
-}
-.chapter-title {
-  font-size: 2rem;
-  margin: 8px 0 12px;
-}
-/* The lesson's second half: its moves, one at a time. */
-.theory,
-.practice {
-  margin-bottom: 36px;
-}
-.theory h2,
-.practice h2 {
-  font-size: 1.15rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  margin: 0 0 12px;
-}
-.theory p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin: 0 0 14px;
-}
-.m-inline {
-  font-family: var(--math);
-  font-size: 1.15em;
-  white-space: nowrap;
-  color: var(--var);
-}
-.guided {
-  margin-bottom: 28px;
-}
-.guided-head {
-  margin-bottom: 10px;
-}
-/* What to do on a move's board: set apart from why it works. */
-.guided-say {
-  margin: 0;
-  font-weight: 600;
-}
-/* The lesson's moves start a little below the chapter's intro. */
-#moves {
-  margin-top: 28px;
-}
-.guided-status {
-  margin: 0;
-  color: var(--ink-soft);
-  /* A line of its own when the button beside it would leave too little room. */
-  flex: 1 1 14rem;
-}
-
-/* ---------- home: the learning path ---------- */
 .path-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 16px;
   align-items: start;
+  scroll-margin-top: 16px;
 }
 .path-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
   padding: 16px 12px 8px;
   min-width: 0;
 }
@@ -619,7 +1041,7 @@ span.ex-step {
 .path-open {
   flex-basis: 100%;
 }
-.dot {
+.path-dot {
   display: inline-block;
   width: 10px;
   height: 10px;
@@ -627,10 +1049,10 @@ span.ex-step {
   vertical-align: -1px;
   margin-right: 2px;
 }
-.dot-next {
+.path-dot.is-next {
   background: var(--accent);
 }
-.dot-done {
+.path-dot.is-done {
   background: var(--good);
 }
 .path {
@@ -662,18 +1084,7 @@ span.ex-step {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 0;
-  border: none;
-  background: none;
   color: var(--ink);
-  font: inherit;
-  cursor: pointer;
-}
-.path-node:hover,
-.path-node:active,
-.path-node[aria-pressed="true"] {
-  background: none;
-  border: none;
 }
 .path-node:focus-visible {
   outline: none;
@@ -685,11 +1096,6 @@ span.ex-step {
 .ring {
   display: block;
   transition: transform 0.15s ease;
-}
-@media (hover: hover) {
-  .path-node:hover .ring {
-    transform: scale(1.08);
-  }
 }
 .ring-face {
   fill: var(--surface-2);
@@ -707,7 +1113,7 @@ span.ex-step {
   stroke-linecap: round;
 }
 .ring-label {
-  font-family: var(--ui);
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 18px;
   fill: var(--ink-soft);
@@ -732,7 +1138,8 @@ span.ex-step {
   fill: var(--accent);
 }
 .node-next .node-title,
-.node-started .node-title {
+.node-started .node-title,
+.node-done .node-title {
   color: var(--ink);
 }
 .node-done .ring-face {
@@ -745,12 +1152,8 @@ span.ex-step {
 .node-done .ring-label {
   fill: var(--good);
 }
-.node-done .node-title {
-  color: var(--ink);
-}
 .node-selected .ring {
   transform: scale(1.12);
-  filter: drop-shadow(0 0 0 transparent);
 }
 .node-selected .ring-face {
   stroke: var(--ink);
@@ -760,9 +1163,16 @@ span.ex-step {
   color: var(--ink);
   font-weight: 700;
 }
-
+.node-ring {
+  position: relative;
+  display: block;
+}
+.node-medal {
+  position: absolute;
+  right: -6px;
+  top: -4px;
+}
 .path-panel {
-  margin-top: 0;
   position: sticky;
   top: 16px;
   scroll-margin-top: 16px;
@@ -775,76 +1185,70 @@ span.ex-step {
   color: var(--ink-soft);
   font-weight: 600;
 }
-.tag {
+.panel-tag {
   font-size: 0.75rem;
   padding: 2px 8px;
   border-radius: 999px;
   font-weight: 700;
 }
-.tag-next {
+.panel-tag.is-next {
   background: var(--accent-soft);
   color: var(--accent);
 }
-.tag-done {
+.panel-tag.is-done {
   background: var(--good-soft);
   color: var(--good);
 }
 .panel-title {
   margin: 6px 0 0;
   font-size: 1.4rem;
-  letter-spacing: -0.01em;
 }
 .panel-title a {
-  color: inherit;
   text-decoration: none;
 }
-@media (hover: hover) {
-  .panel-title a:hover {
-    color: var(--accent);
-  }
-}
 .panel-blurb,
-.panel-builds,
-.panel-opens {
+.panel-builds {
   color: var(--ink-soft);
   line-height: 1.45;
 }
 .panel-blurb {
   margin: 8px 0 0;
 }
-.panel-builds,
-.panel-opens {
+.panel-builds {
   margin: 10px 0 0;
   font-size: 0.9rem;
 }
-.panel-start {
-  display: inline-block;
-  margin-top: 14px;
-  text-decoration: none;
+/* The three ways in, one under another: a name, then its buttons. */
+.panel-mode {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
-.panel-progress {
-  margin-top: 18px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  font-size: 0.85rem;
-  font-weight: 600;
+.panel-mode-name {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-soft);
 }
-.badge-note {
-  font-weight: 400;
+.panel-mode > .button {
+  justify-self: start;
+}
+.panel-mode-note {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.path-panel .levels {
+  grid-template-columns: repeat(3, 1fr);
+}
+.path-panel .leads-to {
+  font-size: 0.9rem;
 }
 
-@media (max-width: 860px) {
-  .path-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .path-panel {
-    position: static;
-  }
-}
-
-/* ---------- badges ---------- */
+/* ---------- badges and marks ---------- */
 .badge {
   display: block;
   flex: none;
@@ -859,100 +1263,86 @@ span.ex-step {
   fill: none;
 }
 .badge-num {
-  font-family: var(--ui);
+  font-family: var(--font-ui);
   font-weight: 700;
   fill: var(--line);
 }
-.badge-bronze .badge-rim,
-.badge-silver .badge-rim,
-.badge-gold .badge-rim {
+.badge-bronze { --medal: var(--bronze); --medal-face: var(--bronze-face); }
+.badge-silver { --medal: var(--silver); --medal-face: var(--silver-face); }
+.badge-gold { --medal: var(--gold); --medal-face: var(--gold-face); }
+.badge:not(.badge-none) .badge-rim {
+  fill: var(--medal);
+  stroke: var(--medal);
   stroke-dasharray: none;
 }
-.badge-bronze .badge-rim { fill: var(--bronze); stroke: var(--bronze); }
-.badge-bronze .badge-face { fill: var(--bronze-face); }
-.badge-bronze .badge-num { fill: var(--bronze); }
-.badge-silver .badge-rim { fill: var(--silver); stroke: var(--silver); }
-.badge-silver .badge-face { fill: var(--silver-face); }
-.badge-silver .badge-num { fill: var(--silver); }
-.badge-gold .badge-rim { fill: var(--gold); stroke: var(--gold); }
-.badge-gold .badge-face { fill: var(--gold-face); }
-.badge-gold .badge-num { fill: var(--gold); }
-
-.shelf {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  margin-bottom: 16px;
+.badge:not(.badge-none) .badge-face {
+  fill: var(--medal-face);
 }
-.shelf-head {
-  font-weight: 700;
-  font-size: 0.9rem;
+.badge:not(.badge-none) .badge-num {
+  fill: var(--medal);
+}
+.badge-row {
+  margin-top: 18px;
   display: flex;
   gap: 10px;
-  align-items: baseline;
-  flex-wrap: wrap;
-}
-.shelf-head span {
-  font-weight: 400;
+  align-items: center;
+  font-size: 0.85rem;
   color: var(--ink-soft);
 }
-.shelf-row {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+
+/* ---------- a chapter's page: its modes, then its lesson ---------- */
+.chapter-page {
+  max-width: 760px;
+  margin: 0 auto;
 }
-.shelf-badge {
-  padding: 0;
-  border: none;
-  background: none;
-  border-radius: 50%;
-  cursor: pointer;
-}
-.shelf-badge:active {
-  background: none;
-  border: none;
-  transform: scale(1.1);
-}
-.node-ring {
-  position: relative;
-  display: block;
-}
-.node-medal {
-  position: absolute;
-  right: -6px;
-  top: -4px;
-}
-.new-badge {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  display: flex;
-  align-items: center;
+/* A chapter's levels: each a button with how many are done there. */
+.levels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+.level {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border-radius: var(--choice-radius);
+}
+.level-name {
   font-weight: 600;
 }
-
-/* ---------- chapter page: lesson and exercises ---------- */
-.chapter-blurb {
+.level-count {
+  font-size: 0.85rem;
   color: var(--ink-soft);
-  font-size: 1.05rem;
-  line-height: 1.5;
-  margin: -4px 0 8px;
-  max-width: 640px;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+.level-done {
+  border-color: var(--good);
+}
+.level-done .level-count {
+  color: var(--good);
+}
+#lesson {
+  margin-top: 28px;
+  scroll-margin-top: 16px;
+}
+.lesson-part {
+  margin-bottom: 36px;
 }
 .lesson-part h2 {
-  text-transform: none;
-  letter-spacing: -0.01em;
-  color: var(--ink);
   font-size: 1.3rem;
+  margin: 0 0 12px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.part-num {
+.lesson-part p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+.lesson-num {
   flex: none;
   width: 28px;
   height: 28px;
@@ -964,255 +1354,22 @@ span.ex-step {
   font-size: 0.9rem;
   font-weight: 700;
 }
-.watch {
-  margin-top: 14px;
-  padding: 10px 14px;
-  border-left: 3px solid var(--warn);
-  background: var(--surface-2);
-  border-radius: 0 10px 10px 0;
-}
-.watch strong {
-  color: var(--warn);
-}
-.practice-note {
-  color: var(--ink-soft);
-  margin: 0 0 12px;
-}
-/* A chapter's levels: each a button with how many are solved there. */
-.levels {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 14px;
-  max-width: 480px;
-}
-.levels .level {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  padding: 10px 8px;
-  border-radius: 14px;
-}
-.level-name {
+/* What to do on a move's board: set apart from why it works. */
+.lesson-part .lesson-how {
+  margin: 0 0 10px;
   font-weight: 600;
 }
-.level-count {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-.level-done {
-  border-color: var(--good);
-}
-.level-done .level-count {
-  color: var(--good);
-}
-/* Easy · Medium · Hard on a practice exercise: the current level filled in. */
-.level-pick {
-  margin-left: auto;
-  display: flex;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 3px;
-  gap: 2px;
-  background: var(--surface);
-}
-.level-pick a {
-  padding: 5px 14px;
-  border-radius: 999px;
-  text-decoration: none;
-  color: var(--ink-soft);
-  font-weight: 500;
-}
-.level-pick a[aria-current="page"] {
-  background: var(--ink);
-  color: var(--bg);
-}
-@media (hover: hover) {
-  .level-pick a:not([aria-current]):hover {
-    color: var(--accent);
-  }
+.lesson-move {
+  margin-bottom: 28px;
 }
 .leads-to {
-  margin-top: 16px;
-  color: var(--ink-soft);
-}
-.back-links {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: baseline;
-}
-.back-lesson {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-
-/* ---------- guess first ---------- */
-.goal.guess {
-  flex-wrap: wrap;
-}
-.goal.guess .goal-label,
-.guess-result {
-  flex-basis: 100%;
-  /* The same height, so the answers don't shift when one replaces the other. */
-  line-height: 1.5rem;
-}
-.choices {
-  flex-basis: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-@media (max-width: 560px) {
-  .choices {
-    grid-template-columns: 1fr;
-  }
-}
-.choice {
-  padding: 4px 8px;
-  border-radius: 12px;
-  border: 2px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-}
-button.choice:focus-visible {
-  border-color: var(--accent);
-}
-.choices.answered .choice {
-  cursor: default;
-}
-.choice.is-right {
-  border-color: var(--good);
-  background: var(--good-soft);
-}
-.choice.is-picked {
-  border-color: var(--warn);
-  background: var(--warn-soft);
-}
-.guess-result {
-  font-weight: 600;
-}
-.guess-result.right {
-  color: var(--good);
-}
-.guess-result.wrong {
-  color: var(--warn);
-}
-.star,
-.ex-star {
-  color: var(--gold);
-  font-size: 0.85rem;
-}
-
-.reveal {
-  margin-left: auto;
-}
-.reveal.is-spent {
-  visibility: hidden;
-}
-/* Guessing first: the board shows the start, but waits for the guess. */
-.still {
-  position: relative;
-}
-.still .canvas {
-  opacity: 0.55;
-}
-.still-note {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 8px;
-  margin: 0;
-  text-align: center;
-  font-size: 0.9rem;
+  margin: 16px 0 0;
   color: var(--ink-soft);
 }
 
-/* ---------- sets of one's own ---------- */
-.top-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.topbar .top-link {
-  white-space: nowrap;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-}
-.topbar .top-link[aria-current="page"] {
-  color: var(--ink);
-  border-color: var(--accent);
-}
-.lang-wrap {
-  position: relative;
-  display: inline-flex;
-}
-.lang-wrap::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  border-right: 1.5px solid var(--ink-soft);
-  border-bottom: 1.5px solid var(--ink-soft);
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
-}
-.lang-pick {
-  appearance: none;
-  -webkit-appearance: none;
-  font: inherit;
-  /* 16px: iPhone zooms into a smaller form field (and stays zoomed). */
-  font-size: 1rem;
-  line-height: inherit;
-  color: var(--ink-soft);
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 28px 6px 12px;
-  cursor: pointer;
-}
-@media (max-width: 480px) {
-  /* Where the buttons' words are long, they go on a line of their own. */
-  .topbar {
-    flex-wrap: wrap;
-    row-gap: 10px;
-  }
-  .top-right {
-    gap: 6px;
-    margin-left: auto;
-  }
-  .topbar .top-link {
-    font-size: 0.8rem;
-    padding: 4px 8px;
-  }
-  .lang-pick {
-    padding: 3px 22px 3px 8px;
-  }
-  .lang-wrap::after {
-    right: 10px;
-  }
-}
-.lang-pick:focus-visible {
-  color: var(--ink);
-  border-color: var(--accent);
-}
-.set-maker h1,
-.set-page h1 {
-  margin: 12px 0 8px;
-  letter-spacing: -0.02em;
-}
-.set-maker > p,
-.set-page > p {
-  color: var(--ink-soft);
-  max-width: 62ch;
+/* ---------- sets of one's own: making one (SetView.tsx) ---------- */
+.page h1 {
+  margin-top: 12px;
 }
 .maker-actions {
   display: flex;
@@ -1220,187 +1377,290 @@ button.choice:focus-visible {
   gap: 8px;
   margin: 12px 0;
 }
-.yaml {
+.maker-yaml {
   display: block;
   width: 100%;
   font: 1rem/1.5 ui-monospace, "SF Mono", Menlo, monospace; /* 16px: no zoom on iPhone */
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
   resize: vertical;
 }
-.yaml:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-.checked {
+.maker-checked {
   background: var(--surface-2);
-  border-radius: var(--radius);
-  padding: 12px 16px;
   margin: 12px 0;
 }
-.checked-list {
+.maker-list {
   margin: 0 0 12px;
   padding: 0;
   list-style: none;
   display: grid;
   gap: 8px;
 }
-.checked-list li {
+.maker-list .card {
   display: grid;
   grid-template-columns: 1.4em 1fr;
   gap: 2px 6px;
-  background: var(--surface);
-  border-radius: 10px;
   padding: 8px 10px;
+  border-radius: var(--choice-radius);
 }
-.checked-list li > :not(.mark) {
+.maker-list .card > :not(.maker-mark) {
   grid-column: 2;
 }
-.checked-list .mark {
+.maker-mark {
   font-weight: 700;
 }
-.checked-list .good .mark {
+.is-good .maker-mark {
   color: var(--good);
 }
-.checked-list .bad .mark {
+.is-bad .maker-mark,
+.maker-problem {
   color: var(--warn);
 }
-.checked-list .what {
-  font-family: var(--math);
+.maker-what {
+  font-family: var(--font-math);
   font-size: 1.05rem;
   overflow-wrap: anywhere;
 }
-.problem {
-  color: var(--warn);
-}
-.note {
+.maker-note {
   color: var(--ink-soft);
   font-size: 0.9rem;
 }
-.warn {
-  color: var(--warn);
+.maker-list .maker-problem {
   font-size: 0.9rem;
 }
-.link-box {
+.maker-link {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
-.link-box input {
+.maker-link input {
   flex: 1 1 260px;
   min-width: 0;
-  font: inherit;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--ink);
 }
-.format {
+.maker-format {
   margin-top: 20px;
   color: var(--ink-soft);
 }
-.format summary {
+.maker-format summary {
   cursor: pointer;
   color: var(--ink);
   font-weight: 500;
 }
-.format pre {
+.maker-format pre {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: var(--card-border);
+  border-radius: var(--choice-radius);
   padding: 10px 12px;
   overflow-x: auto;
   font-size: 0.85rem;
 }
-.set-exercises {
+
+/* ---------- a set, opened from its link ---------- */
+.set-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.set-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border-radius: var(--choice-radius);
+  text-decoration: none;
+}
+.set-card.is-solved {
+  background: var(--good-soft);
 }
 .set-card .static-math {
   height: 60px;
   margin: 2px 0;
 }
+.set-num {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
 .set-marks {
   display: flex;
   gap: 6px;
   min-height: 1.1em;
+  font-size: 0.85rem;
+}
+.set-check {
+  color: var(--good);
+  font-weight: 700;
 }
 .set-own {
   margin-top: 24px;
 }
 
-.solved-before {
-  flex-basis: 100%;
-  margin: 4px 0 0;
-  color: var(--good);
-  font-size: 0.9rem;
+/* ---------- debug mode (Shift+D) ---------- */
+.debug-panel {
+  border-top: 1px dashed var(--line);
+  padding: 12px 16px 16px;
+  font: 0.82rem/1.5 var(--font-ui);
+  color: var(--ink);
 }
-/* Hover looks, only where there's a pointer that hovers (a tapped element keeps :hover on a touchscreen). */
+.debug-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.debug-head span,
+.debug-muted,
+.debug-id,
+.debug-moves summary {
+  color: var(--ink-soft);
+}
+.debug-block {
+  margin-top: 10px;
+}
+.debug-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+.debug-panel code,
+.debug-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+.debug-panel p {
+  margin: 4px 0;
+}
+.debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.debug-tree,
+.debug-tree ul,
+.debug-moves ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.debug-node {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  align-items: baseline;
+}
+.debug-flag {
+  font-size: 0.72rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+.debug-grab {
+  background: var(--good-soft);
+}
+.debug-moves summary {
+  cursor: pointer;
+}
+
+/* ================= Where it differs ================= */
+
+/* Hover looks only where a pointer hovers (on a touchscreen a tapped element keeps :hover). */
 @media (hover: hover) {
-  .shelf-badge:hover {
-    background: none;
-    border: none;
-    transform: scale(1.1);
+  :is(button, .button):not(:disabled, .bare):hover {
+    border-color: var(--btn-hover-border);
+    box-shadow: var(--btn-hover-shadow);
   }
-  button.choice:hover {
-    border-color: var(--accent);
+  .primary:hover {
+    box-shadow: var(--primary-shadow);
   }
-  .topbar .top-link:hover,
-  .lang-pick:hover {
+  .quiet:hover {
     color: var(--ink);
+  }
+  a.puzzle-step:hover,
+  .panel-title a:hover,
+  .level-pick a:not([aria-current]):hover {
+    color: var(--accent);
+  }
+  a.puzzle-step:hover {
     border-color: var(--accent);
+  }
+  .path-node:hover .ring,
+  .shelf-badge:hover {
+    transform: scale(1.1);
   }
 }
 
-/* ---------- touchscreens ---------- */
-html,
-body {
-  /* A piece carried past the screen's edge (the board has no frame) doesn't widen the page. */
-  overflow-x: clip;
+/* The path beside its panel needs room. */
+@media (max-width: 860px) {
+  .path-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .path-panel {
+    position: static;
+  }
 }
-html {
-  /* No double-tap zoom (two quick taps on Undo), pinch zoom still works. */
-  touch-action: manipulation;
-  /* iOS enlarges text when the phone is turned sideways. */
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  /* No grey flash over whatever is tapped (a piece, a card). */
-  -webkit-tap-highlight-color: transparent;
-}
-.canvas,
-.feel-word {
-  /* A long press on a piece is a drag, not a call for iOS's copy menu. */
-  -webkit-touch-callout: none;
-}
-@media (max-width: 480px) {
-  /* "Solved!" above its button: side by side, a long "Next exercise →" runs out of the bar. */
-  .result {
+
+/* A phone. */
+@media (max-width: 600px) {
+  .topbar-links {
+    gap: 6px;
+  }
+  .topbar .quiet {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+  .topbar-pick .quiet {
+    padding: 3px 22px 3px 8px;
+  }
+  .topbar-pick::after {
+    right: 10px;
+  }
+  /* The goal gets the whole width (beside the label it was tiny), the answers one above another. */
+  .puzzle-goal {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .static-math {
+    height: 64px;
+  }
+  .predict-choices {
     grid-template-columns: 1fr;
   }
-  .result .button {
+  /* The maths may use the page's side margins too: bigger, easier to grab. */
+  .canvas {
+    margin-inline: -16px;
+    width: auto;
+  }
+  /* The buttons first, then what's said: they stay where they are whatever it says. */
+  .board-bar {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "actions" "status";
+  }
+  .board-actions button,
+  .board-actions .button {
+    padding: 7px 11px;
+    font-size: 0.9rem;
+  }
+  /* "Solved!" above its button: side by side, a long "Next exercise →" runs out of the box. */
+  .puzzle-solved {
+    grid-template-columns: 1fr;
+  }
+  .puzzle-solved .button {
     grid-row: auto;
     grid-column: auto;
     justify-self: start;
   }
-  /* Three buttons (Sandbox, Make exercises, language) may not fit one row. */
-  .top-right {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    row-gap: 6px;
-  }
 }
+
+/* Four chapters side by side on the path leave ~60px each. */
 @media (max-width: 420px) {
-  /* Four chapters side by side leave ~60px each: break long words at their syllables. */
   .node-title {
     font-size: 0.66rem;
     line-height: 1.1;
   }
-  /* Where four chapters sit side by side, a long word can't fit its slot:
-     break it at its syllables (only there, so other titles keep whole words). */
+  /* A long word can't fit its slot: break it at its syllables (only there, so other titles keep whole words). */
   .node-narrow .node-title {
     -webkit-hyphens: auto;
     hyphens: auto;
@@ -1409,32 +1669,4 @@ html {
   .path-node {
     gap: 4px;
   }
-}
-@media (max-width: 480px) {
-  /* On a phone the maths may use the page's side margins too: bigger, easier to grab. */
-  .canvas {
-    margin-inline: -16px;
-    width: auto;
-  }
-}
-
-/* The test, answered: on to the next one (solving it is optional). */
-.answered-onward {
-  flex-basis: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px 16px;
-  margin-top: 6px;
-}
-.answered-onward .new-badge {
-  margin-right: auto;
-}
-/* On the learning path: the way to each kind of exercise. */
-.sections {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
 }

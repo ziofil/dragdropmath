@@ -14,17 +14,17 @@ const all: Shape[] = [
       const k = r.next() < 0.3 ? r.int(2, 5) : 1;
       switch (r.int(0, 3)) {
         case 0: // p + v + q → v + (p + q)
-          return draft("numbers-around", signedSum([`${p}`, ax(k, v), `${q}`]), lin(k, p + q, v), [p, q, k], [p + q]);
+          return draft("numbers-around", signedSum([`${p}`, ax(k, v), `${q}`]), lin(k, p + q, v));
         case 1: // v + p - q → v + (p - q)
           if (p === q) return null;
-          return draft("numbers-around", signedSum([ax(k, v), `${p}`, `-${q}`]), lin(k, p - q, v), [p, q, k], [p - q]);
+          return draft("numbers-around", signedSum([ax(k, v), `${p}`, `-${q}`]), lin(k, p - q, v));
         case 2: // p - q + v → v + (p - q)
           if (p === q) return null;
-          return draft("numbers-around", signedSum([`${p}`, `-${q}`, ax(k, v)]), lin(k, p - q, v), [p, q, k], [p - q]);
+          return draft("numbers-around", signedSum([`${p}`, `-${q}`, ax(k, v)]), lin(k, p - q, v));
         default: {
           // p - v - q → (p - q) - v
           const big = p + q;
-          return draft("numbers-around", signedSum([`${big}`, `-${ax(k, v)}`, `-${q}`]), `${p} - ${ax(k, v)}`, [big, q, k], [p]);
+          return draft("numbers-around", signedSum([`${big}`, `-${ax(k, v)}`, `-${q}`]), `${p} - ${ax(k, v)}`);
         }
       }
     },
@@ -41,23 +41,23 @@ const all: Shape[] = [
       const order = one(r, [`${p}·${v}·${q}`, `${v}·${p}·${q}`, `${p}·${q}·${v}`]);
       switch (r.int(0, 3)) {
         case 0: // p·v·q → (pq)v
-          return draft("numbers-together", order, ax(k, v), [p, q], [k]);
+          return draft("numbers-together", order, ax(k, v));
         case 1: {
           // p·a·q·b → (pq)ab
           const [a, b] = one(r, [["a", "b"], ["x", "y"]]);
-          return draft("numbers-together", `${p}·${a}·${q}·${b}`, ax(k, a + b), [p, q], [k]);
+          return draft("numbers-together", `${p}·${a}·${q}·${b}`, ax(k, a + b));
         }
         case 2: // c - p·q·y → c - (pq)y
-          return draft("numbers-together", `${c} - ${order}`, `${c} - ${ax(k, v)}`, [c, p, q], [k]);
+          return draft("numbers-together", `${c} - ${order}`, `${c} - ${ax(k, v)}`);
         default: // c + p·v·q → (pq)v + c
-          return draft("numbers-together", `${c} + ${order}`, lin(k, c, v), [c, p, q], [k]);
+          return draft("numbers-together", `${c} + ${order}`, lin(k, c, v));
       }
     },
   },
 ];
 
-function draft(shape: string, start: string, goal: string, numbers: number[], along: number[], via: string[] = []) {
-  return { shape, start, goal, via, numbers, along };
+function draft(shape: string, start: string, goal: string, via: string[] = []) {
+  return { shape, start, goal, via };
 }
 
 /** A letter term of a longer sum: k times `mono`, written plain ("-3y"), as a product ("y·3·2"), or with three numbers ("2·a·3·b·2"). */
@@ -70,8 +70,6 @@ type Lt = { mono: string; k: number; form: "plain" | "product" | "triple" };
  * out, then the numbers added up.
  */
 function mix(r: Rng, shape: string, letters: Lt[], nums: number[], numProduct = false): Draft | null {
-  const numbers: number[] = [];
-  const along: number[] = [];
   type Piece = { text: string; done: string; neg: boolean; num: boolean };
   const pieces: Piece[] = [];
   for (const { mono, k, form } of letters) {
@@ -84,8 +82,6 @@ function mix(r: Rng, shape: string, letters: Lt[], nums: number[], numProduct = 
       const body =
         mono.length === 2 ? `${p}·${mono[0]}·${q}·${mono[1]}` : one(r, [`${p}·${mono}·${q}`, `${mono}·${p}·${q}`, `${p}·${q}·${mono}`]);
       text = k < 0 ? `-${body}` : body;
-      numbers.push(p, q);
-      along.push(k);
     } else if (form === "triple") {
       const m = Math.abs(k);
       const ways: number[][] = [];
@@ -94,25 +90,20 @@ function mix(r: Rng, shape: string, letters: Lt[], nums: number[], numProduct = 
       const [x, y, z] = one(r, ways);
       const body = `${x}·${mono[0]}·${y}·${mono[1]}·${z}`;
       text = k < 0 ? `-${body}` : body;
-      numbers.push(x, y, z);
-      along.push(x * y, k);
-    } else if (Math.abs(k) > 1) numbers.push(Math.abs(k));
+    }
     pieces.push({ text, done: ax(k, mono), neg: k < 0, num: false });
   }
   nums.forEach((n, i) => {
     const f = i === 0 && numProduct && n > 0 ? factorsOf(r, n) : null;
-    if (f) (numbers.push(...f), along.push(n));
-    else numbers.push(Math.abs(n));
     pieces.push({ text: f ? `${f[0]}·${f[1]}` : `${n}`, done: `${n}`, neg: n < 0, num: true });
   });
   // No pair of numbers that cancels at sight (… + 1 … - 1).
   if (nums.some((n, i) => nums.some((m, j) => j > i && n === -m))) return null;
   const total = nums.reduce((s, n) => s + n, 0);
   if (total === 0) return null;
-  // Partial sums met on the way.
+  // Partial sums met on the way: none 0.
   let acc = 0;
-  for (const n of nums.slice(0, -1)) ((acc += n), along.push(acc));
-  if (along.includes(0)) return null;
+  for (const n of nums.slice(0, -1)) if ((acc += n) === 0) return null;
   let order: Piece[] | null = null;
   for (let t = 0; t < 30 && !order; t++) {
     const o = shuffled(r, pieces);
@@ -134,7 +125,7 @@ function mix(r: Rng, shape: string, letters: Lt[], nums: number[], numProduct = 
   const goal = signedSum([...sorted.map((l) => ax(l.k, l.mono)), `${total}`]);
   const added = signedSum([...letters.map((l) => ax(l.k, l.mono)), `${total}`]);
   const via = [...steps, added].filter((v, i, vs) => v !== start && vs.indexOf(v) === i);
-  return { shape, start, goal, via, numbers, along };
+  return { shape, start, goal, via };
 }
 
 /** k (either sign) as two small numbers multiplied: 12 → [3, 4]. */

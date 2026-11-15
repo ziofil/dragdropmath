@@ -117,8 +117,9 @@ export function follows(start: MathState, goal: MathState): boolean {
   if (inequality) {
     const names = [...new Set(all.flatMap(variables))];
     if (names.length === 1) {
-      // One letter: scan it finely (−50 to 50), so a narrow stretch where they disagree isn't missed.
-      return Array.from({ length: 4001 }, (_, i) => -50 + i * 0.025 + 0.00731).every((v) => {
+      // One letter: scan it finely (−50 to 50, or 0 to 50 when letters are positive), so a narrow stretch where they disagree isn't missed.
+      const positive = start.letters === "positive";
+      return Array.from({ length: 4001 }, (_, i) => (positive ? 0.0001 + i * 0.0125 : -50 + i * 0.025 + 0.00731)).every((v) => {
         const e = { [names[0]]: v };
         return startRows.every((r) => holds(r, e)) === goalRows.every((r) => holds(r, e));
       });

@@ -8,8 +8,9 @@ import { without, type DragCtx } from "./types";
 import type { MathState } from "../expr/types";
 
 /**
- * A 1 the learner should see and simplify themselves (2·1, −2·1), rather than
- * have it vanish: marks a 1, or a −1, as explicit.
+ * A 1 a move leaves in a product (2(x − 1) → 2x − 2·1), kept for the move to
+ * show where the copy landed: tidying (game/tidy.ts) writes 2·1 as 2 right
+ * after. Marks a 1, or a −1, as explicit, so normalizing doesn't drop it first.
  */
 export function visibleOne(e: Expr): Expr {
   if (e.kind === "num" && e.value === 1) return { ...e, explicit: true };

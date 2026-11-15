@@ -13,7 +13,6 @@ export const explog: Chapter = {
     "combine-logs",
     "evaluate-log",
     "power-of-base",
-    "exp-across",
-    "log-across",
   ],
+  positive: true,
 };

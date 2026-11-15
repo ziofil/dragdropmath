@@ -4,7 +4,7 @@
  * stored anywhere but in the link.
  *
  *   title: Homework week 3
- *   moves: balance            # optional: a chapter (its id, number or title)
+ *   moves: balance            # optional: a chapter (its id, number or title; a link keeps its id)
  *   exercises:
  *     - start: 2x + 3 = 11
  *       goal: x = 4
@@ -21,7 +21,7 @@ import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { ALL_RULES } from "../rules";
-import { CHAPTERS, lettersPositive, rulesFor, type Chapter } from "./puzzles";
+import { CHAPTERS, lettersPositive, rulesOf, type Chapter } from "./puzzles";
 import { follows, isWrong, shapeMismatch } from "./answers";
 import { autoDecoys } from "./autoDecoys";
 import { allTitles, t } from "../i18n";
@@ -42,11 +42,23 @@ export type CheckedExercise = {
 
 export type CheckedSet = { set: ExerciseSet | null; problems: string[]; exercises: CheckedExercise[] };
 
-/** A chapter named by its id, its number (1, 2, …) or its title (in any language: a set is shared across them). */
+/** A chapter named by its id, its number on the path (1, 2, …) or its title (in any language: a set is shared across them). */
 export function chapterNamed(name: string): Chapter | undefined {
   const s = String(name).trim().toLowerCase();
   return CHAPTERS.find((c, i) => c.id === s || String(i + 1) === s || allTitles(c).some((title) => title.toLowerCase() === s));
 }
+
+/**
+ * The chapters' order until 2026-11-15 (commit bab30f7), when links kept a
+ * chapter the way the teacher wrote it: a number in a link made then means
+ * this order. Links now keep the chapter's id.
+ */
+const NUMBERED_UNTIL_2026_11_15 = ["shuffle", "collect", "distribute", "brackets", "balance", "powers", "factor", "formulas", "inequalities", "fractions", "simultaneous", "roots", "explog"];
+
+/** A chapter as a link keeps it: its id (a name no chapter has stays as it is, and is reported when checked). */
+const toLink = (name: string | undefined) => (name ? (chapterNamed(name)?.id ?? name) : "");
+/** A chapter as a link kept it: a number from an old link is a chapter of the order then. */
+const fromLink = (name: string) => (/^\d+$/.test(name.trim()) ? (NUMBERED_UNTIL_2026_11_15[Number(name) - 1] ?? name) : name);
 
 function why(m: Mismatch): string {
   const s = t().set;
@@ -62,14 +74,11 @@ export function chapterOf(set: ExerciseSet, ex: SetExercise): Chapter | undefine
 /** The moves of an exercise in a set: its own chapter's, else the set's, else all. */
 export function movesOf(set: ExerciseSet, ex: SetExercise): RuleId[] {
   const ch = chapterOf(set, ex);
-  return ch ? rulesFor(CHAPTERS.indexOf(ch)) : ALL_RULES;
+  return ch ? rulesOf(ch.id) : ALL_RULES;
 }
 
-/** Its letters stand for positive numbers (its chapter's do). */
-export function positiveOf(set: ExerciseSet, ex: SetExercise): boolean {
-  const ch = chapterOf(set, ex);
-  return ch ? lettersPositive(ch) : false;
-}
+/** Its letters stand for positive numbers: as its chapter's would, or (no chapter) where it has a power, a root or a log. */
+export const positiveOf = (set: ExerciseSet, ex: SetExercise): boolean => lettersPositive(chapterOf(set, ex), ex.start);
 
 const str = (v: unknown) => (typeof v === "number" ? String(v) : typeof v === "string" ? v.trim() : undefined);
 
@@ -152,9 +161,9 @@ async function pipe(bytes: Uint8Array, stream: CompressionStream | Decompression
   return new Uint8Array(await out.arrayBuffer());
 }
 
-/** The set packed small, for a link: [title, moves, [[start, goal, wrong1, wrong2, hint, moves], …]]. */
+/** The set packed small, for a link: [title, moves, [[start, goal, wrong1, wrong2, hint, moves], …]], chapters by id. */
 export async function encodeSet(set: ExerciseSet): Promise<string> {
-  const packed = [set.title, set.moves ?? "", set.exercises.map((e) => [e.start, e.goal, e.wrong?.[0] ?? "", e.wrong?.[1] ?? "", e.hint ?? "", e.moves ?? ""])];
+  const packed = [set.title, toLink(set.moves), set.exercises.map((e) => [e.start, e.goal, e.wrong?.[0] ?? "", e.wrong?.[1] ?? "", e.hint ?? "", toLink(e.moves)])];
   return b64url(await pipe(new TextEncoder().encode(JSON.stringify(packed)), new CompressionStream("deflate-raw")));
 }
 
@@ -175,7 +184,7 @@ export async function decodeSet(code: string): Promise<ExerciseSet> {
   const [title, moves, list] = packed as [string, string, unknown[]];
   return {
     title,
-    ...(moves ? { moves } : {}),
+    ...(moves ? { moves: fromLink(moves) } : {}),
     exercises: list.map((row) => {
       if (!Array.isArray(row) || !row.every(isText)) throw new Error("not an exercise");
       const [start, goal, w1, w2, hint, mv] = row as string[];
@@ -185,7 +194,7 @@ export async function decodeSet(code: string): Promise<ExerciseSet> {
         goal,
         ...(w1 && w2 && parses(w1) && parses(w2) ? { wrong: [w1, w2] } : {}),
         ...(hint ? { hint } : {}),
-        ...(mv ? { moves: mv } : {}),
+        ...(mv ? { moves: fromLink(mv) } : {}),
       };
     }),
   };

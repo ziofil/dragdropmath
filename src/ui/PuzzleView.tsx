@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
-import { CHAPTERS, type Chapter } from "../game/puzzles";
-import type { Level } from "../game/generate/write";
+import { chapterById, CHAPTERS } from "../game/puzzles";
+import { isDone, taskOf } from "../game/task";
 import type { RuleId } from "../rules";
-import { matchesGoal } from "../game/solver";
-import { badgeTier, countSolved, isCounted, loadProgress, loadSolved, markSolved, type Kind, type Tier } from "../game/scoring";
-import { loadGuesses, loadPicks, saveGuess } from "../game/guess";
+import { record, seen, STREAK_MARKS, type Context, type Recorded, type Tier } from "../game/scoring";
+import { answer, arrive, canSolve, cardOf, type Phase } from "../game/predict";
 import { Badge } from "./Badge";
+import { Board } from "./Board";
 import { chapterText, t } from "../i18n";
-import { MathCanvas, StaticMath, StillBoard } from "./MathCanvas";
+import { StaticMath } from "./MathCanvas";
 import { useMoveHistory } from "./useMoveHistory";
+import { MathText } from "./MathText";
 
 /** A link: where to, and what it says. */
 type Link = { href: string; text: string };
@@ -22,100 +23,72 @@ type Link = { href: string; text: string };
 export type Exercise = {
   puzzle: { id: string; start: string; goal: string; hint?: string };
   rules: readonly RuleId[];
-  /** "6.26", "3". */
+  /** "Exercise <title>" in the heading, between the ‹ › arrows. */
   label: string;
-  /** The heading, when it isn't "Exercise <label>". */
-  title?: string;
-  /** In place of the ‹ title › arrows: the levels to switch between (made-up practice). */
+  /** In place of the ‹ title › arrows: the levels to switch between (a chapter's). */
   levels?: { href: string; text: string; current: boolean }[];
-  /** The three answers to guess between, or null to solve it straight away. */
+  /** The three answers to predict between, or null to solve it straight away. */
   choices: string[] | null;
   back: Link[];
   prev?: Link;
   next?: Link;
-  /** Once solved: where to go on. */
+  /** Once done: where to go on. */
   onward: Link;
-  /** Made up on the spot (a chapter's): nothing about it is kept, beyond the counts. */
-  fresh?: true;
-  /**
-   * A chapter's practice or test exercise, counted at its level: in practice
-   * once solved, in the test once predicted right (which earns the badge).
-   */
-  counts?: { chapter: Chapter; level: Level; kind: Kind };
+  /** What its outcomes count towards (scoring.ts). */
+  context: Context;
   /** Its letters stand for positive numbers (said on screen; see rules/signs.ts). */
   positiveLetters?: boolean;
 };
 
 export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
-  const { puzzle, rules } = ex;
-  const chapter = ex.counts?.chapter;
-  // A set's exercise keeps its prediction and that it's solved; a chapter's made-up one only adds to a count.
-  const keep = !ex.fresh;
-  const test = ex.counts?.kind === "test";
+  const { puzzle, rules, choices, context } = ex;
   const start = useMemo((): MathState => ({ ...parseState(puzzle.start), ...(ex.positiveLetters ? { letters: "positive" as const } : {}) }), [puzzle, ex.positiveLetters]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
-  // The chapter's badge before this exercise, and with it solved.
-  const tiers = useMemo(() => {
-    if (!test || !ex.counts || isCounted(puzzle.id)) return { before: 0 as Tier, after: 0 as Tier };
-    const { chapter, level } = ex.counts;
-    const before = loadProgress();
-    const c = before[chapter.id] ?? { easy: 0, medium: 0, hard: 0 };
-    const after = { ...before, [chapter.id]: { ...c, [level]: c[level] + 1 } };
-    return { before: badgeTier(chapter, before), after: badgeTier(chapter, after) };
-    // Worked out once, on arriving: once solved it's counted, and the new badge must still show.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puzzle.id]);
-  // Guess first (the chapter's last exercises): pick what it becomes before solving it.
-  const choices = ex.choices;
-  const [guessed, setGuessed] = useState<string | null>(null);
-  // What was done on an earlier visit: shown again, and it can all be done again.
-  const before = useMemo(
-    () => (keep ? { guess: loadGuesses()[puzzle.id], pick: loadPicks()[puzzle.id], solved: loadSolved().has(puzzle.id) } : { guess: undefined, pick: undefined, solved: false }),
-    [puzzle.id, keep],
-  );
-  const guessedBefore = before.guess !== undefined;
-  const pick = (choice: string) => {
-    setGuessed(choice);
-    if (keep) saveGuess(puzzle.id, choice === puzzle.goal ? "right" : "wrong", choice);
-    if (test && ex.counts && choice === puzzle.goal) countSolved(ex.counts.chapter.id, ex.counts.level, puzzle.id, "test");
-  };
-  // Skip predicting: the right answer turns green, as if picked (no star, nothing said).
-  const [revealed, setRevealed] = useState(false);
-  const reveal = () => {
-    setRevealed(true);
-    if (keep) saveGuess(puzzle.id, "revealed");
-  };
-  // The answers to show as answered: this visit's pick or reveal, or an earlier one.
-  const earlier = guessed === null && (before.guess === "right" || before.guess === "wrong");
-  const shownPick = guessed ?? (revealed ? null : (before.pick ?? (before.guess === "right" ? puzzle.goal : null)));
-  const mustGuess = choices !== null && !guessedBefore && guessed === null && !revealed;
-  const { current, onDrop, undo, reset, canUndo } = useMoveHistory(start, (s) => matchesGoal(s, goal));
-  const [showHint, setShowHint] = useState(false);
-  const solved = matchesGoal(current, goal);
-  useEffect(() => {
-    if (!solved || !ex.counts) return;
-    const { chapter, level, kind } = ex.counts;
-    // A test with no wrong answers to offer is solved straight away: solving it is its right answer.
-    if (kind === "practice" || choices === null) countSolved(chapter.id, level, puzzle.id, kind);
-  }, [solved, puzzle.id, ex.counts, choices]);
-  useEffect(() => {
-    if (solved && keep) markSolved(puzzle.id);
-  }, [solved, puzzle.id, keep]);
+  const task = useMemo(() => taskOf(goal), [goal]);
+  // What was done here before: its prediction is shown as it was, never asked again.
+  const [before] = useState(() => seen(puzzle.id));
+  const [phase, setPhase] = useState<Phase>(() => arrive(choices, puzzle.goal, before));
+  // What this visit's outcomes earned, as scoring says: right ones in a row, a new badge.
+  const [earned, setEarned] = useState<{ streak: number; badge: Tier }>({ streak: 0, badge: 0 });
+  const tell = (r: Recorded) =>
+    setEarned((e) => ({ streak: r.streak?.now ?? e.streak, badge: r.tier.after > r.tier.before ? r.tier.after : e.badge }));
 
-  const { prev, next } = ex;
+  const pick = (choice: string | null) => {
+    const next = answer(phase, puzzle.goal, choice);
+    if (next === phase || next.kind !== "answered") return;
+    setPhase(next);
+    tell(record(puzzle.id, context, next.prediction, next.pick));
+  };
+
+  // With the answer hidden, any order of its terms will do (ln(5)/y + 1 is 1 + ln(5)/y), and a formula any equal form.
+  const reached = (s: MathState) => isDone(goal, s, task);
+  const moves = useMoveHistory(start, reached);
+  const solved = reached(moves.current);
+  const [showHint, setShowHint] = useState(false);
+  useEffect(() => {
+    if (moves.canUndo) record(puzzle.id, context, "tried");
+  }, [moves.canUndo, puzzle.id, context]);
+  useEffect(() => {
+    if (solved) tell(record(puzzle.id, context, "solved"));
+  }, [solved, puzzle.id, context]);
+
+  const chapter = context.kind === "set" ? undefined : chapterById(context.chapter);
+  const asking = phase.kind === "asking";
+  // A chapter's predict exercise is done once answered: on to another straight away (solving it shows why).
+  const onwardNow = context.kind === "predict" && phase.kind === "answered";
 
   return (
     <main className="puzzle">
       <header className="puzzle-head">
-        <span className="back-links">
-          {ex.back.map((b, i) => (
-            <a key={b.href} href={b.href} className={i === 0 ? "back" : "back back-lesson"}>
+        <span className="puzzle-back">
+          {ex.back.map((b) => (
+            <a key={b.href} href={b.href} className="back-link">
               {b.text}
             </a>
           ))}
         </span>
         {ex.levels ? (
-          <nav className="level-pick" aria-label={ex.title}>
+          <nav className="level-pick" aria-label={ex.label}>
             {ex.levels.map((l) => (
               <a key={l.href} href={l.href} aria-current={l.current ? "page" : undefined}>
                 {l.text}
@@ -123,125 +96,85 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
             ))}
           </nav>
         ) : (
-          <nav className="ex-nav" aria-label={t().exercisesNav}>
-            {prev ? (
-              <a href={prev.href} className="ex-step" title={t().previousTitle(prev.text)} aria-label={t().previousLabel(prev.text)}>
-                ‹
-              </a>
-            ) : (
-              <span className="ex-step" aria-hidden="true" />
-            )}
-            <div className="title">{ex.title ?? t().exerciseN(ex.label)}</div>
-            {next ? (
-              <a href={next.href} className="ex-step" title={t().nextTitle(next.text)} aria-label={t().nextLabel(next.text)}>
-                ›
-              </a>
-            ) : (
-              <span className="ex-step" aria-hidden="true" />
-            )}
+          <nav className="puzzle-nav" aria-label={t().exercisesNav}>
+            <Step link={ex.prev} title={t().previousTitle} label={t().previousLabel} arrow="‹" />
+            <div className="puzzle-title">{t().exerciseN(ex.label)}</div>
+            <Step link={ex.next} title={t().nextTitle} label={t().nextLabel} arrow="›" />
           </nav>
         )}
       </header>
 
       {choices ? (
-        // Predicting first: one panel that stays put. Picking (or revealing)
-        // colours the cards in place; the green one is the goal.
-        <section className="goal guess">
-          {guessed !== null ? (
-            <div className={`guess-result ${guessed === puzzle.goal ? "right" : "wrong"}`} role="status">
-              {guessed === puzzle.goal ? (
-                <>
-                  <span className="star" aria-hidden="true">★</span> {test ? t().testRight : t().rightFirstTime}
-                </>
-              ) : (
-                <>{t().notQuite}</>
-              )}
-            </div>
-          ) : earlier ? (
-            <div className={`guess-result ${before.guess}`}>
-              {before.guess === "right" ? (
-                <>
-                  <span className="star" aria-hidden="true">★</span> {t().guessedBeforeRight}
-                </>
-              ) : (
-                <>{t().guessedBeforeWrong(!!before.pick)}</>
-              )}
-            </div>
-          ) : (
-            <span className="goal-label">{t().guessPrompt}</span>
-          )}
-          {mustGuess ? (
-            <div className="choices">
-              {choices.map((c) => (
-                <button key={c} className="choice" onClick={() => pick(c)}>
-                  <StaticMath state={parseState(c)} height={90} room={12} />
+        // Predicting first: the answers stay where they are; picking (or revealing) colours them in place.
+        <section className="puzzle-goal predict">
+          <span className="puzzle-label">{t().predictPrompt}</span>
+          <div className="predict-choices">
+            {choices.map((c) => {
+              const look = cardOf(phase, c, puzzle.goal);
+              const maths = <StaticMath state={parseState(c)} height={90} room={12} />;
+              return look === "open" ? (
+                <button key={c} className="card predict-choice" onClick={() => pick(c)}>
+                  {maths}
                 </button>
-              ))}
-            </div>
-          ) : (
-            // The three answers stay: the right one green, a wrong pick red.
-            <div className="choices answered">
-              {choices.map((c) => (
-                <div key={c} className={`choice ${c === puzzle.goal ? "is-right" : c === shownPick ? "is-picked" : ""}`}>
-                  <StaticMath state={parseState(c)} height={90} room={12} />
+              ) : (
+                <div key={c} className={`card predict-choice is-${look}`}>
+                  {maths}
                 </div>
-              ))}
-            </div>
-          )}
-          {/* Once answered it keeps its place, so nothing below moves. */}
-          <button className={`reveal ${mustGuess ? "" : "is-spent"}`} onClick={reveal} disabled={!mustGuess} aria-hidden={!mustGuess}>
-            {t().reveal}
-          </button>
-          {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
-          {/* The test: answered, it's done (solving it is only to see why). */}
-          {test && !mustGuess && !solved && (
-            <div className="answered-onward">
-              <NewBadge chapter={chapter} tiers={tiers} />
-              <a className="button primary" href={ex.onward.href}>
-                {ex.onward.text}
-              </a>
-            </div>
-          )}
+              );
+            })}
+          </div>
         </section>
       ) : (
-        <section className="goal">
-          {before.solved && !solved && <p className="solved-before">{t().solvedBefore}</p>}
-          <span className="goal-label">{t().makeItLookLike}</span>
-          <StaticMath state={goal} />
+        <section className="puzzle-goal">
+          {/* An equation's answer stays hidden: finding it is the exercise. */}
+          {task.kind === "solve" ? (
+            <p className="puzzle-task">
+              <MathText text={t().solveFor(task.letters)} />
+            </p>
+          ) : (
+            <p className="puzzle-task">
+              {t().makeItLookLike} <StaticMath state={goal} inline />
+            </p>
+          )}
         </section>
       )}
 
-      <section className={`board ${mustGuess ? "board-waiting" : ""}`}>
-        {mustGuess ? (
-          <div className="still">
-            <StillBoard state={start} />
-            <p className="still-note">{t().pickFirst}</p>
-          </div>
-        ) : (
-          <MathCanvas state={current} rules={rules} onDrop={onDrop} />
-        )}
-        <div className="board-bar">
-          <div className="actions">
-            {puzzle.hint && !mustGuess && (
-              <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint}>
-                {t().hint}
-              </button>
-            )}
-            <button onClick={undo} disabled={!canUndo}>
-              {t().undo}
+      <Board
+        moves={moves}
+        rules={rules}
+        locked={!canSolve(phase)}
+        status={
+          <>
+            <Said phase={phase} streak={earned.streak} predict={context.kind === "predict"} />
+            {before.solved && !solved && <span className="puzzle-before">{t().solvedBefore}</span>}
+            {!solved && <NewBadge chapterId={chapter?.id} tier={earned.badge} />}
+          </>
+        }
+        before={
+          puzzle.hint && (
+            <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint} disabled={asking}>
+              {t().hint}
             </button>
-            <button onClick={reset} disabled={!canUndo}>
-              {t().reset}
-            </button>
-          </div>
-        </div>
-        {showHint && puzzle.hint && !mustGuess && <p className="hint">{puzzle.hint}</p>}
-      </section>
+          )
+        }
+        after={
+          asking ? (
+            <button onClick={() => pick(null)}>{t().reveal}</button>
+          ) : (
+            onwardNow && (
+              <a className="button primary" href={ex.onward.href}>
+                {ex.onward.text}
+              </a>
+            )
+          )
+        }
+      />
+      {showHint && puzzle.hint && !asking && <p className="puzzle-hint">{puzzle.hint}</p>}
 
       {solved && (
-        <section className="result" role="status">
-          <div className="result-name">{t().solvedBang}</div>
-          <NewBadge chapter={chapter} tiers={tiers} />
+        <section className="card puzzle-solved" role="status">
+          <div className="puzzle-solved-name">{t().solvedBang}</div>
+          <NewBadge chapterId={chapter?.id} tier={earned.badge} />
           <a className="button primary" href={ex.onward.href}>
             {ex.onward.text}
           </a>
@@ -251,13 +184,42 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   );
 }
 
-/** A badge just earned, if this exercise earned one. */
-function NewBadge({ chapter, tiers }: { chapter?: Chapter; tiers: { before: Tier; after: Tier } }) {
-  if (!chapter || tiers.after <= tiers.before) return null;
+/** ‹ or ›: to the previous or next exercise, or an empty space the same size. */
+function Step({ link, title, label, arrow }: { link?: Link; title: (s: string) => string; label: (s: string) => string; arrow: string }) {
+  if (!link) return <span className="puzzle-step" aria-hidden="true" />;
   return (
-    <div className="new-badge">
-      <Badge tier={tiers.after} n={CHAPTERS.indexOf(chapter) + 1} size={36} />
-      {t().newBadge(tiers.after as 1 | 2 | 3, chapterText(chapter).title)}
-    </div>
+    <a href={link.href} className="puzzle-step" title={title(link.text)} aria-label={label(link.text)}>
+      {arrow}
+    </a>
+  );
+}
+
+/** What the prediction came to: the prompt to pick first, or how it went. */
+function Said({ phase, streak, predict }: { phase: Phase; streak: number; predict: boolean }) {
+  if (phase.kind === "none") return null;
+  if (phase.kind === "asking") return <span>{t().pickFirst}</span>;
+  const { prediction, earlier, pick } = phase;
+  if (prediction === "revealed") return <span>{t().revealedNote}</span>;
+  if (prediction === "wrong") return <span className="said-wrong">{earlier ? t().predictedBeforeWrong(!!pick) : t().notQuite}</span>;
+  return (
+    <span className="said-right">
+      <span className="star" aria-hidden="true">
+        ★
+      </span>{" "}
+      {earlier ? t().predictedBeforeRight : predict ? t().predictRight : t().rightFirstTime}
+      {streak >= 2 && <span className={STREAK_MARKS.includes(streak) ? "said-streak said-mark" : "said-streak"}>{t().inARow(streak)}</span>}
+    </span>
+  );
+}
+
+/** A badge just earned, if this visit earned one. */
+function NewBadge({ chapterId, tier }: { chapterId?: string; tier: Tier }) {
+  const chapter = chapterById(chapterId);
+  if (!chapter || !tier) return null;
+  return (
+    <span className="puzzle-badge">
+      <Badge tier={tier} n={CHAPTERS.indexOf(chapter) + 1} size={30} />
+      {t().newBadge(tier, chapterText(chapter).title)}
+    </span>
   );
 }

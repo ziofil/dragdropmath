@@ -13,7 +13,7 @@ import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
 import { allNodes } from "../expr/tree";
 import { candidatesFor, handles, tapFor, type RuleId } from "../rules";
-import { allPuzzles } from "../game/testing/exercises";
+import { corpus, forExhaustive } from "../game/testing/corpus";
 import { neighbours } from "../game/solver";
 import { renderState } from "./typeset";
 
@@ -95,7 +95,7 @@ function checkTransition(before: MathState, after: MathState): string[] {
 }
 
 describe("every move can be animated", () => {
-  it.each(allPuzzles().map((r) => [r.puzzle.id, r.puzzle.start, r.rules] as const))("%s: %s", (_, src, rules) => {
+  it.each(forExhaustive(corpus()).map((c) => [c.id, c.start, c.rules] as const))("%s: %s", (_, src, rules) => {
     // The start state and everything one or two moves away.
     const start = parseState(src);
     const problems: string[] = [];
@@ -135,5 +135,21 @@ describe("what you carry is what you grabbed", () => {
     ["a + b - a", "b", "b"],
   ])("%s: carrying %s carries %s", (src, node, expected) => {
     expect(carriedText(src, node)).toBe(expected);
+  });
+});
+
+// Blending two boards, Dragology keeps React's keys: unset, they're list positions, and a piece
+// fading out and another fading in at one position made React leave one drawn for good
+// (a stray + after undoing x(x + 2) + 3(x + 2) → (x + 3)(x + 2)). So keyed pieces carry their key.
+describe("every keyed piece has it as its React key", () => {
+  it("x(x + 2) + 3(x + 2)", () => {
+    const missing: string[] = [];
+    const walk = (e: El) => {
+      const k = e.props.dragologyKey;
+      if (typeof k === "string" && e.key !== `.k:${k}`) missing.push(k);
+      kids(e).forEach(walk);
+    };
+    walk(render(parseState("x(x + 2) + 3(x + 2)")));
+    expect(missing).toEqual([]);
   });
 });

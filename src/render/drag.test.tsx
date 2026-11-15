@@ -9,9 +9,9 @@ import type { Expr, Log } from "../expr/types";
 import { parseState } from "../expr/parse";
 import { allNodes } from "../expr/tree";
 import { ALL_RULES, candidatesFor, signId } from "../rules";
-import { startOf } from "../game/puzzles";
-import { allPuzzles, findPuzzle } from "../game/testing/exercises";
-import { solutionVia } from "../game/solver";
+import { rulesOf } from "../game/puzzles";
+import { corpus } from "../game/testing/corpus";
+import { verify } from "../game/generate/verify";
 import { MERGE_AT } from "./drag";
 import { ANCHOR, harness, show } from "./testing/harness";
 import { checkAllMovesReachable } from "./testing/checks";
@@ -20,7 +20,7 @@ describe("moves inside small superscripts can be reached too", () => {
   // Mid-puzzle states the puzzle starts don't cover: combining exponents in place.
   it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)", "(x + 1)(2x + 3)", "(2x - 3)(2x + 3)", "(3 + 2x)(3 - 2x)", "a(a - 3) + 4a - 12"])("%s", (src) => {
     expect(checkAllMovesReachable(src, ALL_RULES)).toEqual([]);
-  });
+  }, 60_000);
 });
 
 // Slow (minutes): run with `npm run test:all`.
@@ -28,9 +28,10 @@ const SLOW = !!(globalThis as { process?: { env: Record<string, string | undefin
 describe.runIf(SLOW)("on the way to solving, every move can still be reached by dragging", () => {
   // The starts are checked below; these are the states a learner passes
   // through (as the moves and tidying make them, marks and all).
-  it.each(allPuzzles().map((r) => [r.puzzle.id, r] as const))("%s", (_, ref) => {
-    const via = (ref.puzzle.via ?? []).map((v) => parseState(v));
-    const path = solutionVia(parseState(ref.puzzle.start), parseState(ref.puzzle.goal), via, ref.rules, { maxDepth: 10, maxStates: 120_000 })!;
+  it.each(corpus().map((c) => [c.id, c] as const))("%s", (_, ref) => {
+    const check = verify(ref, ref.rules);
+    expect("stuck" in check ? check.stuck : "").toBe("");
+    const path = "path" in check ? check.path : [];
     const problems = path.slice(1, -1).flatMap((s) => checkAllMovesReachable(s, ref.rules).map((p) => `at ${show(s)}: ${p}`));
     expect(problems).toEqual([]);
   }, 60_000);
@@ -430,8 +431,8 @@ describe("substituting: the letter there turns into the value in place (11.6)", 
 
 describe("a square carried across = turns into ½ (13.30)", () => {
   it("(2^x)^2 = 48/3: the ² can be carried across, by hand", () => {
-    const r = findPuzzle("l30")!;
-    const h = harness("(2^x)^2 = 48/3", r.rules);
+    const r = { rules: rulesOf("balance") };
+    const h = harness({ ...parseState("(2^x)^2 = 48/3"), letters: "positive" }, r.rules);
     const square = (h.state.sides[0] as Extract<Expr, { kind: "pow" }>).exp;
     expect(candidatesFor(h.state, square.id, r.rules).map((c) => show(c.state))).toContain("2^x = (48/3)^(1/2)");
     expect(checkAllMovesReachable(h.state, r.rules)).toEqual([]);
@@ -441,10 +442,10 @@ describe("a square carried across = turns into ½ (13.30)", () => {
 describe("undoing a square by hand, where nothing can be lost (12.23, 12.30)", () => {
   it.each([
     ["r23", "(2√x)^2 = 12", "2*√(x) = 12^(1/2)"],
-    ["r30", "x^2 = 4", "x = 4^(1/2)"], // letters stand for positive numbers in the roots chapter
-  ])("%s: %s", (id, src, expected) => {
-    const r = findPuzzle(id)!;
-    const h = harness(startOf(src, r.chapter), r.rules);
+    ["r30", "x^2 = 4", "x = 4^(1/2)"], // where letters stand for positive numbers
+  ])("%s: %s", (_, src, expected) => {
+    const r = { rules: rulesOf("balance") };
+    const h = harness({ ...parseState(src), letters: "positive" }, r.rules);
     const square = (h.state.sides[0] as Extract<Expr, { kind: "pow" }>).exp;
     expect(candidatesFor(h.state, square.id, r.rules).map((c) => show(c.state))).toContain(expected.replace(/\*/g, "*"));
     expect(checkAllMovesReachable(h.state, r.rules)).toEqual([]);

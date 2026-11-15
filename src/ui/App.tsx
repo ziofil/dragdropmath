@@ -1,104 +1,119 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
 import { chapterById } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { SetMaker, SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
 import { ExerciseRoute } from "./Practice";
-import { setDebug, useDebug, useDebugShortcut } from "./debug";
-import { ENGLISH_ONLY, LANGS, setLang, t, useLang, type Lang } from "../i18n";
+import { NotFound } from "./NotFound";
+import { useDebugShortcut } from "./debug";
+import { setDebug, setLang, setSkin, SKINS, useSettings, type SkinId } from "./settings";
+import { anchorOf, href, parse, type Route } from "./routes";
+import { ENGLISH_ONLY, LANGS, t, type Lang } from "../i18n";
 
-function useHash() {
-  const [hash, setHash] = useState(() => window.location.hash);
+const subscribeHash = (f: () => void) => {
+  window.addEventListener("hashchange", f);
+  return () => window.removeEventListener("hashchange", f);
+};
+const hashNow = () => window.location.hash;
+
+/** Where a route points on its page: an element, or the top. The one place that scrolls. */
+function scrollTo(route: Route) {
+  const id = anchorOf(route);
+  const el = id && document.getElementById(id);
+  if (el) el.scrollIntoView({ block: "start" });
+  else window.scrollTo(0, 0);
+}
+
+/** The page the address shows; scrolled to where it points, also when its link is followed again. */
+function useRoute(): Route {
+  const hash = useSyncExternalStore(subscribeHash, hashNow, hashNow);
+  const route = useMemo(() => parse(hash), [hash]);
+  useLayoutEffect(() => {
+    // An earlier form of the link: shown as it's written now.
+    const now = href(route);
+    if (route.page !== "missing" && (route.page !== "home" || route.at) && now !== hash) history.replaceState(null, "", now);
+    scrollTo(route);
+  }, [hash]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A link to where the address is already (the lesson, again, after scrolling away): no hashchange, so scroll here.
   useEffect(() => {
-    const on = () => {
-      setHash(window.location.hash);
-      window.scrollTo(0, 0);
+    const onClick = (e: MouseEvent) => {
+      const a = e.target instanceof Element ? e.target.closest("a") : null;
+      if (a?.getAttribute("href") === window.location.hash) scrollTo(parse(window.location.hash));
     };
-    window.addEventListener("hashchange", on);
-    return () => window.removeEventListener("hashchange", on);
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, []);
-  return hash;
+  return route;
+}
+
+function Page({ route }: { route: Route }) {
+  switch (route.page) {
+    case "home":
+      return <Home key={route.at ?? ""} at={chapterById(route.at)} />;
+    case "chapter": {
+      const chapter = chapterById(route.chapter);
+      // Keyed by the chapter: going to one of its sections keeps the page (and the lesson's boards) as they are.
+      return chapter ? <ChapterView key={chapter.id} chapter={chapter} /> : <NotFound />;
+    }
+    case "exercise":
+      return <ExerciseRoute key={href(route)} mode={route.mode} chapterId={route.chapter} level={route.level} seed={route.seed} />;
+    case "set":
+      return <SetRoute key={href(route)} code={route.code} n={route.n} />;
+    case "make":
+      return <SetMaker />;
+    case "sandbox":
+      return <Sandbox />;
+    case "missing":
+      return <NotFound />;
+  }
 }
 
 export function App() {
-  const hash = useHash();
-  // A chapter, perhaps at one of its sections: #/c/<chapter>[/moves|practice|test]
-  // (#/moves/<chapter> is an earlier link to its moves).
-  const oldMoves = hash.match(/^#\/moves\/([\w-]+)$/);
-  const chapterLink = oldMoves ? [hash, oldMoves[1], "moves"] : hash.match(/^#\/c\/([\w-]+)(?:\/(moves|practice|test))?$/);
-  const chapter = chapterById(chapterLink?.[1]);
-  // The learning path, with a chapter picked out (coming back from it).
-  const atId = hash.match(/^#\/at\/([\w-]+)$/)?.[1];
-  const at = chapterById(atId);
-  // Sets of one's own: making one, or one opened from its link (and its exercises).
-  const making = hash === "#/sets/new";
-  const sandbox = hash === "#/sandbox";
-  // A chapter's exercise: #/practice|test/<chapter>/<level>/<seed> (#/ex/ is an earlier test link).
-  const exercise = hash.match(/^#\/(practice|test|ex)\/([\w-]+)\/(\w+)\/(\d+)$/);
-  const setLink = hash.match(/^#\/set\/([\w-]+)(?:\/(\d+))?$/);
-  const debug = useDebug();
+  const route = useRoute();
+  const { debug, skin, lang } = useSettings();
   useDebugShortcut();
-  const lang = useLang();
-  useEffect(() => {
-    document.documentElement.lang = t().htmlLang;
-    document.title = t().pageTitle;
-  }, [lang]);
 
   return (
-    // Keyed by the language: switching it redraws everything in the new one.
-    <div className="app" key={lang}>
+    <div className="app">
       <nav className="topbar">
-        <a href="#/" className="logo">
+        <a href={href({ page: "home" })} className="topbar-logo">
           {t().logo}
           <span>.</span>
         </a>
-        <span className="top-right">
+        <span className="topbar-links">
           {debug && (
-            <button className="debug-badge" onClick={() => setDebug(false)} title={t().debugOn}>
+            <button className="bare topbar-debug" onClick={() => setDebug(false)} title={t().debugOn}>
               debug ✕
             </button>
           )}
-          <a href="#/sandbox" className="top-link" aria-current={sandbox ? "page" : undefined}>
+          <a href={href({ page: "sandbox" })} className="button quiet" aria-current={route.page === "sandbox" ? "page" : undefined}>
             {t().sandbox}
           </a>
           {/* For teachers (or anyone): write exercises and share them as a link. */}
-          <a href="#/sets/new" className="top-link" aria-current={making ? "page" : undefined}>
+          <a href={href({ page: "make" })} className="button quiet" aria-current={route.page === "make" ? "page" : undefined}>
             {t().makeExercises}
           </a>
-          {/* The select's own arrow sits too far right: it's drawn by .lang-wrap instead. */}
-          {!ENGLISH_ONLY && (
-            <span className="lang-wrap">
-              <select className="lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t().language}>
-                {LANGS.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-            </span>
-          )}
+          <Pick value={skin} label={t().skin} options={SKINS.map((s) => [s.id, s.name])} onPick={(v) => setSkin(v as SkinId)} />
+          {!ENGLISH_ONLY && <Pick value={lang} label={t().language} options={LANGS.map((l) => [l.code, l.name])} onPick={(v) => setLang(v as Lang)} />}
         </span>
       </nav>
-      {sandbox ? (
-        <Sandbox />
-      ) : making ? (
-        <SetMaker />
-      ) : exercise ? (
-        <ExerciseRoute
-          key={hash}
-          kind={exercise[1] === "practice" ? "practice" : "test"}
-          chapterId={exercise[2]}
-          level={exercise[3]}
-          seed={Number(exercise[4])}
-        />
-      ) : setLink ? (
-        <SetRoute key={hash} code={setLink[1]} n={setLink[2] ? Number(setLink[2]) : null} />
-      ) : chapter ? (
-        <ChapterView key={hash} chapter={chapter} section={chapterLink?.[2]} />
-      ) : (
-        <Home key={at?.id ?? ""} at={at} />
-      )}
+      <Page route={route} />
     </div>
+  );
+}
+
+/** A setting's drop-down, as a quiet button (its arrow drawn by .topbar-pick: the select's own sits too far right). */
+function Pick({ value, label, options, onPick }: { value: string; label: string; options: [string, string][]; onPick: (v: string) => void }) {
+  return (
+    <span className="topbar-pick">
+      <select className="button quiet" value={value} onChange={(e) => onPick(e.target.value)} aria-label={label}>
+        {options.map(([v, name]) => (
+          <option key={v} value={v}>
+            {name}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }

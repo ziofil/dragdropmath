@@ -25,7 +25,7 @@ import { canvasBox, carriedCentre, clamp01 } from "../geometry";
 import { stateKey } from "../../expr/key";
 import { textWidth } from "../measure";
 import { fadeGlyphs, fadeGlyphsEverywhere, fadeLayer, layerChildren, redrawLayer, transplant } from "../preview";
-import { glyph, LEAD, type RenderCtx } from "../typeset";
+import { glyph, LEAD, named, type RenderCtx } from "../typeset";
 
 class FlipSign extends Modifier<MathState> {
   readonly name = "flipSign";
@@ -93,7 +93,7 @@ class FlipSign extends Modifier<MathState> {
   private dress(layers: LayeredSvgx, t: number, onMove: boolean): LayeredSvgx {
     const id = this.ctx.draggedId!;
     let out = transplant(layers, this.start, id);
-    out = redrawLayer(out, id, layerChildren(this.start, id), <g dragologyKey="carry-sign" opacity={t}>{this.newSign}</g>);
+    out = redrawLayer(out, id, layerChildren(this.start, id), <g key={named("carry-sign")} dragologyKey="carry-sign" opacity={t}>{this.newSign}</g>);
     if (this.negative) {
       // The − it had fades out (its own handle, or drawn in the term's layer).
       out = fadeLayer(out, signId(id), 1 - t);

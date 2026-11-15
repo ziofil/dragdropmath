@@ -91,3 +91,16 @@ export function signOf(e: Expr, a: Assume): Sign {
 export const canBeNegative = (e: Expr, a: Assume) => !atLeast0(signOf(e, a));
 export const isPositive = (e: Expr, a: Assume) => signOf(e, a) === "positive";
 export const isNegative = (e: Expr, a: Assume) => signOf(e, a) === "negative";
+
+/**
+ * Do these parts split out of a root, a power that isn't whole, or a log
+ * (√(ab) = √a·√b, (ab)^(1/2) = a^(1/2)·b^(1/2), ln(ab) = ln a + ln b, the same
+ * for a/b)? When none of them can be negative; or when all but one are
+ * positive numbers — then wherever the whole is defined, the last can't be
+ * negative either (√(16u) means u ≥ 0; ln(2x) means x > 0). One answer for
+ * every move that splits, whichever piece is carried.
+ */
+export function splitsOver(parts: Expr[], a: Assume): boolean {
+  const unsure = parts.filter((p) => !(isConstant(p) && evaluate(p, {}) > 0));
+  return unsure.length <= 1 || unsure.every((p) => !canBeNegative(p, a));
+}

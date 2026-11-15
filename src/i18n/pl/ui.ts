@@ -46,7 +46,6 @@ export const pl: Translation = {
   notMasteredYet: (titles: string) => ` Jeszcze nieopanowane: ${titles}. Możesz jednak zacząć już teraz.`,
   startLesson: "Zacznij lekcję →",
   backToLesson: "Wróć do lekcji →",
-  leadsOnTo: (titles: string) => `Dalej: ${titles}.`,
   badges: "Odznaki",
   noBadgesYet: "Rozwiąż test w dowolnym rozdziale, a zdobędziesz jego odznakę.",
   badgesEarned: (n: number, total: number) => `${n} z ${total}`,
@@ -57,18 +56,16 @@ export const pl: Translation = {
 
   // Chapter page
   backToPath: "← Ścieżka nauki",
-  practiceNote: "Każde zadanie jest nowe, ułożone specjalnie dla ciebie. Zacznij od łatwych i przejdź wyżej, kiedy poczujesz, że już czas.",
   leadsOnToStart: "Dalej możesz przejść do: ",
   leadsOnToEnd: ". Zajrzyj tam, kiedy chcesz.",
-  watchOut: "Uwaga!",
   level: { easy: "Łatwe", medium: "Średnie", hard: "Trudne" },
   anotherOne: "Jeszcze jedno →",
   practice: "Ćwiczenia",
-  testSkills: "Sprawdź się",
-  testNote:
+  predict: "Sprawdź się",
+  predictNote:
     "Oblicz wynik w pamięci, a potem go wybierz. Za dobre odpowiedzi dostajesz odznakę rozdziału: 10 na poziomie „Łatwe” to brązowa, na „Średnie” srebrna, na „Trudne” złota.",
   solvedN: (n: number) => `${n} ${plural(n, "rozwiązane", "rozwiązane", "rozwiązanych")}`,
-  testRight: "Dobrze! To się liczy do odznaki.",
+  predictRight: "Dobrze! To się liczy do odznaki.",
   drills: {
     commute: { name: "Zmiana kolejności", how: "Przeciągnij wyraz za sąsiada. Przy + i × kolejność nie ma znaczenia." },
     combine: { name: "Dodawanie liczb", how: "Przeciągnij jedną liczbę na drugą, żeby je dodać." },
@@ -135,9 +132,7 @@ export const pl: Translation = {
     `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "dobra odpowiedź", "dobre odpowiedzi", "dobrych odpowiedzi")} na poziomie „${["Łatwe", "Średnie", "Trudne"][tier]}” do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
 
   // Guided example
-  notThisStep: "Ten ruch jest poprawny, ale w tym kroku chodzi o inny. Cofam go.",
   done: "Gotowe.",
-  keepGoing: "Możesz działać dalej: teraz wolno wykonać dowolny ruch.",
   startOver: "Od początku",
 
   // Exercise
@@ -149,10 +144,10 @@ export const pl: Translation = {
   nextTitle: (label: string) => `Następne: zadanie ${label}`,
   nextLabel: (label: string) => `Następne zadanie (${label})`,
   exerciseN: (label: string) => `Zadanie ${label}`,
-  guessPrompt: "Najpierw pomyśl: co z tego wyjdzie?",
+  predictPrompt: "Najpierw pomyśl: co z tego wyjdzie?",
   reveal: "Pokaż",
-  guessedBeforeRight: "Tu twoja pierwsza odpowiedź była dobra.",
-  guessedBeforeWrong: (picked: boolean) =>
+  predictedBeforeRight: "Tu twoja pierwsza odpowiedź była dobra.",
+  predictedBeforeWrong: (picked: boolean) =>
     `${picked ? "Twoja pierwsza odpowiedź to ta czerwona" : "Twoja pierwsza odpowiedź była błędna"}. Dobra jest ta zielona.`,
   rightFirstTime: "Dobrze za pierwszym razem. Teraz to rozwiąż.",
   notQuite: "Niezupełnie. Dobra jest ta zielona. Rozwiąż zadanie, a zobaczysz, gdzie był błąd.",
@@ -161,10 +156,8 @@ export const pl: Translation = {
   pickFirst: "Wybierz odpowiedź powyżej, a potem rozwiąż zadanie tutaj.",
   hint: "Podpowiedź",
   undo: "Cofnij",
-  reset: "Od nowa",
   solvedBang: "Rozwiązane!",
   newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} za rozdział „${chapter}”.`,
-  theExercise: "zadanie",
   moveCrashed: "Coś poszło nie tak przy tym ruchu.",
   moveCrashedDetails: "Szczegóły są w konsoli przeglądarki.",
   tryAgain: "Spróbuj jeszcze raz",
