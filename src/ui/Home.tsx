@@ -6,6 +6,7 @@ import { LEVELS } from "../game/generate/write";
 import { chapterText, t } from "../i18n";
 import { LevelButtons } from "./Practice";
 import { href } from "./routes";
+import { reducedMotion } from "./useMoveHistory";
 
 /** Radius of a chapter's circle. */
 const R = 22;
@@ -18,7 +19,7 @@ export function Home({ at }: { at?: Chapter }) {
   const select = (c: Chapter) => {
     setSelected(c);
     // On a narrow screen the details sit below the path: bring them into view.
-    if (window.matchMedia("(max-width: 860px)").matches) panel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (window.matchMedia("(max-width: 860px)").matches) panel.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
   };
 
   return (

@@ -1629,3 +1629,50 @@ div.predict-choice {
 .unseen {
   visibility: hidden;
 }
+
+/* Less motion, where the system asks for it: nothing slides, pops or grows; what fades still fades.
+   (The tidying after a move shows its end at once: useMoveHistory.ts.) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --logo-animation: none;
+  }
+  .puzzle-solved {
+    animation: none;
+  }
+  .demo-finger,
+  .ring {
+    transition: none;
+  }
+  .held-ring {
+    animation: held-fade 0.45s ease-out forwards;
+  }
+}
+@keyframes held-fade {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* A card with the answers of one equation: side by side, a full-size "or" between them. */
+.choice-rows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-width: 0;
+}
+/* Both drawn at one scale (CardMaths): on a narrow card, both shrink alike. */
+.choice-rows .static-math {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 44%;
+  height: auto;
+}
+.choice-or {
+  flex: none;
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+}

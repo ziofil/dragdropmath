@@ -37,7 +37,9 @@ export function useMoveHistory(start: MathState, stopAt?: (s: MathState) => bool
     if (stopAt?.(next)) return;
     const steps = tidySteps(from, next, history.map((e) => e.state));
     const done = stopAt ? steps.findIndex(stopAt) : -1;
-    const shown = done < 0 ? steps : steps.slice(0, done + 1);
+    const upTo = done < 0 ? steps : steps.slice(0, done + 1);
+    // With reduced motion, the tidying isn't played step by step: its end, at once.
+    const shown = reducedMotion() ? upTo.slice(-1) : upTo;
     if (shown.length) tidyFrom.current = from;
     shown.forEach((state, i) =>
       setTimeout(() => {
@@ -72,3 +74,6 @@ export function useMoveHistory(start: MathState, stopAt?: (s: MathState) => bool
     },
   };
 }
+
+/** The viewer asks for less motion (a system setting). */
+export const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;

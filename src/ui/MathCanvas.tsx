@@ -272,7 +272,22 @@ function plain(n: ReactNode, at = "0"): ReactNode {
  * `room`: extra height above and below, always kept, so a row of these (the
  * answers to pick from) is drawn at one scale whether or not there are fractions.
  */
-export function StaticMath({ state, width = 720, height = 110, room = 0, inline = false }: { state: MathState; width?: number; height?: number; room?: number; inline?: boolean }) {
+export function StaticMath({
+  state,
+  width = 720,
+  height = 110,
+  room = 0,
+  inline = false,
+  scale,
+}: {
+  state: MathState;
+  width?: number;
+  height?: number;
+  room?: number;
+  inline?: boolean;
+  /** Drawn at this many pixels a unit, fitted to what's drawn: drawings side by side at one scale (else it fills its box). */
+  scale?: number;
+}) {
   // Fitted to what's drawn, so a short expression isn't shrunk to fit an empty strip.
   const ref = useRef<SVGSVGElement>(null);
   const font = useSyncExternalStore(subscribeFont, fontEpoch);
@@ -282,12 +297,18 @@ export function StaticMath({ state, width = 720, height = 110, room = 0, inline 
     if (!g || g.width <= 0) return;
     // The usual strip, grown wherever something tall (a power on top of a fraction) would be cut off.
     // Inline in a sentence: just what's drawn, so it sits at the size of the words.
-    const top = inline ? g.y - 2 : Math.min(-room, g.y - 6);
-    const bottom = inline ? g.y + g.height + 2 : Math.max(height + room, g.y + g.height + 6);
+    const fit = inline || scale !== undefined;
+    const top = fit ? g.y - 2 : Math.min(-room, g.y - 6);
+    const bottom = fit ? g.y + g.height + 2 : Math.max(height + room, g.y + g.height + 6);
     setView(`${g.x - (inline ? 2 : 8)} ${top} ${g.width + (inline ? 4 : 16)} ${bottom - top}`);
-  }, [state, width, height, room, font, inline]);
+  }, [state, width, height, room, font, inline, scale]);
   return (
-    <svg ref={ref} className={inline ? "static-math static-math-inline" : "static-math"} viewBox={view} role="img" aria-label={printState(state).replace(/\*/g, "·")}>
+    <svg
+      ref={ref}
+      className={inline ? "static-math static-math-inline" : "static-math"}
+      viewBox={view}
+      style={scale === undefined ? undefined : { width: Number(view.split(" ")[2]) * scale }}
+      role="img" aria-label={printState(state).replace(/\*/g, "·")}>
       {plain(renderState({ state }, width, height))}
     </svg>
   );

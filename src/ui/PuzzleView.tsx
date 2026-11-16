@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type { MathState } from "../expr/types";
 import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
@@ -6,6 +6,7 @@ import { isDone, taskOf } from "../game/task";
 import type { RuleId } from "../rules";
 import { record, seen, type Change, type Context } from "../game/scoring";
 import { answer, arrive, canSolve, cardOf, type Phase } from "../game/predict";
+import { rowsOf } from "../game/answers";
 import { Board } from "./Board";
 import { t } from "../i18n";
 import { StaticMath } from "./MathCanvas";
@@ -110,7 +111,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           <div className="predict-choices">
             {choices.map((c) => {
               const look = cardOf(phase, c, puzzle.goal);
-              const maths = <StaticMath state={parseState(c)} height={90} room={12} />;
+              const maths = <CardMaths text={c} />;
               return look === "open" ? (
                 <button key={c} className="card predict-choice" onClick={() => pick(c)}>
                   {maths}
@@ -204,6 +205,27 @@ function Said({ phase, score }: { phase: Phase; score: Change | null }) {
       </span>{" "}
       {earlier ? t().predictedBeforeRight : t().rightFirstTime}
       {moved}
+    </span>
+  );
+}
+
+/**
+ * An answer on a card. The answers of one equation (x = 4 or x = −1) go on
+ * one line, with a full-size "or" between them: stacked, the "or" came out
+ * tiny and the maths filled a third of the card.
+ */
+function CardMaths({ text }: { text: string }) {
+  const state = parseState(text);
+  const rows = state.join === "or" ? rowsOf(state) : [state];
+  if (rows.length < 2) return <StaticMath state={state} height={90} room={12} />;
+  return (
+    <span className="choice-rows">
+      {rows.map((row, i) => (
+        <Fragment key={i}>
+          {i > 0 && <span className="choice-or">{t().or}</span>}
+          <StaticMath state={row} height={300} scale={0.55} />
+        </Fragment>
+      ))}
     </span>
   );
 }
