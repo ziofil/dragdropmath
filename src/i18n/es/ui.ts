@@ -575,7 +575,7 @@ exercises:
     hint: Una pista breve.    # opcional
     moves: collect            # opcional: movimientos solo para este ejercicio`,
   writeMathsAs: "Escribe las expresiones tal como las teclearías:",
-  or: "o",
+  or: "o bien",
   twoEquations: ["Dos ecuaciones a la vez se escriben en una sola línea, con", "entre ellas."],
   exampleSet: `title: Tarea de la semana 3
 # Movimientos hasta "Resolver ecuaciones" (número, id o título de un capítulo). Si no se pone: todos.
