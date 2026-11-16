@@ -276,6 +276,31 @@ const levels = (): Record<Level, Shape[]> => ({
   hard: chosen("factors-a", "square-of-bracket", "expand-first", "pure-root", "root-squared", "fraction-zero"),
 });
 
+/** A coefficient as it's written after another term: " + 3x", " - x", " - 6". */
+const coef = (k: number, x = "") => (k < 0 ? " - " : " + ") + (Math.abs(k) === 1 && x ? "" : Math.abs(k)) + x;
+
+/**
+ * x² + bx + c = 0 factored the way the lesson says, as the moves write it:
+ * the middle term split (as split-term splits it: the smaller number
+ * first), each pair's shared factor taken out, then the shared bracket.
+ */
+function factoredInPairs(b: number, c: number): string[] {
+  let [p, q] = [0, 0];
+  for (let n = -Math.abs(c); n <= Math.abs(c); n++) {
+    if (n === 0 || c % n !== 0) continue;
+    if (n + c / n === b && Math.abs(n) <= Math.abs(c / n)) {
+      [p, q] = [n, c / n];
+      break;
+    }
+  }
+  const bracket = `(x${coef(p)})`;
+  return [
+    `x^2${coef(p, "x")}${coef(q, "x")}${coef(c)} = 0`,
+    `x${bracket}${coef(q, "x").replace(/x$/, "")}${bracket} = 0`,
+    `${bracket}(x${coef(q)}) = 0`,
+  ];
+}
+
 export const quadratic: Chapter = {
   id: "quadratic",
   title: "Second-degree equations",
@@ -302,27 +327,28 @@ export const quadratic: Chapter = {
       return { start: `${x}^2 - ${a}${x} = 0`, goal: `${x} = 0 or ${x} = ${a}` };
     }, "factor-out"),
     d("split-middle", (r) => {
-      const [u, v] = [r.int(1, 6), r.int(1, 6)];
-      if (u === v) return { start: "x^2 + x - 6 = 0", goal: "x = 2 or x = -3" };
-      // (x + u)(x − v) = x² + (u − v)x − uv.
-      const b = u - v;
-      const mid = b === 0 ? "" : b === 1 ? " + x" : b === -1 ? " - x" : b > 0 ? ` + ${b}x` : ` - ${-b}x`;
-      return { start: `x^2${mid} - ${u * v} = 0`, goal: `x = ${v} or x = -${u}` };
+      // (x + u)(x − v) = x² + (u − v)x − uv; never u = v (that's a difference of two squares).
+      const [u, v0] = [r.int(1, 6), r.int(1, 6)];
+      const v = v0 === u ? (u % 6) + 1 : v0;
+      const [b, c] = [u - v, -u * v];
+      return { start: `x^2${coef(b, "x")}${coef(c)} = 0`, via: factoredInPairs(b, c), goal: `x = ${v} or x = -${u}` };
     }, "split-term"),
-    // The root squared away: its conditions, given at the start, keep the answers honest.
+    // The root squared away: an answer the squared equation has, but the first one hasn't, is crossed out.
     d("square-both-sides", (r) => {
-      const [dd, x0] = [r.int(1, 3), r.int(0, 5)];
-      const k = 2 * dd * x0 + dd * dd;
-      const where = `where x ≥ ${-dd}`;
-      const left = `x^2 + ${k} =`;
+      // √(x + c) = x + d: squared, x² + (2d − 1)x + d² − c = 0 = (x − p)(x − q), with p ≥ −d an answer and q < −d crossed out.
+      const [dd, p] = [r.int(1, 2), r.int(1, 3)];
+      const q = 1 - 2 * dd - p;
+      const c = dd * dd - p * q;
+      const where = ` where x ≥ ${-c}, x ≥ ${-dd}`;
+      const [b, k] = [2 * dd - 1, dd * dd - c];
       const via = [
-        `${left} (x + ${dd})^2 ${where}`,
-        `${left} (x + ${dd})(x + ${dd}) ${where}`,
-        ...(dd === 1 ? [] : [`${left} x(x + ${dd}) + ${dd}(x + ${dd}) ${where}`]),
-        `${left} x·x + ${dd === 1 ? "" : dd}x + ${dd === 1 ? "" : dd}x + ${dd * dd} ${where}`,
-        `${left} x^2 + ${2 * dd}x + ${dd * dd} ${where}`,
-      ];
-      return { start: `√(x^2 + ${k}) = x + ${dd} ${where}`, goal: `x = ${x0}`, via };
+        `x + ${c} = (x + ${dd})^2`,
+        `x + ${c} = (x + ${dd})(x + ${dd})`,
+        `x + ${c} = x^2 + ${2 * dd}x + ${dd * dd}`,
+        `0 = x^2${coef(b, "x")}${coef(k)}`,
+        ...factoredInPairs(b, k).map((f) => `0 = ${f.replace(" = 0", "")}`),
+      ].map((v) => v + where);
+      return { start: `√(x + ${c}) = x + ${dd}${where}`, via, goal: `x = ${p} or x = ${q}${where}` };
     }, "root-across"),
   ],
   levels,

@@ -53,11 +53,17 @@ export const balance: Chapter = {
       const [x, a, b] = [letter(r), r.int(2, 9), r.int(2, 9)];
       return { start: `${x}/${a} = ${b}`, want: x, goal: `${x} = ${a * b}` };
     }),
+    // Two things done to x: undone the other way round (the 4 of 3x + 4 first, then the 3).
+    d("two-steps", (r) => {
+      const [x, a, k, b] = [letter(r), r.int(2, 5), r.int(2, 6), r.int(1, 9)];
+      return { start: `${a}${x} + ${b} = ${a * k + b}`, via: [`${a}${x} = ${a * k + b} - ${b}`, `${a}${x} = ${a * k}`, `${x} = ${a * k}/${a}`], goal: `${x} = ${k}` };
+    }, "move-term"),
     d("move-sign", (r) => `-${letter(r)} = ${r.int(2, 9)}`),
     d("swap-sides", (r) => `${r.int(2, 20)} = ${letter(r)}`),
     d("root-across", (r) => {
       const [x, n, b] = [letter(r), pick(r, [2, 2, 3, 4]), r.int(2, 4)];
-      return { start: `${x}^(1/${n}) = ${b}`, want: x, goal: `${x} = ${b ** n}` };
+      // The root itself carried across (as x^(1/2) it's the ½: the words say so too).
+      return { start: `${n === 2 ? `√${x}` : `root_${n}(${x})`} = ${b}`, want: x, goal: `${x} = ${b ** n}` };
     }),
     d("exp-across", (r) => `${pick(r, ["e", "2", "3", "10"])}^${letter(r)} = ${r.int(5, 20)}`),
     // Both sides powers of the same base: the exponents balance like the sides do.

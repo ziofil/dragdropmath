@@ -8,7 +8,7 @@ import * as L from "../generate/linear";
 import * as E from "../generate/equations";
 import type { Chapter } from "../puzzles";
 import { one, type Level, type Rng, type Shape, one as pick } from "../generate/write";
-import { d, letters2 } from "../generate/drill";
+import { d } from "../generate/drill";
 
 /** A formula and the subjects it can be rearranged for (each goal as the engine writes it). */
 type Formula = { start: string; goals: string[]; via?: Record<string, string[]> };
@@ -108,14 +108,15 @@ export const formulas: Chapter = {
   unlocks: ["move-letter-factor", "move-letter-denominator"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
-    d("move-letter-factor", (r) => {
-      const [x, y] = letters2(r);
-      return `${y}${x} = ${pick(r, ["c", "F", "P", "k"])}`;
-    }),
-    d("move-letter-denominator", (r) => {
-      const [x, y] = letters2(r);
-      return `${x}/${y} = ${pick(r, ["c", "P", "k"])}`;
-    }),
+    // Real formulas: a product of letters, then a letter on the bottom.
+    d("move-letter-factor", (r) => pick(r, ["F = ma", "V = IR", "d = st", "p = mv", "W = Fd", "P = IV", "A = lw"])),
+    d("move-letter-denominator", (r) => pick(r, ["P = F/A", "s = d/t", "D = m/V"])),
+    // Back to Factoring: the letter wanted in two places is taken out first, then its bracket moves across.
+    d("letter-twice", (r) => {
+      const [a, b] = pick(r, [["a", "b"], ["p", "q"], ["m", "n"]] as const);
+      const c = pick(r, ["c", "k"]);
+      return { start: `${a}x + ${b}x = ${c}`, via: [`x(${a} + ${b}) = ${c}`], goal: `x = ${c}/(${a} + ${b})` };
+    }, "factor-out"),
   ],
   levels,
 };

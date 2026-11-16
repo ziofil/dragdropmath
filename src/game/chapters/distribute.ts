@@ -182,6 +182,11 @@ export const distribute: Chapter = {
       return { start: `${a}(${x} + ${b})`, goal: `${a}${x} + ${a * b}` };
     }),
     d("distribute-neg", (r) => `-(${anyLetter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
+    // A negative number in front: its number, then its minus (minus times minus is plus).
+    d("minus-number-in", (r) => {
+      const [a, b, x] = [r.int(2, 5), r.int(1, 9), anyLetter(r)];
+      return { start: `-${a}(${x} - ${b})`, via: [`-(${a}${x} - ${a * b})`], goal: `-${a}${x} + ${a * b}` };
+    }, "distribute"),
     // Back to Powers: a letter times a bracket makes a power (x·x = x²).
     d("letter-in", (r) => {
       const [x, a] = [anyLetter(r), r.int(2, 9)];

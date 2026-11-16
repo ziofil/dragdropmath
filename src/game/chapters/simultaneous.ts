@@ -8,7 +8,7 @@
 import { type Chapter, rulesOf } from "../puzzles";
 import { composedSystem, SYSTEMS as S } from "../generate/systems";
 import type { Level, Shape } from "../generate/write";
-import { d } from "../generate/drill";
+import { carrying, d } from "../generate/drill";
 
 const rules = () => rulesOf("simultaneous");
 
@@ -27,7 +27,7 @@ export const simultaneous: Chapter = {
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
     // 1. A letter on its own already: substitute it, and solve the equation that's left.
-    d("substitute", (r) => {
+    carrying("alone", d("substitute", (r) => {
       const [a, k] = [r.int(2, 4), r.int(1, 5)];
       return {
         start: `y = ${a}x; x + y = ${(a + 1) * k}`,
@@ -35,12 +35,12 @@ export const simultaneous: Chapter = {
         // Checkpoints on the way (for the tests: a search between each is quick).
         via: [`y = ${a}x; x + ${a}x = ${(a + 1) * k}`, `y = ${a}x; ${a + 1}x = ${(a + 1) * k}`],
       };
-    }),
+    })),
     // 2. One letter found: put it back into the other equation, for the other letter.
-    d("substitute-back", (r) => {
+    carrying("alone", d("substitute-back", (r) => {
       const [a, b, k] = [r.int(2, 4), r.int(1, 6), r.int(1, 5)];
       return { start: `y = ${a}x + ${b}; x = ${k}`, goal: `y = ${a * k + b}; x = ${k}`, via: [`y = ${a}*${k} + ${b}; x = ${k}`] };
-    }, "substitute"),
+    }, "substitute")),
     // 3. The whole way: no letter on its own, so make one first; then substitute, solve, and put it back.
     d("alone-first", (r) => {
       for (;;) {
@@ -50,7 +50,16 @@ export const simultaneous: Chapter = {
         return {
           start: `x + y = ${p + q}; 2x - y = ${t}`,
           goal: `y = ${q}; x = ${p}`,
-          via: [`y = ${p + q} - x; 2x - y = ${t}`, `y = ${p + q} - x; 2x - (${p + q} - x) = ${t}`, `y = ${p + q} - x; 3x = ${t + p + q}`, `y = ${p + q} - x; x = ${p}`, `y = ${p + q} - ${p}; x = ${p}`],
+          // The way the words go: the minus in front of the bracket changes the signs inside, then the x's are collected.
+          via: [
+            `y = ${p + q} - x; 2x - y = ${t}`,
+            `y = ${p + q} - x; 2x - (${p + q} - x) = ${t}`,
+            `y = ${p + q} - x; 2x - ${p + q} + x = ${t}`,
+            `y = ${p + q} - x; 3x - ${p + q} = ${t}`,
+            `y = ${p + q} - x; 3x = ${t + p + q}`,
+            `y = ${p + q} - x; x = ${p}`,
+            `y = ${p + q} - ${p}; x = ${p}`,
+          ],
         };
       }
     }, "move-term"),

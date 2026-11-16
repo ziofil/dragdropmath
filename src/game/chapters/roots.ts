@@ -71,15 +71,6 @@ export const roots: Chapter = {
   drills: [
     // Square roots mostly, now and then a cube or fourth root.
     d("evaluate-root", (r) => (r.next() < 0.6 ? `√${pick(r, [4, 9, 16, 25, 36, 49, 64, 81, 100])}` : pick(r, ["root_3(8)", "root_3(27)", "root_3(64)", "root_4(16)", "root_4(81)"]))),
-    d("split-square", (r) => {
-      // √(a²·b) → a√b; ∛(a³·b) → a∛b.
-      if (r.next() < 0.6) {
-        const [a, b] = pick(r, [[2, 2], [2, 3], [3, 2], [2, 5], [3, 3], [3, 5], [5, 2]] as const);
-        return { start: `√${a * a * b}`, goal: `${a}√${b}` };
-      }
-      const [a, b] = pick(r, [[2, 2], [2, 3], [3, 2]] as const);
-      return { start: `root_3(${a ** 3 * b})`, goal: `${a}root_3(${b})` };
-    }),
     d("pull-out-of-power", (r) => {
       const x = letter(r);
       if (r.next() < 0.6) {
@@ -89,9 +80,19 @@ export const roots: Chapter = {
       const a = r.int(2, 3);
       return { start: `root_3(${a ** 3}${x})`, goal: `${a}root_3(${x})` };
     }),
+    // Then a number that isn't a square: split under the root so one splits off (then it's pulled out, as above).
+    d("split-square", (r) => {
+      // √(a²·b) → a√b; ∛(a³·b) → a∛b.
+      if (r.next() < 0.6) {
+        const [a, b] = pick(r, [[2, 2], [2, 3], [3, 2], [2, 5], [3, 3], [3, 5], [5, 2]] as const);
+        return { start: `√${a * a * b}`, goal: `${a}√${b}` };
+      }
+      const [a, b] = pick(r, [[2, 2], [2, 3], [3, 2]] as const);
+      return { start: `root_3(${a ** 3 * b})`, goal: `${a}root_3(${b})` };
+    }),
     d("join-powers", (r) => {
       const [a, b] = pick(r, [[2, 3], [2, 5], [3, 5], [2, 7], [3, 7], [5, 7]] as const);
-      return { start: `√${a}·√${b}`, goal: `√(${a}*${b})` };
+      return { start: `√${a}·√${b}`, goal: `√${a * b}` };
     }),
     d("root-notation", (r) => `${r.next() < 0.6 ? "√" : `root_${r.int(3, 4)}`}(${letter(r)}) + ${r.int(2, 9)}`),
     // Back to Powers: a root of a power is a power of a power.
@@ -102,7 +103,8 @@ export const roots: Chapter = {
     // Back to Powers and Fractions: a root times a power, as one power (the exponents add, as fractions).
     d("fraction-power", (r) => {
       const [x, k] = [letter(r), r.int(1, 3)];
-      return { start: `√${x}·${x}^${k}`, goal: `${x}^(${2 * k + 1}/2)` };
+      // (x¹ is written x: it's what tidying makes of it.)
+      return { start: `√${x}·${k === 1 ? x : `${x}^${k}`}`, goal: `${x}^(${2 * k + 1}/2)` };
     }, "merge-powers"),
     // A whole number under the bar: the root that's there, dropped onto the top (Fractions' own move).
     carrying("bottom", d("rationalise", (r) => {

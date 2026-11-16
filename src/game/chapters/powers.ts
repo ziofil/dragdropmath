@@ -82,6 +82,8 @@ export const powers: Chapter = {
   positive: true,
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
+    // What a power is first: the exponent counts the factors (2³ = 2·2·2 = 8).
+    d("tap-power", (r) => `${pick(r, ["2^3", "2^4", "2^5", "3^2", "3^3", "4^2", "5^2", "10^2"])} + ${letter(r)}`),
     d("merge-powers", (r) => {
       const [x, a, b] = [letter(r), r.int(2, 5), r.int(2, 5)];
       return { start: `${x}^${a}·${x}^${b}`, goal: `${x}^${a + b}` };
@@ -91,21 +93,21 @@ export const powers: Chapter = {
       const [x, b, a] = [letter(r), pick(r, [2, 3]), r.int(2, 4)];
       return { start: `${b}^(${x} + ${a})`, goal: `${b}^${x}*${b}^${a}` };
     }),
-    carrying("outer-exponent", d("power-of-power", (r) => {
-      const [x, a, b] = [letter(r), r.int(2, 5), r.int(2, 4)];
-      return { start: `(${x}^${a})^${b}`, goal: `${x}^${a * b}` };
-    })),
+    // Dividing, then where it leads: one x left (x¹), none (x⁰), more on the bottom (x⁻³).
     d("divide-powers", (r) => {
       const [x, b, k] = [letter(r), r.int(2, 4), r.int(2, 4)];
       return { start: `${x}^${b + k}/${x}^${b}`, goal: `${x}^${k}` };
     }),
+    d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`),
     d("zero-power", (r) => {
       const [x, a] = [letter(r), r.int(2, 9)];
       return { start: `${x}^0 + ${a}`, goal: `${a + 1}` };
     }),
     d("flip-across-bar", (r) => `1/${letter(r)}^${r.int(2, 5)}`),
-    d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`),
-    d("tap-power", (r) => `${pick(r, ["2^3", "2^4", "2^5", "3^2", "3^3", "4^2", "5^2", "10^2"])} + ${letter(r)}`),
+    carrying("outer-exponent", d("power-of-power", (r) => {
+      const [x, a, b] = [letter(r), r.int(2, 5), r.int(2, 4)];
+      return { start: `(${x}^${a})^${b}`, goal: `${x}^${a * b}` };
+    })),
     d("power-of-product", (r) => {
       const [a, x, n] = [r.int(2, 5), letter(r), r.int(2, 3)];
       return { start: `(${a}${x})^${n}`, goal: `${a ** n}${x}^${n}` };

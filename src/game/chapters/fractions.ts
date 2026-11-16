@@ -260,8 +260,6 @@ const levels = (): Record<Level, Shape[]> => ({
   hard: [...nestedFractions, composedFractions("hard", 3)],
 });
 
-const gcdOf = (a: number, b: number): number => (b === 0 ? a : gcdOf(b, a % b));
-
 export const fractions: Chapter = {
   id: "fractions",
   title: "Fractions",
@@ -294,25 +292,24 @@ export const fractions: Chapter = {
       return { start: `1/${p} + 1/${q}`, goal: `${p + q}/${p * q}`, via: [`${q}/${p * q} + ${p}/${p * q}`] };
     }),
     d("multiply-fractions", (r) => {
-      const p = r.int(1, 3);
-      const q = r.int(1, 3);
-      const b = p + r.int(1, 4);
-      // Never the same fraction twice: (2/5)·(2/5) is a square (dropping one on the other makes (2/5)²).
-      const d0 = q + r.int(1, 4);
-      const d = p === q && d0 === b ? d0 + 1 : d0;
-      return { start: `(${p}/${b})·(${q}/${d})`, goal: `${p * q}/${b * d}` };
+      // Two fractions in their simplest form, never the same one twice ((2/5)·(2/5) is a square: dropping one on the other makes (2/5)²).
+      for (;;) {
+        const [p, b, q, dd] = [r.int(1, 3), r.int(2, 7), r.int(1, 3), r.int(2, 7)];
+        if (p >= b || q >= dd || gcd(p, b) !== 1 || gcd(q, dd) !== 1 || (p === q && b === dd)) continue;
+        return { start: `(${p}/${b})·(${q}/${dd})`, goal: `${p * q}/${b * dd}` };
+      }
     }),
-    carrying("bottom", d("divide-by-fraction", (r) => {
+    carrying("lower-bottom", d("divide-by-fraction", (r) => {
       const [a, b, c] = [r.int(2, 9), r.int(2, 3), r.int(4, 7)];
       // a·(c/b), worked out: a whole number when it comes out whole.
       return { start: `${a}/(${b}/${c})`, goal: Number.isInteger((a * c) / b) ? `${(a * c) / b}` : `${a * c}/${b}` };
     })),
     // Every piece of (a/b)/(c/d) can cross the main bar: the two bottoms, one up and one down, make it one fraction.
-    carrying("bottom", d("fraction-of-fractions", (r) => {
+    carrying("lower-bottom", d("fraction-of-fractions", (r) => {
       for (;;) {
         const [a, b, c, dd] = [r.int(1, 5), r.int(2, 7), r.int(1, 5), r.int(2, 7)];
         const [top, bottom] = [a * dd, b * c];
-        if (gcdOf(top, bottom) !== 1 || bottom === 1 || gcdOf(a, b) !== 1 || gcdOf(c, dd) !== 1) continue;
+        if (gcd(top, bottom) !== 1 || bottom === 1 || gcd(a, b) !== 1 || gcd(c, dd) !== 1) continue;
         return { start: `(${a}/${b})/(${c}/${dd})`, goal: `${top}/${bottom}` };
       }
     }, "divide-by-fraction")),

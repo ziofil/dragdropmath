@@ -52,7 +52,8 @@ export const shuffle: Chapter = {
   unlocks: ["commute", "combine", "multiply-numbers", "numbers-first", "multiply-out"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
-    d("commute", (r) => `${r.int(2, 9)} + ${letter(r)}`),
+    // Now and then with a minus: it goes along with its term (7 − x → −x + 7).
+    d("commute", (r) => `${r.int(2, 9)} ${r.next() < 0.4 ? "-" : "+"} ${letter(r)}`),
     d("combine", (r) => `${r.int(2, 9)} + ${letter(r)} + ${r.int(2, 9)}`),
     d("multiply-numbers", (r) => `${r.int(2, 5)}·${letter(r)}·${r.int(2, 5)}`),
     d("numbers-first", (r) => `${letter(r)}·${r.int(2, 9)}`),

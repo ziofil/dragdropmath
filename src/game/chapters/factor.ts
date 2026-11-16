@@ -101,11 +101,12 @@ export const factor: Chapter = {
       const a = r.int(2, 7);
       return `${a}${x} + ${a}${y}`;
     }),
+    // A common factor that doesn't show: 3 in 6x + 9. Splitting 6 (into its smallest prime, 2, and 3) shows it.
     d("split-number", (r) => {
-      // a·b splits as a·b when a is its smallest prime: 2·anything, 3·odd, 5·(5, 7).
-      const [a, b] = pick(r, [[2, 3], [2, 5], [2, 7], [3, 5], [3, 7], [2, 9], [5, 7]] as const);
+      const [p, g] = pick(r, [[2, 3], [2, 5], [2, 7], [3, 5], [3, 7]] as const);
+      const c = pick(r, [2, 3, 4, 5].filter((n) => gcd(n, p) === 1));
       const x = letter(r);
-      return { start: `${a}${x} + ${a * b}`, goal: `${a}(${x} + ${b})` };
+      return { start: `${p * g}${x} + ${g * c}`, via: [`${p}*${g}*${x} + ${g * c}`], goal: `${g}(${p}${x} + ${c})` };
     }),
     d("bracket-out", (r) => {
       const x = letter(r);
@@ -117,17 +118,24 @@ export const factor: Chapter = {
       // Four terms, worked in pairs: x² + 2x + 3x + 6, the first two first.
       const a = r.int(1, 5);
       const b = pick(r, [2, 3, 4, 5, 6].filter((n) => n !== a));
-      return { start: `x·x + ${term(a, "x")} + ${b}x + ${a * b}`, want: `x*(x + ${a})`, goal: `(x + ${a})(x + ${b})` };
+      return { start: `x^2 + ${term(a, "x")} + ${b}x + ${a * b}`, want: `x*(x + ${a})`, goal: `(x + ${a})(x + ${b})` };
     }),
     // x² + 5x + 6: the middle term splits into the two pairs factor-shared then works on.
     d("split-term", (r) => {
       const x = letter(r);
       const [p, q] = pick(r, [[1, 2], [1, 3], [2, 3], [1, 4], [2, 4], [3, 4], [2, 5], [3, 5]] as const);
-      return { start: `${x}^2 + ${p + q}${x} + ${p * q}`, goal: `${x}^2 + ${term(p, x)} + ${q}${x} + ${p * q}` };
+      const split = `${x}^2 + ${term(p, x)} + ${q}${x} + ${p * q}`;
+      // And on to the product, factored in pairs as in the last board.
+      return { start: `${x}^2 + ${p + q}${x} + ${p * q}`, via: [split, `${x}(${x} + ${p}) + ${q}(${x} + ${p})`], goal: `(${x} + ${p})(${x} + ${q})` };
     }),
     d("difference-of-squares", (r) => {
       const [x, k] = [letter(r), r.int(2, 9)];
-      return { start: `${x}^2 - ${k * k}`, goal: `(${x} - ${k})(${x} + ${k})` };
+      // Now and then a number in front that is a square too: 4x² − 9 = (2x − 3)(2x + 3).
+      const a = r.next() < 0.3 ? pick(r, [2, 3]) : 1;
+      const m = a === 1 ? k : pick(r, [1, 3, 5].filter((n) => gcd(n, a) === 1));
+      const ax2 = a === 1 ? `${x}^2` : `${a * a}${x}^2`;
+      const ax = a === 1 ? x : `${a}${x}`;
+      return { start: `${ax2} - ${m * m}`, goal: `(${ax} - ${m})(${ax} + ${m})` };
     }),
   ],
   // Brackets multiplied out (undone by factoring).

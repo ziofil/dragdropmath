@@ -39,6 +39,12 @@ export const inequalities: Chapter = {
     }, "move-factor"),
     d("ineq-swap", (r) => `${r.int(2, 9)} ${pick(r, ["<", ">"])} ${letter(r)}`, "swap-sides"),
     d("ineq-sign", (r) => `-${letter(r)} ${pick(r, ["<", ">", "≤", "≥"])} ${r.int(2, 9)}`, "move-sign"),
+    // Dividing by a negative number: by the number (the sign stays), then by −1 (it turns).
+    carrying("number", d("ineq-negative", (r) => {
+      const [x, a, k, rel] = [letter(r), r.int(2, 5), r.int(1, 6), pick(r, ["<", ">", "≤", "≥"] as const)];
+      const turned = { "<": ">", ">": "<", "≤": "≥", "≥": "≤" }[rel];
+      return { start: `-${a}${x} ${rel} ${a * k}`, via: [`-${x} ${rel} ${a * k}/${a}`, `-${x} ${rel} ${k}`], goal: `${x} ${turned} -${k}` };
+    }, "move-factor")),
   ],
   levels,
 };

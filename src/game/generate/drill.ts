@@ -27,9 +27,10 @@ export type Drill = {
 /**
  * The piece a drill's words say to carry, where the move could be made with
  * either of two (the bottom power onto the top one, or the top onto the
- * bottom): Show carries that one, so it does what the words say.
+ * bottom; the 5 of 4/(3/5) up, not the 3; the y of y = 2x onto the other y,
+ * not that one onto it): Show carries that one, so it does what the words say.
  */
-export type Carry = "bottom" | "exponent" | "outer-exponent" | "number";
+export type Carry = "bottom" | "lower-bottom" | "exponent" | "outer-exponent" | "number" | "alone";
 
 /** A drill whose words name the piece to carry. */
 export const carrying = (carries: Carry, drill: Drill): Drill => ({ ...drill, carries });
@@ -50,8 +51,19 @@ export function carries(state: MathState, id: string, carry: Carry): boolean {
       return parent?.kind === "pow" && last === 1 && parent.base.kind === "pow";
     case "bottom":
       // Under some fraction's bar: its bottom, or a factor of it.
-      return loc.path.some((step, k) => step === 1 && nodeAt(state, { ...loc, path: loc.path.slice(0, k) }).kind === "frac");
+      return bars(state, loc) >= 1;
+    case "lower-bottom":
+      // Under two bars: the bottom of a fraction that is itself a bottom (the 5 of 4/(3/5)).
+      return bars(state, loc) >= 2;
+    case "alone":
+      // A letter alone on its side (the y of y = 2x: substituted, it's the one carried).
+      return loc.path.length === 0 && node.kind === "var";
   }
+}
+
+/** How many fraction bars are over the piece at `loc`. */
+function bars(state: MathState, loc: NonNullable<ReturnType<typeof locate>>): number {
+  return loc.path.filter((step, k) => step === 1 && nodeAt(state, { ...loc, path: loc.path.slice(0, k) }).kind === "frac").length;
 }
 
 /** Two different letters. */
