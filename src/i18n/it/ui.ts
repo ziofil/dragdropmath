@@ -567,7 +567,7 @@ exercises:
     hint: Un breve suggerimento.   # facoltativo
     moves: collect            # facoltativo: mosse solo per questo esercizio`,
   writeMathsAs: "Scrivi la matematica come la digiteresti:",
-  or: "o",
+  or: "oppure",
   twoEquations: ["Due equazioni insieme vanno su una sola riga, con", "in mezzo."],
   exampleSet: `title: Compiti settimana 3
 # Mosse fino a "Equazioni" (numero, id o titolo di un capitolo). Se manca: tutte le mosse.
