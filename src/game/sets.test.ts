@@ -38,6 +38,20 @@ exercises:
     expect(r.exercises[2].problems.join(" ")).toMatch(/Can't read the start/);
   });
 
+  it("impossible maths isn't right: ∞ equals nothing, a start with no value is said so", () => {
+    const r = readSet(`exercises:
+  - start: x/0 = 1
+    goal: x = 5
+  - start: 1/(x - x) = 2
+    goal: x = 1
+  - start: 2x + 3 = 11
+    goal: x = 4
+`);
+    expect(r.exercises[0].problems.join(" ")).toMatch(/no value/);
+    expect(r.exercises[1].problems.join(" ")).toMatch(/no value/);
+    expect(r.exercises[2].problems).toEqual([]);
+  });
+
   it("not YAML, or not a set", () => {
     expect(readSet("title: [unclosed").problems[0]).toMatch(/isn't valid YAML/);
     expect(readSet("- just a list").problems.length).toBeGreaterThan(0);

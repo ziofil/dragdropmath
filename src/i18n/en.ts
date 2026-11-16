@@ -288,6 +288,7 @@ exercises:
     cantReadStart: (err: string) => `Can't read the start: ${err}`,
     cantReadGoal: (err: string) => `Can't read the goal: ${err}`,
     doesntFollow: "The goal doesn't follow from the start (check for a typo).",
+    noValue: "The start has no value for any number (a division by 0?).",
     twoWrong: "`wrong:` should list two wrong answers.",
     cantReadWrong: (w: string, err: string) => `Can't read the wrong answer "${w}": ${err}`,
     wrongShape: (w: string, why: string) => `The wrong answer "${w}" doesn't look like the goal: ${why}.`,
@@ -306,7 +307,7 @@ export type Strings = typeof en;
  * strings are written in English only: a translation may lack them, and
  * English stands in.
  */
-export type Translation = Omit<Partial<Strings>, "drills"> & { drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>> };
+export type Translation = Omit<Partial<Strings>, "drills" | "set"> & { drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>; set?: Partial<Strings["set"]> };
 
 /** A move's words: its name, what to do on its board, why it works, and a common mistake. */
 export type MoveWords = { name: string; how: string; text: string[] };

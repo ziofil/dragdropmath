@@ -90,6 +90,9 @@ export const cancelFactor: Rule = {
     const bottom = [...view.bottom];
     let any = false;
     for (let i = 0; i < top.length; i++) {
+      // 0/0 isn't 1: a 0 never cancels.
+      const ti = top[i];
+      if (ti.kind === "num" && ti.value === 0) continue;
       const j = bottom.findIndex((b) => key(b) === key(top[i]));
       if (j < 0) continue;
       top.splice(i, 1);

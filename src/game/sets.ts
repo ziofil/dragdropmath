@@ -22,7 +22,7 @@ import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { ALL_RULES } from "../rules";
 import { CHAPTERS, lettersPositive, rulesOf, type Chapter } from "./puzzles";
-import { follows, isWrong, shapeMismatch } from "./answers";
+import { follows, hasValue, isWrong, shapeMismatch } from "./answers";
 import { autoDecoys } from "./autoDecoys";
 import { allTitles, t } from "../i18n";
 import type { Mismatch } from "./answers";
@@ -131,7 +131,8 @@ function checkExercise(ex: SetExercise, n: number): CheckedExercise {
   if (typeof start === "string") problems.push(s.cantReadStart(start));
   if (typeof goal === "string") problems.push(s.cantReadGoal(goal));
   if (start && goal && typeof start !== "string" && typeof goal !== "string") {
-    if (!follows(start, goal)) problems.push(s.doesntFollow);
+    if (!hasValue(start)) problems.push(s.noValue);
+    else if (!follows(start, goal)) problems.push(s.doesntFollow);
     if (ex.wrong) {
       if (ex.wrong.length !== 2) problems.push(s.twoWrong);
       for (const w of ex.wrong) {

@@ -26,7 +26,16 @@ export function envs(exprs: Expr[], n = 6): Env[] {
   return defined.length ? defined.slice(0, n) : tries.slice(0, n);
 }
 
-const close = (x: number, y: number) => Math.abs(x - y) <= 1e-9 * Math.max(1, Math.abs(x), Math.abs(y));
+/** Equal, near enough: both numbers (∞ is no value, and equal to nothing: x/0 = 1 isn't true at x = 5). */
+const close = (x: number, y: number) => Number.isFinite(x) && Number.isFinite(y) && Math.abs(x - y) <= 1e-9 * Math.max(1, Math.abs(x), Math.abs(y));
+
+/** It has a value somewhere: not x/0, not ln(−x²) everywhere. */
+export function hasValue(s: MathState): boolean {
+  return envs(s.sides).some((env) => s.sides.every((e) => Number.isFinite(evaluate(e, env)))) || envs(s.sides).some((env) => {
+    const flipped = Object.fromEntries(Object.entries(env).map(([n, v]) => [n, -v]));
+    return s.sides.every((e) => Number.isFinite(evaluate(e, flipped)));
+  });
+}
 
 /** Differ in value somewhere. */
 export function differ(a: Expr, b: Expr): boolean {

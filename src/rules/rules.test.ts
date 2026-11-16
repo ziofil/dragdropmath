@@ -77,6 +77,7 @@ describe("rules do what they say", () => {
     ["ab/b", "cancel-factor", "(a*b)/b", ["a"]],
     ["(2·3)/(2·5)", "cancel-factor", "(2*3)/(2*5)", ["3/5"]],
     ["(x + 1)/(2(x + 1))", "cancel-factor", "(x + 1)/(2*(x + 1))", ["1/2"]],
+    ["(0·x)/(0·3)", "cancel-factor", "(0*x)/(0*3)", []], // 0/0 isn't 1
     // A fraction is read with what multiplies it, and its bottom may have letters too.
     ["3·(x/3)", "cancel-factor", "x/3", ["x"]], // what multiplies the fraction counts as its top
     ["6x/(3y)", "divide-numbers", "(6*x)/(3*y)", ["(2*x)/y"]],
