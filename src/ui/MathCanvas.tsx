@@ -98,7 +98,13 @@ export function MathCanvas({
     setTimeout(() => setHeldAt(null), 450);
   });
   useTaps(width.ref, held, (x, y) => {
-    const next = tapAt(width.ref.current, now.current.state, now.current.rules, x, y);
+    // A tap that goes wrong (outside React's reach: an event, not a render) does nothing, as a wrong move does.
+    let next = null;
+    try {
+      next = tapAt(width.ref.current, now.current.state, now.current.rules, x, y);
+    } catch (e) {
+      console.error(e);
+    }
     if (next) onDropRef.current(next);
   });
   // A finger, for a move played to watch: where it is, and whether it's pressing.

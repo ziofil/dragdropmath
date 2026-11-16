@@ -17,6 +17,7 @@
  * from classic slips (autoDecoys).
  */
 import { parseState } from "../expr/parse";
+import { follows, isWrong, shapeMismatch } from "./answers";
 import type { RuleId } from "../rules";
 import { ALL_RULES } from "../rules";
 import { CHAPTERS, lettersPositive, rulesOf, type Chapter } from "./puzzles";
@@ -88,9 +89,42 @@ export async function encodeSet(set: ExerciseSet): Promise<string> {
   return b64url(await pipe(new TextEncoder().encode(JSON.stringify(packed)), new CompressionStream("deflate-raw")));
 }
 
-/** The set in a link. A link that isn't one (cut short, or made by hand) throws. */
+/** What a link may carry: far more than any set needs, far less than would choke the page. */
+export const LINK_LIMITS = { code: 40_000, unpacked: 400_000, exercises: 200 };
+
+/** Unpacked, but never beyond `limit` bytes (a small link can unpack to megabytes). */
+async function inflate(bytes: Uint8Array, limit: number): Promise<Uint8Array> {
+  const reader = new Blob([bytes as BlobPart]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > limit) {
+      await reader.cancel();
+      throw new Error("too big");
+    }
+    parts.push(value);
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) {
+    out.set(p, at);
+    at += p.length;
+  }
+  return out;
+}
+
+/**
+ * The set in a link. A link that isn't one (cut short, made by hand, or too
+ * big) throws. What the set maker checks is checked again, as a link can be
+ * made by hand: an exercise whose goal doesn't follow from its start is left
+ * out, and wrong answers that aren't wrong are dropped (they're made instead).
+ */
 export async function decodeSet(code: string): Promise<ExerciseSet> {
-  const json = new TextDecoder().decode(await pipe(unb64url(code), new DecompressionStream("deflate-raw")));
+  if (code.length > LINK_LIMITS.code) throw new Error("too big");
+  const json = new TextDecoder().decode(await inflate(unb64url(code), LINK_LIMITS.unpacked));
   const packed: unknown = JSON.parse(json);
   const isText = (v: unknown): v is string => typeof v === "string";
   const parses = (v: string) => {
@@ -103,7 +137,8 @@ export async function decodeSet(code: string): Promise<ExerciseSet> {
   };
   if (!Array.isArray(packed) || !isText(packed[0]) || !isText(packed[1]) || !Array.isArray(packed[2])) throw new Error("not a set");
   const [title, moves, list] = packed as [string, string, unknown[]];
-  return {
+  if (list.length > LINK_LIMITS.exercises) throw new Error("too big");
+  const set: ExerciseSet = {
     title,
     ...(moves ? { moves: fromLink(moves) } : {}),
     exercises: list.map((row) => {
@@ -119,6 +154,23 @@ export async function decodeSet(code: string): Promise<ExerciseSet> {
       };
     }),
   };
+  const exercises = set.exercises.flatMap((ex): SetExercise[] => {
+    const start = parseState(ex.start);
+    const goal = parseState(ex.goal);
+    if (!follows(start, goal)) return [];
+    const wrongOk = ex.wrong?.every((w) => {
+      const s = parseState(w);
+      return shapeMismatch(goal, s) === null && isWrong(goal, s) && !follows(start, s);
+    });
+    if (ex.wrong && !wrongOk) {
+      const { wrong: _wrong, ...rest } = ex;
+      void _wrong;
+      return [rest];
+    }
+    return [ex];
+  });
+  if (!exercises.length) throw new Error("not a set");
+  return { ...set, exercises };
 }
 
 /** A short, stable name for a set (from its link), for keeping progress: the same set, the same progress. */

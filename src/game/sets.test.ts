@@ -66,6 +66,23 @@ exercises:
     expect(setKey(code)).toBe(setKey(code));
   });
 
+  it("a link made by hand is checked as the maker checks: no wrong goal, no right 'wrong' answer, nothing huge", async () => {
+    const set = {
+      title: "T",
+      exercises: [
+        { start: "2x = 4", goal: "x = 2", wrong: ["x = 2", "x = 8"] }, // a "wrong" answer that's the goal
+        { start: "2x = 4", goal: "x = 3" }, // a goal that doesn't follow
+        { start: "x + 1 = 3", goal: "x = 2", wrong: ["x = 4", "x = 1"] },
+      ],
+    };
+    const back = await decodeSet(await encodeSet(set));
+    expect(back.exercises).toEqual([{ start: "2x = 4", goal: "x = 2" }, { start: "x + 1 = 3", goal: "x = 2", wrong: ["x = 4", "x = 1"] }]);
+    // Thousands of exercises in a short link: refused.
+    const many = { title: "T", exercises: Array.from({ length: 5000 }, () => ({ start: "2x = 4", goal: "x = 2" })) };
+    await expect(decodeSet(await encodeSet(many))).rejects.toThrow();
+    await expect(decodeSet("A".repeat(50_000))).rejects.toThrow();
+  });
+
   it("a link keeps a chapter by its id, whatever the teacher wrote", async () => {
     const set = { title: "T", moves: "5", exercises: [{ start: "2x = 4", goal: "x = 2", moves: "Fractions" }] };
     const back = await decodeSet(await encodeSet(set));

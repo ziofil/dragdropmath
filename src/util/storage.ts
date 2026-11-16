@@ -17,12 +17,14 @@ export function readJson<T>(key: string, fallback: T, ok: (v: unknown) => boolea
   }
 }
 
-/** Store `value` under `key` (nothing happens when storage is unavailable). */
-export function writeJson(key: string, value: unknown): void {
+/** Store `value` under `key` (nothing happens when storage is unavailable). Whether it was stored. */
+export function writeJson(key: string, value: unknown): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
     /* storage unavailable: it just won't persist */
+    return false;
   }
 }
 

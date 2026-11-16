@@ -77,6 +77,12 @@ export const en = {
     ] as { heading: string; text: string[] }[],
   },
   progressNotABackup: "That file isn't a DragDropMath progress file.",
+  /** Before loading a backup: it replaces what's here. `saved`: when the file was saved (may be empty). */
+  progressReplace: (saved: string) => `This replaces your progress in this browser with the file's${saved ? ` (saved ${saved})` : ""}. Load it?`,
+  progressLoadIt: "Load it",
+  cancel: "Cancel",
+  progressNoRoom: "Your browser couldn't store it, so nothing was changed.",
+  progressBlocked: "This browser isn't keeping anything for this site (a private window, or storage turned off), so there's no progress to save.",
   showMove: "Show",
   /** Show is playing: stop it (the board goes back to the start). */
   stopShow: "Stop",
@@ -212,7 +218,10 @@ export const en = {
   /** Before the conditions on the letters, under a board: "where x ≥ −1, x ≠ 2". */
   where: "where",
   moveCrashed: "Something went wrong with that move.",
-  moveCrashedDetails: "Details are in the browser console.",
+  moveCrashedDetails: "Try again, or start this one over.",
+  /** Anything else on a page went wrong (the top bar stays). */
+  pageCrashed: "Something went wrong on this page.",
+  pageCrashedDetails: "Try again, or go back to the learning path. Your progress is safe.",
   tryAgain: "Try again",
 
   // Making a set

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
+import { Component, lazy, Suspense, useEffect, useLayoutEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { chapterById } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
@@ -112,7 +112,43 @@ export function App() {
           <SettingsButton />
         </span>
       </nav>
-      <Page route={route} />
+      {/* Anything that goes wrong on a page stays on that page: the top bar, and the way back, stay. */}
+      <PageErrorBoundary resetKey={href(route)}>
+        <Page route={route} />
+      </PageErrorBoundary>
     </div>
   );
+}
+
+/** A page that crashed: said in place of it, with a way on (going to another page clears it). */
+class PageErrorBoundary extends Component<{ resetKey: string; children: ReactNode }, { error: Error | null; key: string }> {
+  state = { error: null as Error | null, key: this.props.resetKey };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  static getDerivedStateFromProps(props: { resetKey: string }, state: { error: Error | null; key: string }) {
+    return props.resetKey === state.key ? null : { error: null, key: props.resetKey };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error(error);
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <main className="page page-error" role="alert">
+        <h1>{t().pageCrashed}</h1>
+        <p>{t().pageCrashedDetails}</p>
+        <div className="maker-actions">
+          <button onClick={() => this.setState({ error: null })}>{t().tryAgain}</button>
+          <a className="button primary" href={href({ page: "home" })}>
+            {t().learningPathButton}
+          </a>
+        </div>
+      </main>
+    );
+  }
 }

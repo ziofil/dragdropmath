@@ -76,19 +76,22 @@ export function record(id: string, ctx: Context, outcome: Outcome, pick?: string
   const result: Recorded = { first, score: null };
   if (!first) return result;
 
-  if (ctx.kind === "predict") {
-    // Solved with nothing predicted: there were no answers to pick from, and solving it is its answer.
-    const right = outcome === "right" || (outcome === "solved" && !was.predicted);
-    if (outcome === "solved" && !was.predicted) now.predicted = "right";
-    if (right || outcome === "wrong") result.score = nextScore(ctx.level, right);
-  }
+  // Solved with nothing predicted: there were no answers to pick from, and solving it is its answer.
+  const unasked = ctx.kind === "predict" && outcome === "solved" && !was.predicted;
+  if (unasked) now.predicted = "right";
 
   // The latest last; the oldest forgotten beyond KEEP.
   delete all[id];
   all[id] = now;
   const ids = Object.keys(all);
   for (const old of ids.slice(0, Math.max(0, ids.length - KEEP))) delete all[old];
-  writeJson(SEEN_KEY, all);
+  // The outcome first, the score after, and only if the outcome was kept: else the same answer could count again.
+  const kept = writeJson(SEEN_KEY, all);
+
+  if (kept && ctx.kind === "predict") {
+    const right = outcome === "right" || unasked;
+    if (right || outcome === "wrong") result.score = nextScore(ctx.level, right);
+  }
   return result;
 }
 

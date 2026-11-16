@@ -1,6 +1,6 @@
 // Saving progress to a file and loading it back gives the same progress; other files are refused.
 import { beforeEach, describe, expect, it } from "vitest";
-import { backupText, loadBackup } from "./backup";
+import { applyBackup, backupText, canStore, loadBackup, readBackup } from "./backup";
 
 const store = new Map<string, string>();
 const fake = {
@@ -37,5 +37,40 @@ describe("progress backup", () => {
     expect(loadBackup("not json")).toBeNull();
     expect(loadBackup('{"app":"other","version":1,"data":{}}')).toBeNull();
     expect(store.size).toBe(0);
+  });
+
+  it("refuses a damaged file: a value that isn't what the app stores", () => {
+    expect(readBackup('{"app":"dragdropmath","version":1,"saved":"","data":{"mathbyhand.score.v1":"{broken"}}')).toBeNull();
+    expect(readBackup('{"app":"dragdropmath","version":1,"saved":"","data":{"mathbyhand.score.v1":3}}')).toBeNull();
+    expect(readBackup('{"app":"dragdropmath","version":1,"saved":"","data":["x"]}')).toBeNull();
+  });
+
+  it("is all or nothing: storing that fails partway puts back what was there", () => {
+    store.set("mathbyhand.score.v1", '{"easy":5}');
+    const real = fake.setItem;
+    let n = 0;
+    fake.setItem = (k: string, v: string) => {
+      if (++n === 2) throw new Error("QuotaExceededError");
+      real(k, v);
+    };
+    try {
+      expect(applyBackup([["mathbyhand.score.v1", '{"easy":9}'], ["mathbyhand.outcomes.v1", "{}"]])).toBeNull();
+    } finally {
+      fake.setItem = real;
+    }
+    expect(Object.fromEntries(store)).toEqual({ "mathbyhand.score.v1": '{"easy":5}' });
+  });
+
+  it("knows when the browser keeps nothing", () => {
+    expect(canStore()).toBe(true);
+    const real = fake.setItem;
+    fake.setItem = () => {
+      throw new Error("SecurityError");
+    };
+    try {
+      expect(canStore()).toBe(false);
+    } finally {
+      fake.setItem = real;
+    }
   });
 });

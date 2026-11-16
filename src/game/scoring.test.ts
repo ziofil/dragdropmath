@@ -21,6 +21,20 @@ const score = () => loadScore();
 describe("record", () => {
   beforeEach(() => store.clear());
 
+  it("doesn't move the score when the answer itself couldn't be kept (else it could count again)", () => {
+    const real = globalThis.localStorage.setItem;
+    globalThis.localStorage.setItem = (k: string, v: string) => {
+      if (k === "mathbyhand.outcomes.v1") throw new Error("QuotaExceededError");
+      store.set(k, v);
+    };
+    try {
+      expect(record("q1", predict(), "right", "x = 4")).toMatchObject({ score: null });
+    } finally {
+      globalThis.localStorage.setItem = real;
+    }
+    expect(score().easy).toBe(0);
+  });
+
   it("counts a right first answer once, however often it's told", () => {
     expect(record("p1", predict(), "right", "x = 4")).toMatchObject({ first: true, score: { level: "easy", was: 0, now: 1 } });
     // A reload and a pick again (any pick): nothing more.

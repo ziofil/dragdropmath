@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { setDebug, setLang, setNumbers, setSkin, SKINS, useSettings, type SkinId } from "./settings";
 import { LANGS, t, type Lang } from "../i18n";
-import { backupText, loadBackup } from "../util/backup";
+import { applyBackup, backupText, canStore, readBackup } from "../util/backup";
 
 export function SettingsButton() {
   const [open, setOpen] = useState(false);
@@ -76,8 +76,11 @@ function Pick({ value, label, options, onPick }: { value: string; label: string;
 /** Saving progress to a file and loading it back: it otherwise lives only in this browser. */
 function ProgressBackup() {
   const [said, setSaid] = useState<string | null>(null);
+  // A file read and waiting to be confirmed: loading it replaces the progress here.
+  const [pending, setPending] = useState<ReturnType<typeof readBackup>>(null);
   const file = useRef<HTMLInputElement>(null);
   const save = () => {
+    if (!canStore()) return setSaid(t().progressBlocked);
     const blob = new Blob([backupText()], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -86,10 +89,18 @@ function ProgressBackup() {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     setSaid(t().progressSaved);
   };
-  const load = async (f: File | undefined) => {
+  const pick = async (f: File | undefined) => {
     if (!f) return;
-    const n = loadBackup(await f.text());
-    if (n === null) return setSaid(t().progressNotABackup);
+    const b = readBackup(await f.text());
+    setSaid(b ? null : t().progressNotABackup);
+    setPending(b);
+  };
+  const load = () => {
+    if (!pending) return;
+    if (applyBackup(pending.entries) === null) {
+      setPending(null);
+      return setSaid(t().progressNoRoom);
+    }
     // Everything reads its progress afresh.
     location.reload();
   };
@@ -99,8 +110,28 @@ function ProgressBackup() {
       <div className="settings-backup-actions">
         <button onClick={save}>{t().saveProgress}</button>
         <button onClick={() => file.current?.click()}>{t().loadProgress}</button>
-        <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => load(e.target.files?.[0])} />
+        <input
+          ref={file}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => {
+            pick(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
       </div>
+      {pending && (
+        <div className="settings-backup-confirm" role="alertdialog" aria-label={t().loadProgress}>
+          <p>{t().progressReplace(pending.saved ? new Date(pending.saved).toLocaleDateString() : "")}</p>
+          <div className="settings-backup-actions">
+            <button className="primary" onClick={load}>
+              {t().progressLoadIt}
+            </button>
+            <button onClick={() => setPending(null)}>{t().cancel}</button>
+          </div>
+        </div>
+      )}
       {said && (
         <p className="settings-backup-said" role="status">
           {said}
