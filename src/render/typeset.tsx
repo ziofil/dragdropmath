@@ -148,8 +148,8 @@ function layoutNode(
         {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(e.id), dragologyZIndex: rc.draggedId === e.id ? "/1" : false } : {})}
         // Copies (from distributing) fly out of their source fully visible —
         // every part of them, grabbable or not (the 2 and x of a copied 2x too).
-        dragologyEmergeFrom={e.from}
-        dragologyEmergeMode={e.from ? ("clone" as const) : undefined}
+        dragologyEmergeFrom={rc.state.copies?.[e.id]}
+        dragologyEmergeMode={rc.state.copies?.[e.id] ? ("clone" as const) : undefined}
       >
         <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
         {L &&

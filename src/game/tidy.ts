@@ -79,7 +79,7 @@ function ungroup(state: MathState): MathState | null {
     const g = free(state.sides[i], null);
     if (!g) continue;
     const sides = state.sides.slice();
-    sides[i] = normalize(mapTree(sides[i], (e) => (e.id === g.id && e.kind === "sum" ? { kind: "sum", id: e.id, terms: e.terms, ...(e.from ? { from: e.from } : {}) } : e)));
+    sides[i] = normalize(mapTree(sides[i], (e) => (e.id === g.id && e.kind === "sum" ? { kind: "sum", id: e.id, terms: e.terms } : e)));
     return { ...state, sides };
   }
   return null;

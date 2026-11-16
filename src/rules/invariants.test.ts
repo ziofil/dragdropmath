@@ -35,6 +35,7 @@ describe("every move keeps the pieces whole", () => {
               const what = `${k.rule}: ${printState(s)} → ${printState(k.state)}`;
               const ids = k.state.sides.flatMap(allNodes).map((n) => n.id);
               if (new Set(ids).size !== ids.length) problems.add(`a piece twice: ${what}`);
+              if (k.state.sides.flatMap(allNodes).some((n) => n.from)) problems.add(`a copy mark left in the tree: ${what}`);
               if (k !== tap && !k.targetId && !ids.includes(signOwner(h) ?? h)) problems.add(`the dragged piece lost: ${what}`);
               if (k.targetId && !before.has(k.targetId)) problems.add(`a target that wasn't there: ${what}`);
               // The setting carries over: letters and conditions always; the relation unless turned round; the join unless a row splits into "or" rows.

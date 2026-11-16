@@ -116,8 +116,8 @@ export const powerToProduct: Rule = {
     if (!c || !P || P.radical || P.base.kind === "num" || c.node.kind !== "num") return [];
     const n = c.node.value;
     if (!Number.isInteger(n) || n < 2 || n > 4) return [];
-    const copies = Array.from({ length: n - 1 }, () => cloneFresh(P.base));
-    return [{ rule: "power-to-product", state: replaceIn(state, c.parentLoc!, prod([P.base, ...copies], P.id)) }];
+    // The base n times: the first is the base itself, the others copies of it (expr/copies.ts).
+    return [{ rule: "power-to-product", state: replaceIn(state, c.parentLoc!, prod(Array.from({ length: n }, () => P.base), P.id)) }];
   },
 };
 
@@ -742,8 +742,8 @@ export const powerOfProduct: Rule = {
     if (!whole(n) && !splitsOver(B.kind === "prod" ? B.factors : B.kind === "frac" ? [B.num, B.den] : [B], assumeOf(state))) return [];
     // A factor that is already a power multiplies exponents: (x²y)³ → x^(2·3)·y³.
     let spread: Expr;
-    if (B.kind === "prod") spread = prod(B.factors.map((f, k) => raiseTo(f, k === 0 ? n : cloneFresh(n))), B.id);
-    else if (B.kind === "frac") spread = frac(raiseTo(B.num, n), raiseTo(B.den, cloneFresh(n)), B.id);
+    if (B.kind === "prod") spread = prod(B.factors.map((f) => raiseTo(f, n)), B.id);
+    else if (B.kind === "frac") spread = frac(raiseTo(B.num, n), raiseTo(B.den, n), B.id);
     else return [];
     return [{ rule: "power-of-product", state: replaceIn(state, c.parentLoc!, spread), targetId: B.id }];
   },

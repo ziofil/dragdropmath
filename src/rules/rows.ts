@@ -4,7 +4,7 @@
  */
 import type { Expr } from "../expr/types";
 import { cloneFresh, freshId } from "../expr/build";
-import { allNodes, children, withChildren, withoutFrom } from "../expr/tree";
+import { allNodes, children, withChildren } from "../expr/tree";
 import { adopt, dragCtx, partner, setSides, type Candidate, type Rule } from "./types";
 
 /**
@@ -34,7 +34,7 @@ export const substitute: Rule = {
           // The x there turns into the value right where it is (x → 4 in
           // place: the value keeps the target's identity, and nothing flies
           // over from the other equation)…
-          sides[i] = replaceNode(s, target.id, adopt(withoutFrom(cloneFresh(value)), target.id));
+          sides[i] = replaceNode(s, target.id, adopt(cloneFresh(value, false), target.id));
           // …and the carried x is absorbed into it, while the x of x = 4 stays
           // where it was (a piece of its own, so the carried one doesn't fly back).
           sides[c.loc.side] = { ...c.node, id: freshId() };

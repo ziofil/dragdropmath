@@ -7,7 +7,7 @@ import { renderStateReadOnly, Vec2, type DragInitContext, type DragSpec } from "
 import type { MathState } from "../../expr/types";
 import { locate, nodeAt } from "../../expr/tree";
 import { dragCtx } from "../../rules/types";
-import { withoutMarks } from "../../rules";
+import { withoutCopies } from "../../expr/copies";
 import { canvasBox, carriedCentre, laidOut } from "../geometry";
 import type { RenderCtx } from "../typeset";
 import type { DragEnv } from "./env";
@@ -37,7 +37,7 @@ export function rowSlot(
     const midY = boxes[0].centre.y;
     // Staying put, minus the previous move's "copied from" marks: a copy that
     // disappears now (merged away) must not fly back into where it came from.
-    const stay = withoutMarks(rc.state);
+    const stay = withoutCopies(rc.state);
     const previews = new Map<number, () => ReturnType<typeof renderStateReadOnly>>();
     const previewOf = (slot: number, state: MathState) => {
       if (!previews.has(slot)) {

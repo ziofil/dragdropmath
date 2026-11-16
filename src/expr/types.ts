@@ -16,6 +16,10 @@
  * - negations are pulled out of products and fractions
  */
 /**
+ * `from`: a rule's mark on a copy it made (cloneFresh), naming its source.
+ * Only a rule's own result holds these: the engine turns them into the
+ * board's `copies` (expr/copies.ts), so boards never do.
+ *
  * `slot`: a term that took over another's place in its row (multiplying out
  * makes (a + b)·d where d was) names that place, so the + in front of it stays
  * the same + and keeps its place (see render/typeset.tsx).
@@ -90,6 +94,13 @@ export type MathState = {
    * until the drop moves it where it belongs). Ignored by keys and rules.
    */
   pin?: { id: string; x: number };
+  /**
+   * The last move's copies: a new piece's id → the piece it grew out of
+   * (2(x + 1) → 2x + 2·1: the second 2 grew out of the first). Drawn as
+   * flying out of their source; never carried to the next move (see
+   * expr/copies.ts). Ignored by keys and rules.
+   */
+  copies?: Record<string, string>;
 };
 
 /**

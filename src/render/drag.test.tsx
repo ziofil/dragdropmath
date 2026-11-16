@@ -209,7 +209,8 @@ describe("a copy made by distributing is an ordinary piece afterwards", () => {
     expect(show(state)).toBe("(2*x + 2*3)");
     const h = harness(state);
     const twos = state.sides.flatMap(allNodes).filter((n): n is Expr => n.kind === "num" && n.value === 2);
-    expect(twos.some((n) => n.from)).toBe(true);
+    expect(twos.some((n) => state.copies?.[n.id])).toBe(true);
+    expect(state.sides.flatMap(allNodes).some((n) => n.from), "marks stay out of the tree").toBe(false);
     // The 2 next to the 3 (the carried one: it went in on the far side), and the one in 2x (its copy).
     const term = (n: Expr) => state.sides.flatMap(allNodes).find((p) => p.kind === "prod" && p.factors.includes(n))!;
     const copy = twos.find((n) => show({ sides: [term(n)] }) === "2*3")!;

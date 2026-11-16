@@ -100,7 +100,6 @@ function LastDrag({ rec, frames }: { rec: Recording; frames: number }) {
 
 function Node({ e, depth, label, moves }: { e: Expr; depth: number; label?: string; moves: ReturnType<typeof movesFor> }) {
   const flags = [
-    e.from && `from ${e.from}`,
     e.kind === "num" && e.explicit && "explicit",
     e.kind === "pow" && e.radical && "radical",
   ].filter(Boolean);

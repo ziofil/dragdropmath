@@ -1,7 +1,8 @@
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { inSetting } from "../expr/setting";
-import { allNodes, locate, nodeAt, parentLoc, withoutFrom } from "../expr/tree";
+import { settleCopies, withoutCopies } from "../expr/copies";
+import { allNodes, locate, nodeAt, parentLoc } from "../expr/tree";
 import { dragCtx, handles, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { num } from "../expr/build";
 import { roleOf } from "./view";
@@ -291,15 +292,15 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
 }
 
 function collect(withMarks: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
-  // Copies made by the previous move are ordinary pieces now (see withoutFrom).
-  const state = withoutMarks(withMarks);
+  // Copies made by the previous move are ordinary pieces now.
+  const state = withoutCopies(withMarks);
   const seen = new Set([stateKey(state, "exact")]);
   const out: Candidate[] = [];
   for (const id of enabled) {
     for (const found of RULES[id].apply(state, draggedId)) {
       // Rules rewrite sides; the relation, how rows go together and what the letters
       // stand for carry over (unless the move sets them: an inequality turned round).
-      const cand = { ...found, state: inSetting(found.state, state) };
+      const cand = { ...found, state: settleCopies(inSetting(found.state, state), state) };
       const k = stateKey(cand.state, "exact");
       if (seen.has(k)) continue;
       seen.add(k);
@@ -388,8 +389,3 @@ export function isPressable(state: MathState, id: string, enabled: readonly Rule
 }
 
 
-/** The state without "copied from" marks from earlier moves (keeps the object when there are none). */
-export function withoutMarks(state: MathState): MathState {
-  const sides = state.sides.map(withoutFrom);
-  return sides.every((e, i) => e === state.sides[i]) ? state : { ...state, sides };
-}

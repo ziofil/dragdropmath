@@ -36,10 +36,15 @@ export const log = (base: Expr, arg: Expr, id = freshId()): Expr => ({ kind: "lo
 export const isNum = (e: Expr, v?: number): e is Num =>
   e.kind === "num" && (v === undefined || e.value === v);
 
-/** Deep copy with fresh ids; every copied node remembers its source in `from`. */
-export function cloneFresh(e: Expr): Expr {
-  const copy = withChildren(e, children(e).map(cloneFresh));
-  return { ...copy, id: freshId(), from: e.id };
+/**
+ * Deep copy with fresh ids; every copied node remembers its source in `from`
+ * (it flies out of it). `marked` false: a plain copy that just appears.
+ */
+export function cloneFresh(e: Expr, marked = true): Expr {
+  const copy = withChildren(e, children(e).map((c) => cloneFresh(c, marked)));
+  const { from: _from, ...rest } = copy;
+  void _from;
+  return marked ? { ...rest, id: freshId(), from: e.id } as Expr : { ...rest, id: freshId() } as Expr;
 }
 
 /** Negate, cancelling a double negative instead of stacking it. */
