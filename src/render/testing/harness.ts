@@ -7,7 +7,6 @@
 import {
   dragSpecToBehavior,
   getElementPosition,
-  getElementPositionCheap,
   renderStateReadOnly,
   Vec2,
   type Draggable,
@@ -20,10 +19,11 @@ import { parseState } from "../../expr/parse";
 import { reserveIds } from "../../expr/build";
 import { printState } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
-import { ALL_RULES, candidatesFor, type Candidate, type RuleId } from "../../rules";
+import { ALL_RULES, candidatesFor, feelOf, type Candidate, type RuleId } from "../../rules";
+import { AIMS } from "../drag/carry";
 import { interactive } from "../drag";
 import { mergePlan } from "../drag/merge";
-import { canvasBox } from "../geometry";
+import { canvasBox, originOf } from "../geometry";
 import { probeBlend } from "../preview";
 import { renderState, type RenderCtx, type Size } from "../typeset";
 import type { Recording } from "./recording";
@@ -209,7 +209,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
     },
     /** Canvas position of node `id`'s origin (baseline-left) when showing `s`. */
     originOf(id: string, s: MathState = state): Vec2 | null {
-      return getElementPositionCheap({ ...ctxFor(id), anchorPos: Vec2(0, 0) }, s);
+      return originOf(ctxFor(id), id, s);
     },
     /** Node `id`'s size when showing `s`. */
     sizeOf(id: string, s: MathState = state): Size {
@@ -242,6 +242,15 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
       const rc = h.rc(id);
       const ctx = ctxFor(id);
       return mergePlan(rc, ctx, id, c.state, targetId, c.stays).aim.sub(canvasBox(rc, ctx, id).centre);
+    },
+    /**
+     * Where a move without a target aims (the carried symbol's centre), as the
+     * drag measures it (render/drag/carry.ts AIMS): a reorder aims where the
+     * piece sits in the reordered row.
+     */
+    aimOf(id: string, c: Candidate): Vec2 {
+      const carry = feelOf(c).carry ?? "landing";
+      return AIMS[carry === "reorder" ? "landing" : carry](h.rc(id), id, c.state)(ctxFor(id));
     },
     /** Pick up node `id` (or the first piece printing as `text`) at a point on it (default: near its symbol's start). */
     grab(idOrText: string, at?: Vec2): Grip {

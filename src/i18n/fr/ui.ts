@@ -3,7 +3,6 @@ import type { Translation } from "../en";
 /** "1 exercice", "2 exercices" (in French, 0 and 1 take the singular). */
 const s = (n: number) => (n > 1 ? "s" : "");
 
-const BADGE = ["", "de bronze", "d'argent", "d'or"] as const;
 
 export const fr: Translation = {
   htmlLang: "fr",
@@ -28,24 +27,11 @@ export const fr: Translation = {
   heroText:
     "Fais glisser n'importe quelle partie d'une équation. Elle ne bouge que comme les maths le permettent. Transforme-la jusqu'à obtenir le résultat demandé.",
   learningPath: "Parcours",
-  nextUp: "à suivre",
-  mastered: "maîtrisé",
   everyChapterOpen: "Tous les chapitres sont ouverts. Les flèches indiquent un ordre conseillé.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Chapitre ${n} : ${title}, ${done} exercice${s(done)} résolu${s(done)} sur ${total}`,
   chapterN: (n: number) => `Chapitre ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Prérequis : ${titles}.`,
-  notMasteredYet: (titles: string) => ` Tu ne maîtrises pas encore : ${titles}. Tu peux commencer quand même.`,
   startLesson: "Commencer le cours →",
-  backToLesson: "Retour au cours →",
-  badges: "Badges",
-  noBadgesYet: "Fais le test d'un chapitre pour gagner son badge.",
-  badgesEarned: (n: number, total: number) => `${n} sur ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `Badge ${BADGE[tier]}`,
-  badgeNotEarned: "badge pas encore gagné",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) => `${chapter} : ${tier ? `badge ${BADGE[tier]}` : "pas encore gagné"}`,
-
   // Chapter page
   backToPath: "← Parcours",
   leadsOnToStart: "Ensuite : ",
@@ -54,9 +40,6 @@ export const fr: Translation = {
   anotherOne: "Un autre →",
   practice: "Entraîne-toi",
   predict: "Teste-toi",
-  predictNote: "Trouve la réponse de tête, puis choisis-la. Les bonnes réponses font gagner le badge du chapitre : 10 au niveau Facile pour le bronze, au niveau Moyen pour l'argent, au niveau Difficile pour l'or.",
-  solvedN: (n: number) => `${n} résolu${s(n)}`,
-  predictRight: "Bonne réponse ! Elle compte pour le badge.",
   drills: {
     commute: { name: "Changer l'ordre", how: "Fais glisser un terme au-delà de son voisin. Avec + et ×, l'ordre ne compte pas." },
     combine: { name: "Additionner des nombres", how: "Dépose un nombre sur l'autre pour les additionner." },
@@ -68,7 +51,6 @@ export const fr: Translation = {
     distribute: { name: "Développer", how: "Dépose le nombre devant sur la parenthèse. Il multiplie chaque terme à l'intérieur." },
     "distribute-neg": { name: "Un moins devant la parenthèse", how: "Dépose le signe moins sur la parenthèse. Tous les signes à l'intérieur changent." },
     "factor-out": { name: "Mettre en facteur", how: "Les deux termes ont un facteur commun. Fais-en glisser un devant, au-delà du bord gauche." },
-    "x-times-x": { name: "x fois x", how: "Dépose un x sur l'autre. `x·x` s'écrit `x²`." },
     "merge-powers": { name: "Même base : additionner les exposants", how: "Dépose une puissance sur l'autre de même base. Les exposants s'additionnent." },
     "power-to-product": { name: "Un carré comme produit", how: "Appuie sur le ² pour écrire la parenthèse deux fois." },
     "move-term": { name: "Faire passer un terme", how: "Fais passer le nombre de l'autre côté du =. Au passage, son signe change." },
@@ -118,10 +100,6 @@ export const fr: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Exercice ${label}${solved ? " — résolu" : ""}`,
-  goldNote: "Badge d'or. Tu peux continuer autant que tu veux.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `Badge ${BADGE[tier]}. ` : ""}Encore ${more} bonne${s(more)} réponse${s(more)} au niveau ${["Facile", "Moyen", "Difficile"][tier]} pour ${["le bronze", "l'argent", "l'or"][tier]}.`,
-
   // Guided example
   done: "Terminé.",
   startOver: "Recommencer",
@@ -148,7 +126,6 @@ export const fr: Translation = {
   hint: "Indice",
   undo: "Annuler",
   solvedBang: "Résolu !",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `Badge ${BADGE[tier]} : ${chapter}.`,
   moveCrashed: "Ce mouvement a provoqué une erreur.",
   moveCrashedDetails: "Les détails sont dans la console du navigateur.",
   tryAgain: "Réessayer",

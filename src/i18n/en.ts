@@ -3,9 +3,6 @@
  * Functions build a sentence around numbers or names (each language orders
  * and inflects them its own way). `backticks` mark maths where MathText is used.
  */
-/** The badge's steps, by tier (1 bronze, 2 silver, 3 gold). */
-const TIER = ["", "bronze", "silver", "gold"] as const;
-const Tier = (tier: 1 | 2 | 3) => TIER[tier][0].toUpperCase() + TIER[tier].slice(1);
 
 export const en = {
   /** <html lang>, and the page title. */
@@ -33,24 +30,13 @@ export const en = {
   heroAfter: ".",
   heroText: "Drag any part of an equation. It can only move in ways the maths allows. Rearrange it until it matches the goal.",
   learningPath: "Learning path",
-  nextUp: "next up",
-  mastered: "mastered",
   everyChapterOpen: "Every chapter is open. The arrows show a suggested order.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) => `Chapter ${n}: ${title}, ${done} of ${total} solved`,
+  chapterNodeLabel: (n: number, title: string) => `Chapter ${n}: ${title}`,
   chapterN: (n: number) => `Chapter ${n}`,
   /** A list of names: "A", "A and B", "A, B and C". */
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Builds on ${titles}.`,
-  notMasteredYet: (titles: string) => ` Not mastered yet: ${titles}. You can start anyway.`,
   startLesson: "Start the lesson →",
-  backToLesson: "Back to the lesson →",
-  badges: "Badges",
-  noBadgesYet: "See the answers in your mind's eye, in any chapter, to earn its badge.",
-  badgesEarned: (n: number, total: number) => `${n} of ${total}`,
-  /** A badge by its tier: 1 bronze, 2 silver, 3 gold. */
-  tierBadge: (tier: 1 | 2 | 3) => `${Tier(tier)} badge`,
-  badgeNotEarned: "badge not earned yet",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) => `${chapter}: ${tier ? `${TIER[tier]} badge` : "not earned yet"}`,
 
   // Chapter page
   backToPath: "← Learning path",
@@ -59,20 +45,24 @@ export const en = {
   leadsOnToEnd: ". You can go there any time.",
   level: { easy: "Easy", medium: "Medium", hard: "Hard" },
   anotherOne: "Another one →",
+  progressHere: "Your progress is kept in this browser only. Save it to a file to keep it safe, or to carry it to another device.",
+  saveProgress: "Save my progress",
+  loadProgress: "Load progress from a file",
+  progressSaved: "Saved. Load that file here, or in any browser, to get your progress back.",
+  progressNotABackup: "That file isn't a Math by Hand progress file.",
   showMove: "Show",
   /** The three ways through a chapter. */
   lesson: "Lesson",
   practice: "Practice",
   predict: "Mind's eye",
-  predictNote: "See the answer in your mind's eye, pick it, then solve it by hand to check. 10 right at Easy earn bronze, at Medium silver, at Hard gold.",
-  /** How many practice exercises are tried at a level. */
-  solvedN: (n: number) => `${n} tried`,
-  /** Practice: tried in the chapter, and the marks reached on the way (every so often). */
-  triedTotal: (n: number) => (n ? `${n} tried so far.` : "Nothing tried yet."),
-  /** Predicting: right answers in a row. */
-  inARow: (n: number) => ` ${n} in a row!`,
-  bestStreak: (n: number) => (n ? `Best run: ${n} right in a row.` : "No run of right answers yet."),
-  predictRight: "Right! It counts towards the badge.",
+  predictNote: "See the answer in your mind's eye, pick it, then solve it by hand to check. A right answer adds 1 to your score at its level; a wrong one, or a reveal, takes 1 away.",
+  /** The mind's eye's scores, one per level across every chapter. */
+  scores: "Mind's eye scores",
+  scoresNote: "One for each level, across every chapter: +1 for a right answer, −1 for a wrong one or a reveal.",
+  /** On a level's button: its score. */
+  scoreOf: (n: number) => `score ${n}`,
+  /** After a first answer: the score at its level, and how it moved. */
+  scoreNow: (level: string, now: number, up: boolean, moved: boolean) => `${level} score: ${now}${moved ? (up ? " (+1)" : " (−1)") : ""}.`,
   /**
    * Learning the moves: each drill's name (on its button) and what to do (above
    * the goal). Keys are the drills of game/generate/moves.ts.
@@ -87,9 +77,8 @@ export const en = {
     "collect-cancel": { name: "Cancel opposites", how: "Drop a term onto its opposite. They cancel out.", text: ["Taking away works the same way: `5y − 2y` is `3y`. Anything minus itself is 0, so `a + b − a` is just `b`."] },
     distribute: { name: "Multiply out brackets", how: "Drop the number in front onto the brackets: it multiplies every term inside. Then tap the · to work out the numbers.", text: ["`2(x + 3)` means 2 lots of `(x + 3)`: 2 lots of x plus 2 lots of 3, `2x + 2·3`. The number outside multiplies every term inside.", "Think of a rectangle 2 tall and `x + 3` wide. Its two parts have areas `2·x` and `2·3`, and together they make the whole."] },
     "distribute-neg": { name: "Minus before brackets", how: "Drop the minus onto the brackets. Every sign inside changes.", text: ["`−(x − 4)` means −1 times the brackets. The −1 multiplies every term, so every sign inside changes."] },
-    "factor-out": { name: "Take out a common factor", how: "Both terms share a factor. Press and hold it in one term, then drag it out in front, past the left end.", text: ["Going backwards is called factoring. If every term has a factor of 3, the 3 can go out in front of brackets: `3x + 3y = 3(x + y)`. Multiply it out again to check."] },
-    "x-times-x": { name: "x times x", how: "Press and hold one x for a moment, then drop it onto the other. `x·x` is written `x²`.", text: ["A letter can be multiplied by itself: `x(x + 2)` gives `x·x`. We write it `x²`, x squared, like the area of a square with sides x.", "A quick drag always moves a whole term. To take one piece out of a term, press and hold it for a moment first, then drag."] },
-    "split-exponent": { name: "Split an exponent", how: "Pull a term out of the exponent. The power splits into two powers of the same base.", text: ["Adding exponents works backwards too: `2^(x + 3)` is `2^x·2^3`. The three extra 2s are multiplied on separately."] },
+    "factor-out": { name: "Take out a common factor", how: "Both terms share a factor. Press and hold it in one term, then drag it out in front, past the left end.", text: ["To factor a sum is to write it as a product. In `3x + 3y`, both terms are something times 3. So the 3 can be written once, in front of brackets that hold what each term has besides it: `3x + 3y = 3(x + y)`.", "It's true because multiplying `3(x + y)` out gives `3x + 3y` again: the 3 visits each term inside. That's also how to check a factoring."] },
+    "split-exponent": { name: "Split an exponent", how: "Pull a term out of the exponent. The power splits into two powers of the same base.", text: ["`2^(x + 3)` is x + 3 twos multiplied together: x of them, then 3 more. So it's `2^x·2^3`: a sum in an exponent splits into a product of powers."] },
     "merge-powers": { name: "Same base: add exponents", how: "Drop one power onto the other, or tap the · between them. The exponents add up: tap the + to work them out.", text: ["`x³` means `x·x·x`. The small number, the exponent, counts the x's.", "So `x²·x³` is two x's times three x's: five x's in all. Multiplying powers of the same base adds the exponents."] },
     "power-to-product": { name: "A square as a product", how: "Tap the ² to write the brackets twice. Then multiply them out, and collect like terms.", text: ["`(x + 1)²` is `(x + 1)(x + 1)`, so it's multiplied out the same way."] },
     "move-term": { name: "Move a term across", how: "Drag the number across the =. Its sign changes on the way. Then tap the − to work it out.", text: ["An equation says two sides are equal. Do the same thing to both sides and they stay equal.", "Moving a term across the `=` does exactly that. From `x + 3 = 10`, take 3 from both sides: `x = 10 − 3`. That's why `+3` becomes `−3` on the other side."] },
@@ -125,7 +114,7 @@ export const en = {
     substitute: { name: "Substitute", how: "Drag the `y` of `y = …` onto the `y` in the other equation: it becomes what `y` equals. Then solve for x, and put x into the first equation to find y.", text: ["`y = 2x` and `x + y = 9` are two equations about the same x and y, both true at once. One equation with two unknowns has many solutions; two together usually have just one.", "`y = 2x` says y and 2x are equal, so y can be replaced by 2x in the other equation. That leaves one equation with one letter, which you know how to solve.", "If no equation has a letter on its own, make one first: in `x − y = 1`, move the −y across to get `x = 1 + y`."] },
     "evaluate-root": { name: "Work out a root", how: "Tap the root to work it out.", text: ["`√9` is the number that gives 9 when it's multiplied by itself: 3, since `3·3 = 9`. In the same way `∛8 = 2`, since `2·2·2 = 8`."] },
     "split-square": { name: "Split under a root", how: "Tap the number under the root: a square splits off (a cube, under a cube root). Then pull it out of the root, and tap its root to work it out.", text: ["A root that doesn't come out whole can still be simplified. Split the number under it so that a square splits off: `√12 = √(4·3)`."] },
-    "join-powers": { name: "Join roots", how: "Drop one root onto the other. They share one root sign.", text: ["Splitting a root works backwards too: `√2·√3 = √(2·3) = √6`. The same goes for any shared exponent: `x³y³ = (xy)³`."] },
+    "join-powers": { name: "Join roots", how: "Drop one root onto the other. They share one root sign.", text: ["`√2·√3` squared is `2·3`, so `√2·√3` is the number whose square is 6: `√(2·3) = √6`. Two roots of the same kind join under one.", "The same goes for any shared exponent: `x³y³` is xxx·yyy, which is xy·xy·xy, so `(xy)³`."] },
     "pull-out-of-power": { name: "Split a root", how: "Pull the number out of the root: it gets its own root. Then tap that root to work it out.", text: ["The root of a product is the product of the roots: `√(4x) = √4·√x = 2√x`."] },
     "root-notation": { name: "A root as a power", how: "Tap the root to write it as a power: √ is a power of ½, ∛ a power of ⅓.", text: ["Every root is a power: `√x = x^(1/2)`, `∛x = x^(1/3)`, and the nth root of x is `x^(1/n)`. So all the rules for powers work for roots too: `√x·√x = x^(1/2 + 1/2) = x`."] },
     "root-across": { name: "A root's power across the =", how: "Drag the ½ (or ⅓, or ¼) across the =. On the other side it becomes a square (or a cube, or a fourth power). Then tap the exponent to work it out.", text: ["To solve `√x = 3`, square both sides. Written as a power, `x^(1/2) = 3`, the ½ moves across and becomes a square: `x = 3²`."] },
@@ -146,10 +135,6 @@ export const en = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Exercise ${label}${solved ? " — solved" : ""}`,
-  goldNote: "Gold badge. Keep going as long as you like.",
-  /** The badge so far (`tier`, 0 for none yet), and `more` exercises still to solve for the next one. */
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${Tier(tier)} badge. ` : ""}${more} more right answer${more === 1 ? "" : "s"} at ${["Easy", "Medium", "Hard"][tier]} for ${TIER[tier + 1]}.`,
 
   // Guided example
   done: "Done.",
@@ -179,7 +164,6 @@ export const en = {
   hint: "Hint",
   undo: "Undo",
   solvedBang: "Solved!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${Tier(tier)} badge for ${chapter}.`,
   moveCrashed: "Something went wrong with that move.",
   moveCrashedDetails: "Details are in the browser console.",
   tryAgain: "Try again",

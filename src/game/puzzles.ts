@@ -39,10 +39,10 @@ export type Chapter = {
 export const CHAPTERS: Chapter[] = [
   shuffle,
   collect,
+  powers,
   distribute,
   brackets,
   factor,
-  powers,
   fractions,
   roots,
   explog,

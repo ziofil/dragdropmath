@@ -15,7 +15,7 @@ const another = (id: string, r: Rng, as: string): Draft | null => {
   return d && { ...d, shape: as };
 };
 
-const all: Shape[] = [
+export const all: Shape[] = [
   {
     id: "multiply",
     name: "multiplying powers",
@@ -292,8 +292,9 @@ const all: Shape[] = [
 
 /** Easy: one rule, once. Medium: numbers, powers of powers and brackets together. Hard: a power of a quotient, a quotient of powers, with x and y (nested.ts). */
 export const shapes: Record<Level, Shape[]> = {
-  easy: byIds(all, "multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters", "bracket-cancel", "expand-collect"),
-  medium: byIds(all, "two-products", "letters-and-number", "bracket-square", "square-and-more"),
+  // (Powers with brackets to multiply out come after the distributive law: chapters/brackets.ts.)
+  easy: byIds(all, "multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters"),
+  medium: byIds(all, "two-products", "letters-and-number"),
   // Hard nests one thing in another, with x and y: chapters/nested.ts.
   hard: NESTED.powers,
 };

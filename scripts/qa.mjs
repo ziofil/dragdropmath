@@ -68,7 +68,9 @@ errs = [];
 const boardTop = () => p.evaluate(() => Math.round(document.querySelector(".board .canvas").getBoundingClientRect().top + scrollY));
 const actionsTop = () => p.evaluate(() => Math.round(document.querySelector(".board-actions").getBoundingClientRect().top + scrollY));
 const said = () => p.evaluate(() => document.querySelector(".board-status")?.textContent ?? "");
-const progress = () => p.evaluate(() => JSON.parse(localStorage.getItem("mathbyhand.counts.v1") ?? "{}"));
+/** The run at balance, easy (the mind's eye). */
+const easyScore = () => p.evaluate(() => JSON.parse(localStorage.getItem("mathbyhand.score.v1") ?? "{}").easy ?? 0);
+const scoreAt = (n) => p.evaluate((n) => localStorage.setItem("mathbyhand.score.v1", JSON.stringify({ easy: n, medium: 0, hard: 0 })), n);
 const cards = () => p.$$("button.predict-choice");
 /** On a chapter's predict exercise: which card is right (by its maths, as the card labels it). */
 const rightCard = () =>
@@ -97,30 +99,38 @@ for (const [w, h] of [[375, 800], [1100, 900]]) {
   check(`${w}px: revealing moves neither the board nor its buttons (bug 5)`, b0 === (await boardTop()) && a0 === (await actionsTop()));
 }
 
-// Bugs 1, 2, 4: a reveal is kept; after it, no prompt without cards, no count, no badge.
+// Bugs 1, 2, 4: a reveal is kept; after it, no prompt without cards, and it takes one off the score.
 await fresh();
-await p.evaluate(() => localStorage.setItem("mathbyhand.counts.v1", JSON.stringify({ balance: { easy: 9, medium: 0, hard: 0 } })));
+await scoreAt(9);
 await go("#/predict/balance/easy/7", 500);
 await p.click("text=Reveal");
 await p.waitForTimeout(150);
-check("after Reveal: no 'predict first' without cards, no badge (bugs 1, 4)", !(await said()).includes("Pick an answer") && !(await p.$(".puzzle-badge")));
+check("after Reveal: no 'predict first' without cards (bugs 1, 4)", !(await said()).includes("Pick an answer"));
+check("after Reveal: the Easy score goes down by 1", (await easyScore()) === 8 && (await said()).includes("Easy score: 8 (−1)"), await said());
 await reload();
-check("Reveal, reload: the cards stay answered (bug 2)", (await cards()).length === 0 && (await said()).includes("green one"));
-check("Reveal, reload: nothing counted (bug 2)", (await progress()).balance.easy === 9);
-// A wrong pick: no badge (bug 1); a right one at 9: the badge.
+check("Reveal, reload: the cards stay answered, the score not taken again (bug 2)", (await cards()).length === 0 && (await said()).includes("green one") && (await easyScore()) === 8);
+// A wrong pick: one down; a right one: one up, once.
+await scoreAt(9);
 await go("#/predict/balance/easy/8", 500);
 await (await cards())[((await rightCard()) + 1) % 3].click();
 await p.waitForTimeout(150);
-check("a wrong pick at 9 right: no badge (bug 1)", !(await p.$(".puzzle-badge")) && (await progress()).balance.easy === 9);
+check("a wrong pick: the score down by 1", (await easyScore()) === 8);
+await scoreAt(9);
 await go("#/predict/balance/easy/9", 500);
 const rightAt = await rightCard();
 if (rightAt >= 0) {
   await (await cards())[rightAt].click();
   await p.waitForTimeout(150);
-  check("the tenth right pick: the badge, once", !!(await p.$(".puzzle-badge")) && (await progress()).balance.easy === 10);
+  check("a right pick: the score up by 1, said", (await easyScore()) === 10 && (await said()).includes("Easy score: 10 (+1)"), await said());
   await reload();
-  check("…and a reload doesn't announce it again, nor count it (bug 3)", !(await p.$(".puzzle-badge")) && (await progress()).balance.easy === 10);
+  check("…and a reload doesn't count it again (bug 3)", (await easyScore()) === 10);
 } else check("found the right card by its maths", false);
+// The score is never below 0.
+await scoreAt(0);
+await go("#/predict/balance/easy/11", 500);
+await p.click("text=Reveal");
+await p.waitForTimeout(150);
+check("at 0, a reveal leaves the score at 0", (await easyScore()) === 0);
 
 // Bug 6: switching skin keeps work in progress (and doesn't ask the prediction again).
 await go("#/sandbox", 400);
@@ -163,7 +173,7 @@ check("the set maker's ✓ has no dashed pill (bug 8)", markStyle === "none");
 for (const skin of ["classic", "codex", "paper", "neon"]) {
   await p.selectOption(".topbar-pick select", skin);
   await p.waitForTimeout(400);
-  for (const [h, sels] of [["#/", [".shelf", ".path-card", ".path-panel", ".home-sandbox"]], ["#/predict/balance/easy/3", [".predict-choice"]]]) {
+  for (const [h, sels] of [["#/", [".scores", ".path-card", ".path-panel", ".home-sandbox"]], ["#/predict/balance/easy/3", [".predict-choice"]]]) {
     await go(h, 400);
     const looks = await p.evaluate((sels) => sels.flatMap((s) => [...document.querySelectorAll(s)].map((e) => { const c = getComputedStyle(e); return `${c.borderTopWidth} ${c.borderLeftWidth} ${c.borderTopStyle}`; })), sels);
     check(`${skin}: ${h} frames alike`, new Set(looks).size <= 1, looks.join(", "));

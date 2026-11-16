@@ -1,6 +1,5 @@
 import type { Translation } from "../en";
 
-const TIER = ["", "Bronze", "Silber", "Gold"] as const;
 
 export const de: Translation = {
   htmlLang: "de",
@@ -25,23 +24,11 @@ export const de: Translation = {
   heroText:
     "Zieh an einem beliebigen Teil einer Gleichung. Er bewegt sich nur so, wie es die Mathematik erlaubt. Forme um, bis alles aussieht wie das Ziel.",
   learningPath: "Lernpfad",
-  nextUp: "als Nächstes",
-  mastered: "gemeistert",
   everyChapterOpen: "Alle Kapitel sind offen. Die Pfeile zeigen eine sinnvolle Reihenfolge.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) => `Kapitel ${n}: ${title}, ${done} von ${total} gelöst`,
   chapterN: (n: number) => `Kapitel ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} und ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Setzt voraus: ${titles}.`,
-  notMasteredYet: (titles: string) => ` Noch nicht gemeistert: ${titles}. Du kannst trotzdem anfangen.`,
   startLesson: "Zur Lektion →",
-  backToLesson: "Zurück zur Lektion →",
-  badges: "Abzeichen",
-  noBadgesYet: "Mach in einem Kapitel den Test, um sein Abzeichen zu bekommen.",
-  badgesEarned: (n: number, total: number) => `${n} von ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `${TIER[tier]}abzeichen`,
-  badgeNotEarned: "Abzeichen noch nicht erreicht",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) => `${chapter}: ${tier ? `${TIER[tier]}abzeichen` : "noch nicht erreicht"}`,
-
   // Chapter page
   backToPath: "← Lernpfad",
   leadsOnToStart: "Darauf baut auf: ",
@@ -50,10 +37,6 @@ export const de: Translation = {
   anotherOne: "Noch eine →",
   practice: "Üben",
   predict: "Teste dein Können",
-  predictNote:
-    "Rechne die Antwort im Kopf aus und wähl sie dann aus. Richtige Antworten bringen dir das Abzeichen des Kapitels: 10 bei „Leicht“ für Bronze, bei „Mittel“ für Silber, bei „Schwer“ für Gold.",
-  solvedN: (n: number) => `${n} gelöst`,
-  predictRight: "Richtig! Das zählt für das Abzeichen.",
   drills: {
     commute: { name: "Reihenfolge tauschen", how: "Zieh einen Term an seinem Nachbarn vorbei. Bei + und × ist die Reihenfolge egal." },
     combine: { name: "Zahlen addieren", how: "Zieh eine Zahl auf die andere, um sie zu addieren." },
@@ -65,7 +48,6 @@ export const de: Translation = {
     distribute: { name: "Klammer ausmultiplizieren", how: "Zieh die Zahl vor der Klammer auf die Klammer. Sie wird mit jedem Term darin multipliziert." },
     "distribute-neg": { name: "Minus vor der Klammer", how: "Zieh das Minus auf die Klammer. Jedes Vorzeichen darin dreht sich um." },
     "factor-out": { name: "Gemeinsamen Faktor ausklammern", how: "Beide Terme haben einen Faktor gemeinsam. Zieh ihn aus einem der beiden ganz nach links vor den Term." },
-    "x-times-x": { name: "x mal x", how: "Zieh ein x auf das andere. `x·x` schreibt man `x²`." },
     "merge-powers": { name: "Gleiche Basis: Exponenten addieren", how: "Zieh eine Potenz auf die andere mit gleicher Basis. Die Exponenten werden addiert." },
     "power-to-product": { name: "Ein Quadrat als Produkt", how: "Tippe auf das ², um die Klammer zweimal hinzuschreiben." },
     "move-term": { name: "Term hinüberbringen", how: "Zieh die Zahl über das =. Dabei ändert sich ihr Vorzeichen." },
@@ -115,10 +97,6 @@ export const de: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Aufgabe ${label}${solved ? " – gelöst" : ""}`,
-  goldNote: "Goldabzeichen. Üb ruhig weiter, so viel du willst.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${TIER[tier]}abzeichen. ` : ""}Noch ${more} ${more === 1 ? "richtige Antwort" : "richtige Antworten"} bei „${["Leicht", "Mittel", "Schwer"][tier]}“ bis ${TIER[tier + 1]}.`,
-
   // Guided example
   done: "Fertig.",
   startOver: "Von vorn",
@@ -144,7 +122,6 @@ export const de: Translation = {
   hint: "Tipp",
   undo: "Rückgängig",
   solvedBang: "Gelöst!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${TIER[tier]}abzeichen für ${chapter}.`,
   moveCrashed: "Bei diesem Schritt ist etwas schiefgegangen.",
   moveCrashedDetails: "Details stehen in der Browser-Konsole.",
   tryAgain: "Nochmal versuchen",

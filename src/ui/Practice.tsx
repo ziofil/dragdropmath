@@ -2,18 +2,17 @@
  * A chapter's exercises, all made up on the spot from a seed (so a link always
  * gives the same one), in two modes, each at Easy / Medium / Hard:
  *
- * - practice: solved straight away; each one tried counts (no score);
- * - predict: the answer picked first, in one's head; a right one counts
- *   towards the chapter's badge.
+ * - practice: solved straight away, counted nowhere (no score);
+ * - the mind's eye (predict): the answer picked first, in one's head; a right
+ *   one adds 1 to the score at its level, a wrong one takes 1 away.
  */
 import { useMemo } from "react";
-import { chapterById, CHAPTERS, rulesOf, type Chapter } from "../game/puzzles";
+import { chapterById, rulesOf, type Chapter } from "../game/puzzles";
 import { freshSeed, LEVELS, practiceExercise, type Level } from "../game/generate/practice";
-import { badgeTier, countsOf, PER_LEVEL, type Progress } from "../game/scoring";
+import { loadScore } from "../game/scoring";
 import { parseState } from "../expr/parse";
 import { autoDecoys } from "../game/autoDecoys";
 import { choicesFor } from "../game/predict";
-import { Badge, BadgeNote } from "./Badge";
 import { PuzzleView, type Exercise } from "./PuzzleView";
 import { NotFound } from "./NotFound";
 import { href, type Mode } from "./routes";
@@ -25,32 +24,17 @@ export const exerciseHref = (mode: Mode, chapter: Chapter, level: Level) => href
 /** A mode's name on screen. */
 export const modeName = (mode: Mode) => (mode === "predict" ? t().predict : t().practice);
 
-/** A button for each level, with how many are done there. */
-export function LevelButtons({ mode, chapter, progress }: { mode: Mode; chapter: Chapter; progress: Progress }) {
-  const counts = countsOf(chapter, progress);
+/** A button for each level; the mind's eye's say the score at their level. */
+export function LevelButtons({ mode, chapter }: { mode: Mode; chapter: Chapter }) {
+  const score = mode === "predict" ? loadScore() : null;
   return (
     <div className="levels">
-      {LEVELS.map((level) => {
-        const n = counts[level];
-        // Predicting aims at PER_LEVEL at each level; practice just counts.
-        const done = mode === "predict" && n >= PER_LEVEL;
-        return (
-          <a key={level} className={`button level ${done ? "level-done" : ""}`} href={exerciseHref(mode, chapter, level)}>
-            <span className="level-name">{t().level[level]}</span>
-            <span className="level-count">{mode === "practice" ? t().solvedN(n) : done ? `✓ ${n}` : `${n}/${PER_LEVEL}`}</span>
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Where the chapter's badge stands. */
-export function BadgeRow({ chapter, progress }: { chapter: Chapter; progress: Progress }) {
-  return (
-    <div className="badge-row">
-      <Badge tier={badgeTier(chapter, progress)} n={CHAPTERS.indexOf(chapter) + 1} size={30} />
-      <BadgeNote chapter={chapter} progress={progress} />
+      {LEVELS.map((level) => (
+        <a key={level} className="button level" href={exerciseHref(mode, chapter, level)}>
+          <span className="level-name">{t().level[level]}</span>
+          {score && <span className="level-count">{t().scoreOf(score[level])}</span>}
+        </a>
+      ))}
     </div>
   );
 }

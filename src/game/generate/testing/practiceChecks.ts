@@ -9,8 +9,8 @@ import { SLOW } from "../../testing/corpus";
 import { stuckOf, verify } from "../verify";
 import { rng } from "../write";
 
-/** Exercises checked per shape (a composed shape is many shapes in one: more of those). */
-const PER_SHAPE = SLOW ? 6 : 2;
+/** Exercises checked per shape (a composed shape is many shapes in one: more of those). One in a quick run: a shape's way is the same each time. */
+const PER_SHAPE = SLOW ? 6 : 1;
 const PER_COMPOSED = SLOW ? 40 : 4;
 
 /** The checks for some chapters (split over files, so they run side by side). */
@@ -42,8 +42,9 @@ export function practiceChecks(chapters: (id: string) => boolean) {
               expect(keys.slice(1, -1).filter((k, i) => k === keys[i] || k === keys[0] || k === keys[keys.length - 1]), d!.start).toEqual([]);
               // Built backwards: the stretches go with the moves they say (what practice checks before serving).
               if (d!.legs) expect(stuckOf(verify(d!, rules, { quick: true })), `${d!.start}, quickly`).toBe("");
-              // Fully: with all the chapter's moves (in a slow run, without the stretches' word).
-              expect(stuckOf(verify(SLOW ? { ...d!, legs: undefined } : d!, rules)), d!.start).toBe("");
+              // Fully, with all the chapter's moves: for a hand-written shape (no stretches to go by), and
+              // in a slow run for every shape, without the stretches' word.
+              if (!d!.legs || SLOW) expect(stuckOf(verify(SLOW ? { ...d!, legs: undefined } : d!, rules)), d!.start).toBe("");
               const start = parseState(d!.start);
               expect(follows(d!.positive ? { ...start, letters: "positive" } : start, parseState(d!.goal)), `${d!.start} ⇒ ${d!.goal}`).toBe(true);
             }

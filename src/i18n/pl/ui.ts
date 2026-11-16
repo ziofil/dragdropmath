@@ -1,17 +1,5 @@
 import type { Translation } from "../en";
 
-/**
- * Polish plural forms: 1 zadanie, 2–4 zadania, 5+ zadań (and 12–14 zadań, 22–24 zadania).
- */
-const plural = (n: number, one: string, few: string, many: string) => {
-  if (n === 1) return one;
-  const last = n % 10;
-  const lastTwo = n % 100;
-  return last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14) ? few : many;
-};
-
-const medal = ["", "Brązowa odznaka", "Srebrna odznaka", "Złota odznaka"] as const;
-
 export const pl: Translation = {
   htmlLang: "pl",
   pageTitle: "Math by Hand",
@@ -35,25 +23,11 @@ export const pl: Translation = {
   heroText:
     "Przeciągnij dowolną część równania. Da się ją przesunąć tylko tak, jak pozwala matematyka. Przekształcaj je, aż dojdziesz do celu.",
   learningPath: "Ścieżka nauki",
-  nextUp: "następny",
-  mastered: "opanowane",
   everyChapterOpen: "Wszystkie rozdziały są otwarte. Strzałki pokazują proponowaną kolejność.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Rozdział ${n}: ${title}, rozwiązane ${done} z ${total}`,
   chapterN: (n: number) => `Rozdział ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} i ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Najpierw warto znać: ${titles}.`,
-  notMasteredYet: (titles: string) => ` Jeszcze nieopanowane: ${titles}. Możesz jednak zacząć już teraz.`,
   startLesson: "Zacznij lekcję →",
-  backToLesson: "Wróć do lekcji →",
-  badges: "Odznaki",
-  noBadgesYet: "Rozwiąż test w dowolnym rozdziale, a zdobędziesz jego odznakę.",
-  badgesEarned: (n: number, total: number) => `${n} z ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => medal[tier],
-  badgeNotEarned: "odznaka jeszcze niezdobyta",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) =>
-    `${chapter}: ${tier ? `${["", "brązowa", "srebrna", "złota"][tier]} odznaka` : "odznaka jeszcze niezdobyta"}`,
-
   // Chapter page
   backToPath: "← Ścieżka nauki",
   leadsOnToStart: "Dalej możesz przejść do: ",
@@ -62,10 +36,6 @@ export const pl: Translation = {
   anotherOne: "Jeszcze jedno →",
   practice: "Ćwiczenia",
   predict: "Sprawdź się",
-  predictNote:
-    "Oblicz wynik w pamięci, a potem go wybierz. Za dobre odpowiedzi dostajesz odznakę rozdziału: 10 na poziomie „Łatwe” to brązowa, na „Średnie” srebrna, na „Trudne” złota.",
-  solvedN: (n: number) => `${n} ${plural(n, "rozwiązane", "rozwiązane", "rozwiązanych")}`,
-  predictRight: "Dobrze! To się liczy do odznaki.",
   drills: {
     commute: { name: "Zmiana kolejności", how: "Przeciągnij wyraz za sąsiada. Przy + i × kolejność nie ma znaczenia." },
     combine: { name: "Dodawanie liczb", how: "Przeciągnij jedną liczbę na drugą, żeby je dodać." },
@@ -77,7 +47,6 @@ export const pl: Translation = {
     distribute: { name: "Wymnażanie nawiasu", how: "Przeciągnij liczbę sprzed nawiasu na nawias. Mnoży każdy wyraz w środku." },
     "distribute-neg": { name: "Minus przed nawiasem", how: "Przeciągnij minus na nawias. Każdy znak w środku się zmienia." },
     "factor-out": { name: "Wyłączanie wspólnego czynnika", how: "Oba wyrazy mają wspólny czynnik. Przeciągnij go z jednego z nich na sam początek, przed całe wyrażenie." },
-    "x-times-x": { name: "x razy x", how: "Przeciągnij jeden x na drugi. `x·x` zapisujemy jako `x²`." },
     "merge-powers": { name: "Ta sama podstawa: dodaj wykładniki", how: "Przeciągnij jedną potęgę na drugą o tej samej podstawie. Wykładniki się dodają." },
     "power-to-product": { name: "Kwadrat jako iloczyn", how: "Dotknij ², żeby zapisać nawias dwa razy." },
     "move-term": { name: "Przenoszenie wyrazu", how: "Przenieś liczbę na drugą stronę =. Po drodze zmienia znak." },
@@ -127,10 +96,6 @@ export const pl: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Zadanie ${label}${solved ? " — rozwiązane" : ""}`,
-  goldNote: "Złota odznaka. Możesz ćwiczyć dalej, ile chcesz.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${medal[tier]}. ` : ""}Jeszcze ${more} ${plural(more, "dobra odpowiedź", "dobre odpowiedzi", "dobrych odpowiedzi")} na poziomie „${["Łatwe", "Średnie", "Trudne"][tier]}” do ${["brązowej", "srebrnej", "złotej"][tier]}.`,
-
   // Guided example
   done: "Gotowe.",
   startOver: "Od początku",
@@ -157,7 +122,6 @@ export const pl: Translation = {
   hint: "Podpowiedź",
   undo: "Cofnij",
   solvedBang: "Rozwiązane!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} za rozdział „${chapter}”.`,
   moveCrashed: "Coś poszło nie tak przy tym ruchu.",
   moveCrashedDetails: "Szczegóły są w konsoli przeglądarki.",
   tryAgain: "Spróbuj jeszcze raz",

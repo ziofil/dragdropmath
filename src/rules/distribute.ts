@@ -1,5 +1,5 @@
 import type { Expr } from "../expr/types";
-import { cloneFresh, neg, negate, num, pow, prod, sum, variable } from "../expr/build";
+import { cloneFresh, frac, neg, negate, num, pow, prod, sum, variable } from "../expr/build";
 import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
 import { nodeAt, type Loc } from "../expr/tree";
 import { divideOut, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
@@ -32,7 +32,8 @@ export const distribute: Rule = {
         const g = k === first ? f : cloneFresh(f);
         // A minus stays the term's own (the same sign, now in front of the product).
         // Carried in from the right, it sits after each term: (2x + 1)(x + 3) → 2x(x + 3) + 1(x + 3).
-        const times = (u: Expr) => prod(fromLeft ? [g, visibleOne(u)] : [visibleOne(u), g]);
+        // The product takes the term's place in the row (its + stays the same +: Base.slot).
+        const times = (u: Expr): Expr => ({ ...prod(fromLeft ? [g, visibleOne(u)] : [visibleOne(u), g]), slot: t.id });
         return t.kind === "neg" ? neg(times(t.arg), t.id) : times(t);
       };
       // Still in its bracket for a moment, so the factor is seen to have gone inside (see Sum.grouped) —
@@ -68,22 +69,25 @@ function staysPut(near: Expr, fromLeft: boolean): string {
 export const distributeNeg: Rule = {
   id: "distribute-neg",
   name: "Distribute a minus",
-  gesture: "Drop a minus sign onto its brackets — every sign inside flips.",
+  gesture: "Drop a minus sign onto its brackets, or onto the top or bottom of the fraction it's in front of — every sign inside flips.",
   apply(state, id) {
     // Carried by the minus sign alone, onto its own brackets.
     const owner = signOwner(id);
     const c = owner ? dragCtx(state, owner) : null;
-    if (c?.node.kind !== "neg" || c.node.arg.kind !== "sum") return [];
-    const s = c.node.arg;
-    return [
-      {
-        rule: "distribute-neg",
-        // The carried minus becomes the sign of the first term (−(x − 4) → −x + 4),
-        // so it lands somewhere instead of vanishing while its contents stay.
-        state: replaceIn(state, c.loc, sum(s.terms.map((t, i) => (i === 0 ? adopt(negate(t), c.node.id) : negate(t))), s.id)),
-        targetId: s.id,
-      },
-    ];
+    if (c?.node.kind !== "neg") return [];
+    const minus = c.node;
+    // The carried minus becomes the sign of the first term (−(x − 4) → −x + 4),
+    // so it lands somewhere instead of vanishing while its contents stay.
+    const flipped = (s: Extract<Expr, { kind: "sum" }>) => sum(s.terms.map((t, i) => (i === 0 ? adopt(negate(t), minus.id) : negate(t))), s.id);
+    if (minus.arg.kind === "sum") return [{ rule: "distribute-neg", state: replaceIn(state, c.loc, flipped(minus.arg)), targetId: minus.arg.id }];
+    // In front of a fraction, its top or its bottom is the brackets: −4/(2 − x) → 4/(x − 2).
+    const F = minus.arg;
+    if (F.kind !== "frac") return [];
+    return ([F.num, F.den] as Expr[]).flatMap((part, k): Candidate[] =>
+      part.kind === "sum"
+        ? [{ rule: "distribute-neg", state: replaceIn(state, c.loc, k === 0 ? frac(flipped(part), F.den, F.id) : frac(F.num, flipped(part), F.id)), targetId: part.id }]
+        : [],
+    );
   },
 };
 

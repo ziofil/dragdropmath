@@ -55,7 +55,7 @@ exercises:
     const set = { title: "T", moves: "5", exercises: [{ start: "2x = 4", goal: "x = 2", moves: "Fractions" }] };
     const back = await decodeSet(await encodeSet(set));
     // 5 is the fifth chapter on the path now; the title, any language's, is its chapter.
-    expect(back.moves).toBe("factor");
+    expect(back.moves).toBe("brackets");
     expect(back.exercises[0].moves).toBe("fractions");
   });
 

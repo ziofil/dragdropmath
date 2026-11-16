@@ -318,10 +318,18 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       // A "+" belongs to the row, not to the term after it: carrying 2 out of
       // 2 + x carries just the 2, and the + waits in the row where it will
       // land. A "−" is part of its term's value, so it travels with the term.
+      // Named after the place of the term it's in front of (a term that took another's place keeps
+      // that one's +: see Base.slot), and only once in a row.
+      const used = new Set<string>();
+      const plusOf = (t: Expr) => {
+        const name = t.slot && !used.has(t.slot) && !e.terms.some((u) => u.id === t.slot) ? t.slot : t.id;
+        used.add(name);
+        return `plus-${name}`;
+      };
       return row(
         e.terms.flatMap((t, i) =>
           i > 0 && t.kind !== "neg"
-            ? [separator("plus", `plus-${t.id}`, size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null, { parens: t.kind === "sum" })]
+            ? [separator("plus", plusOf(t), size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null, { parens: t.kind === "sum" })]
             : [layoutNode(t, rc, size, i > 0 ? "minus" : null, { parens: t.kind === "sum" })],
         ),
       );

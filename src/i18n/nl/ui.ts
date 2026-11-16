@@ -1,7 +1,5 @@
 import type { Translation } from "../en";
 
-const tierName = ["", "Bronzen", "Zilveren", "Gouden"] as const;
-const metal = ["brons", "zilver", "goud"] as const;
 
 export const nl: Translation = {
   htmlLang: "nl",
@@ -26,25 +24,11 @@ export const nl: Translation = {
   heroText:
     "Sleep elk stukje van een vergelijking. Het kan alleen bewegen zoals de wiskunde het toestaat. Schuif net zo lang tot het eruitziet als het doel.",
   learningPath: "Leerpad",
-  nextUp: "volgende",
-  mastered: "beheerst",
   everyChapterOpen: "Alle hoofdstukken zijn open. De pijlen geven een handige volgorde aan.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Hoofdstuk ${n}: ${title}, ${done} van ${total} opgelost`,
   chapterN: (n: number) => `Hoofdstuk ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} en ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Bouwt voort op ${titles}.`,
-  notMasteredYet: (titles: string) => ` Nog niet beheerst: ${titles}. Je kunt toch al beginnen.`,
   startLesson: "Begin met de les →",
-  backToLesson: "Terug naar de les →",
-  badges: "Badges",
-  noBadgesYet: "Maak de test in een hoofdstuk om de badge ervan te verdienen.",
-  badgesEarned: (n: number, total: number) => `${n} van ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `${tierName[tier]} badge`,
-  badgeNotEarned: "badge nog niet verdiend",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) =>
-    `${chapter}: ${tier ? `${tierName[tier].toLowerCase()} badge` : "nog niet verdiend"}`,
-
   // Chapter page
   backToPath: "← Leerpad",
   leadsOnToStart: "Hierna komt ",
@@ -53,10 +37,6 @@ export const nl: Translation = {
   anotherOne: "Nog een →",
   practice: "Oefenen",
   predict: "Test jezelf",
-  predictNote:
-    "Reken het antwoord uit in je hoofd en kies het dan. Met goede antwoorden verdien je de badge van het hoofdstuk: 10 bij Makkelijk voor brons, bij Gemiddeld voor zilver, bij Moeilijk voor goud.",
-  solvedN: (n: number) => `${n} opgelost`,
-  predictRight: "Goed! Deze telt mee voor de badge.",
   drills: {
     commute: { name: "Volgorde omwisselen", how: "Sleep een term langs zijn buurman. Bij + en × maakt de volgorde niet uit." },
     combine: { name: "Getallen optellen", how: "Sleep het ene getal op het andere om ze op te tellen." },
@@ -68,7 +48,6 @@ export const nl: Translation = {
     distribute: { name: "Haakjes wegwerken", how: "Sleep het getal voor de haakjes op de haakjes. Het vermenigvuldigt elke term ertussen." },
     "distribute-neg": { name: "Minteken voor de haakjes", how: "Sleep het minteken op de haakjes. Alle tekens ertussen veranderen." },
     "factor-out": { name: "Buiten haakjes brengen", how: "Beide termen hebben een gemeenschappelijke factor. Sleep die bij een van de twee naar voren, helemaal links voor de termen." },
-    "x-times-x": { name: "x keer x", how: "Sleep de ene x op de andere. `x·x` schrijf je als `x²`." },
     "merge-powers": { name: "Zelfde grondtal: exponenten optellen", how: "Sleep de ene macht op de andere met hetzelfde grondtal. De exponenten worden opgeteld." },
     "power-to-product": { name: "Een kwadraat als product", how: "Tik op de ² om de haakjes twee keer op te schrijven." },
     "move-term": { name: "Term naar de overkant", how: "Sleep het getal naar de andere kant van het =. Onderweg verandert het teken." },
@@ -118,10 +97,6 @@ export const nl: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Oefening ${label}${solved ? " — opgelost" : ""}`,
-  goldNote: "Gouden badge. Je kunt zo lang doorgaan als je wilt.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${tierName[tier]} badge. ` : ""}Nog ${more} ${more === 1 ? "goed antwoord" : "goede antwoorden"} bij ${["Makkelijk", "Gemiddeld", "Moeilijk"][tier]} voor ${metal[tier]}.`,
-
   // Guided example
   done: "Klaar.",
   startOver: "Opnieuw beginnen",
@@ -148,7 +123,6 @@ export const nl: Translation = {
   hint: "Tip",
   undo: "Ongedaan maken",
   solvedBang: "Opgelost!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${tierName[tier]} badge voor ${chapter}.`,
   moveCrashed: "Er ging iets mis bij die zet.",
   moveCrashedDetails: "Details staan in de console van de browser.",
   tryAgain: "Probeer opnieuw",

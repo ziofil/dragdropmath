@@ -4,8 +4,9 @@ export const powers: Chapter = {
   id: "powers",
   title: "Powers",
   blurb: "x³ means x·x·x. Count the x's and you can work out the rules for powers.",
-  after: ["brackets"],
+  after: ["collect"],
   unlocks: [
+    "merge-powers",
     "power-of-power",
     "zero-power",
     "evaluate-power",

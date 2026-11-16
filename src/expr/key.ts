@@ -14,7 +14,23 @@ export type Ordering = boolean | "exact";
  * (they do whenever order counts; a search wants them apart always, so as
  * not to lose the move between them).
  */
+/**
+ * Keys are asked for again and again (every move compares states, every
+ * search dedupes them), and an expression never changes: each one's key is
+ * worked out once per way of keying it, then kept.
+ */
+const keys = new WeakMap<Expr, Map<string, string>>();
+
 export function key(e: Expr, ordered: Ordering = false, notation = ordered !== false): string {
+  const how = `${ordered}${notation}`;
+  let byHow = keys.get(e);
+  if (!byHow) keys.set(e, (byHow = new Map()));
+  let made = byHow.get(how);
+  if (made === undefined) byHow.set(how, (made = keyOf(e, ordered, notation)));
+  return made;
+}
+
+function keyOf(e: Expr, ordered: Ordering, notation: boolean): string {
   const k = (x: Expr) => key(x, ordered, notation);
   const list = (xs: Expr[], keepOrder: boolean) => {
     const ks = xs.map(k);

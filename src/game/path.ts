@@ -1,9 +1,8 @@
 /**
  * The learning path: chapters as a graph, each pointing to the chapters
- * that build on it. It's a suggestion of where to go next, never a lock.
+ * that build on it. It's a suggested order, never a lock.
  */
 import { CHAPTERS, type Chapter } from "./puzzles";
-import { isMastered, type Progress } from "./scoring";
 
 export type PathNode = {
   chapter: Chapter;
@@ -32,17 +31,17 @@ const COLS = 4;
 const PLACES: Record<string, [col: number, row: number]> = {
   shuffle: [1.5, 0],
   collect: [1.5, 1],
-  distribute: [1.5, 2],
-  brackets: [1.5, 3],
-  factor: [0.5, 4],
-  powers: [2.5, 4],
-  fractions: [1.5, 5],
-  roots: [1.5, 6],
-  explog: [1.5, 7],
-  balance: [1.5, 8],
-  inequalities: [0.5, 9],
-  formulas: [2.5, 9],
-  simultaneous: [2.5, 10],
+  powers: [1.5, 2],
+  distribute: [1.5, 3],
+  brackets: [1.5, 4],
+  factor: [1.5, 5],
+  fractions: [1.5, 6],
+  roots: [1.5, 7],
+  explog: [1.5, 8],
+  balance: [1.5, 9],
+  inequalities: [0.5, 10],
+  formulas: [2.5, 10],
+  simultaneous: [2.5, 11],
 };
 
 export function layoutPath(chapters: readonly Chapter[] = CHAPTERS): PathLayout {
@@ -58,13 +57,4 @@ export function layoutPath(chapters: readonly Chapter[] = CHAPTERS): PathLayout 
     rows: Math.max(...nodes.map((n) => n.row)) + 1,
     edges: nodes.flatMap((to) => to.chapter.after.map((id) => ({ from: node.get(id)!, to }))),
   };
-}
-
-/**
- * Where to go next: chapters not yet mastered whose groundwork is (all
- * mastered: none). In chapter order.
- */
-export function suggested(progress: Progress, chapters: readonly Chapter[] = CHAPTERS): Chapter[] {
-  const done = new Set(chapters.filter((c) => isMastered(c, progress)).map((c) => c.id));
-  return chapters.filter((c) => !done.has(c.id) && c.after.every((id) => done.has(id)));
 }

@@ -26,7 +26,7 @@ import { approach, canvasBox, carriedCentre, originOf } from "../geometry";
 import { PROBE, PROBE_SPAN, withProbe } from "../preview";
 import type { RenderCtx } from "../typeset";
 import type { DragEnv } from "./env";
-import { rowSlot } from "./carry";
+import { lazily, rowSlot } from "./carry";
 
 /**
  * "On" a target = the carried symbol's centre is over the target symbol
@@ -139,7 +139,7 @@ function mergePlanUnclamped(
 ): { aim: Vec2; pinned: boolean; shown: MathState } {
   const target = canvasBox(rc, ctx, targetId);
   const home = canvasBox(rc, ctx, draggedId).centre;
-  const pinAt = (id: string): MathState => ({ ...result, pin: { id, x: canvasBox(rc, ctx, id).symLeft.x } });
+  const pinAt = (id: string): MathState => pinned(result, id, canvasBox(rc, ctx, id).symLeft.x);
   // A minus carried on its own (its own handle, not a node): aim at the target.
   const loc = locate(rc.state, draggedId);
   if (!loc) return { aim: target.centre, pinned: false, shown: result };
@@ -164,6 +164,17 @@ function mergePlanUnclamped(
   }
   return { aim: target.centre, pinned: false, shown };
 }
+
+/** `result` with piece `id` pinned at `x`: one state per pin, so what's worked out about it (its layout) is kept. */
+function pinned(result: MathState, id: string, x: number): MathState {
+  const k = `${id}@${x.toFixed(2)}`;
+  let byPin = pins.get(result);
+  if (!byPin) pins.set(result, (byPin = new Map()));
+  let s = byPin.get(k);
+  if (!s) byPin.set(k, (s = { ...result, pin: { id, x } }));
+  return s;
+}
+const pins = new WeakMap<MathState, Map<string, MathState>>();
 
 /** Where a merge completes (see mergePlan). */
 export const mergeAim = (...args: Parameters<typeof mergePlan>) => mergePlan(...args).aim;
@@ -192,7 +203,8 @@ const shown = operator(Shown);
 type Merge = {
   state: MathState;
   targetId: string;
-  preview: LayeredSvgx;
+  /** Drawn when first shown (see lazily). */
+  preview: () => LayeredSvgx;
   zone: ReturnType<typeof onTarget>;
   aim: Vec2;
   absorbed: boolean;
@@ -247,7 +259,7 @@ class MergeApproach extends Operator<MathState> {
       return {
         state: c.state,
         targetId: c.targetId!,
-        preview: withProbe(renderStateReadOnly(ctx, plan.shown), PROBE_SPAN),
+        preview: lazily(() => withProbe(renderStateReadOnly(ctx, plan.shown), PROBE_SPAN)),
         zone: onTarget(rc, ctx, id, c.targetId!),
         aim: plan.aim,
         absorbed: plan.pinned,
@@ -347,7 +359,7 @@ class MergeApproach extends Operator<MathState> {
     this.last = { best, t, mix, merging: !!hit, carried: carriedCentre(this.env.rc, this.ctx, frame.pointer) };
     if (mix <= 0) return { ...carried, dropState };
     this.a = { ...carried, preview: () => withProbe(carried.preview(), 0) };
-    this.b = { preview: () => best.preview, dropState: best.state, gap: 0 };
+    this.b = { preview: best.preview, dropState: best.state, gap: 0 };
     const mixed = this.blend.run({ pointer: Vec2(mix * PROBE_SPAN, 0) });
     return { ...carried, preview: mixed.preview, dropState, activePath: undefined };
   }

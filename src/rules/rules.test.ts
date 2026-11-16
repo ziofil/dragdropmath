@@ -128,6 +128,9 @@ describe("rules do what they say", () => {
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
     ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // A minus in front of a fraction goes into its top or its bottom, flipping every sign there.
+    ["-4/(2 - ln(2))", "distribute-neg", "sign:-4/(2 - ln(2))", ["4/(-2 + ln(2))"]],
+    ["-(x - 1)/3", "distribute-neg", "sign:-(x - 1)/3", ["(-x + 1)/3"]],
     // Factoring a quadratic: the middle term splits into two whose numbers multiply to first × last.
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
@@ -202,6 +205,9 @@ describe("rules do what they say", () => {
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
     ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    // A minus in front of a fraction goes into its top or its bottom, flipping every sign there.
+    ["-4/(2 - ln(2))", "distribute-neg", "sign:-4/(2 - ln(2))", ["4/(-2 + ln(2))"]],
+    ["-(x - 1)/3", "distribute-neg", "sign:-(x - 1)/3", ["(-x + 1)/3"]],
     // Factoring a quadratic: the middle term splits into two whose numbers multiply to first × last.
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],

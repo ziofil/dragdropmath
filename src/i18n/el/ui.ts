@@ -1,6 +1,5 @@
 import type { Translation } from "../en";
 
-const medal = ["", "Χάλκινο μετάλλιο", "Ασημένιο μετάλλιο", "Χρυσό μετάλλιο"] as const;
 
 export const el: Translation = {
   htmlLang: "el",
@@ -25,25 +24,11 @@ export const el: Translation = {
   heroText:
     "Σύρε όποιο κομμάτι μιας εξίσωσης θέλεις. Κινείται μόνο με τρόπους που επιτρέπουν τα μαθηματικά. Άλλαξέ τη μέχρι να γίνει ίδια με τον στόχο.",
   learningPath: "Διαδρομή μάθησης",
-  nextUp: "επόμενο",
-  mastered: "ολοκληρώθηκε",
   everyChapterOpen: "Όλα τα κεφάλαια είναι ανοιχτά. Τα βέλη δείχνουν μια προτεινόμενη σειρά.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Κεφάλαιο ${n}: ${title}, ${done} από ${total} λυμένες`,
   chapterN: (n: number) => `Κεφάλαιο ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} και ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Χρειάζεσαι πρώτα: ${titles}.`,
-  notMasteredYet: (titles: string) => ` Δεν έχεις ολοκληρώσει ακόμα: ${titles}. Μπορείς όμως να ξεκινήσεις κανονικά.`,
   startLesson: "Ξεκίνα το μάθημα →",
-  backToLesson: "Πίσω στο μάθημα →",
-  badges: "Μετάλλια",
-  noBadgesYet: "Κάνε το τεστ σε οποιοδήποτε κεφάλαιο για να κερδίσεις το μετάλλιό του.",
-  badgesEarned: (n: number, total: number) => `${n} από ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => medal[tier],
-  badgeNotEarned: "δεν το έχεις κερδίσει ακόμα",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) =>
-    `${chapter}: ${tier ? medal[tier].toLowerCase() : "δεν το έχεις κερδίσει ακόμα"}`,
-
   // Chapter page
   backToPath: "← Διαδρομή μάθησης",
   leadsOnToStart: "Μετά συνεχίζεις με: ",
@@ -52,10 +37,6 @@ export const el: Translation = {
   anotherOne: "Άλλη μία →",
   practice: "Εξάσκηση",
   predict: "Δοκίμασε τον εαυτό σου",
-  predictNote:
-    "Βρες την απάντηση με το μυαλό και μετά διάλεξέ τη. Οι σωστές απαντήσεις σού δίνουν το μετάλλιο του κεφαλαίου: 10 στις εύκολες για το χάλκινο, στις μέτριες για το ασημένιο και στις δύσκολες για το χρυσό.",
-  solvedN: (n: number) => `${n} ${n === 1 ? "λυμένη" : "λυμένες"}`,
-  predictRight: "Σωστά! Μετράει για το μετάλλιο.",
   drills: {
     commute: { name: "Άλλαξε τη σειρά", how: "Σύρε έναν όρο πέρα από τον διπλανό του. Στο + και στο × η σειρά δεν παίζει ρόλο." },
     combine: { name: "Πρόσθεσε αριθμούς", how: "Σύρε τον έναν αριθμό πάνω στον άλλον για να τους προσθέσεις." },
@@ -67,7 +48,6 @@ export const el: Translation = {
     distribute: { name: "Κάνε επιμεριστική", how: "Σύρε τον αριθμό που είναι μπροστά πάνω στην παρένθεση. Πολλαπλασιάζει κάθε όρο μέσα της." },
     "distribute-neg": { name: "Μείον μπροστά από παρένθεση", how: "Σύρε το μείον πάνω στην παρένθεση. Κάθε πρόσημο μέσα της αλλάζει." },
     "factor-out": { name: "Βγάλε κοινό παράγοντα", how: "Οι δύο όροι έχουν κοινό παράγοντα. Σύρε τον έναν μπροστά, πέρα από την αριστερή άκρη." },
-    "x-times-x": { name: "x επί x", how: "Σύρε το ένα x πάνω στο άλλο. Το `x·x` γράφεται `x²`." },
     "merge-powers": { name: "Ίδια βάση: πρόσθεσε τους εκθέτες", how: "Σύρε μια δύναμη πάνω σε μια άλλη με την ίδια βάση. Οι εκθέτες προστίθενται." },
     "power-to-product": { name: "Το τετράγωνο ως γινόμενο", how: "Πάτησε το ² για να γράψεις την παρένθεση δύο φορές." },
     "move-term": { name: "Μετάφερε έναν όρο", how: "Σύρε τον αριθμό στο άλλο μέλος του =. Στη διαδρομή αλλάζει πρόσημο." },
@@ -117,10 +97,6 @@ export const el: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Άσκηση ${label}${solved ? " — λυμένη" : ""}`,
-  goldNote: "Χρυσό μετάλλιο. Μπορείς να συνεχίσεις όσο θέλεις.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${medal[tier]}. ` : ""}Ακόμα ${more} ${more === 1 ? "σωστή απάντηση" : "σωστές απαντήσεις"} στις ${["εύκολες", "μέτριες", "δύσκολες"][tier]} για το ${["χάλκινο", "ασημένιο", "χρυσό"][tier]}.`,
-
   // Guided example
   done: "Έτοιμο.",
   startOver: "Από την αρχή",
@@ -147,7 +123,6 @@ export const el: Translation = {
   hint: "Υπόδειξη",
   undo: "Αναίρεση",
   solvedBang: "Λύθηκε!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${medal[tier]} στο κεφάλαιο «${chapter}».`,
   moveCrashed: "Κάτι πήγε στραβά με αυτή την κίνηση.",
   moveCrashedDetails: "Θα βρεις λεπτομέρειες στην κονσόλα του προγράμματος περιήγησης.",
   tryAgain: "Δοκίμασε ξανά",

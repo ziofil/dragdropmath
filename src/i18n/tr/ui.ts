@@ -27,24 +27,11 @@ export const tr: Translation = {
   heroText:
     "Bir denklemin istediğin parçasını sürükle. Parçalar yalnızca matematiğin izin verdiği şekilde hareket eder. Hedefe benzeyene kadar düzenlemeye devam et.",
   learningPath: "Öğrenme yolu",
-  nextUp: "sıradaki",
-  mastered: "tamamlandı",
   everyChapterOpen: "Bütün bölümler açık. Oklar önerilen sırayı gösteriyor.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) => `Bölüm ${n}: ${title}, ${done}/${total} çözüldü`,
   chapterN: (n: number) => `Bölüm ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} ve ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Ön bilgi: ${titles}.`,
-  notMasteredYet: (titles: string) => ` Henüz tamamlamadığın: ${titles}. Yine de başlayabilirsin.`,
   startLesson: "Konuya başla →",
-  backToLesson: "Konuya dön →",
-  badges: "Rozetler",
-  noBadgesYet: "Bir bölümün rozetini kazanmak için o bölümün testini çöz.",
-  badgesEarned: (n: number, total: number) => `${n}/${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `${["", "Bronz", "Gümüş", "Altın"][tier]} rozet`,
-  badgeNotEarned: "rozet henüz kazanılmadı",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) =>
-    `${chapter}: ${tier ? `${["", "bronz", "gümüş", "altın"][tier]} rozet` : "henüz kazanılmadı"}`,
-
   // Chapter page
   backToPath: "← Öğrenme yolu",
   leadsOnToStart: "Sonra gelenler: ",
@@ -53,10 +40,6 @@ export const tr: Translation = {
   anotherOne: "Bir tane daha →",
   practice: "Alıştırma yap",
   predict: "Kendini sına",
-  predictNote:
-    "Cevabı aklından bul, sonra seç. Doğru cevaplar bölümün rozetini kazandırır: Kolay seviyede 10 doğru bronz, Orta seviyede gümüş, Zor seviyede altın rozet getirir.",
-  solvedN: (n: number) => `${n} çözüldü`,
-  predictRight: "Doğru! Rozet için sayıldı.",
   drills: {
     commute: { name: "Sırayı değiştir", how: "Bir terimi yanındakinin öbür yanına sürükle. + ve × işlemlerinde sıra fark etmez." },
     combine: { name: "Sayıları topla", how: "Toplamak için bir sayıyı diğerinin üstüne bırak." },
@@ -68,7 +51,6 @@ export const tr: Translation = {
     distribute: { name: "Parantezi aç", how: "Öndeki sayıyı parantezin üstüne bırak. İçerideki her terimle çarpılır." },
     "distribute-neg": { name: "Parantezin önünde eksi", how: "Eksiyi parantezin üstüne bırak. İçerideki bütün işaretler değişir." },
     "factor-out": { name: "Ortak çarpan parantezine al", how: "İki terimde de ortak bir çarpan var. Birini en soldan dışarı, öne sürükle." },
-    "x-times-x": { name: "x çarpı x", how: "x'lerden birini diğerinin üstüne bırak. `x·x`, `x²` diye yazılır." },
     "merge-powers": { name: "Aynı taban: üsleri topla", how: "Bir kuvveti, tabanı aynı olan öbür kuvvetin üstüne bırak. Üsler toplanır." },
     "power-to-product": { name: "Kareyi çarpım olarak yaz", how: "Parantezi iki kez yazmak için üsteki ²'ye dokun." },
     "move-term": { name: "Terimi karşıya geçir", how: "Sayıyı = işaretinin karşı tarafına sürükle. Geçerken işareti değişir." },
@@ -118,10 +100,6 @@ export const tr: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Alıştırma ${label}${solved ? " — çözüldü" : ""}`,
-  goldNote: "Altın rozet. İstediğin kadar devam edebilirsin.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `${["", "Bronz", "Gümüş"][tier]} rozet. ` : ""}${["Bronz", "Gümüş", "Altın"][tier]} rozet için ${["Kolay", "Orta", "Zor"][tier]} seviyede ${more} doğru cevap daha.`,
-
   // Guided example
   done: "Tamam.",
   startOver: "Baştan başla",
@@ -147,7 +125,6 @@ export const tr: Translation = {
   hint: "İpucu",
   undo: "Geri al",
   solvedBang: "Çözdün!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `${["", "Bronz", "Gümüş", "Altın"][tier]} rozet: ${chapter}.`,
   moveCrashed: "Bu hamlede bir şeyler ters gitti.",
   moveCrashedDetails: "Ayrıntılar tarayıcı konsolunda.",
   tryAgain: "Yeniden dene",

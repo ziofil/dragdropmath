@@ -4,7 +4,8 @@
  * to it are worked out from them (../composeExpr.ts).
  */
 import { brackets as twoBrackets, composedExpression, expression, lin, P, square as squared, term, times, type Piece } from "../composeExpr";
-import { one, type Level, type Rng, type Shape } from "../write";
+import { byIds, one, type Level, type Rng, type Shape } from "../write";
+import { all as powers } from "./powers";
 
 
 const shape = (id: string, name: string, pieces: (r: Rng) => Piece[] | null): Shape => ({
@@ -127,7 +128,8 @@ const letterBracketMinusProduct = shape("letter-bracket-minus-product", "x times
 });
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: [letterTimes, powerTimes, thenCollect, twoPlus, signs, timesSquare, thenTake, composedExpression("brackets", "easy", 4)],
-  medium: [bothNumbers, square, numberTimes, threeFactors, composedExpression("brackets", "medium", 4)],
+  // And powers with a bracket to multiply out, from the powers chapter (which now comes before the distributive law).
+  easy: [letterTimes, powerTimes, thenCollect, twoPlus, signs, timesSquare, thenTake, ...byIds(powers, "bracket-cancel", "expand-collect"), composedExpression("brackets", "easy", 4)],
+  medium: [bothNumbers, square, numberTimes, threeFactors, ...byIds(powers, "bracket-square", "square-and-more"), composedExpression("brackets", "medium", 4)],
   hard: [twoLetterProductMinus, letterBracketMinusProduct, composedExpression("brackets", "hard", 4)],
 };

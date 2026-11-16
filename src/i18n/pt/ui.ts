@@ -1,6 +1,5 @@
 import type { Translation } from "../en";
 
-const TIER = ["", "bronze", "prata", "ouro"];
 
 export const pt: Translation = {
   htmlLang: "pt-BR",
@@ -25,25 +24,11 @@ export const pt: Translation = {
   heroText:
     "Arraste qualquer parte de uma equação. Ela só se mexe do jeito que a matemática permite. Transforme a equação até ela ficar igual ao objetivo.",
   learningPath: "Trilha de aprendizagem",
-  nextUp: "próximo",
-  mastered: "dominado",
   everyChapterOpen: "Todos os capítulos estão liberados. As setas mostram uma ordem sugerida.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Capítulo ${n}: ${title}, ${done} de ${total} resolvidos`,
   chapterN: (n: number) => `Capítulo ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Usa o que você viu em ${titles}.`,
-  notMasteredYet: (titles: string) => ` Você ainda não domina: ${titles}. Mas pode começar mesmo assim.`,
   startLesson: "Começar a lição →",
-  backToLesson: "Voltar à lição →",
-  badges: "Medalhas",
-  noBadgesYet: "Faça o teste de qualquer capítulo para ganhar a medalha dele.",
-  badgesEarned: (n: number, total: number) => `${n} de ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `Medalha de ${TIER[tier]}`,
-  badgeNotEarned: "medalha ainda não conquistada",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) =>
-    `${chapter}: ${tier ? `medalha de ${TIER[tier]}` : "ainda não conquistada"}`,
-
   // Chapter page
   backToPath: "← Trilha de aprendizagem",
   leadsOnToStart: "Prepara para ",
@@ -52,10 +37,6 @@ export const pt: Translation = {
   anotherOne: "Outro →",
   practice: "Prática",
   predict: "Teste o que você aprendeu",
-  predictNote:
-    "Resolva de cabeça e depois escolha a resposta. Os acertos valem a medalha do capítulo: 10 no Fácil para o bronze, no Médio para a prata e no Difícil para o ouro.",
-  solvedN: (n: number) => `${n} ${n === 1 ? "resolvido" : "resolvidos"}`,
-  predictRight: "Acertou! Conta para a medalha.",
   drills: {
     commute: { name: "Trocar a ordem", how: "Arraste um termo para além do termo ao lado. Com + e ×, a ordem não importa." },
     combine: { name: "Somar números", how: "Arraste um número até o outro para somá-los." },
@@ -67,7 +48,6 @@ export const pt: Translation = {
     distribute: { name: "Aplicar a distributiva", how: "Arraste o número da frente até os parênteses. Ele multiplica cada termo de dentro." },
     "distribute-neg": { name: "Menos antes dos parênteses", how: "Arraste o menos até os parênteses. Todos os sinais de dentro se invertem." },
     "factor-out": { name: "Colocar em evidência", how: "Os dois termos têm um fator comum. Arraste um deles para fora, à esquerda de tudo." },
-    "x-times-x": { name: "x vezes x", how: "Arraste um x até o outro. `x·x` se escreve `x²`." },
     "merge-powers": { name: "Mesma base: somar expoentes", how: "Arraste uma potência até a outra de mesma base. Os expoentes se somam." },
     "power-to-product": { name: "Quadrado como produto", how: "Toque no ² para escrever os parênteses duas vezes." },
     "move-term": { name: "Passar um termo", how: "Passe o número para o outro lado do =. No caminho, ele troca de sinal." },
@@ -117,10 +97,6 @@ export const pt: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Exercício ${label}${solved ? " — resolvido" : ""}`,
-  goldNote: "Medalha de ouro. Pode continuar praticando quanto quiser.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `Medalha de ${TIER[tier]}. ` : ""}${more === 1 ? "Falta 1 acerto" : `Faltam ${more} acertos`} no ${["Fácil", "Médio", "Difícil"][tier]} para a medalha de ${TIER[tier + 1]}.`,
-
   // Guided example
   done: "Pronto.",
   startOver: "Recomeçar",
@@ -147,7 +123,6 @@ export const pt: Translation = {
   hint: "Dica",
   undo: "Desfazer",
   solvedBang: "Resolvido!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `Medalha de ${TIER[tier]} em ${chapter}.`,
   moveCrashed: "Algo deu errado com esse movimento.",
   moveCrashedDetails: "Os detalhes estão no console do navegador.",
   tryAgain: "Tentar de novo",

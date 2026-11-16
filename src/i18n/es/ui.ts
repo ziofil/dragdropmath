@@ -1,6 +1,5 @@
 import type { Translation } from "../en";
 
-const TIER = ["", "bronce", "plata", "oro"];
 
 export const es: Translation = {
   htmlLang: "es",
@@ -25,24 +24,11 @@ export const es: Translation = {
   heroText:
     "Arrastra cualquier parte de una ecuación. Solo se mueve como lo permiten las matemáticas. Transfórmala hasta que quede igual que el objetivo.",
   learningPath: "Ruta de aprendizaje",
-  nextUp: "siguiente",
-  mastered: "dominado",
   everyChapterOpen: "Todos los capítulos están abiertos. Las flechas indican un orden recomendado.",
-  chapterNodeLabel: (n: number, title: string, done: number, total: number) =>
-    `Capítulo ${n}: ${title}, ${done} de ${total} resueltos`,
   chapterN: (n: number) => `Capítulo ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Se basa en ${titles}.`,
-  notMasteredYet: (titles: string) => ` Aún no dominas: ${titles}. Puedes empezar igualmente.`,
   startLesson: "Empezar la lección →",
-  backToLesson: "Volver a la lección →",
-  badges: "Insignias",
-  noBadgesYet: "Ponte a prueba en cualquier capítulo para ganar su insignia.",
-  badgesEarned: (n: number, total: number) => `${n} de ${total}`,
-  tierBadge: (tier: 1 | 2 | 3) => `Insignia de ${TIER[tier]}`,
-  badgeNotEarned: "insignia aún no conseguida",
-  shelfTitle: (chapter: string, tier: 0 | 1 | 2 | 3) => `${chapter}: ${tier ? `insignia de ${TIER[tier]}` : "aún no conseguida"}`,
-
   // Chapter page
   backToPath: "← Ruta de aprendizaje",
   leadsOnToStart: "Te prepara para ",
@@ -51,9 +37,6 @@ export const es: Translation = {
   anotherOne: "Otro →",
   practice: "Practica",
   predict: "Ponte a prueba",
-  predictNote: "Calcula la respuesta mentalmente y luego elígela. Las respuestas correctas te dan la insignia del capítulo: 10 en Fácil para la de bronce, en Medio para la de plata y en Difícil para la de oro.",
-  solvedN: (n: number) => (n === 1 ? "1 resuelto" : `${n} resueltos`),
-  predictRight: "¡Correcto! Cuenta para la insignia.",
   drills: {
     commute: { name: "Cambiar el orden", how: "Arrastra un término más allá del de al lado. Al sumar y al multiplicar, el orden no importa." },
     combine: { name: "Sumar números", how: "Suelta un número sobre el otro para sumarlos." },
@@ -65,7 +48,6 @@ export const es: Translation = {
     distribute: { name: "Quitar paréntesis", how: "Suelta el número de delante sobre el paréntesis. Multiplica a cada término de dentro." },
     "distribute-neg": { name: "Un menos delante del paréntesis", how: "Suelta el signo menos sobre el paréntesis. Cambian todos los signos de dentro." },
     "factor-out": { name: "Sacar factor común", how: "Los dos términos tienen un factor en común. Arrastra uno hacia fuera, a la izquierda de todo." },
-    "x-times-x": { name: "x por x", how: "Suelta una x sobre la otra. `x·x` se escribe `x²`." },
     "merge-powers": { name: "Misma base: sumar exponentes", how: "Suelta una potencia sobre otra de la misma base. Los exponentes se suman." },
     "power-to-product": { name: "Un cuadrado como producto", how: "Toca el ² para escribir el paréntesis dos veces." },
     "move-term": { name: "Pasar un término al otro lado", how: "Arrastra el número al otro lado del =. Por el camino cambia de signo." },
@@ -115,10 +97,6 @@ export const es: Translation = {
 
   // Progress
   exerciseTitle: (label: string, solved: boolean) => `Ejercicio ${label}${solved ? " — resuelto" : ""}`,
-  goldNote: "Insignia de oro. Puedes seguir practicando todo lo que quieras.",
-  badgeNote: (tier: 0 | 1 | 2, more: number) =>
-    `${tier ? `Insignia de ${TIER[tier]}. ` : ""}${more === 1 ? "Te falta 1 respuesta correcta" : `Te faltan ${more} respuestas correctas`} en ${["Fácil", "Medio", "Difícil"][tier]} para la insignia de ${TIER[tier + 1]}.`,
-
   // Guided example
   done: "Hecho.",
   startOver: "Empezar de nuevo",
@@ -144,7 +122,6 @@ export const es: Translation = {
   hint: "Pista",
   undo: "Deshacer",
   solvedBang: "¡Resuelto!",
-  newBadge: (tier: 1 | 2 | 3, chapter: string) => `Insignia de ${TIER[tier]} en ${chapter}.`,
   moveCrashed: "Algo salió mal con ese movimiento.",
   moveCrashedDetails: "Los detalles están en la consola del navegador.",
   tryAgain: "Volver a intentarlo",

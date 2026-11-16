@@ -1,13 +1,14 @@
 import { useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import { chapterById, CHAPTERS, type Chapter } from "../game/puzzles";
-import { layoutPath, suggested, type PathNode } from "../game/path";
+import { layoutPath, type PathNode } from "../game/path";
 import { FeelWord } from "./FeelWord";
-import { badgeTier, GOAL, isMastered, loadProgress, progressOf, solvedCount, streakOf, type Progress } from "../game/scoring";
+import { loadScore } from "../game/scoring";
+import { LEVELS } from "../game/generate/write";
 import { chapterText, t } from "../i18n";
-import { Badge } from "./Badge";
-import { BadgeRow, LevelButtons } from "./Practice";
+import { LevelButtons } from "./Practice";
 import { LeadsTo } from "./ChapterView";
 import { href } from "./routes";
+import { backupText, loadBackup } from "../util/backup";
 
 /** Height of one row of the path. */
 const ROW = 136;
@@ -20,9 +21,7 @@ const MAX_W = 620;
 
 /** The learning path. `at`: a chapter to pick out (coming back from it). */
 export function Home({ at }: { at?: Chapter }) {
-  const progress = useMemo(() => loadProgress(), []);
-  const next = useMemo(() => suggested(progress), [progress]);
-  const [selected, setSelected] = useState<Chapter>(at ?? next[0] ?? CHAPTERS[0]);
+  const [selected, setSelected] = useState<Chapter>(at ?? CHAPTERS[0]);
   const panel = useRef<HTMLElement>(null);
 
   const select = (c: Chapter) => {
@@ -42,24 +41,18 @@ export function Home({ at }: { at?: Chapter }) {
         <p>{t().heroText}</p>
       </section>
 
-      <Shelf progress={progress} onSelect={select} />
+      <Scores />
 
       {/* Coming back from a chapter, the page opens here (routes.ts). */}
       <div className="path-layout" id="path">
         <section className="card path-card" aria-label={t().learningPath}>
           <div className="path-legend">
-            <span>
-              <i className="path-dot is-next" /> {t().nextUp}
-            </span>
-            <span>
-              <i className="path-dot is-done" /> {t().mastered}
-            </span>
             <span className="path-open">{t().everyChapterOpen}</span>
           </div>
-          <PathMap progress={progress} next={next} selected={selected} onSelect={select} />
+          <PathMap selected={selected} onSelect={select} />
         </section>
 
-        <ChapterPanel panelRef={panel} chapter={selected} progress={progress} isNext={next.includes(selected)} />
+        <ChapterPanel panelRef={panel} chapter={selected} />
       </div>
 
       <section className="card home-sandbox">
@@ -68,22 +61,14 @@ export function Home({ at }: { at?: Chapter }) {
         </a>
         <p>{t().sandboxIntro}</p>
       </section>
+
+      <ProgressBackup />
     </main>
   );
 }
 
 /** The chapters as a graph, each arrow pointing to what builds on it. */
-function PathMap({
-  progress,
-  next,
-  selected,
-  onSelect,
-}: {
-  progress: Progress;
-  next: readonly Chapter[];
-  selected: Chapter;
-  onSelect: (c: Chapter) => void;
-}) {
+function PathMap({ selected, onSelect }: { selected: Chapter; onSelect: (c: Chapter) => void }) {
   const { cols, rows, nodes, edges } = useMemo(() => layoutPath(), []);
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -117,9 +102,6 @@ function PathMap({
               <marker id="path-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow" />
               </marker>
-              <marker id="path-arrow-done" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow-done" />
-              </marker>
             </defs>
             {edges.map(({ from, to }) => {
               // From below the chapter's title, curving down into the next chapter.
@@ -129,38 +111,23 @@ function PathMap({
               const bottom = b.y - R - 8;
               const mid = (top + bottom) / 2;
               const d = `M ${a.x} ${top} C ${a.x} ${mid}, ${b.x} ${mid}, ${b.x} ${bottom}`;
-              const done = isMastered(from.chapter, progress);
-              return (
-                <path
-                  key={`${from.chapter.id}-${to.chapter.id}`}
-                  className={done ? "edge edge-done" : "edge"}
-                  d={d}
-                  markerEnd={done ? "url(#path-arrow-done)" : "url(#path-arrow)"}
-                />
-              );
+              return <path key={`${from.chapter.id}-${to.chapter.id}`} className="edge" d={d} markerEnd="url(#path-arrow)" />;
             })}
           </svg>
           {nodes.map((n) => {
             const p = at(n);
             const c = n.chapter;
-            const done = progressOf(c, progress);
-            const state = isMastered(c, progress) ? "done" : next.includes(c) ? "next" : solvedCount(c, progress) > 0 ? "started" : "open";
             return (
               <button
                 key={c.id}
-                className={`bare path-node node-${state} ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
+                className={`bare path-node ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
                 style={{ left: p.x, top: p.y - R, width: room(n) }}
                 onClick={() => onSelect(c)}
                 aria-pressed={c === selected}
-                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title, done, GOAL)}
+                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title)}
               >
                 <span className="node-ring">
-                  <Ring done={done} total={GOAL} label={String(n.index + 1)} />
-                  {badgeTier(c, progress) > 0 && (
-                    <span className="node-medal">
-                      <Badge tier={badgeTier(c, progress)} n={n.index + 1} size={22} />
-                    </span>
-                  )}
+                  <Ring label={String(n.index + 1)} />
                 </span>
                 <span className="node-title">{chapterText(c).title}</span>
               </button>
@@ -172,24 +139,11 @@ function PathMap({
   );
 }
 
-/** A chapter's circle: its number, ringed by how much of it is solved. */
-function Ring({ done, total, label }: { done: number; total: number; label: string }) {
-  const r = R - 3;
-  const len = 2 * Math.PI * r;
+/** A chapter's circle, with its number. */
+function Ring({ label }: { label: string }) {
   return (
     <svg className="ring" width={2 * R} height={2 * R} viewBox={`0 0 ${2 * R} ${2 * R}`} aria-hidden="true">
       <circle className="ring-face" cx={R} cy={R} r={R - 1} />
-      <circle className="ring-track" cx={R} cy={R} r={r} />
-      {done > 0 && (
-        <circle
-          className="ring-fill"
-          cx={R}
-          cy={R}
-          r={r}
-          strokeDasharray={`${(done / total) * len} ${len}`}
-          transform={`rotate(-90 ${R} ${R})`}
-        />
-      )}
       <text className="ring-label" x={R} y={R} dominantBaseline="central" textAnchor="middle">
         {label}
       </text>
@@ -198,91 +152,95 @@ function Ring({ done, total, label }: { done: number; total: number; label: stri
 }
 
 /** The chosen chapter: what it's about, what it builds on, its exercises. */
-function ChapterPanel({
-  panelRef,
-  chapter,
-  progress,
-  isNext,
-}: {
-  panelRef: Ref<HTMLElement>;
-  chapter: Chapter;
-  progress: Progress;
-  isNext: boolean;
-}) {
+function ChapterPanel({ panelRef, chapter }: { panelRef: Ref<HTMLElement>; chapter: Chapter }) {
   const ci = CHAPTERS.indexOf(chapter);
-  const practice = loadProgress("practice");
-  const started = solvedCount(chapter, progress) > 0 || solvedCount(chapter, practice) > 0;
-  const mastered = isMastered(chapter, progress);
   const builds = chapter.after.map((id) => chapterById(id)!);
-  const missing = builds.filter((c) => !isMastered(c, progress));
   const text = chapterText(chapter);
   const titles = (cs: Chapter[]) => t().list(cs.map((c) => chapterText(c).title));
 
   return (
     <section className="card path-panel" ref={panelRef}>
-      <div className="panel-kicker">
-        {t().chapterN(ci + 1)}
-        {mastered ? <span className="panel-tag is-done">{t().mastered}</span> : isNext && <span className="panel-tag is-next">{t().nextUp}</span>}
-      </div>
+      <div className="panel-kicker">{t().chapterN(ci + 1)}</div>
       <h2 className="panel-title">
         <a href={href({ page: "chapter", chapter: chapter.id })}>{text.title}</a>
       </h2>
       <p className="panel-blurb">{text.blurb}</p>
 
-      {builds.length > 0 && (
-        <p className="panel-builds">
-          {t().buildsOn(titles(builds))}
-          {missing.length > 0 && t().notMasteredYet(titles(missing))}
-        </p>
-      )}
+      {builds.length > 0 && <p className="panel-builds">{t().buildsOn(titles(builds))}</p>}
 
       {/* The three ways into a chapter, from its node: the lesson, practice, and the mind's eye. */}
       <div className="panel-mode">
         <h3 className="panel-mode-name">{t().lesson}</h3>
         <a className="button primary" href={href({ page: "chapter", chapter: chapter.id })}>
-          {started ? t().backToLesson : t().startLesson}
+          {t().startLesson}
         </a>
       </div>
       <div className="panel-mode">
         <h3 className="panel-mode-name">{t().practice}</h3>
-        <LevelButtons mode="practice" chapter={chapter} progress={practice} />
-        <p className="panel-mode-note">{t().triedTotal(solvedCount(chapter, practice))}</p>
+        <LevelButtons mode="practice" chapter={chapter} />
       </div>
       <div className="panel-mode">
         <h3 className="panel-mode-name">{t().predict}</h3>
-        <LevelButtons mode="predict" chapter={chapter} progress={progress} />
+        <LevelButtons mode="predict" chapter={chapter} />
         <p className="panel-mode-note">{t().predictNote}</p>
-        <BadgeRow chapter={chapter} progress={progress} />
-        <p className="panel-mode-note">{t().bestStreak(streakOf(chapter).best)}</p>
       </div>
       <LeadsTo chapter={chapter} />
     </section>
   );
 }
 
-/** Every chapter's badge, earned or not yet: a small reason to come back, nothing more. */
-function Shelf({ progress, onSelect }: { progress: Progress; onSelect: (c: Chapter) => void }) {
-  const tiers = CHAPTERS.map((c) => badgeTier(c, progress));
-  const earned = tiers.filter((t) => t > 0).length;
+/** The mind's eye's three scores, one per level across every chapter. */
+function Scores() {
+  const score = useMemo(() => loadScore(), []);
   return (
-    <section className="card shelf" aria-label={t().badges}>
-      <div className="shelf-head">
-        {t().badges} <span>{earned === 0 ? t().noBadgesYet : t().badgesEarned(earned, CHAPTERS.length)}</span>
-      </div>
-      <ul className="shelf-row">
-        {CHAPTERS.map((c, i) => (
-          <li key={c.id}>
-            <button
-              className="bare shelf-badge"
-              onClick={() => onSelect(c)}
-              title={t().shelfTitle(chapterText(c).title, tiers[i])}
-              aria-label={t().shelfTitle(chapterText(c).title, tiers[i])}
-            >
-              <Badge tier={tiers[i]} n={i + 1} size={34} />
-            </button>
+    <section className="card scores" aria-label={t().scores}>
+      <div className="scores-head">{t().scores}</div>
+      <ul className="scores-row">
+        {LEVELS.map((l) => (
+          <li key={l} className={`score score-${l}`}>
+            <span className="score-num">{score[l]}</span>
+            <span className="score-level">{t().level[l]}</span>
           </li>
         ))}
       </ul>
+      <p className="scores-note">{t().scoresNote}</p>
+    </section>
+  );
+}
+
+/** Saving progress to a file and loading it back: it otherwise lives only in this browser. */
+function ProgressBackup() {
+  const [said, setSaid] = useState<string | null>(null);
+  const file = useRef<HTMLInputElement>(null);
+  const save = () => {
+    const blob = new Blob([backupText()], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `math-by-hand-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    setSaid(t().progressSaved);
+  };
+  const load = async (f: File | undefined) => {
+    if (!f) return;
+    const n = loadBackup(await f.text());
+    if (n === null) return setSaid(t().progressNotABackup);
+    // Everything reads its progress afresh.
+    location.reload();
+  };
+  return (
+    <section className="card home-backup">
+      <p>{t().progressHere}</p>
+      <div className="home-backup-actions">
+        <button onClick={save}>{t().saveProgress}</button>
+        <button onClick={() => file.current?.click()}>{t().loadProgress}</button>
+        <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => load(e.target.files?.[0])} />
+      </div>
+      {said && (
+        <p className="home-backup-said" role="status">
+          {said}
+        </p>
+      )}
     </section>
   );
 }

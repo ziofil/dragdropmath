@@ -61,8 +61,6 @@ export const DRILLS: Record<string, Drill[]> = {
       return { start: `${a}(${x} + ${b})`, goal: `${a}${x} + ${a * b}` };
     }),
     d("distribute-neg", (r) => `-(${letter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
-    // x(x + 2) gives x·x + 2x. Powers with exponents come in the Powers chapter.
-    d("x-times-x", (r) => `x·x + ${r.int(2, 9)}x`, "merge-powers"),
   ],
   brackets: [
     d("bracket-times-bracket", (r) => {

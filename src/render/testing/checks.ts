@@ -15,10 +15,14 @@ import { ANCHOR, Grip, harness, show, type Harness } from "./harness";
 
 export const same = (a: Parameters<typeof stateKey>[0], b: Parameters<typeof stateKey>[0]) => stateKey(a, "exact") === stateKey(b, "exact");
 
-/** Drop points along the row through the piece's home, nearest first: as far as the canvas is wide (a long sum's first term carried to its end). */
-const ROW = Array.from({ length: 361 }, (_, i) => Vec2(i * 4 - 720, 0)).sort((p, q) => p.len() - q.len());
+/**
+ * Drop points along the row through the piece's home, nearest first: as far as
+ * the canvas is wide (a long sum's first term carried to its end). Every 8 px:
+ * a move that only a narrower window gives is one no finger finds anyway.
+ */
+const ROW = Array.from({ length: 181 }, (_, i) => Vec2(i * 8 - 720, 0)).sort((p, q) => p.len() - q.len());
 /** Then a coarser 2D search around home, for vertical moves (across a fraction bar...). */
-const AROUND = Array.from({ length: 41 * 21 }, (_, i) => Vec2((i % 41) * 8 - 160, Math.floor(i / 41) * 8 - 80))
+const AROUND = Array.from({ length: 27 * 15 }, (_, i) => Vec2((i % 27) * 12 - 156, Math.floor(i / 27) * 12 - 84))
   .filter((v) => v.y !== 0)
   .sort((p, q) => p.len() - q.len());
 
@@ -88,7 +92,11 @@ export function checkAllMovesReachable(src: string | MathState, rules: readonly 
       // carried symbol passes a neighbour's middle, so a wide term may need to travel past
       // where it finally settles; factoring out happens past the left end.)
       const gives = (o: Vec2) => same(dropAt(h, id, home.add(o)), c.state);
-      if (!ROW.some(gives) && !AROUND.some(gives)) {
+      // Where the move aims first, then anywhere, nearest the aim first (a reorder past a merge
+      // target is just beyond it): a few drops, mostly, instead of hundreds.
+      const aim = h.aimOf(id, c).sub(h.centreOf(id));
+      const byAim = (ps: Vec2[]) => [aim, ...ps].sort((p, q) => p.dist(aim) - q.dist(aim));
+      if (!byAim(ROW).some(gives) && !AROUND.some(gives)) {
         const seen = new Map<string, number>();
         for (const o of ROW) {
           const k = show(dropAt(h, id, home.add(o)));

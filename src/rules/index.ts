@@ -223,6 +223,12 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   };
   const drag = memo((id): Candidate[] => {
     const mine = own(id);
+    // A piece carried out in front (a factor, a bracket taken out) passes over its neighbours on
+    // the way: the merges it only has the other way round would form there instead (the bracket of
+    // x(x + 6) + 2(x + 6) multiplying into its x). They're its neighbours' to make.
+    const outInFront = mine.some((c) => !c.targetId && feelOf(c).carry === "out-in-front");
+    // (Nor, then, swaps with those neighbours: cosmetic, and in the way. Dragging the neighbour still swaps them.)
+    if (outInFront) return mine.filter((c) => !isCosmetic(state, id, c));
     if (inert.has(id) || !mirrorable.length) return mine;
     const seen = new Set(mine.map((c) => stateKey(c.state, "exact")));
     const back: Candidate[] = [];

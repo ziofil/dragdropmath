@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CHAPTERS } from "./puzzles";
-import { layoutPath, suggested } from "./path";
+import { layoutPath } from "./path";
 
 describe("the learning path", () => {
   it("each chapter builds only on chapters that come before it", () => {
@@ -40,13 +40,6 @@ describe("the learning path", () => {
         if (e === f || e.from === f.from || e.to === f.to || e.to === f.from || e.from === f.to) continue;
         expect(crosses(pt(e.from), pt(e.to), pt(f.from), pt(f.to)), `${e.from.chapter.id} → ${e.to.chapter.id} crosses ${f.from.chapter.id} → ${f.to.chapter.id}`).toBe(false);
       }
-  });
-
-  it("suggests the first chapter, then what the mastered ones open up", () => {
-    expect(suggested({}).map((c) => c.id)).toEqual(["shuffle"]);
-    const gold = { easy: 0, medium: 0, hard: 10 };
-    const progress = Object.fromEntries(CHAPTERS.slice(0, 2).map((c) => [c.id, gold]));
-    expect(suggested(progress).map((c) => c.id)).toEqual(["distribute"]);
   });
 });
 

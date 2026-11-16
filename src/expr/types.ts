@@ -15,7 +15,12 @@
  * - sums and products are flat (associativity is implicit)
  * - negations are pulled out of products and fractions
  */
-type Base = { id: string; from?: string };
+/**
+ * `slot`: a term that took over another's place in its row (multiplying out
+ * makes (a + b)·d where d was) names that place, so the + in front of it stays
+ * the same + and keeps its place (see render/typeset.tsx).
+ */
+type Base = { id: string; from?: string; slot?: string };
 
 /** `explicit`: a ·1 normalizing keeps (one written in an exercise, or one a move shows landing before tidying; see rules/shapes.ts visibleOne). */
 export type Num = Base & { kind: "num"; value: number; explicit?: boolean };
