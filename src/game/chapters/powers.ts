@@ -99,12 +99,12 @@ export const powers: Chapter = {
       const [x, b, k] = [letter(r), r.int(2, 4), r.int(2, 4)];
       return { start: `${x}^${b + k}/${x}^${b}`, goal: `${x}^${k}` };
     }),
-    carrying("exponent", d("zero-power", (r) => {
+    d("zero-power", (r) => {
       const [x, a] = [letter(r), r.int(2, 9)];
       return { start: `${x}^0 + ${a}`, goal: `${a + 1}` };
-    })),
+    }),
     d("flip-across-bar", (r) => `1/${letter(r)}^${r.int(2, 5)}`),
-    carrying("exponent", d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`)),
+    d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`),
     d("tap-power", (r) => `${pick(r, ["2^3", "2^4", "2^5", "3^2", "3^3", "4^2", "5^2", "10^2"])} + ${letter(r)}`),
     d("power-of-product", (r) => {
       const [a, x, n] = [r.int(2, 5), letter(r), r.int(2, 3)];

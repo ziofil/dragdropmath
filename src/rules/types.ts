@@ -90,6 +90,11 @@ export type Rule = {
   gesture: string;
   /** Tap (click) the node instead of dragging it. A tap rule yields at most one candidate. */
   tap?: true;
+  /**
+   * A merge onto the piece's neighbour that tapping the piece makes too (the 0
+   * of x⁰ tapped: x⁰ → 1), as dropping it would. Taught as a tap.
+   */
+  tapsToo?: true;
   /** When several taps apply, the lowest order wins (default 0). */
   tapOrder?: number;
   /** How carrying the piece towards this move feels (see Feel). Merges (with a target) always blend in. */

@@ -74,8 +74,9 @@ export const powerOne: Rule = {
   id: "power-one",
   tidy: true,
   either: true,
+  tapsToo: true,
   name: "Power of one",
-  gesture: "Drop an exponent of 1 onto its base — x¹ is just x.",
+  gesture: "Tap an exponent of 1, or drop it onto its base — x¹ is just x.",
   apply(state, id) {
     const c = dragCtx(state, id);
     const P = c && exponentOf(c);
@@ -88,8 +89,9 @@ export const powerOne: Rule = {
 export const zeroPower: Rule = {
   id: "zero-power",
   either: true,
+  tapsToo: true,
   name: "Power of zero",
-  gesture: "Drop an exponent of 0 onto its base — anything to the power 0 is 1.",
+  gesture: "Tap an exponent of 0, or drop it onto its base — anything to the power 0 is 1.",
   apply(state, id) {
     const c = dragCtx(state, id);
     const P = c && exponentOf(c);

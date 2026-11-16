@@ -613,6 +613,11 @@ describe("tapping a number's exponent", () => {
     expect(tap("x = 3^2")).toBe("tap-power: x = 9");
     expect(tap("x^2")).toBe("power-to-product: x*x");
   });
+  it("an exponent of 0 or 1 does what dropping it on its base does", () => {
+    expect(tap("x^0 + 4")).toBe("zero-power: 1 + 4");
+    expect(tap("3x^1")).toBe("power-one: 3*x");
+    expect(tap("x^1")).toBe("power-one: x");
+  });
 });
 
 describe("tapping + or − between two numbers works it out", () => {

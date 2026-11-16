@@ -276,7 +276,15 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
     }
     return [...mine, ...back];
   });
-  const tap = memo((id) => (inert.has(id) ? null : (collect(state, id, tapRules)[0] ?? null)));
+  // A tap of its own, else a merge that tapping makes too (see Rule.tapsToo).
+  const tapsToo = dragRules.filter((id) => RULES[id].tapsToo);
+  const tap = memo((id) => {
+    if (inert.has(id)) return null;
+    const t = collect(state, id, tapRules)[0];
+    if (t) return t;
+    const m = tapsToo.length ? own(id).find((c) => RULES[c.rule].tapsToo) : undefined;
+    return m ? { rule: m.rule, state: m.state } : null;
+  });
   // Any piece with a real move can be picked up: a quick press takes it when it's
   // a term (or in no sum at all), a press held still takes it out of its term.
   const grabbable = memo((id) => drag(id).some((c) => !isCosmetic(state, id, c)));

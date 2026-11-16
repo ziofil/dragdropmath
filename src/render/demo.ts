@@ -50,7 +50,7 @@ export function planDemo(
     .sort((a, b) => a.r - b.r)
     .map((x) => x.w);
   // A tap is shown as a tap (its rule is one), never as some drag that happens to give the same.
-  if (RULES[rule].tap) {
+  if (RULES[rule].tap || RULES[rule].tapsToo) {
     const t = ways.find((w) => w.tap);
     return t ? { kind: "tap", id: t.id, next: t.candidate.state } : null;
   }
