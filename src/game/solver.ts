@@ -159,10 +159,11 @@ export function searchBest(start: MathState, done: (s: MathState) => boolean, ru
  * This move does the step: it gives what the step shows, or the same in
  * another order (dropping the first x of x + 2 + x on the second gives
  * 2 + 2x, not 2x + 2: just as right). Not when the step is the order itself
- * (a reorder: the same terms as before, in any order).
+ * (a reorder: the same terms as before, in any order), nor when it's the
+ * sides swapped (18 = x to x = 18): then it must look exactly like it, or the
+ * board would be done before a move.
  */
 export function stepDone(before: MathState, next: MathState, want: MathState): boolean {
-  if (matchesGoal(next, want)) return true;
-  const reorder = stateKey(before, false) === stateKey(want, false);
-  return !reorder && matchesGoal(next, want, false);
+  if (matchesGoal(before, want, false)) return stateKey(next, "exact") === stateKey(want, "exact");
+  return matchesGoal(next, want) || matchesGoal(next, want, false);
 }

@@ -56,6 +56,20 @@ describe("lesson moves, by hand", () => {
   });
 });
 
+// No board is done before a move (18 = x is not yet x = 18, though an exercise would take it).
+describe("lesson boards start undone", () => {
+  const all = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.map((d) => [chapterId, d.id] as const));
+  it.each(all)("%s: %s", (chapterId, drillId) => {
+    const ch = CHAPTERS.find((c) => c.id === chapterId)!;
+    for (const seed of [11, 222, 3333, 44444, 5]) {
+      const ex = drillExercise(chapterId, drillId, seed)!;
+      const state = startOf(ex.start, ch);
+      const goals = [ex.goal, ...ex.also].map((g) => startOf(g, ch));
+      expect(goals.some((g) => stepDone(state, state, g)), `${ex.start} is already done`).toBe(false);
+    }
+  });
+});
+
 // Show does what the words say: where they name the piece to carry (the bottom one up, the exponent onto its base), Show carries that one.
 describe("lesson moves, as their words say", () => {
   const named = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.filter((d) => d.carries).map((d) => [chapterId, d.id] as const));
