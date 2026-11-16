@@ -232,8 +232,10 @@ export const splitTerm: Rule = {
   name: "Split the middle term",
   gesture: "Tap the middle term of something like x² + 5x + 6: it splits in two (2x + 3x), ready to factor in pairs.",
   tap: true,
+  // Before splitting a number: the 8 of y² + 8y + 15 tapped splits its term, as the y does.
+  tapOrder: -0.5,
   apply(state, id) {
-    const r = roleOf(state, id);
+    const r = roleOf(state, termHolding(state, id));
     if (!r || r.part !== "term" || r.terms.length !== 3) return [];
     const ms = r.terms.map(monomial);
     if (ms.some((m) => m === null)) return [];
@@ -254,6 +256,14 @@ export const splitTerm: Rule = {
     return [];
   },
 };
+
+/** The term a number in front belongs to (the 8y of the 8, through a minus), else `id` itself. */
+function termHolding(state: MathState, id: string): string {
+  let c = dragCtx(state, id);
+  if (c?.node.kind !== "num") return id;
+  while (c?.parent && (c.parent.kind === "prod" || c.parent.kind === "neg")) c = dragCtx(state, c.parent.id);
+  return c?.node.id ?? id;
+}
 
 /** √ of a term k·xⁿ, when it's a whole square (9 → 3, 4x² → 2x, x⁴ → x²). */
 function rootOf(m: { k: number; x: string | null; n: number }): { k: number; n: number } | null {

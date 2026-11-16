@@ -144,6 +144,9 @@ describe("rules do what they say", () => {
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
     ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // Its number tapped splits the whole term (not the 8 into 2·4).
+    ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
+    ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
     // A difference of two squares: tap the minus.
     ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
     ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
@@ -226,6 +229,9 @@ describe("rules do what they say", () => {
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
     ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // Its number tapped splits the whole term (not the 8 into 2·4).
+    ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
+    ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
     // A difference of two squares: tap the minus.
     ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
     ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
