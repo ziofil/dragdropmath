@@ -1,5 +1,5 @@
 /**
- * Second-degree equations: one chapter, its lesson (a board per move) and
+ * Quadratic equations: one chapter, its lesson (a board per move) and
  * its practice, built back from their answers (../generate/back.ts): x = 3
  * or x = −2 is (x − 3)(x + 2) = 0 (a product is 0 when a factor is), that
  * multiplied out (x² − x − 6 = 0), then written as a teacher might, with
@@ -303,7 +303,7 @@ function factoredInPairs(b: number, c: number): string[] {
 
 export const quadratic: Chapter = {
   id: "quadratic",
-  title: "Second-degree equations",
+  title: "Quadratic equations",
   blurb: "An equation with x² can have two answers. Make one side 0 and write the other as a product: a product is 0 only when one of its factors is. Or get the square on its own: x² = 9 means x = 3 or x = −3.",
   after: ["simultaneous"],
   unlocks: ["zero-product"],
