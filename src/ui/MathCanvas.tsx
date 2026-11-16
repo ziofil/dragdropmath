@@ -21,7 +21,7 @@ const NO_RULES: readonly RuleId[] = [];
 const PRESS_SLOP = 6;
 
 /** Plays one move on the board, as a hand would (see Demo): false if it can't be shown. */
-export type ShowMove = (rule: RuleId, good?: (s: MathState) => boolean) => Promise<boolean>;
+export type ShowMove = (rule: RuleId, good?: (s: MathState) => boolean, prefer?: (s: MathState, id: string) => boolean) => Promise<boolean>;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -103,18 +103,18 @@ export function MathCanvas({
     return () => box.removeEventListener("pointerdown", block, true);
   }, [width.ref]);
   if (show)
-    show.current = async (rule, good) => {
+    show.current = async (rule, good, prefer) => {
       playing.current = true;
       try {
-        return await play(rule, good);
+        return await play(rule, good, prefer);
       } finally {
         playing.current = false;
       }
     };
-  const play: ShowMove = async (rule, good) => {
+  const play: ShowMove = async (rule, good, prefer) => {
       const box = width.ref.current;
       const svg = box?.querySelector("svg");
-      const plan = planDemo(now.current.state, now.current.rules, rule, width.value, height, good);
+      const plan = planDemo(now.current.state, now.current.rules, rule, width.value, height, good, prefer);
       if (!box || !svg || !plan) return false;
       const r = svg.getBoundingClientRect();
       const k = r.width / width.value;

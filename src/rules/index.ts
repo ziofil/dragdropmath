@@ -358,6 +358,8 @@ function termAround(state: MathState, id: string): string | null {
       const t = nodeAt(state, loc).id;
       return t === id ? null : t;
     }
+    // A fraction on top of or under another's bar is one piece: a quick press on its 3 takes 3/6 in 6/(3/6) (held, the 3).
+    if (P.kind === "frac" && up.path.length > 0 && nodeAt(state, parentLoc(up)!).kind === "frac") return P.id;
     // Side by side: factors, a minus, and a power's base (the x of x², not its exponent, nor what a √ holds).
     const besideIt = P.kind === "prod" || P.kind === "neg" || (P.kind === "pow" && !P.radical && loc.path.at(-1) === 0);
     if (!besideIt) return null;

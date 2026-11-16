@@ -8,7 +8,7 @@ import type { RuleId } from "../../rules";
 import { candidatesFor, handles, isGrabbable, tapFor } from "../../rules";
 import type { MathState } from "../../expr/types";
 import { parseState } from "../../expr/parse";
-import { allNodes } from "../../expr/tree";
+import { allNodes, locate, nodeAt } from "../../expr/tree";
 import { key, printState, stateKey } from "../../expr/key";
 import { chapterById, lettersPositive, rulesOf } from "../puzzles";
 import { letter, one as pick, rng, term, type Rng } from "./write";
@@ -26,6 +26,48 @@ export type Drill = {
    */
   make: (r: Rng) => string | { start: string; want?: string; goal?: string; via?: string[] };
 };
+
+/**
+ * The piece a drill's words say to carry, where the move could be made with
+ * either of two (the bottom power onto the top one, or the top onto the
+ * bottom): Show carries that one, so it does what the words say.
+ */
+export type Carry = "bottom" | "exponent" | "outer-exponent" | "number";
+
+const CARRIES: Record<string, Carry> = {
+  "power-of-power": "outer-exponent",
+  "divide-powers": "bottom",
+  "zero-power": "exponent",
+  "power-one": "exponent",
+  "divide-numbers": "bottom",
+  "cancel-factor": "bottom",
+  "divide-by-fraction": "bottom",
+  "move-term": "number",
+  "ineq-move-term": "number",
+};
+
+/** The piece a drill's words say to carry, if they say. */
+export const carryOf = (drillId: string): Carry | undefined => CARRIES[drillId];
+
+/** Whether piece `id` is the kind `carry` names. */
+export function carries(state: MathState, id: string, carry: Carry): boolean {
+  const loc = locate(state, id);
+  if (!loc) return false;
+  const node = nodeAt(state, loc);
+  const parent = loc.path.length ? nodeAt(state, { ...loc, path: loc.path.slice(0, -1) }) : null;
+  const last = loc.path.at(-1);
+  switch (carry) {
+    case "number":
+      return node.kind === "num";
+    case "exponent":
+      return parent?.kind === "pow" && last === 1;
+    case "outer-exponent":
+      return parent?.kind === "pow" && last === 1 && parent.base.kind === "pow";
+    case "bottom":
+      // Under some fraction's bar: its bottom, or a factor of it.
+      return loc.path.some((step, k) => step === 1 && nodeAt(state, { ...loc, path: loc.path.slice(0, k) }).kind === "frac");
+  }
+}
 
 /** Two different letters. */
 function letters2(r: Rng): [string, string] {

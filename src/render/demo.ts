@@ -28,7 +28,16 @@ const same = (a: MathState, b: MathState) => stateKey(a, "exact") === stateKey(b
  * How to show `rule` on `state` in a W×H canvas: preferring a move that
  * `good` likes (one that heads for the board's goal). Null if none can be shown.
  */
-export function planDemo(state: MathState, rules: readonly RuleId[], rule: RuleId, W: number, H: number, good: (s: MathState) => boolean = () => true): Demo | null {
+export function planDemo(
+  state: MathState,
+  rules: readonly RuleId[],
+  rule: RuleId,
+  W: number,
+  H: number,
+  good: (s: MathState) => boolean = () => true,
+  /** The piece to carry, when the words say which (see Carry in game/generate/moves.ts). */
+  prefer: (state: MathState, id: string) => boolean = () => false,
+): Demo | null {
   const moves = movesFor(state, rules);
   const ids = handles(state);
   if (RULES[rule].tap) {
@@ -40,8 +49,13 @@ export function planDemo(state: MathState, rules: readonly RuleId[], rule: RuleI
     return t ? { kind: "tap", id: t.id, next: t.c.state } : null;
   }
   const h = harness(state, rules, W, H);
-  const all: { id: string; c: Candidate }[] = ids.filter((id) => moves.grabbable(id)).flatMap((id) => moves.drag(id).filter((c) => c.rule === rule).map((c) => ({ id, c })));
-  const ordered = [...all.filter((x) => good(x.c.state)), ...all.filter((x) => !good(x.c.state))];
+  // The move itself; or, with the piece the words name, any move that makes the same step
+  // (the bottom 6 of 6x/6 carried up divides the numbers: x, as cancelling does).
+  const all: { id: string; c: Candidate }[] = ids
+    .filter((id) => moves.grabbable(id))
+    .flatMap((id) => moves.drag(id).filter((c) => c.rule === rule || (prefer(state, id) && good(c.state))).map((c) => ({ id, c })));
+  const rank = (x: (typeof all)[number]) => (good(x.c.state) ? 0 : 2) + (prefer(state, x.id) ? 0 : 1);
+  const ordered = [...all].sort((a, b) => rank(a) - rank(b));
   for (const { id, c } of ordered) {
     const origin = h.originOf(id);
     if (!origin) continue;

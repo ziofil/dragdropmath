@@ -21,6 +21,7 @@ export function MoveBoard({
   how,
   rules,
   rule,
+  prefer,
   positive,
   more,
 }: {
@@ -31,6 +32,8 @@ export function MoveBoard({
   rules: readonly RuleId[];
   /** The move it teaches (what Show plays). */
   rule: RuleId;
+  /** The piece Show carries, when the words say which. */
+  prefer?: (s: MathState, id: string) => boolean;
   /** Its letters stand for positive numbers. */
   positive?: boolean;
   /** A button for a fresh one. */
@@ -52,7 +55,7 @@ export function MoveBoard({
       reset();
       await new Promise((r) => setTimeout(r, 450));
     }
-    const ok = await showMove.current?.(rule, reached);
+    const ok = await showMove.current?.(rule, reached, prefer);
     if (ok) {
       await new Promise((r) => setTimeout(r, 1300));
       undo();

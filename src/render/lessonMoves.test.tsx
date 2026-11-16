@@ -7,7 +7,8 @@
 import { describe, expect, it } from "vitest";
 import { harness } from "./testing/harness";
 import { CHAPTERS, rulesOf, startOf } from "../game/puzzles";
-import { DRILLS, drillExercise, oneMove } from "../game/generate/moves";
+import { carries, carryOf, DRILLS, drillExercise, oneMove } from "../game/generate/moves";
+import { planDemo } from "./demo";
 import { allNodes } from "../expr/tree";
 import { handles, RULES, tapFor } from "../rules";
 import { stepDone } from "../game/solver";
@@ -46,6 +47,26 @@ describe("lesson moves, by hand", () => {
         return nodes.filter((b) => b.id !== a && dropsOn(b.id)).map((b) => `${a} → ${b.id}`);
       });
       expect(ways.length, `${ex.start} → ${ex.goal}: no piece dropped on another, nor a tap, makes it`).toBeGreaterThan(0);
+    }
+  });
+});
+
+// Show does what the words say: where they name the piece to carry (the bottom one up, the exponent onto its base), Show carries that one.
+describe("lesson moves, as their words say", () => {
+  const named = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.filter((d) => carryOf(d.id)).map((d) => [chapterId, d.id] as const));
+  it.each(named)("%s: %s", (chapterId, drillId) => {
+    const ch = CHAPTERS.find((c) => c.id === chapterId)!;
+    const rules = rulesOf(ch.id);
+    const drill = DRILLS[chapterId].find((d) => d.id === drillId)!;
+    const carry = carryOf(drillId)!;
+    for (const seed of [11, 222, 3333]) {
+      const ex = drillExercise(chapterId, drillId, seed)!;
+      const state = startOf(ex.start, ch);
+      const goals = [ex.goal, ...ex.also].map((g) => startOf(g, ch));
+      const good = (s: typeof state) => goals.some((g) => stepDone(state, s, g));
+      const plan = planDemo(state, rules, drill.rule, 720, 220, good, (s, id) => carries(s, id, carry));
+      expect(plan, ex.start).not.toBeNull();
+      expect(plan!.kind === "drag" && carries(state, plan!.id, carry), `${ex.start}: Show carries ${plan && "id" in plan ? plan.id : "?"}, not the ${carry} its words say`).toBe(true);
     }
   });
 });

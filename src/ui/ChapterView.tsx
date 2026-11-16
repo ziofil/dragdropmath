@@ -1,6 +1,6 @@
 import { CHAPTERS, leadsTo, rulesOf, type Chapter } from "../game/puzzles";
 import { useState } from "react";
-import { drillExercise, drillsOf, type Drill } from "../game/generate/moves";
+import { carries, carryOf, drillExercise, drillsOf, type Drill } from "../game/generate/moves";
 import { freshSeed } from "../game/generate/practice";
 import { MoveBoard } from "./Guided";
 import { MathText } from "./MathText";
@@ -84,6 +84,7 @@ function MoveBlock({ chapter, drill, rules, n }: { chapter: Chapter; drill: Dril
         how={words.how}
         rules={rules}
         rule={drill.rule}
+        prefer={carryOf(drill.id) && ((s, id) => carries(s, id, carryOf(drill.id)!))}
         positive={d.positive}
         more={{ text: t().anotherOne, onClick: () => setSeed(freshSeed()) }}
       />
