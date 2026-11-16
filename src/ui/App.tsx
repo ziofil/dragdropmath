@@ -99,13 +99,13 @@ export function App() {
           <a href={href({ page: "make" })} className="button quiet" aria-current={route.page === "make" ? "page" : undefined}>
             {t().makeExercises}
           </a>
+          <a href={href({ page: "about" })} className="button quiet" aria-current={route.page === "about" ? "page" : undefined}>
+            {t().aboutLink}
+          </a>
           <SettingsButton />
         </span>
       </nav>
       <Page route={route} />
-      <footer className="footer">
-        <a href={href({ page: "about" })}>{t().aboutLink}</a>
-      </footer>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { carries, drillExercise, drillsOf, type Drill } from "../game/generate/moves";
 import { freshSeed } from "../game/generate/practice";
 import { MoveBoard } from "./Guided";
+import { LevelButtons } from "./Practice";
 import { MathText } from "./MathText";
 import { href } from "./routes";
 import { chapterText, t } from "../i18n";
@@ -10,8 +11,8 @@ import type { MoveWords } from "../i18n/en";
 
 /**
  * A chapter's lesson: its moves one at a time, why each works, and a board to
- * try it on. Practice and the mind's eye start from the chapter's node on the
- * learning path (Home's panel).
+ * try it on; at its end, practice and the mind's eye (as on the chapter's
+ * panel on the learning path).
  */
 export function ChapterView({ chapter }: { chapter: Chapter }) {
   const ci = CHAPTERS.indexOf(chapter);
@@ -38,6 +39,17 @@ export function ChapterView({ chapter }: { chapter: Chapter }) {
         ))}
       </div>
 
+      {/* At the end of the lesson: on to practice and the mind's eye, as from the chapter's panel on the path. */}
+      <section className="card lesson-next" id="next">
+        <div className="panel-mode">
+          <h3 className="panel-mode-name">{t().practice}</h3>
+          <LevelButtons mode="practice" chapter={chapter} />
+        </div>
+        <div className="panel-mode">
+          <h3 className="panel-mode-name">{t().predict}</h3>
+          <LevelButtons mode="predict" chapter={chapter} />
+        </div>
+      </section>
     </main>
   );
 }

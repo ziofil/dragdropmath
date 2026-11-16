@@ -957,35 +957,27 @@ div.predict-choice {
   scroll-margin-top: 16px;
 }
 .path-card {
-  padding: 16px 12px 8px;
+  padding: 12px;
   min-width: 0;
 }
 
+/* The chapters in order, as tiles that wrap (Home.tsx). */
 .path {
-  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
 }
-.path-edges {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-}
-.edge {
-  fill: none;
-  stroke: var(--line);
-  stroke-width: 2;
-}
-
-.edge-arrow {
-  fill: var(--line);
-}
-
 .path-node {
-  position: absolute;
-  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 10px;
+  text-align: left;
   color: var(--ink);
 }
 .path-node:focus-visible {
@@ -1007,13 +999,13 @@ div.predict-choice {
 .ring-label {
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 15px;
   fill: var(--ink-soft);
 }
 .node-title {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   line-height: 1.2;
-  text-align: center;
+  text-align: left;
   color: var(--ink-soft);
   /* Wrap between words only ("Inequalitie-s" reads badly); a long word may overhang its slot a little. */
   overflow-wrap: normal;
@@ -1034,6 +1026,7 @@ div.predict-choice {
 .node-ring {
   position: relative;
   display: block;
+  flex: none;
 }
 
 .path-panel {
@@ -1092,8 +1085,17 @@ div.predict-choice {
   font-size: 0.86rem;
   color: var(--ink-soft);
 }
-.path-panel .levels {
+.path-panel .levels,
+.lesson-next .levels {
   grid-template-columns: repeat(3, 1fr);
+}
+/* The end of a lesson: practice and the mind's eye. */
+.lesson-next {
+  margin-top: 32px;
+  padding: 4px 16px 16px;
+}
+.lesson-next .panel-mode:first-child {
+  border-top: none;
 }
 
 /* ---------- the mind's eye's scores (Home) ---------- */
@@ -1483,23 +1485,6 @@ div.predict-choice {
   }
 }
 
-/* Four chapters side by side on the path leave ~60px each. */
-@media (max-width: 420px) {
-  .node-title {
-    font-size: 0.66rem;
-    line-height: 1.1;
-  }
-  /* A long word can't fit its slot: break it at its syllables (only there, so other titles keep whole words). */
-  .node-narrow .node-title {
-    -webkit-hyphens: auto;
-    hyphens: auto;
-  }
-  /* Three lines of title then end before the arrows start (TITLE_H in Home.tsx). */
-  .path-node {
-    gap: 4px;
-  }
-}
-
 /* ---------- settings (from the top bar) ---------- */
 .settings {
   position: relative;
@@ -1547,21 +1532,6 @@ div.predict-choice {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-/* ---------- footer, on every page ---------- */
-.footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 48px;
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  opacity: 0.75;
-}
-.footer a {
-  color: inherit;
 }
 
 /* ---------- About ---------- */

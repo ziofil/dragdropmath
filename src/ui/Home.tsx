@@ -1,6 +1,5 @@
-import { useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
+import { useMemo, useRef, useState, type Ref } from "react";
 import { chapterById, CHAPTERS, type Chapter } from "../game/puzzles";
-import { layoutPath, type PathNode } from "../game/path";
 import { FeelWord } from "./FeelWord";
 import { loadScore } from "../game/scoring";
 import { LEVELS } from "../game/generate/write";
@@ -8,14 +7,8 @@ import { chapterText, t } from "../i18n";
 import { LevelButtons } from "./Practice";
 import { href } from "./routes";
 
-/** Height of one row of the path. */
-const ROW = 136;
 /** Radius of a chapter's circle. */
-const R = 28;
-/** Room under a chapter for its title (two lines), before its arrows start. */
-const TITLE_H = 40;
-/** The path is never drawn wider than this. */
-const MAX_W = 620;
+const R = 22;
 
 /** The learning path. `at`: a chapter to pick out (coming back from it). */
 export function Home({ at }: { at?: Chapter }) {
@@ -54,75 +47,29 @@ export function Home({ at }: { at?: Chapter }) {
   );
 }
 
-/** The chapters as a graph, each arrow pointing to what builds on it. */
+/**
+ * The chapters in order, as tiles that wrap: a suggested order, never a lock
+ * (what each builds on is in its panel).
+ */
 function PathMap({ selected, onSelect }: { selected: Chapter; onSelect: (c: Chapter) => void }) {
-  const { cols, rows, nodes, edges } = useMemo(() => layoutPath(), []);
-  const box = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
-  useLayoutEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
-    ro.observe(el);
-    setWidth(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
-
-  const w = Math.min(width, MAX_W);
-  const left = (width - w) / 2;
-  const at = (n: { col: number; row: number }) => ({ x: left + ((n.col + 0.5) / cols) * w, y: R + 12 + n.row * ROW });
-  const height = rows * ROW;
-  // A chapter's title may be as wide as the gap to its nearest neighbour in
-  // the row (chapters 4 and 5 sit two columns apart): on a narrow phone a long
-  // title then takes two lines, not four that run into the arrows below.
-  const room = (n: PathNode) => {
-    const gaps = nodes.filter((m) => m !== n && m.row === n.row).map((m) => Math.abs(m.col - n.col));
-    return Math.min(140, gaps.length ? (Math.min(...gaps) * w) / cols - 6 : w / 2);
-  };
-
   return (
-    <div className="path" ref={box} style={{ height }}>
-      {width > 0 && (
-        <>
-          <svg className="path-edges" width={width} height={height} aria-hidden="true">
-            <defs>
-              <marker id="path-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" className="edge-arrow" />
-              </marker>
-            </defs>
-            {edges.map(({ from, to }) => {
-              // From below the chapter's title, curving down into the next chapter.
-              const a = at(from);
-              const b = at(to);
-              const top = a.y + R + TITLE_H;
-              const bottom = b.y - R - 8;
-              const mid = (top + bottom) / 2;
-              const d = `M ${a.x} ${top} C ${a.x} ${mid}, ${b.x} ${mid}, ${b.x} ${bottom}`;
-              return <path key={`${from.chapter.id}-${to.chapter.id}`} className="edge" d={d} markerEnd="url(#path-arrow)" />;
-            })}
-          </svg>
-          {nodes.map((n) => {
-            const p = at(n);
-            const c = n.chapter;
-            return (
-              <button
-                key={c.id}
-                className={`bare path-node ${c === selected ? "node-selected" : ""} ${room(n) < 100 ? "node-narrow" : ""}`}
-                style={{ left: p.x, top: p.y - R, width: room(n) }}
-                onClick={() => onSelect(c)}
-                aria-pressed={c === selected}
-                aria-label={t().chapterNodeLabel(n.index + 1, chapterText(c).title)}
-              >
-                <span className="node-ring">
-                  <Ring label={String(n.index + 1)} />
-                </span>
-                <span className="node-title">{chapterText(c).title}</span>
-              </button>
-            );
-          })}
-        </>
-      )}
-    </div>
+    <ol className="path">
+      {CHAPTERS.map((c, i) => (
+        <li key={c.id}>
+          <button
+            className={`bare path-node ${c === selected ? "node-selected" : ""}`}
+            onClick={() => onSelect(c)}
+            aria-pressed={c === selected}
+            aria-label={t().chapterNodeLabel(i + 1, chapterText(c).title)}
+          >
+            <span className="node-ring">
+              <Ring label={String(i + 1)} />
+            </span>
+            <span className="node-title">{chapterText(c).title}</span>
+          </button>
+        </li>
+      ))}
+    </ol>
   );
 }
 
