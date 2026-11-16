@@ -13,11 +13,11 @@
  */
 import type { Expr, MathState, Rel } from "../../expr/types";
 import { econst, flipRel, frac, log, neg, num, pow, prod, root, sum, variable } from "../../expr/build";
-import { key, printState } from "../../expr/key";
+import { key } from "../../expr/key";
 import { parseState } from "../../expr/parse";
 import { allNodes, children, mapTree, withChildren } from "../../expr/tree";
 import type { RuleId } from "../../rules";
-import type { Draft, Rng } from "./write";
+import type { Rng } from "./write";
 import { differ, envs } from "../answers";
 import { evaluate } from "../../expr/eval";
 
@@ -645,55 +645,124 @@ export function solved(x: string, value: number | Expr, rel: Rel = "="): MathSta
   return { sides: [variable(x), typeof value === "number" ? n(value) : value], ...(rel !== "=" ? { rel } : {}) };
 }
 
-/** Sums inside sums made flat, and every tree as the parser reads its print (so it is what the moves will meet). */
-const canonical = (s: MathState): MathState => parseState(printState(s));
+// ---------- several answers: rows joined by "or" ----------
 
-export type Built = {
-  /** Solved first, the start last. */
-  path: MathState[];
-  /** Which of `path` are milestones (not quiet). */
-  shown: boolean[];
-  positive: boolean;
-  /** For each step back (path[i + 1] → path[i]), the moves it takes. */
-  rules: RuleId[][];
+/** The answers' rows: [letter, value] for each `x = v` (null if a row isn't one). */
+function answerRows(s: MathState): [Expr, Expr][] | null {
+  if (s.join !== "or" || s.sides.length < 4) return null;
+  const rows: [Expr, Expr][] = [];
+  for (let k = 0; k + 1 < s.sides.length; k += 2) rows.push([s.sides[k], s.sides[k + 1]]);
+  return rows;
+}
+
+/** One row, the "or" gone: the state written as `left = right`. */
+const oneRow = (s: MathState, left: Expr, right: Expr): MathState => {
+  const { join: _j, ...rest } = s;
+  void _j;
+  return { ...rest, sides: [left, right] };
 };
 
-/** The answer undone by these steps, in order; null if one can't be. */
-export function build(answer: MathState, steps: readonly (UnMove | null | false | undefined)[], r: Rng): Built | null {
-  const real = steps.filter((x): x is UnMove => !!x);
-  let s = answer;
-  const out: Built = { path: [s], shown: [true], positive: false, rules: [] };
-  for (const [i, step] of real.entries()) {
-    const need = real[i + 1]?.wants ?? (() => true);
-    const made = step.on(s, r, need);
-    if (!made || (Array.isArray(made) && !made.length)) return null;
-    for (const next of Array.isArray(made) ? made : [made]) {
-      if (next === s) continue;
-      const before = printState(s);
-      s = canonical(next);
-      if (printState(s) === before) continue;
-      if (s.sides.some((e) => allNodes(e).some((x) => x.kind === "num" && !Number.isInteger(x.value)))) return null;
-      out.path.push(s);
-      out.shown.push(!step.quiet);
-      out.rules.push(step.rules);
-    }
-    out.positive ||= !!step.positive;
-  }
-  return out;
+/** A number as p/q (q > 0), if it's a whole number or a fraction of two. */
+function ratio(e: Expr): [number, number] | null {
+  const v = valueOf(e);
+  if (Number.isInteger(v)) return [v, 1];
+  const signed = e.kind === "neg" ? e.arg : e;
+  const s = e.kind === "neg" ? -1 : 1;
+  if (signed.kind === "frac" && signed.num.kind === "num" && signed.den.kind === "num") return [s * signed.num.value, signed.den.value];
+  return null;
 }
 
-/** A built exercise as a draft: the start the last state, the milestones those in between (the start's side first), and the moves of each stretch. */
-export function draftOf(shape: string, b: Built, positive = b.positive): Draft {
-  const { path, shown, rules } = b;
-  const via: string[] = [];
-  const legs: RuleId[][] = [];
-  let leg = new Set<RuleId>();
-  for (let i = path.length - 1; i > 0; i--) {
-    rules[i - 1].forEach((x) => leg.add(x));
-    if (i - 1 > 0 && !shown[i - 1]) continue;
-    if (i - 1 > 0) via.push(printState(path[i - 1]));
-    legs.push([...leg]);
-    leg = new Set();
-  }
-  return { shape, start: printState(path[path.length - 1]), goal: printState(path[0]), via, positive, legs };
+/**
+ * x = 3 or x = −2/3 → (x − 3)(3x + 2) = 0: a product is 0 when one of its
+ * factors is (each factor q·x − p for an answer p/q; x itself for 0).
+ * Undone by pulling a factor off the product, then solving each row.
+ */
+export const productIsZero = (): UnMove => ({
+  rules: ["zero-product", "move-term", "move-factor", "divide-numbers", "cancel-factor", ...ARITH],
+  on: (s) => {
+    const rows = answerRows(s);
+    if (!rows || rows.some(([l]) => l.kind !== "var" || key(l) !== key(rows[0][0]))) return null;
+    const x = rows[0][0];
+    const fs: Expr[] = [];
+    for (const [, v] of rows) {
+      const pq = ratio(v);
+      if (!pq) return null;
+      const [p, q] = pq;
+      fs.push(p === 0 ? variable((x as { name: string }).name) : sumOf([termExpr(q, variable((x as { name: string }).name)), n(-p)]));
+    }
+    return oneRow(s, prod(fs), num(0));
+  },
+});
+
+/** v² written as a number: 9 for 3, 4/9 for 2/3, 5 for √5 (null if it isn't one of those). */
+function squared(v: Expr): Expr | null {
+  const b = v.kind === "neg" ? v.arg : v;
+  if (b.kind === "num") return num(b.value * b.value);
+  if (b.kind === "frac" && b.num.kind === "num" && b.den.kind === "num") return frac(num(b.num.value ** 2), num(b.den.value ** 2));
+  if (b.kind === "pow" && b.exp.kind === "frac" && b.exp.num.kind === "num" && b.exp.num.value === 1 && b.exp.den.kind === "num" && b.exp.den.value === 2 && b.base.kind === "num") return num(b.base.value);
+  return null;
 }
+
+/**
+ * A = v or A = −v → A² = v² (x = 3 or x = −3 → x² = 9; 2x + 1 = 5 or
+ * 2x + 1 = −5 → (2x + 1)² = 25). Undone by taking the root of both sides
+ * (an even power has two roots).
+ */
+export const squaredRows = (): UnMove => ({
+  rules: ["root-across", "evaluate-power", "tap-power", "evaluate-root", "evaluate-fraction", "split-square", ...ARITH],
+  on: (s) => {
+    const rows = answerRows(s);
+    if (!rows || rows.length !== 2) return null;
+    const [[a, v], [b, w]] = rows;
+    if (key(a) !== key(b) || differ(v, neg(w))) return null;
+    const v2 = squared(v);
+    return v2 && oneRow(s, pow(a, num(2)), v2);
+  },
+});
+
+/**
+ * Each answer row x = v written as E = E(v), for a·x + b (x = 2 or x = −3 →
+ * 2x + 1 = 5 or 2x + 1 = −5). Undone by solving each row.
+ */
+export const rowsAs = (E: Expr): UnMove => ({
+  rules: ["move-term", "move-factor", "divide-numbers", "evaluate-fraction", ...ARITH],
+  on: (s) => {
+    const rows = answerRows(s);
+    if (!rows) return null;
+    const sides: Expr[] = [];
+    for (const [x, v] of rows) {
+      if (x.kind !== "var") return null;
+      const at = evaluate(E, { [x.name]: evaluate(v, {}) });
+      if (!Number.isInteger(at)) return null;
+      sides.push(E, n(at));
+    }
+    return { ...s, sides };
+  },
+});
+
+/**
+ * L = B² → √L = B: the root of both sides, where B isn't negative (a
+ * condition the exercise then gives: see domain.ts). Undone by carrying the
+ * root across (squaring both sides).
+ */
+export const rootBoth = (row = 0): UnMove => ({
+  rules: ["root-across", "power-of-power", "evaluate-power", "tap-power", ...ARITH],
+  on: (s) =>
+    onRow(s, row, (L, R) => {
+      if (R.kind !== "pow" || R.exp.kind !== "num" || R.exp.value !== 2) return null;
+      return [root(L, 2), R.base];
+    }),
+});
+
+/**
+ * L = 0 → L/B = 0 (where B isn't 0: a condition the exercise then gives).
+ * Undone by multiplying both sides by B (0 times anything is 0).
+ */
+export const overBottom = (B: Expr, row = 0): UnMove => ({
+  rules: ["move-denominator", "move-letter-denominator", "multiply-numbers", "times-one", ...ARITH],
+  on: (s) =>
+    onRow(s, row, (L, R) => {
+      if (valueOf(R) !== 0) return null;
+      return [frac(L, B), R];
+    }),
+});

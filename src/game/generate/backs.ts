@@ -50,7 +50,8 @@ export const splitLike = (max = 9, numbersOnly = false): UnMove => ({
         const i = r.int(0, ts.length - 1);
         const { k, m } = termOf(ts[i]);
         // Not a term with numbers still to multiply (2·x·3): it combines with nothing until they are.
-        if (numbersToMultiply(m) || (numbersOnly && m !== null)) return null;
+        // Nor one with a fraction in it (6·(x²/y) − 5·(x²/y)): like terms are combined by what's on top, and these aren't.
+        if (numbersToMultiply(m) || (numbersOnly && m !== null) || (m && allNodes(m).some((n) => n.kind === "frac"))) return null;
         const p = part(r, max, k);
         const q = k - p;
         if (q === 0 || Math.abs(q) > max) return null;
@@ -102,6 +103,22 @@ export const productCoef = (): UnMove => ({
         const inner = m === null ? [num(a), num(b)] : r.next() < 0.5 ? [num(a), ...(m.kind === "prod" ? m.factors : [m]), num(b)] : [num(a), num(b), ...(m.kind === "prod" ? m.factors : [m])];
         const t = prod(inner);
         return ts.map((x, j) => (j === i ? (k < 0 ? neg(t) : t) : x));
+      }),
+    ),
+});
+
+/** A term moved to another place in the sum (b − 1 → −1 + b). Undone by moving it back. */
+export const termMoved = (): UnMove => ({
+  rules: ["commute"],
+  trusted: true,
+  on: (s, r) =>
+    many(() =>
+      onTerms(s, (ts) => {
+        if (ts.length < 2) return null;
+        const i = r.int(0, ts.length - 1);
+        const rest = ts.filter((_, j) => j !== i);
+        const at = r.int(0, rest.length);
+        return at === i ? null : [...rest.slice(0, at), ts[i], ...rest.slice(at)];
       }),
     ),
 });
@@ -393,3 +410,24 @@ function plusConstant(e: Expr, k: number): Expr {
   const v = termOf(ts[i]).k + k;
   return sumOf(v === 0 ? ts.filter((_, j) => j !== i) : ts.map((t, j) => (j === i ? termExpr(v, null) : t)));
 }
+
+
+/**
+ * A letter or a power of one, somewhere, written as e to its log: x³ →
+ * e^(ln(x³)). Undone by e^ undoing the ln. (Letters positive.)
+ */
+export const eOfLog = (): UnMove => ({
+  rules: ["exp-of-log"],
+  trusted: true,
+  positive: true,
+  on: (s, r) =>
+    many(() => {
+      const nodes = s.sides.flatMap((e) => allNodes(e)).filter((n) => n.kind === "var" || (n.kind === "pow" && n.base.kind === "var" && n.exp.kind === "num"));
+      if (!nodes.length) return null;
+      const n = one(r, nodes);
+      // Not inside a log already (ln(e^(ln x)) is a chore, not an exercise).
+      const inLog = s.sides.some((e) => allNodes(e).some((m) => m.kind === "log" && allNodes(m).some((k) => k.id === n.id)));
+      if (inLog) return null;
+      return { ...s, sides: s.sides.map((e) => mapTree(e, (x) => (x.id === n.id ? pow({ kind: "const", id: `e${x.id}`, name: "e" }, log({ kind: "const", id: `b${x.id}`, name: "e" }, x)) : x))) };
+    }),
+});

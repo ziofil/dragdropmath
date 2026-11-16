@@ -13,7 +13,8 @@
  */
 import type { Rel } from "../../expr/types";
 import type { RuleId } from "../../rules";
-import { build, disguise, draftOf, expOfSide, lin, logOfSide, overSome, rootOf, solved, squareOf, xBoth, type UnMove } from "./unmove";
+import { build, draftOf } from "./back";
+import { disguise, expOfSide, lin, logOfSide, overSome, rootOf, solved, squareOf, xBoth, type UnMove } from "./unmove";
 import { one, type Draft, type Level, type Rng, type Shape } from "./write";
 
 export type Kind = "lin" | "over" | "root" | "cube" | "square" | "log" | "exp";

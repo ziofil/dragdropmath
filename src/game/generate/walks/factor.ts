@@ -3,6 +3,8 @@
  * out, a bracket or a term at a time, then its numbers worked out, as the
  * start is written. Undone by taking the factor (or bracket) out again.
  */
+import type { MathState } from "../../../expr/types";
+import { printState } from "../../../expr/key";
 import type { Walk } from "../walk";
 import { written } from "../backs";
 import { gcd, lin, one, type Rng } from "../write";
@@ -18,13 +20,15 @@ function inner(r: Rng, x = "x"): string | null {
   return gcd(a, b) === 1 ? lin(a, b, x) : null;
 }
 
-const walk = (id: string, name: string, answer: Walk["answer"], steps: [number, number] = [1, 2]): Walk => ({
+const walk = (id: string, name: string, answer: Walk["answer"], steps: [number, number] = [1, 2], whole = false): Walk => ({
   id,
   name,
   answer,
   back: BACK,
   steps,
   settle: written,
+  // Hard starts are all multiplied out (nothing half factored to begin with): it walks on until no bracket is left.
+  ...(whole ? { alone: true, fits: (s: MathState) => !printState(s).includes("(") } : {}),
   needs: [...FACTORING],
 });
 
@@ -57,7 +61,16 @@ export const walks: Record<"easy" | "medium" | "hard", Walk[]> = {
     walk("walk-pairs-two-letters", "pairs, with x and y", (r) => {
       const p = twoOf(r, 5);
       return p && `(x ${p[0] < 0 ? "-" : "+"} ${Math.abs(p[0]) === 1 ? "" : Math.abs(p[0])}y)(x ${p[1] < 0 ? "-" : "+"} ${Math.abs(p[1]) === 1 ? "" : Math.abs(p[1])}y)`;
-    }, [2, 3]),
+    }, [3, 12], true),
+    walk("walk-number-then-pairs-two-letters", "a number out first, then pairs with x and y", (r) => {
+      const p = twoOf(r, 4);
+      const y = (k: number) => `${k < 0 ? "-" : "+"} ${Math.abs(k) === 1 ? "" : Math.abs(k)}y`;
+      return p && `${r.int(2, 4)}(x ${y(p[0])})(x ${y(p[1])})`;
+    }, [3, 12], true),
+    walk("walk-pairs-numbers", "pairs, with x and y and numbers in front", (r) => {
+      const [p, q, a] = [r.int(2, 5), r.signed(1, 5), r.int(2, 3)];
+      return gcd(p, q) === 1 && Math.abs(q * a) <= 30 ? `(x + ${a}y)(${p}x ${q < 0 ? "-" : "+"} ${Math.abs(q) === 1 ? "" : Math.abs(q)}y)` : null;
+    }, [3, 12], true),
     walk("walk-common-xy", "a number and both letters out in front", (r) => {
       const [a, b] = [r.int(1, 4), r.signed(1, 6)];
       return gcd(a, b) === 1 ? `${r.int(2, 4)}xy(${lin(a, b)} ${b < 0 ? "+" : "-"} y)` : null;

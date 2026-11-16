@@ -15,7 +15,7 @@ import type { RuleId } from "../../rules";
 import { matchesGoal, search, searchBest } from "../solver";
 import { isDone, taskOf } from "../task";
 
-export type Checkable = { start: string; goal: string; via: readonly string[]; positive?: boolean; legs?: readonly (readonly RuleId[])[] };
+export type Checkable = { start: string; goal: string; via: readonly string[]; positive?: boolean; legs?: readonly (readonly RuleId[])[]; proven?: readonly boolean[] };
 
 /** The way through, every state from start to finish; or the stretch it couldn't do. */
 export type Checked = { path: MathState[] } | { stuck: string };
@@ -24,14 +24,20 @@ export type Checked = { path: MathState[] } | { stuck: string };
 const LEG = 5;
 const STATES = 40_000;
 const QUICK_STATES = 600;
+/** States looked at per stretch when serving (bestOnly): a stretch one move undoes takes a handful. */
+const SERVE_STATES = 120;
 /** States looked at best-first before searching breadth-first. */
 const BEST_STATES = 3000;
 
 /**
  * `quick`: only the moves each stretch says it takes, a few hundred states a
  * stretch (milliseconds, mostly); a draft that doesn't say isn't checked.
+ * `trusting`: stretches the draft says are proven (Draft.proven: a walk
+ * checked them as it was built) are taken as done. `bestOnly`: quick, with
+ * no breadth-first search when best-first fails (serving: another draft
+ * will do).
  */
-export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, states = STATES, quick = false } = {}): Checked {
+export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, states = STATES, quick = false, trusting = false, bestOnly = false } = {}): Checked {
   if (quick && !d.legs) return { path: [] };
   const start = parseState(d.start);
   const goal = parseState(d.goal);
@@ -44,11 +50,16 @@ export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, stat
   for (const [i, target] of targets.entries()) {
     const last = i === targets.length - 1;
     const at = path[path.length - 1];
+    // `trusting`: a stretch the draft has already proven one move (and its tidying) undoes is taken as done (not the last: its goal may need its terms put in order).
+    if (trusting && !last && d.proven?.[i]) {
+      path.push(target);
+      continue;
+    }
     // The moves the stretch takes, when the draft knows them (a few, so quick), else (or failing that) all the chapter's.
     const own = d.legs?.[i]?.filter((x) => allowed.has(x));
     // Best-first first (quick where a stretch is a few obvious moves among many possible ones), breadth-first failing that.
     const find = (done: (s: MathState) => boolean, from: MathState, opts: { ordered: false | "exact"; maxDepth: number; maxStates: number }) => {
-      if (quick) return searchBest(from, done, own ?? [], { ordered: opts.ordered, maxStates: QUICK_STATES }) ?? search(from, done, own ?? [], { ...opts, maxStates: QUICK_STATES });
+      if (quick) return searchBest(from, done, own ?? [], { ordered: opts.ordered, maxStates: bestOnly ? SERVE_STATES : QUICK_STATES }) ?? (bestOnly ? null : search(from, done, own ?? [], { ...opts, maxStates: QUICK_STATES }));
       return (own && search(from, done, own, opts)) || searchBest(from, done, rules, { ordered: opts.ordered, maxStates: BEST_STATES }) || search(from, done, rules, opts);
     };
     let way: MathState[] | null;

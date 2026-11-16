@@ -1,10 +1,16 @@
 /**
- * Second-degree equations, made from their answers: x = 3 or x = −2 is
- * (x − 3)(x + 2) = 0, multiplied out (x² − x − 6 = 0), then written as a
- * teacher might, with terms moved across, both sides multiplied, the sides
- * swapped. Solved by factoring and splitting (a product is 0 when a factor
- * is), or by getting the square alone and taking its root (±).
+ * Second-degree equations, built back from their answers (../back.ts): x = 3
+ * or x = −2 is (x − 3)(x + 2) = 0 (a product is 0 when a factor is), that
+ * multiplied out (x² − x − 6 = 0), then written as a teacher might, with
+ * terms moved across, both sides multiplied, the sides swapped. Or x = ±3 is
+ * x² = 9 (an even power has two roots). A root of both sides, or a fraction
+ * over a bottom, brings conditions with it, read off the start (domain.ts):
+ * an answer that breaks one is crossed out, and isn't in the goal.
  */
+import type { MathState } from "../../../expr/types";
+import { parseState } from "../../../expr/parse";
+import { build, draftOf, type Step } from "../back";
+import { ex, overBottom, productIsZero, restate, rootBoth, rowsAs, squaredRows, writeAs } from "../unmove";
 import { gcd, one, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** a·x² + b·x + c as [a, b, c]. */
@@ -55,32 +61,44 @@ function answers(x: string, ...vs: [number, number][]): string {
 }
 
 /**
- * The way a side's (x + d)² is multiplied out, a few moves at a time:
- * (x + d)(x + d), x(x + d) + d(x + d), x·x + dx + dx + d², x² + 2dx + d².
- * `other` is the rest of the equation; `where` its conditions.
+ * The ways a side's (x + d)² is multiplied out, a few moves at a time, last
+ * first: x² + 2dx + d², x·x + dx + dx + d², x(x + d) + d(x + d), (x + d)(x + d).
  */
-function squareOut(x: string, d: number, other: string, where: string): string[] {
+function squareOut(x: string, d: number): string[] {
   const xd = d === 0 ? x : `${x} ${d < 0 ? "-" : "+"} ${Math.abs(d)}`;
-  if (d === 0) return [`${other} = ${x}·${x} where ${where}`];
+  if (d === 0) return [`${x}·${x}`];
   const dt = (k: number) => termOf(k, 1, x)!;
   return [
-    `${other} = (${xd})(${xd}) where ${where}`,
+    sumStr([termOf(1, 2, x)!, dt(2 * d), `${d * d}`]),
+    sumStr([`${x}·${x}`, dt(d), dt(d), `${d * d}`]),
     // (Not with d = ±1: the app never writes 1·(x + 1).)
-    ...(Math.abs(d) === 1 ? [] : [`${other} = ${x}(${xd}) ${d < 0 ? "-" : "+"} ${Math.abs(d)}(${xd}) where ${where}`]),
-    `${other} = ${sumStr([`${x}·${x}`, dt(d), dt(d), `${d * d}`])} where ${where}`,
-    `${other} = ${sumStr([termOf(1, 2, x)!, dt(2 * d), `${d * d}`])} where ${where}`,
+    ...(Math.abs(d) === 1 ? [] : [`${x}(${xd}) ${d < 0 ? "-" : "+"} ${Math.abs(d)}(${xd})`]),
+    `(${xd})(${xd})`,
   ];
 }
 
 const letter = (r: Rng) => (r.next() < 0.75 ? "x" : one(r, ["t", "y", "a"]));
-const draft = (shape: string, start: string, goal: string, via: string[] = []): Draft => ({ shape, start, goal, via });
 
-/** Everything on the left, = 0: "x^2 - 7x + 12 = 0". */
-const zeroForm = ([a, b, c]: Q, x: string) => `${sumStr([termOf(a, 2, x), termOf(b, 1, x), termOf(c, 0, x)].filter((t): t is string => t !== null))} = 0`;
+/** Everything on the left: "x^2 - 7x + 12". */
+const zeroSide = ([a, b, c]: Q, x: string) => sumStr([termOf(a, 2, x), termOf(b, 1, x), termOf(c, 0, x)].filter((t): t is string => t !== null));
 /** (p·x − q) as written: "x - 3", "2x + 1". */
 const factor = ([p, q]: [number, number], x: string) => `${p === 1 ? "" : p}${x} ${q < 0 ? "+" : "-"} ${Math.abs(q)}`;
-/** The way through a factoring: everything on one side, then the product of the two brackets. */
-const factoring = (fs: [[number, number], [number, number]], x: string) => [zeroForm(times(fs[0], fs[1]), x), `(${factor(fs[0], x)})(${factor(fs[1], x)}) = 0`];
+
+/** A side written another way (equal to it), then the whole row as a teacher writes it (a multiple of it). */
+const side = (src: string, at = 0): Step => writeAs([], ex(src), at);
+const row = (src: string): Step => {
+  const [l, r] = parseState(src).sides;
+  return restate([], l, r);
+};
+
+/** Built back from `answer` by `steps`, as a draft with its conditions (checked whole: no moves per stretch). */
+function made(shape: string, answer: string, steps: Step[], r: Rng): Draft | null {
+  const b = build(parseState(answer) as MathState, steps, r);
+  return b && { ...draftOf(shape, b, { conditions: true }), legs: undefined };
+}
+
+/** From the answers to the product of brackets, multiplied out (q[0]x² + q[1]x + q[2] = 0). */
+const factored = (q: Q, x: string): Step[] => [productIsZero(), side(zeroSide(q, x))];
 
 const shapes: Shape[] = [
   {
@@ -92,19 +110,19 @@ const shapes: Shape[] = [
       const [p, q] = [r.int(1, 9), one(r, [1, 1, 1, 2, 3])];
       if (gcd(p, q) !== 1) return null;
       const k = one(r, [1, 1, 2, 3, 4]);
-      return draft("pure", written(r, [q * q * k, 0, -p * p * k], x, { move: 0.6 }), answers(x, [p, q], [-p, q]));
+      return made("pure", answers(x, [p, q], [-p, q]), [squaredRows(), row(written(r, [q * q * k, 0, -p * p * k], x, { move: 0.6 }))], r);
     },
   },
   {
     id: "pure-fraction",
     name: "a fraction in front of x²",
     make: (r) => {
-      // (1/q)·x² = p² ... written as (p'/q)x² = c with whole answers ±n.
+      // (a/q)·x² = c with whole answers ±n.
       const x = letter(r);
       const [a, q, n] = [r.int(1, 3), one(r, [2, 3, 4]), r.int(1, 6)];
       if (gcd(a, q) !== 1 || (a * n * n) % q !== 0) return null;
       const c = (a * n * n) / q;
-      return draft("pure-fraction", r.next() < 0.5 ? `(${a}/${q})${x}^2 = ${c}` : `(${a}/${q})${x}^2 - ${c} = 0`, answers(x, [n, 1], [-n, 1]), [`${x}^2 = ${n * n}`]);
+      return made("pure-fraction", answers(x, [n, 1], [-n, 1]), [squaredRows(), row(r.next() < 0.5 ? `(${a}/${q})${x}^2 = ${c}` : `(${a}/${q})${x}^2 - ${c} = 0`)], r);
     },
   },
   {
@@ -114,7 +132,7 @@ const shapes: Shape[] = [
       // x² − 5 = 0 → x = √5 or x = −√5.
       const x = letter(r);
       const n = one(r, [2, 3, 5, 6, 7, 10]);
-      return draft("pure-root", written(r, [1, 0, -n], x, { move: 0.6 }), `${x} = √${n} or ${x} = -√${n}`);
+      return made("pure-root", `${x} = √${n} or ${x} = -√${n}`, [squaredRows(), row(written(r, [1, 0, -n], x, { move: 0.6 }))], r);
     },
   },
   {
@@ -127,7 +145,7 @@ const shapes: Shape[] = [
       if (gcd(p, q) !== 1) return null;
       const k = one(r, [1, 1, 2, 3]);
       const [a, b] = [q * k, -p * k];
-      return draft("spurious", written(r, [a, b, 0], x), answers(x, [0, 1], [p, q]));
+      return made("spurious", answers(x, [0, 1], [p, q]), [...factored([q, -p, 0], x), row(written(r, [a, b, 0], x))], r);
     },
   },
   {
@@ -137,7 +155,8 @@ const shapes: Shape[] = [
       const x = letter(r);
       const [u, v] = [r.signed(1, 9), r.signed(1, 9)];
       if (u === v || u === -v || u === 0 || v === 0) return null;
-      return draft("factors-one", written(r, times([1, u], [1, v]), x, { move: 0.3 }), answers(x, [u, 1], [v, 1]), factoring([[1, u], [1, v]], x));
+      const q = times([1, u], [1, v]);
+      return made("factors-one", answers(x, [u, 1], [v, 1]), [...factored(q, x), row(written(r, q, x, { move: 0.3 }))], r);
     },
   },
   {
@@ -149,7 +168,8 @@ const shapes: Shape[] = [
       const [p, q, v] = [one(r, [2, 3, 4, 5]), r.signed(1, 7), r.signed(1, 6)];
       // Both pairs of the split middle term share a number of 2 or more (px(x − v) and −q(x − v)): a shared 1 can't be taken out by hand.
       if (gcd(p, q) !== 1 || q === p * v || Math.abs(q) < 2 || Math.abs(v) < 2) return null;
-      return draft("factors-a", written(r, times([p, q], [1, v]), x, { move: 0.3 }), answers(x, [q, p], [v, 1]), factoring([[p, q], [1, v]], x));
+      const Q3 = times([p, q], [1, v]);
+      return made("factors-a", answers(x, [q, p], [v, 1]), [...factored(Q3, x), row(written(r, Q3, x, { move: 0.3 }))], r);
     },
   },
   {
@@ -163,9 +183,8 @@ const shapes: Shape[] = [
       const br = `${p === 1 ? "" : p}${x} ${q < 0 ? "-" : "+"} ${Math.abs(q)}`;
       const k = one(r, [1, 1, 1, 2, 3]);
       const left = `${k === 1 ? "" : k}(${br})^2`;
-      const start = r.next() < 0.3 ? `${k * m * m} = ${left}` : `${left} = ${k * m * m}`;
-      // The square alone, then its two roots, each solved.
-      return draft("square-of-bracket", start, answers(x, [m - q, p], [-m - q, p]), [`(${br})^2 = ${m * m}`, `${br} = ${m} or ${br} = ${-m}`]);
+      // Each answer as the bracket equal to ±m, the bracket squared, then both sides times k.
+      return made("square-of-bracket", answers(x, [m - q, p], [-m - q, p]), [rowsAs(ex(br)), squaredRows(), row(r.next() < 0.3 ? `${k * m * m} = ${left}` : `${left} = ${k * m * m}`)], r);
     },
   },
   {
@@ -181,12 +200,16 @@ const shapes: Shape[] = [
       if (b === 0 && c === 0) return null;
       const bracket = (w: number) => `(${x} ${w < 0 ? "-" : "+"} ${Math.abs(w)})`;
       const right = sumStr([termOf(b, 1, x), termOf(c, 0, x)].filter((t): t is string => t !== null));
-      const expanded = `${sumStr([termOf(1, 2, x), termOf(u + v, 1, x), termOf(u * v, 0, x)].filter((t): t is string => t !== null))} = ${right}`;
-      // Multiplied out, then collected: x² + vx + ux + uv, then x² + (u + v)x + uv.
-      const out = `${sumStr([termOf(1, 2, x), termOf(v, 1, x), termOf(u, 1, x), termOf(u * v, 0, x)].filter((t): t is string => t !== null))} = ${right}`;
-      // (Not with u = ±1: the app never writes 1·(x + v).)
-      const first = Math.abs(u) === 1 ? [] : [`${x}${bracket(v)} ${u < 0 ? "-" : "+"} ${Math.abs(u)}${bracket(v)} = ${right}`];
-      return draft("expand-first", `${bracket(u)}${bracket(v)} = ${right}`, answers(x, [r1, 1], [r2, 1]), [...first, out, expanded, ...factoring([[1, r1], [1, r2]], x)]);
+      // Multiplied out, then collected (backwards: collected, multiplied out, one bracket in, both).
+      const steps: Step[] = [
+        ...factored(times([1, r1], [1, r2]), x),
+        row(`${zeroSide([1, u + v, u * v], x)} = ${right}`),
+        side(sumStr([termOf(1, 2, x), termOf(v, 1, x), termOf(u, 1, x), termOf(u * v, 0, x)].filter((t): t is string => t !== null))),
+        // (Not with u = ±1: the app never writes 1·(x + v).)
+        Math.abs(u) !== 1 && side(`${x}${bracket(v)} ${u < 0 ? "-" : "+"} ${Math.abs(u)}${bracket(v)}`),
+        side(`${bracket(u)}${bracket(v)}`),
+      ];
+      return made("expand-first", answers(x, [r1, 1], [r2, 1]), steps, r);
     },
   },
   {
@@ -198,12 +221,9 @@ const shapes: Shape[] = [
       const [d, x0] = [r.int(1, 4), r.int(-1, 6)];
       const k = 2 * d * x0 + d * d;
       if (k <= 0 || x0 < -d) return null;
-      const where = `${x} ≥ ${-d}`;
-      // Squared, then the brackets multiplied out: the x² on each side cancel.
-      return draft("root-cancels", `√(${x}^2 + ${k}) = ${x} + ${d} where ${where}`, `${x} = ${x0}`, [
-        `${x}^2 + ${k} = (${x} + ${d})^2 where ${where}`,
-        ...squareOut(x, d, `${x}^2 + ${k}`, where),
-      ]);
+      const outs = squareOut(x, d);
+      const steps: Step[] = [row(`${x}^2 + ${k} = ${outs[0]}`), ...outs.slice(1).map((o) => side(o, 1)), side(`(${x} + ${d})^2`, 1), rootBoth()];
+      return made("root-cancels", `${x} = ${x0}`, steps, r);
     },
   },
   {
@@ -216,22 +236,18 @@ const shapes: Shape[] = [
       const [d, r1, r2] = [r.int(-2, 4), r.signed(1, 6), r.signed(1, 6)];
       const [a, b] = [2 * d + r1 + r2, d * d - r1 * r2];
       if (r1 === r2 || a <= 0 || b === 0 || Math.abs(b) > 30) return null;
-      const valid = [r1, r2].filter((v) => v >= -d);
-      if (!valid.length) return null;
+      if (![r1, r2].some((v) => v >= -d)) return null;
       const inside = `${a === 1 ? "" : a}${x} ${b < 0 ? "-" : "+"} ${Math.abs(b)}`;
       const right = d === 0 ? x : `${x} ${d < 0 ? "-" : "+"} ${Math.abs(d)}`;
-      // The bound of the inside: x ≥ −b/a, a whole number or a fraction.
-      const g = gcd(b, a);
-      const bound = a / g === 1 ? `${-b / g}` : `${-b < 0 ? "-" : ""}${Math.abs(b / g)}/${a / g}`;
-      // (Once, where the two bounds are the same.)
-      const where = bound === `${-d}` ? `${x} ≥ ${-d}` : `${x} ≥ ${bound}, ${x} ≥ ${-d}`;
-      const squared = `${inside} = (${right})^2`;
-      return draft("root-squared", `√(${inside}) = ${right} where ${where}`, answers(x, ...valid.map((v): [number, number] => [v, 1])), [
-        `${squared} where ${where}`,
-        ...squareOut(x, d, inside, where),
-        `${zeroForm([1, -(r1 + r2), r1 * r2], x)} where ${where}`,
-        `(${factor([1, r1], x)})(${factor([1, r2], x)}) = 0 where ${where}`,
-      ]);
+      const outs = squareOut(x, d);
+      const steps: Step[] = [
+        ...factored(times([1, r1], [1, r2]), x),
+        row(`${inside} = ${outs[0]}`),
+        ...outs.slice(1).map((o) => side(o, 1)),
+        side(`(${right})^2`, 1),
+        rootBoth(),
+      ];
+      return made("root-squared", answers(x, [r1, 1], [r2, 1]), steps, r);
     },
   },
   {
@@ -242,15 +258,12 @@ const shapes: Shape[] = [
       const x = letter(r);
       const [r1, r2] = [r.signed(1, 6), r.signed(1, 6)];
       if (r1 === r2 || r1 === -r2) return null;
-      const top = zeroForm(times([1, r1], [1, r2]), x).replace(" = 0", "");
-      const bottom = factor([1, r1], x);
-      const where = `${x} ≠ ${r1}`;
-      return draft("fraction-zero", `(${top})/(${bottom}) = 0 where ${where}`, `${x} = ${r2}`, [`${top} = 0 where ${where}`, `(${bottom})(${factor([1, r2], x)}) = 0 where ${where}`]);
+      return made("fraction-zero", answers(x, [r1, 1], [r2, 1]), [...factored(times([1, r1], [1, r2]), x), overBottom(ex(factor([1, r1], x)))], r);
     },
   },
 ];
 
-// Right by construction (made from their answers); the tests solve every shape with the moves.
+// Right by construction (built back from their answers); the tests solve every shape with the moves.
 const chosen = (...ids: string[]) => ids.map((id) => shapes.find((s) => s.id === id)! as Shape);
 
 export const shapesByLevel: Record<Level, Shape[]> = {

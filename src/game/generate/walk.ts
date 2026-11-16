@@ -12,17 +12,16 @@
 import type { MathState } from "../../expr/types";
 import { assuming } from "../../expr/setting";
 import { parseState } from "../../expr/parse";
-import { printState, stateKey } from "../../expr/key";
-import { stepsFrom, type RuleId } from "../../rules";
-import { tidied } from "../tidy";
-import { matchesGoal, searchBest } from "../solver";
+import { printState } from "../../expr/key";
+import type { RuleId } from "../../rules";
+import { verify } from "./verify";
 import { CHAPTERS, rulesOf } from "../puzzles";
 import { OWN_STEPS } from "./walks/steps";
+import { build, canonical, type Back } from "./back";
 import type { UnMove } from "./unmove";
-import { shuffled, type Draft, type Rng, type Shape } from "./write";
+import type { Draft, Rng, Shape } from "./write";
 
-/** A step back: a move made forwards (its opposite undoes it), or an un-move. */
-export type Back = RuleId | UnMove;
+export type { Back } from "./back";
 
 export type Walk = {
   id: string;
@@ -35,6 +34,10 @@ export type Walk = {
   earlier?: readonly Back[];
   /** How many steps back, at least and at most. */
   steps: readonly [number, number];
+  /** Only its own steps back, never an earlier chapter's (a walk that must end somewhere exact: everything multiplied out). */
+  alone?: boolean;
+  /** One more step back after the wandering, now and then (half the time): the start written another way. */
+  last?: UnMove;
   /** The start as a person writes it (3·5 worked out to 15, x·x as x²). */
   settle?: Settle;
   /** What a start must be like to be kept (not too long, say). */
@@ -49,9 +52,6 @@ export type Walk = {
 /** Writing a walk's end as a person would (12x + 28, not 4·3x + 4·7): the start. */
 export type Settle = (s: MathState) => MathState;
 
-/** Every tree as the parser reads its print: what the moves will meet. */
-const canonical = (s: MathState): MathState => parseState(printState(s));
-const sameTerms = (a: MathState, b: MathState) => stateKey(a, false) === stateKey(b, false);
 
 /** The steps back of the chapters before this one (see walks/steps.ts). */
 function earlierSteps(chapterId: string): Back[] {
@@ -59,8 +59,9 @@ function earlierSteps(chapterId: string): Back[] {
   return CHAPTERS.slice(0, Math.max(0, at)).flatMap((c) => OWN_STEPS[c.id] ?? []);
 }
 
-/** How often a step back is one of the chapter's own, not an earlier chapter's. */
-const OWN_FIRST = 0.7;
+
+/** Drafts a walked shape makes to pick the nicest from. */
+const WALK_POOL = 4;
 
 /** A walk as one of a chapter's exercise shapes, solved with that chapter's moves, taking earlier chapters' steps back too. */
 export function walked(w: Walk, chapterId: string): Shape {
@@ -71,109 +72,47 @@ export function walked(w: Walk, chapterId: string): Shape {
     weight: w.weight,
     positive: w.positive,
     make: (r) => walk({ ...w, earlier: (earlier ??= earlierSteps(chapterId)) }, rulesOf(chapterId), r),
-    check: (d) => stillSolves(d, rulesOf(chapterId)),
+    // Every draft is a walk, each step checked: a few to pick from are enough (they're varied by walking).
+    pool: WALK_POOL,
+    check: (d) => walkSolves(d, rulesOf(chapterId)),
   };
-}
-
-/**
- * The moves that undo a move made forwards (a step back): factoring undoes
- * multiplying out. Checking only these is what keeps a walk quick; a move
- * not listed is checked against all of the chapter's.
- */
-export const UNDONE_BY: Partial<Record<RuleId, RuleId[]>> = {
-  distribute: ["factor-out", "factor-shared"],
-  "distribute-neg": ["factor-out"],
-  "factor-out": ["distribute"],
-  "multiply-numbers": ["split-number"],
-  "multiply-out": ["split-number"],
-  "split-number": ["multiply-numbers", "multiply-out"],
-  "merge-powers": ["split-exponent"],
-  "split-exponent": ["merge-powers"],
-  "add-fractions": ["split-fraction"],
-  "split-fraction": ["add-fractions"],
-  "log-of-product": ["combine-logs"],
-  "combine-logs": ["log-of-product"],
-  "log-of-power": ["power-into-log"],
-  "power-into-log": ["log-of-power"],
-  "join-powers": ["pull-out-of-power"],
-  "pull-out-of-power": ["join-powers"],
-  commute: ["commute"],
-};
-
-/** The states one step back from `s`, each with the moves that may undo it. */
-type Option = { state: MathState; undo: readonly RuleId[] | null; trusted: boolean };
-
-function backFrom(s: MathState, back: readonly Back[], r: Rng): Option[] {
-  return back.flatMap((b): Option[] => {
-    if (typeof b === "string") return stepsFrom(s, [b]).map((st) => ({ state: st.state, undo: UNDONE_BY[b] ?? null, trusted: false }));
-    const made = b.on(s, r, () => true);
-    return (made === null ? [] : Array.isArray(made) ? made : [made]).map((state) => ({ state, undo: b.rules, trusted: !!b.trusted }));
-  });
-}
-
-/** The chapter's moves that take `from` back to `to` in one step (none: it can't be undone in one). */
-export function undoneBy(from: MathState, to: MathState, rules: readonly RuleId[]): RuleId[] {
-  const out = new Set<RuleId>();
-  for (const st of stepsFrom(from, rules)) if (sameTerms(tidied(from, st.state), to)) for (const w of st.ways) out.add(w.candidate.rule);
-  return [...out];
-}
-
-/** One step back from `s` that the chapter's moves undo, at random (and not back where it has been): its own steps first, mostly, else an earlier chapter's. */
-function stepBack(
-  s: MathState,
-  back: readonly Back[],
-  earlier: readonly Back[],
-  rules: readonly RuleId[],
-  seen: Set<string>,
-  r: Rng,
-  positive: boolean,
-) {
-  const at = assuming(s, positive);
-  const mine = () => shuffled(r, backFrom(at, back, r));
-  const theirs = () => shuffled(r, backFrom(at, earlier, r));
-  const groups = r.next() < OWN_FIRST ? [mine, theirs] : [theirs, mine];
-  for (const group of groups)
-    for (const o of group()) {
-      const next = assuming(canonical(o.state), positive);
-      const k = stateKey(next, "exact");
-      if (seen.has(k)) continue;
-      const undoers = o.undo?.filter((x) => rules.includes(x));
-      const undo = o.trusted && undoers?.length ? undoers : undoneBy(next, at, undoers?.length ? undoers : rules);
-      if (undo.length) return { next, undo, k };
-    }
-  return null;
 }
 
 function walk(w: Walk, rules: readonly RuleId[], r: Rng): Draft | null {
   const src = w.answer(r);
   if (!src) return null;
   const positive = !!w.positive;
-  const goal = canonical(parseState(src));
-  const path: MathState[] = [goal];
-  const legs: RuleId[][] = [];
-  const seen = new Set([stateKey(goal, "exact")]);
-  const n = r.int(w.steps[0], w.steps[1]);
-  const take = (back: readonly Back[]) => {
-    const got = stepBack(path[path.length - 1], back, back === w.back ? (w.earlier ?? []) : [], rules, seen, r, positive);
-    if (!got) return false;
-    seen.add(got.k);
-    path.push(got.next);
-    legs.push(got.undo);
-    return true;
-  };
-  for (let i = 0; i < n; i++) if (!take(w.back)) break;
-  if (path.length - 1 < w.steps[0]) return null;
+  const b = build(canonical(parseState(src)), [{ wander: w.back, earlier: w.alone ? [] : w.earlier, times: w.steps }, w.last && r.next() < 0.5 && w.last], r, { rules, positive });
+  if (!b) return null;
+  const path = b.path;
   if (w.settle) settle(w.settle, path, positive);
-  if (w.needs && !legs.some((l) => l.some((x) => w.needs!.includes(x)))) return null;
+  if (w.needs && !b.rules.some((l) => l.some((x) => w.needs!.includes(x)))) return null;
   if (w.fits && !w.fits(path[path.length - 1])) return null;
   const shown = path.map((s) => printState({ ...s, letters: undefined }));
-  // No milestones: a trusted step or a tidied start needn't pass through the states the walk wrote
-  // (ln(x) + ln(x) combines to ln(x²), not ln(x·x)). The draft is searched once, start to goal (see `check`).
-  return { shape: w.id, start: shown[shown.length - 1], goal: shown[0], via: [], ...(positive ? { positive } : {}) };
+  // The states it walked through are its milestones, each stretch with the moves that undo its step (a start
+  // written another way, `settle`, takes the moves of writing too). `check` follows them, quickly; where the
+  // moves don't pass through a state the walk wrote (ln(x) + ln(x) combines to ln(x²), not ln(x·x)), it
+  // searches from start to goal instead.
+  const settling = SETTLING.filter((x) => rules.includes(x));
+  const legs = b.rules.map((l) => (w.settle ? [...new Set([...l, ...settling])] : [...l])).reverse();
+  // A walk whose start is written as a person writes it has its milestones written so too (what the moves and tidying meet).
+  if (w.settle) for (let i = 1; i < path.length - 1; i++) shown[i] = printState({ ...canonical(w.settle(path[i])), letters: undefined });
+  // Steps checked as they were taken are proven (back.ts); trusted ones aren't, nor any once the states are written another way.
+  const proven = b.checked.slice().reverse().map((c) => c && !w.settle);
+  return { shape: w.id, start: shown[shown.length - 1], goal: shown[0], via: shown.slice(1, -1).reverse(), legs, proven, ...(positive ? { positive } : {}) };
 }
 
-/** How hard a start may be looked at, to be sure the moves solve it (most take a few dozen states). */
-const CHECK_STATES = 1500;
+/** Moves that undo writing a start as a person would (Walk.settle): numbers multiplied, put first, x·x as x². */
+const SETTLING: RuleId[] = ["multiply-numbers", "numbers-first", "merge-powers", "commute"];
+
+/**
+ * The draft solved along its milestones, quickly (the stretches it proved as
+ * it walked taken as done), or null: another draft is picked. (A blind
+ * search from start to goal can take seconds where the moves can't do it.)
+ */
+export function walkSolves(d: Draft, rules: readonly RuleId[]): Draft | null {
+  return d.legs && !("stuck" in verify(d, rules, { quick: true, trusting: true, bestOnly: true })) ? d : null;
+}
 
 /** The walk's end written as a person writes it (see Walk.settle), as the start. */
 function settle(write: Settle, path: MathState[], positive: boolean): void {
@@ -181,25 +120,3 @@ function settle(write: Settle, path: MathState[], positive: boolean): void {
   // In place of the walk's end: the moves needn't pass through it (12 splits as 2·6, not as the 4·3 it was).
   path[path.length - 1] = start;
 }
-
-/** Moves between two milestones taken from a found way (the checks search at most a few between milestones). */
-const EVERY = 4;
-
-/**
- * The start gets to the goal with the chapter's moves (tidying can hide a
- * step: x(x − 4) + 1·(x − 4) tidies to x(x − 4) + x − 4, which no move
- * factors). Searched briefly, on the draft practice picks only; the way
- * found gives its milestones, states the moves really reach.
- */
-export function stillSolves(d: Draft, rules: readonly RuleId[]): Draft | null {
-  const start = assuming(parseState(d.start), d.positive);
-  const goal = parseState(d.goal);
-  // (Rows in any order, each either way round: the answers of x² = 9 come as x = 3 or x = −3, or the other way.)
-  const way = searchBest(start, (x) => matchesGoal(x, goal, false), rules, { ordered: false, maxStates: CHECK_STATES });
-  if (!way) return null;
-  const via = way.slice(1, -1).filter((_, i) => (i + 1) % EVERY === 0).map((s) => printState({ ...s, letters: undefined }));
-  return { ...d, via };
-}
-
-/** A shape that makes its exercises some other way, checked like a walk's: the picked one is solved once, its way giving the milestones. */
-export const searched = (s: Omit<Shape, "check">, chapterId: string): Shape => ({ ...s, check: (d) => stillSolves(d, rulesOf(chapterId)) });

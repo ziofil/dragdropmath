@@ -10,6 +10,7 @@ import { adopt, dragCtx, mergeInto, moveItem, replaceIn, siblings, without, type
 /** a + b → b + a, a·b → b·a (drag a term or factor to a new slot). */
 export const commute: Rule = {
   id: "commute",
+  undoneBy: ["commute"],
   feel: { carry: "reorder" },
   name: "Swap",
   gesture: "Drag a term or factor past its neighbours — order doesn't matter for + and ×.",
@@ -107,6 +108,7 @@ export const combine: Rule = {
 /** 2·3 → 6 (drop a number onto another number in the same product). */
 export const multiplyNumbers: Rule = {
   id: "multiply-numbers",
+  undoneBy: ["split-number"],
   operatorTap: "product",
   name: "Multiply numbers",
   gesture: "Drop a number onto another number it's multiplied by.",
@@ -131,6 +133,7 @@ export const multiplyNumbers: Rule = {
 /** x·x → x², x²·x³ → x⁵ (drop a factor onto one with the same base). */
 export const mergePowers: Rule = {
   id: "merge-powers",
+  undoneBy: ["split-exponent"],
   operatorTap: "product",
   name: "Same base: add exponents",
   gesture: "Drop a factor onto another with the same base — the exponents add up.",
@@ -228,6 +231,7 @@ const isOne = (f: Expr) => f.kind === "num" && f.value === 1;
 /** 2·3 → 6, 3·2·x → 6x (tap the product, or one of its numbers: the numbers in it are multiplied out). */
 export const multiplyOut: Rule = {
   id: "multiply-out",
+  undoneBy: ["split-number"],
   // After tidying: x·2·3 is first written 2·3·x.
   tapOrder: 2,
   name: "Multiply out",

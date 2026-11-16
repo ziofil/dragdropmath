@@ -161,6 +161,7 @@ function workOutPower(state: MathState, id: string, rule: "evaluate-power" | "ta
  */
 export const joinPowers: Rule = {
   id: "join-powers",
+  undoneBy: ["pull-out-of-power"],
   name: "Same exponent: join the bases",
   gesture: "Drop a power onto another with the same exponent — the bases go under one: √2·√3 = √(2·3).",
   apply(state, id) {
@@ -270,6 +271,7 @@ export const expOfLog: Rule = {
 /** ln(ab) → ln a + ln b, ln(a/b) → ln a − ln b (drop the ln onto its brackets). */
 export const logOfProduct: Rule = {
   id: "log-of-product",
+  undoneBy: ["combine-logs"],
   feel: { carry: "pull-out", wears: "grow-log" },
   name: "Split a log",
   gesture: "Pull a factor out of a log's brackets — it takes a copy of the log with it.",
@@ -312,6 +314,7 @@ export const logOfProduct: Rule = {
 /** ln(x³) → 3·ln x (carry the exponent out in front of the log). */
 export const logOfPower: Rule = {
   id: "log-of-power",
+  undoneBy: ["power-into-log"],
   name: "Exponent out of a log",
   gesture: "Carry the exponent inside a log out in front of it.",
   apply(state, id) {
@@ -331,6 +334,7 @@ export const logOfPower: Rule = {
 /** 3·ln x → ln(x³) (drop the number in front onto the log). */
 export const powerIntoLog: Rule = {
   id: "power-into-log",
+  undoneBy: ["log-of-power"],
   either: true,
   name: "Number into a log",
   gesture: "Drop a number multiplying a log onto it — it becomes an exponent inside.",
@@ -355,6 +359,7 @@ export const powerIntoLog: Rule = {
 /** ln a + ln b → ln(ab), ln a − ln b → ln(a/b) (drop one log term onto another). */
 export const combineLogs: Rule = {
   id: "combine-logs",
+  undoneBy: ["log-of-product"],
   operatorTap: "sum",
   feel: { wears: "shed-log" },
   name: "Combine logs",
@@ -447,6 +452,7 @@ export const powerOfBase: Rule = {
  */
 export const splitExponent: Rule = {
   id: "split-exponent",
+  undoneBy: ["merge-powers"],
   feel: { carry: "pull-out" },
   name: "Same base: split the exponent",
   gesture: "Pull a term out of an exponent — the power splits into two powers of the same base.",
@@ -694,6 +700,7 @@ export const rootAcross: Rule = {
  */
 export const pullOutOfPower: Rule = {
   id: "pull-out-of-power",
+  undoneBy: ["join-powers"],
   feel: { carry: "pull-out" },
   name: "Split a power or root",
   gesture: "Pull a factor out of a root's (or power's) brackets — it takes its own copy of the root.",

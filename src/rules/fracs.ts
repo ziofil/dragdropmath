@@ -41,6 +41,7 @@ function ownFraction(state: MathState, f: Expr, part: { F: Extract<Expr, { kind:
  */
 export const splitNumber: Rule = {
   id: "split-number",
+  undoneBy: ["multiply-numbers",  "multiply-out"],
   name: "Split a number",
   gesture: "Tap a number to split it into two factors (6 → 2·3).",
   tap: true,
@@ -109,6 +110,7 @@ export const expandFraction: Rule = {
 /** 1/5 + 2/5 → (1 + 2)/5 (drop a fraction onto one with the same denominator). */
 export const addFractions: Rule = {
   id: "add-fractions",
+  undoneBy: ["split-fraction"],
   operatorTap: "sum",
   name: "Add fractions",
   gesture: "Drop a fraction onto another with the same denominator — the tops add up.",
@@ -144,6 +146,7 @@ export const addFractions: Rule = {
 /** (x + 2)/2 → x/2 + 2/2 (pull a term out of the top; it takes a copy of the bottom). */
 export const splitFraction: Rule = {
   id: "split-fraction",
+  undoneBy: ["add-fractions"],
   feel: { carry: "pull-out" },
   name: "Split a fraction",
   gesture: "Pull a term out of a fraction's top — it takes a copy of the bottom with it.",

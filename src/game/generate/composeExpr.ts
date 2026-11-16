@@ -302,11 +302,6 @@ function randomPiece(kind: Kind, c: Ctx): Piece {
 
 /** What each chapter's composed exercises are made of, at each level. */
 const RANDOM: Record<string, Record<Level, (r: Rng) => { kinds: Kind[]; vars: string[] }>> = {
-  collect: {
-    easy: (r) => ({ kinds: ["term", "term", "term", "term"], vars: [one(r, ["x", "a", "y"])] }),
-    medium: () => ({ kinds: ["term", "term", "term", "numbers", "term", "term"], vars: ["a", "b"] }),
-    hard: () => ({ kinds: ["term", "numbers", "term", "term", "numbers", "term", "term", "term"], vars: ["x", "y", "z"] }),
-  },
   distribute: {
     easy: (r) => ({ kinds: ["times-bracket", "term"], vars: [one(r, ["x", "a", "y"])] }),
     medium: (r) => ({ kinds: ["times-bracket", r.next() < 0.5 ? "minus-bracket" : "times-bracket", "term"], vars: ["a", "b"] }),

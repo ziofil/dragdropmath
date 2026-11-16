@@ -63,6 +63,8 @@ export type Draft = {
   positive?: boolean;
   /** The moves each stretch takes (start → first milestone, …, last → goal), when known: checking searches with those first. */
   legs?: RuleId[][];
+  /** Stretches already proven one of those moves undoes (a walk checks each step as it takes it): serving needn't search them again. */
+  proven?: boolean[];
 };
 
 // ---------- writing maths as a person would ----------
@@ -97,6 +99,8 @@ export type Shape = {
   curated?: boolean;
   /** A last check, on the draft picked only (a search: too slow for every try): the draft as it passed (it may add what it found), or null to pick another. */
   check?: (d: Draft) => Draft | null;
+  /** How many drafts to make and pick the nicest from (default practice.ts POOL): fewer for a shape whose drafts cost a search each. */
+  pool?: number;
 };
 
 /** The shapes with these ids, in this order: a level's list. */

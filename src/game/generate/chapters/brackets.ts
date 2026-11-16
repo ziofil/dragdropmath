@@ -4,8 +4,7 @@
  * to it are worked out from them (../composeExpr.ts).
  */
 import { brackets as twoBrackets, composedExpression, expression, lin, P, square as squared, term, times, type Piece } from "../composeExpr";
-import { byIds, one, type Level, type Rng, type Shape } from "../write";
-import { all as powers } from "./powers";
+import { byIds, one, pw, type Level, type Rng, type Shape } from "../write";
 
 
 const shape = (id: string, name: string, pieces: (r: Rng) => Piece[] | null): Shape => ({
@@ -126,6 +125,98 @@ const letterBracketMinusProduct = shape("letter-bracket-minus-product", "x times
   const [a, b] = [r.int(1, 4), r.int(1, 4)];
   return [times(1, "x", P(`x + ${a}y`)), twoBrackets(P(`x + ${a}y`), P(`x - ${b}y`), -1)];
 });
+
+/** c·x^e: "3x^5", "x^4", "-x". */
+const mono = (c: number, x: string, e: number) => `${c === 1 ? "" : c === -1 ? "-" : c}${pw(x, e)}`;
+/** " + 2x", " - x^3" after a term. */
+const then = (c: number, x: string, e: number) => (c < 0 ? ` - ${mono(-c, x, e)}` : ` + ${mono(c, x, e)}`);
+
+/** Brackets with powers in them (Powers comes before this chapter). */
+const powers: Shape[] = [
+  {
+    id: "bracket-cancel",
+    name: "a bracket, then a term that cancels",
+    make: (r) => {
+      // ax^m(x^n - k) + akx^m = ax^(m+n)
+      const a = r.next() < 0.5 ? 1 : r.int(2, 3);
+      const m = r.int(1, 3);
+      const n = r.int(2, 4);
+      const k = r.int(1, 3);
+      if (m === n || (a === 1 && k === 1 && r.next() < 0.5)) return null;
+      const lead = a === 1 ? pw("x", m) : `${a}${pw("x", m)}`;
+      return {
+        shape: "bracket-cancel",
+        start: `${lead}(${pw("x", n)} - ${k}) + ${mono(a * k, "x", m)}`,
+        goal: mono(a, "x", m + n),
+        via: [
+          ...(a > 1 ? [`${a}${pw("x", m)}*${pw("x", n)}${then(-a * k, "x", m)} + ${mono(a * k, "x", m)}`] : []),
+          `${mono(a, "x", m + n)}${then(-a * k, "x", m)} + ${mono(a * k, "x", m)}`,
+        ],
+      };
+    },
+  },
+{
+    id: "square-and-more",
+    name: "a squared term, and a bracket of the same power",
+    make: (r) => {
+      // (kx^m)^2 + x^p(x^(2m-p) - b) = (k^2 + 1)x^(2m) - bx^p
+      const k = r.int(2, 3);
+      const m = r.int(2, 3);
+      const p = r.int(1, m);
+      const b = r.int(1, 5);
+      const q = 2 * m - p;
+      return {
+        shape: "square-and-more",
+        start: `(${mono(k, "x", m)})^2 + ${pw("x", p)}(${pw("x", q)} - ${b})`,
+        goal: `${mono(k * k + 1, "x", 2 * m)} - ${mono(b, "x", p)}`,
+        via: [`${mono(k * k, "x", 2 * m)} + ${pw("x", p)}(${pw("x", q)} - ${b})`, `${mono(k * k, "x", 2 * m)} + ${pw("x", 2 * m)} - ${mono(b, "x", p)}`],
+      };
+    },
+  },
+{
+    id: "bracket-square",
+    name: "a bracket with a power, squared",
+    make: (r) => {
+      // (x^m + p)^2 = x^(2m) + 2px^m + p^2
+      const m = r.int(2, 3);
+      const p = r.signed(2, 4);
+      const inside = `${pw("x", m)}${p < 0 ? " - " : " + "}${Math.abs(p)}`;
+      return {
+        shape: "bracket-square",
+        start: `(${inside})^2`,
+        goal: `${pw("x", 2 * m)}${then(2 * p, "x", m)} + ${p * p}`,
+        via: [`(${inside})(${inside})`, `${pw("x", 2 * m)}${then(p, "x", m)}${p < 0 ? " - " : " + "}${Math.abs(p)}(${inside})`, `${pw("x", 2 * m)}${then(p, "x", m)}${then(p, "x", m)} + ${p * p}`],
+      };
+    },
+  },
+{
+    id: "expand-collect",
+    name: "multiply out, then collect",
+    make: (r) => {
+      if (r.next() < 0.35) {
+        // x^-m(x^(m+a) + x^m) = x^a + 1
+        const m = r.int(1, 3);
+        const a = r.int(1, 3);
+        return {
+          shape: "expand-collect",
+          start: `${pw("x", -m)}·(${pw("x", m + a)} + ${pw("x", m)})`,
+          goal: `${pw("x", a)} + 1`,
+          via: [`${pw("x", a)} + ${pw("x", -m)}·${pw("x", m)}`],
+        };
+      }
+      // ax(x^2 + b) - cx^3 = (a - c)x^3 + abx
+      const a = r.int(2, 4);
+      const c = r.int(1, a - 1);
+      const b = r.signed(1, 4);
+      return {
+        shape: "expand-collect",
+        start: `${a}x(x^2${b < 0 ? " - " : " + "}${Math.abs(b)}) - ${mono(c, "x", 3)}`,
+        goal: `${mono(a - c, "x", 3)}${then(a * b, "x", 1)}`,
+        via: [`${mono(a, "x", 3)}${then(a * b, "x", 1)} - ${mono(c, "x", 3)}`],
+      };
+    },
+  },
+];
 
 export const shapes: Record<Level, Shape[]> = {
   // And powers with a bracket to multiply out, from the powers chapter (which now comes before the distributive law).

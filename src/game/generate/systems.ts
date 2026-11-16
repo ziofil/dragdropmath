@@ -11,7 +11,8 @@ import type { Expr, MathState } from "../../expr/types";
 import { children, mapTree } from "../../expr/tree";
 import { variable } from "../../expr/build";
 import type { RuleId } from "../../rules";
-import { bracket, build, draftOf, n, plus, sumOf, swap, swapRows, termExpr, times, unsubstitute, valueIn, type UnMove } from "./unmove";
+import { build, draftOf } from "./back";
+import { bracket, n, plus, sumOf, swap, swapRows, termExpr, times, unsubstitute, valueIn, type UnMove } from "./unmove";
 import { composeSteps, type Kind } from "./compose";
 import { letterPair, one, type Level, type Rng, type Shape } from "./write";
 

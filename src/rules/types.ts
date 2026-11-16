@@ -105,6 +105,12 @@ export type Rule = {
    * this merge, as dropping the second on the first would: 3 + 4 → 7, 2·3 → 6.
    */
   operatorTap?: "sum" | "product";
+  /**
+   * The moves that undo this one (factoring undoes multiplying out): an
+   * exercise built backwards takes this move as a step back, and checks only
+   * these undo it (game/generate/back.ts).
+   */
+  undoneBy?: readonly RuleId[];
   apply(state: MathState, draggedId: string): Candidate[];
 };
 

@@ -57,20 +57,26 @@ function mix(seed: number, id: string): number {
 
 export function nicest(s: Shape, r: Rng): Draft | null {
   const found: { d: Draft; score: number }[] = [];
-  for (let tries = 0; found.length < POOL && tries < 500; tries++) {
-    const d = s.make(r);
-    if (!d) continue;
-    const v = s.curated ? { ok: true, score: 0 } : judge(d);
-    if (!v.ok || !predictable(d)) continue;
-    found.push({ d, score: v.score });
-  }
-  while (found.length) {
-    const best = Math.max(...found.map((f) => f.score));
-    const near = found.filter((f) => f.score >= best - NEAR_BEST);
-    const pick = near[r.int(0, near.length - 1)];
-    const passed = s.check ? s.check(pick.d) : pick.d;
-    if (passed) return passed;
-    found.splice(found.indexOf(pick), 1);
+  let tries = 0;
+  // A pool of drafts, the nicest checked first; when every one fails its check, a fresh pool (within the tries).
+  while (tries < 500) {
+    for (; found.length < (s.pool ?? POOL) && tries < 500; tries++) {
+      const d = s.make(r);
+      if (!d) continue;
+      const v = s.curated ? { ok: true, score: 0 } : judge(d);
+      if (!v.ok || !predictable(d)) continue;
+      found.push({ d, score: v.score });
+    }
+    if (!found.length) return null;
+    while (found.length) {
+      const best = Math.max(...found.map((f) => f.score));
+      const near = found.filter((f) => f.score >= best - NEAR_BEST);
+      const pick = near[r.int(0, near.length - 1)];
+      const passed = s.check ? s.check(pick.d) : pick.d;
+      if (passed) return passed;
+      found.splice(found.indexOf(pick), 1);
+    }
+    if (!s.check) return null;
   }
   return null;
 }

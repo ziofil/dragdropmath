@@ -1,6 +1,5 @@
 /** Every chapter's exercise shapes, by level. */
 import type { Draft, Level, Shape } from "../write";
-import type { RuleId } from "../../../rules";
 import { chapterById } from "../../puzzles";
 import { parseState } from "../../../expr/parse";
 import { stateKey } from "../../../expr/key";
@@ -35,15 +34,17 @@ function served(s: Shape, chapterPositive: boolean): Shape {
     const keys = [d.start, ...d.via, d.goal].map((t) => stateKey(parseState(t)));
     const keep = d.via.map((_, i) => keys[i + 1] !== keys[i] && keys[i + 1] !== keys[0] && keys[i + 1] !== keys[keys.length - 1]);
     const legs = d.legs && joinLegs(d.legs, keep);
-    return { ...d, via: d.via.filter((_, i) => keep[i]), ...(legs ? { legs } : {}), positive: d.positive ?? positive };
+    // A stretch joined from several is proven only if each of them was.
+    const proven = d.proven && joinLegs(d.proven.map((p) => (p ? [] : [false])), keep).map((x) => x.length === 0);
+    return { ...d, via: d.via.filter((_, i) => keep[i]), ...(legs ? { legs } : {}), ...(proven ? { proven } : {}), positive: d.positive ?? positive };
   };
   return { ...s, positive, make };
 }
 
 /** Each kept milestone's stretch, with those of the dropped ones before it. */
-function joinLegs(legs: readonly RuleId[][], keep: readonly boolean[]): RuleId[][] {
-  const out: RuleId[][] = [];
-  let acc: RuleId[] = [];
+function joinLegs<T>(legs: readonly T[][], keep: readonly boolean[]): T[][] {
+  const out: T[][] = [];
+  let acc: T[] = [];
   legs.forEach((leg, i) => {
     acc = [...acc, ...leg];
     if (i >= keep.length || keep[i]) {

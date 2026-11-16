@@ -12,7 +12,8 @@
  */
 import type { Expr, Rel } from "../../expr/types";
 import { frac, neg, num, variable } from "../../expr/build";
-import { both, bracket, build, draftOf, ex, from, over, plus, restate, solved, spread, sumOf, swap, termExpr, times, writeAs, type UnMove } from "./unmove";
+import { build, draftOf } from "./back";
+import { both, bracket, ex, from, over, plus, restate, solved, spread, sumOf, swap, termExpr, times, writeAs, type UnMove } from "./unmove";
 import type { RuleId } from "../../rules";
 import { gcd, letter as someLetter, one, type Rng, type Shape } from "./write";
 
@@ -88,7 +89,7 @@ export function shapeOf(rc: Recipe, use: Use = {}): Shape {
       if (!made || x0 === 0) return null;
       const [value, steps] = Array.isArray(made) ? [c.u(x0)!, made] : [made.value, made.steps];
       const b = build(solved(x, value, rel), steps, r);
-      return b && draftOf(id, b, b.positive || !!rc.positive);
+      return b && draftOf(id, b, { positive: b.positive || !!rc.positive });
     },
   };
 }

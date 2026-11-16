@@ -10,6 +10,7 @@ import { visibleOne } from "./shapes";
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
 export const distribute: Rule = {
   id: "distribute",
+  undoneBy: ["factor-out",  "factor-shared"],
   either: true,
   name: "Distribute",
   gesture: "Drop a factor onto the brackets it multiplies — it visits every term inside.",
@@ -69,6 +70,7 @@ function staysPut(near: Expr, fromLeft: boolean): string {
 /** −(a − b) → −a + b (drop the minus sign onto its brackets). */
 export const distributeNeg: Rule = {
   id: "distribute-neg",
+  undoneBy: ["factor-out"],
   name: "Distribute a minus",
   gesture: "Drop a minus sign onto its brackets, or onto the top or bottom of the fraction it's in front of — every sign inside flips.",
   apply(state, id) {
@@ -145,6 +147,7 @@ function carried(state: MathState, id: string) {
  */
 export const factorOut: Rule = {
   id: "factor-out",
+  undoneBy: ["distribute"],
   feel: { carry: "out-in-front" },
   name: "Factor out",
   gesture: "Pull a factor that's in every term out in front of brackets.",
