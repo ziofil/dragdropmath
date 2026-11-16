@@ -94,6 +94,17 @@ export type Rule = {
   tapOrder?: number;
   /** How carrying the piece towards this move feels (see Feel). Merges (with a target) always blend in. */
   feel?: Feel;
+  /**
+   * A merge that works both ways round: whichever of the two is dropped on
+   * the other, the same happens (the bracket of 4(x + 6) on the 4 as well as
+   * the 4 on the bracket, ln x on the 4 of 4·ln x, …).
+   */
+  either?: true;
+  /**
+   * Tapping the + or − (`sum`) or the · (`product`) between two pieces does
+   * this merge, as dropping the second on the first would: 3 + 4 → 7, 2·3 → 6.
+   */
+  operatorTap?: "sum" | "product";
   apply(state: MathState, draggedId: string): Candidate[];
 };
 

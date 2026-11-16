@@ -10,6 +10,7 @@ import { visibleOne } from "./shapes";
 /** a(b + c) → ab + ac (drop a factor onto the parentheses next to it). */
 export const distribute: Rule = {
   id: "distribute",
+  either: true,
   name: "Distribute",
   gesture: "Drop a factor onto the brackets it multiplies — it visits every term inside.",
   apply(state, id) {

@@ -53,6 +53,7 @@ function replaceFactor(e: Expr, id: string, by: Expr): Expr {
 /** (x²)³ → x⁶ (drop the outer exponent onto the inner one). */
 export const powerOfPower: Rule = {
   id: "power-of-power",
+  either: true,
   name: "Power of a power",
   gesture: "Drop an outer exponent onto the inner one — they multiply.",
   apply(state, id) {
@@ -71,6 +72,7 @@ export const powerOfPower: Rule = {
 /** x¹ → x (drop the 1 onto its base). */
 export const powerOne: Rule = {
   id: "power-one",
+  either: true,
   name: "Power of one",
   gesture: "Drop an exponent of 1 onto its base — x¹ is just x.",
   apply(state, id) {
@@ -84,6 +86,7 @@ export const powerOne: Rule = {
 /** x⁰ → 1 (drop the 0 onto its base). */
 export const zeroPower: Rule = {
   id: "zero-power",
+  either: true,
   name: "Power of zero",
   gesture: "Drop an exponent of 0 onto its base — anything to the power 0 is 1.",
   apply(state, id) {
@@ -121,6 +124,7 @@ export const powerToProduct: Rule = {
 /** 2³ → 8 (drop the exponent onto a number base). */
 export const evaluatePower: Rule = {
   id: "evaluate-power",
+  either: true,
   name: "Work out a power",
   gesture: "Drop a whole-number exponent onto a number to work it out.",
   apply: (state, id) => workOutPower(state, id, "evaluate-power"),
@@ -251,6 +255,7 @@ export const flipAcrossBar: Rule = {
 /** e^(ln x) → x (drop the e onto the ln). */
 export const expOfLog: Rule = {
   id: "exp-of-log",
+  either: true,
   name: "e^ undoes ln",
   gesture: "Drop a base onto a log of the same base in its exponent — they cancel.",
   apply(state, id) {
@@ -326,6 +331,7 @@ export const logOfPower: Rule = {
 /** 3·ln x → ln(x³) (drop the number in front onto the log). */
 export const powerIntoLog: Rule = {
   id: "power-into-log",
+  either: true,
   name: "Number into a log",
   gesture: "Drop a number multiplying a log onto it — it becomes an exponent inside.",
   apply(state, id) {
@@ -349,6 +355,7 @@ export const powerIntoLog: Rule = {
 /** ln a + ln b → ln(ab), ln a − ln b → ln(a/b) (drop one log term onto another). */
 export const combineLogs: Rule = {
   id: "combine-logs",
+  operatorTap: "sum",
   feel: { wears: "shed-log" },
   name: "Combine logs",
   gesture: "Drop a log onto another log with the same base — adding logs multiplies inside, subtracting divides.",

@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { harness } from "./testing/harness";
 import { CHAPTERS, rulesOf, startOf } from "../game/puzzles";
-import { carries, carryOf, DRILLS, drillExercise, oneMove } from "../game/generate/moves";
+import { carries, DRILLS, drillExercise, oneMove } from "../game/generate/moves";
 import { planDemo } from "./demo";
 import { allNodes } from "../expr/tree";
 import { handles, RULES, tapFor } from "../rules";
@@ -54,12 +54,12 @@ describe("lesson moves, by hand", () => {
 
 // Show does what the words say: where they name the piece to carry (the bottom one up, the exponent onto its base), Show carries that one.
 describe("lesson moves, as their words say", () => {
-  const named = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.filter((d) => carryOf(d.id)).map((d) => [chapterId, d.id] as const));
+  const named = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.filter((d) => d.carries).map((d) => [chapterId, d.id] as const));
   it.each(named)("%s: %s", (chapterId, drillId) => {
     const ch = CHAPTERS.find((c) => c.id === chapterId)!;
     const rules = rulesOf(ch.id);
     const drill = DRILLS[chapterId].find((d) => d.id === drillId)!;
-    const carry = carryOf(drillId)!;
+    const carry = drill.carries!;
     for (const seed of [11, 222, 3333]) {
       const ex = drillExercise(chapterId, drillId, seed)!;
       const state = startOf(ex.start, ch);

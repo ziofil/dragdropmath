@@ -105,7 +105,7 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
 
   const merges = candidates.filter((c) => c.targetId);
   // A side swap reorders the equation like a reorder does a row: it mustn't jump past a forming merge either.
-  const swaps = away.filter((c) => c.rule === "swap-sides").map((c) => c.state);
+  const swaps = away.filter((c) => carry(c) === "far-end").map((c) => c.state);
   const spec = merges.length === 0 ? moves.withFloating() : mergeApproach(moves.withFloating(), env, merges, [...reorders.values(), ...swaps]);
   // A move that turns an inequality round (the − of −x < 6 carried across): the sign turns as it's crossed.
   const turns = candidates.some((c) => relOf(c.state) !== relOf(rc.state));

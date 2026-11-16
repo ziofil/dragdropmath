@@ -159,10 +159,6 @@ export function stepsFrom(state: MathState, enabled: readonly RuleId[]): Step[] 
   return [...byKey.values()];
 }
 
-/** Merges a tap on the operator between two pieces does: what dropping the second on the first would. */
-const SUM_TAPS: RuleId[] = ["combine", "add-fractions", "combine-logs"];
-const PRODUCT_TAPS: RuleId[] = ["multiply-numbers", "merge-powers", "multiply-fractions"];
-
 /**
  * Tapping the +, − or · in front of a piece (`itemId`: the term or factor
  * after it) works out the two on either side, as dropping one on the other
@@ -175,7 +171,7 @@ export function operatorTap(state: MathState, itemId: string, enabled: readonly 
   const row = c?.parent;
   if (!c || c.index === 0 || (row?.kind !== "sum" && row?.kind !== "prod")) return null;
   const prev = row.kind === "sum" ? row.terms[c.index - 1] : row.factors[c.index - 1];
-  const kinds = (row.kind === "sum" ? SUM_TAPS : PRODUCT_TAPS).filter((r) => enabled.includes(r));
+  const kinds = enabled.filter((r) => RULES[r].operatorTap === (row.kind === "sum" ? "sum" : "product"));
   const moves = movesFor(state, enabled);
   const merge = (from: string, onto: string) => moves.drag(from).find((k) => kinds.includes(k.rule) && k.targetId === onto);
   const found = merge(itemId, prev.id) ?? merge(prev.id, itemId);
@@ -243,8 +239,8 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   // reached by tapping the root into x^(1/2) first.
   const inert = rootParts(state);
   const own = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
-  // Two-way merges: dropping B on A does what dropping A on B does (see MIRRORED).
-  const mirrorable = enabled.filter((id) => MIRRORED.includes(id));
+  // Two-way merges: dropping B on A does what dropping A on B does (see Rule.either).
+  const mirrorable = enabled.filter((id) => RULES[id].either);
   const nodes = state.sides.flatMap(allNodes);
   // Two pieces side by side in a row, or not in the same row at all.
   const neighbours = (a: string, b: string) => {
@@ -313,22 +309,6 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   return out;
 }
 
-/**
- * Merges that work both ways round: whichever of the two is dropped on the
- * other, the same happens (36 on the 6 of 36/6 as well as 6 on the 36, the
- * bracket of 4(x + 6) on the 4, ln x on the 4 of 4·ln x, …).
- */
-const MIRRORED: RuleId[] = [
-  "power-of-power",
-  "evaluate-power",
-  "distribute",
-  "substitute",
-  "exp-of-log",
-  "power-into-log",
-  "times-one",
-  "power-one",
-  "zero-power",
-];
 
 /** A root's exponent (drawn as the √) and everything inside it. */
 function rootParts(state: MathState): Set<string> {

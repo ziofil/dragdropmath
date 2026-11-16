@@ -26,6 +26,8 @@ export type Drill = {
    * (x = 16 − 6 still to work out, 1/3 + 1/4 with only one bottom changed).
    */
   make: (r: Rng) => string | { start: string; want?: string; goal?: string; via?: string[] };
+  /** The piece its words say to carry, if they say (Show carries that one). */
+  carries?: Carry;
 };
 
 /**
@@ -35,18 +37,8 @@ export type Drill = {
  */
 export type Carry = "bottom" | "exponent" | "outer-exponent" | "number";
 
-const CARRIES: Record<string, Carry> = {
-  "power-of-power": "outer-exponent",
-  "zero-power": "exponent",
-  "power-one": "exponent",
-  "divide-by-fraction": "bottom",
-  rationalise: "bottom",
-  "move-term": "number",
-  "ineq-move-term": "number",
-};
-
-/** The piece a drill's words say to carry, if they say. */
-export const carryOf = (drillId: string): Carry | undefined => CARRIES[drillId];
+/** A drill whose words name the piece to carry. */
+const carrying = (carries: Carry, drill: Drill): Drill => ({ ...drill, carries });
 
 /** Whether piece `id` is the kind `carry` names. */
 export function carries(state: MathState, id: string, carry: Carry): boolean {
@@ -119,10 +111,10 @@ export const DRILLS: Record<string, Drill[]> = {
     }),
   ],
   balance: [
-    d("move-term", (r) => {
+    carrying("number", d("move-term", (r) => {
       const [x, a, b] = [letter(r), r.int(2, 9), r.int(10, 20)];
       return { start: `${x} + ${a} = ${b}`, want: x, goal: `${x} = ${b - a}` };
-    }),
+    })),
     d("move-factor", (r) => {
       const [x, a, k] = [letter(r), r.int(2, 9), r.int(2, 6)];
       return { start: `${a}${x} = ${a * k}`, want: x, goal: `${x} = ${k}` };
@@ -160,20 +152,20 @@ export const DRILLS: Record<string, Drill[]> = {
       const [x, b, a] = [letter(r), pick(r, [2, 3]), r.int(2, 4)];
       return { start: `${b}^(${x} + ${a})`, goal: `${b}^${x}*${b}^${a}` };
     }),
-    d("power-of-power", (r) => {
+    carrying("outer-exponent", d("power-of-power", (r) => {
       const [x, a, b] = [letter(r), r.int(2, 5), r.int(2, 4)];
       return { start: `(${x}^${a})^${b}`, goal: `${x}^${a * b}` };
-    }),
+    })),
     d("divide-powers", (r) => {
       const [x, b, k] = [letter(r), r.int(2, 4), r.int(2, 4)];
       return { start: `${x}^${b + k}/${x}^${b}`, goal: `${x}^${k}` };
     }),
-    d("zero-power", (r) => {
+    carrying("exponent", d("zero-power", (r) => {
       const [x, a] = [letter(r), r.int(2, 9)];
       return { start: `${x}^0 + ${a}`, goal: `${a + 1}` };
-    }),
+    })),
     d("flip-across-bar", (r) => `1/${letter(r)}^${r.int(2, 5)}`),
-    d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`),
+    carrying("exponent", d("power-one", (r) => `${r.int(2, 9)}${letter(r)}^1`)),
     d("tap-power", (r) => `${pick(r, ["2^3", "2^4", "2^5", "3^2", "3^3", "4^2", "5^2", "10^2"])} + ${letter(r)}`),
     d("power-of-product", (r) => {
       const [a, x, n] = [r.int(2, 5), letter(r), r.int(2, 3)];
@@ -226,10 +218,10 @@ export const DRILLS: Record<string, Drill[]> = {
     }),
   ],
   inequalities: [
-    d("ineq-move-term", (r) => {
+    carrying("number", d("ineq-move-term", (r) => {
       const [x, a, b, rel] = [letter(r), r.int(2, 9), r.int(10, 20), pick(r, ["<", ">", "≤", "≥"])];
       return { start: `${x} + ${a} ${rel} ${b}`, want: x, goal: `${x} ${rel} ${b - a}` };
-    }, "move-term"),
+    }, "move-term")),
     d("ineq-move-factor", (r) => {
       const [x, a, k, rel] = [letter(r), r.int(2, 6), r.int(2, 6), pick(r, ["<", ">", "≤", "≥"])];
       return { start: `${a}${x} ${rel} ${a * k}`, want: x, goal: `${x} ${rel} ${k}` };
@@ -269,11 +261,11 @@ export const DRILLS: Record<string, Drill[]> = {
       const d = p === q && d0 === b ? d0 + 1 : d0;
       return { start: `(${p}/${b})·(${q}/${d})`, goal: `${p * q}/${b * d}` };
     }),
-    d("divide-by-fraction", (r) => {
+    carrying("bottom", d("divide-by-fraction", (r) => {
       const [a, b, c] = [r.int(2, 9), r.int(2, 3), r.int(4, 7)];
       // a·(c/b), worked out: a whole number when it comes out whole.
       return { start: `${a}/(${b}/${c})`, goal: Number.isInteger((a * c) / b) ? `${(a * c) / b}` : `${a * c}/${b}` };
-    }),
+    })),
     d("split-fraction", (r) => `(${letter(r)} + ${r.int(1, 9)})/${r.int(2, 9)}`),
     d("times-one", (r) => `1·${letter(r)} + ${r.int(2, 9)}`),
     // Back to Factoring: take out the factor the top shares with the bottom, then cancel it.
@@ -331,11 +323,11 @@ export const DRILLS: Record<string, Drill[]> = {
       return { start: `√${x}·${x}^${k}`, goal: `${x}^(${2 * k + 1}/2)` };
     }, "merge-powers"),
     // A whole number under the bar: the root that's there, dropped onto the top (Fractions' own move).
-    d("rationalise", (r) => {
+    carrying("bottom", d("rationalise", (r) => {
       const [a, b] = [r.int(1, 5), pick(r, [2, 3, 5, 6, 7])];
       const goal = a % b === 0 ? `${a / b === 1 ? "" : a / b}√${b}` : `${a === 1 ? "" : a}√${b}/${b}`;
       return { start: `${a}/√${b}`, goal };
-    }, "expand-fraction"),
+    }, "expand-fraction")),
   ],
   explog: [
     d("exp-of-log", (r) => (r.next() < 0.5 ? `e^(ln(${letter(r)}))` : `2^(log_2(${letter(r)}))`)),

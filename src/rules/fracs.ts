@@ -109,6 +109,7 @@ export const expandFraction: Rule = {
 /** 1/5 + 2/5 → (1 + 2)/5 (drop a fraction onto one with the same denominator). */
 export const addFractions: Rule = {
   id: "add-fractions",
+  operatorTap: "sum",
   name: "Add fractions",
   gesture: "Drop a fraction onto another with the same denominator — the tops add up.",
   apply(state, id) {
@@ -164,6 +165,7 @@ export const splitFraction: Rule = {
 /** x/3 · 6/x → (x·6)/(3·x), 2 · 3/4 → (2·3)/4 (drop a factor onto a fraction it multiplies). */
 export const multiplyFractions: Rule = {
   id: "multiply-fractions",
+  operatorTap: "product",
   name: "Multiply fractions",
   gesture: "Drop a fraction (or number) onto a fraction it multiplies — tops multiply, bottoms multiply.",
   apply(state, id) {

@@ -64,6 +64,7 @@ function fractionLike(mine: Expr, terms: readonly Expr[], index: number): { j: n
 
 export const combine: Rule = {
   id: "combine",
+  operatorTap: "sum",
   name: "Combine like terms",
   gesture: "Drop a term onto a term of the same kind to add them up.",
   apply(state, id) {
@@ -106,6 +107,7 @@ export const combine: Rule = {
 /** 2·3 → 6 (drop a number onto another number in the same product). */
 export const multiplyNumbers: Rule = {
   id: "multiply-numbers",
+  operatorTap: "product",
   name: "Multiply numbers",
   gesture: "Drop a number onto another number it's multiplied by.",
   apply(state, id) {
@@ -129,6 +131,7 @@ export const multiplyNumbers: Rule = {
 /** x·x → x², x²·x³ → x⁵ (drop a factor onto one with the same base). */
 export const mergePowers: Rule = {
   id: "merge-powers",
+  operatorTap: "product",
   name: "Same base: add exponents",
   gesture: "Drop a factor onto another with the same base — the exponents add up.",
   apply(state, id) {
@@ -172,6 +175,7 @@ export const mergePowers: Rule = {
 /** x·1 → x (drop a 1 onto anything it multiplies). */
 export const timesOne: Rule = {
   id: "times-one",
+  either: true,
   name: "Times one",
   gesture: "Drop a 1 onto what it multiplies — multiplying by 1 changes nothing.",
   apply(state, id) {

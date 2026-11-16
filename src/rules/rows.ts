@@ -14,6 +14,7 @@ import { adopt, dragCtx, partner, setSides, type Candidate, type Rule } from "./
  */
 export const substitute: Rule = {
   id: "substitute",
+  either: true,
   name: "Substitute",
   gesture: "In y = 2x, drag the y onto a y in the other equation: it becomes 2x there.",
   apply(state, id) {
