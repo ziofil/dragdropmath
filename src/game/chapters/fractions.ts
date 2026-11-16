@@ -260,6 +260,8 @@ const levels = (): Record<Level, Shape[]> => ({
   hard: [...nestedFractions, composedFractions("hard", 3)],
 });
 
+const gcdOf = (a: number, b: number): number => (b === 0 ? a : gcdOf(b, a % b));
+
 export const fractions: Chapter = {
   id: "fractions",
   title: "Fractions",
@@ -305,6 +307,15 @@ export const fractions: Chapter = {
       // a·(c/b), worked out: a whole number when it comes out whole.
       return { start: `${a}/(${b}/${c})`, goal: Number.isInteger((a * c) / b) ? `${(a * c) / b}` : `${a * c}/${b}` };
     })),
+    // Every piece of (a/b)/(c/d) can cross the main bar: the two bottoms, one up and one down, make it one fraction.
+    carrying("bottom", d("fraction-of-fractions", (r) => {
+      for (;;) {
+        const [a, b, c, dd] = [r.int(1, 5), r.int(2, 7), r.int(1, 5), r.int(2, 7)];
+        const [top, bottom] = [a * dd, b * c];
+        if (gcdOf(top, bottom) !== 1 || bottom === 1 || gcdOf(a, b) !== 1 || gcdOf(c, dd) !== 1) continue;
+        return { start: `(${a}/${b})/(${c}/${dd})`, goal: `${top}/${bottom}` };
+      }
+    }, "divide-by-fraction")),
     d("split-fraction", (r) => `(${anyLetter(r)} + ${r.int(1, 9)})/${r.int(2, 9)}`),
     d("times-one", (r) => `1·${anyLetter(r)} + ${r.int(2, 9)}`),
     // Back to Factoring: take out the factor the top shares with the bottom, then cancel it.

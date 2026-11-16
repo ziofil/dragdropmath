@@ -179,8 +179,9 @@ export const mergePowers: Rule = {
 export const timesOne: Rule = {
   id: "times-one",
   either: true,
+  tapsToo: true,
   name: "Times one",
-  gesture: "Drop a 1 onto what it multiplies — multiplying by 1 changes nothing.",
+  gesture: "Tap a 1 that multiplies something, or drop it onto what it multiplies — multiplying by 1 changes nothing.",
   apply(state, id) {
     const c = dragCtx(state, id);
     if (c?.parent?.kind !== "prod" || c.node.kind !== "num" || c.node.value !== 1) return [];
