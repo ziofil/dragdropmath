@@ -11,14 +11,32 @@ export function About() {
         <section key={s.heading}>
           <h2>{s.heading}</h2>
           {s.text.map((p) => (
-            <p key={p}>{p}</p>
+            <p key={p}>{withAuthorLink(p)}</p>
           ))}
         </section>
       ))}
       <a className="button primary" href={href({ page: "home" })}>
         {t().learningPathButton}
       </a>
-      <p className="about-rights">{t().rightsReserved(new Date().getFullYear())}</p>
+      <p className="about-rights">{withAuthorLink(t().rightsReserved(new Date().getFullYear()))}</p>
     </main>
+  );
+}
+
+const AUTHOR = "Filippo Miatto";
+const AUTHOR_SITE = "https://filippomiatto.com";
+
+/** The author's name, wherever a text says it (in any language), as a link to the author's website. */
+function withAuthorLink(text: string) {
+  const parts = text.split(AUTHOR);
+  return parts.flatMap((part, i) =>
+    i === 0
+      ? [part]
+      : [
+          <a key={i} href={AUTHOR_SITE} target="_blank" rel="noopener">
+            {AUTHOR}
+          </a>,
+          part,
+        ],
   );
 }
