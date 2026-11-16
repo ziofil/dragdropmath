@@ -16,7 +16,6 @@ import { printState } from "../../expr/key";
 import type { RuleId } from "../../rules";
 import { verify } from "./verify";
 import { CHAPTERS, rulesOf } from "../puzzles";
-import { OWN_STEPS } from "./walks/steps";
 import { build, canonical, type Back } from "./back";
 import type { UnMove } from "./unmove";
 import type { Draft, Rng, Shape } from "./write";
@@ -53,10 +52,10 @@ export type Walk = {
 export type Settle = (s: MathState) => MathState;
 
 
-/** The steps back of the chapters before this one (see walks/steps.ts). */
+/** The steps back of the chapters before this one (Chapter.stepsBack). */
 function earlierSteps(chapterId: string): Back[] {
   const at = CHAPTERS.findIndex((c) => c.id === chapterId);
-  return CHAPTERS.slice(0, Math.max(0, at)).flatMap((c) => OWN_STEPS[c.id] ?? []);
+  return CHAPTERS.slice(0, Math.max(0, at)).flatMap((c) => c.stepsBack?.() ?? []);
 }
 
 

@@ -1,24 +1,8 @@
-/** Every chapter's exercise shapes, by level. */
-import type { Draft, Level, Shape } from "../write";
-import { chapterById } from "../../puzzles";
-import { parseState } from "../../../expr/parse";
-import { stateKey } from "../../../expr/key";
-import { shapes as balance } from "./balance";
-import { shapes as shuffle } from "./shuffle";
-import { shapes as collect } from "./collect";
-import { shapes as distribute } from "./distribute";
-import { shapes as brackets } from "./brackets";
-import { shapes as factor } from "./factor";
-import { shapesByLevel as quadratic } from "./quadratic";
-import { shapes as powers } from "./powers";
-import { shapes as roots } from "./roots";
-import { shapes as fractions } from "./fractions";
-import { shapes as explog } from "./explog";
-import { shapes as formulas } from "./formulas";
-import { shapes as inequalities } from "./inequalities";
-import { shapes as simultaneous } from "./simultaneous";
-
-const BY_CHAPTER: Record<string, Record<Level, Shape[]>> = { balance, shuffle, collect, distribute, brackets, factor, powers, roots, fractions, explog, formulas, inequalities, simultaneous, quadratic };
+/** Every chapter's exercise shapes, by level, as practice serves them. */
+import type { Draft, Level, Shape } from "./write";
+import { CHAPTERS } from "../puzzles";
+import { parseState } from "../../expr/parse";
+import { stateKey } from "../../expr/key";
 
 /**
  * A chapter's shape as practice serves it: every draft says whether its
@@ -56,8 +40,9 @@ function joinLegs<T>(legs: readonly T[][], keep: readonly boolean[]): T[][] {
 }
 
 export const SHAPES: Record<string, Record<Level, Shape[]>> = Object.fromEntries(
-  Object.entries(BY_CHAPTER).map(([id, levels]) => {
-    const positive = chapterById(id)?.positive ?? false;
-    return [id, Object.fromEntries(Object.entries(levels).map(([l, ss]) => [l, ss.map((s) => served(s, positive))])) as Record<Level, Shape[]>];
+  CHAPTERS.flatMap((c) => {
+    const levels = c.levels?.();
+    if (!levels) return [];
+    return [[c.id, Object.fromEntries(Object.entries(levels).map(([l, ss]) => [l, ss.map((s) => served(s, c.positive ?? false))])) as Record<Level, Shape[]>]];
   }),
 );

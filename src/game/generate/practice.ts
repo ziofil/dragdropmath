@@ -7,7 +7,7 @@
  * moves each stretch says it takes, and fully.
  */
 import { LEVELS, rng, type Draft, type Level, type Rng, type Shape } from "./write";
-import { SHAPES } from "./chapters";
+import { SHAPES } from "./served";
 import { judge } from "./beauty";
 import { parseState } from "../../expr/parse";
 import { autoDecoys } from "../autoDecoys";

@@ -5,7 +5,7 @@
  *   npx tsx scripts/generate.ts <chapter> [perShape=4]
  */
 import { CHAPTERS, lettersPositive, rulesFor } from "../src/game/puzzles";
-import { SHAPES } from "../src/game/generate/chapters";
+import { SHAPES } from "../src/game/generate/served";
 import { LEVELS, rng } from "../src/game/generate/write";
 import { judge } from "../src/game/generate/beauty";
 import { verify } from "../src/game/generate/verify";

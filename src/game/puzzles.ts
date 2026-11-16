@@ -1,4 +1,7 @@
 import type { RuleId } from "../rules";
+import type { Drill } from "./generate/drill";
+import type { Back } from "./generate/back";
+import type { Level, Shape } from "./generate/write";
 import type { MathState } from "../expr/types";
 import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
@@ -36,6 +39,16 @@ export type Chapter = {
    * rules/signs.ts.
    */
   positive?: boolean;
+  /** Its lesson: one board per move it teaches, in the order a learner meets them (words in i18n `drills`). */
+  drills: Drill[];
+  /**
+   * Its own steps back (generate/back.ts): what its walks write the long way.
+   * A later chapter's walks take these too, now and then — every chapter's
+   * exercises use what came before. (A function: they're made on first use.)
+   */
+  stepsBack?: () => readonly Back[];
+  /** Its practice: the exercise shapes at each level (made on first use: they call into modules that import the chapters). */
+  levels?: () => Record<Level, Shape[]>;
 };
 
 export const CHAPTERS: Chapter[] = [
