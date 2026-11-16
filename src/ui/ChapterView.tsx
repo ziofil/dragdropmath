@@ -74,6 +74,7 @@ function MoveBlock({ chapter, drill, rules, n }: { chapter: Chapter; drill: Dril
         key={seed}
         start={d.start}
         goals={[d.goal, ...d.also]}
+        via={d.via}
         how={words.how}
         rules={rules}
         rule={drill.rule}

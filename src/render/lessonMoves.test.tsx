@@ -8,7 +8,11 @@ import { describe, expect, it } from "vitest";
 import { harness } from "./testing/harness";
 import { CHAPTERS, rulesOf, startOf } from "../game/puzzles";
 import { carries, DRILLS, drillExercise, oneMove } from "../game/generate/moves";
-import { planDemo } from "./demo";
+import { planDemo, planStepTo } from "./demo";
+import type { MathState } from "../expr/types";
+import { printState, stateKey } from "../expr/key";
+import { tidied } from "../game/tidy";
+import { wayOn } from "../game/showWay";
 import { allNodes } from "../expr/tree";
 import { handles, RULES, tapFor } from "../rules";
 import { stepDone } from "../game/solver";
@@ -70,4 +74,41 @@ describe("lesson moves, as their words say", () => {
       expect(plan!.kind === "drag" && carries(state, plan!.id, carry), `${ex.start}: Show carries ${plan && "id" in plan ? plan.id : "?"}, not the ${carry} its words say`).toBe(true);
     }
   });
+});
+
+// Show plays a board to its end: the lesson's own move (as above), then every step on, through the
+// board's checkpoints, each made as a hand would make it (a tap, or a drag through the real engine).
+describe("Show plays every lesson board to its end", () => {
+  const all = Object.entries(DRILLS).flatMap(([chapterId, drills]) => drills.map((d) => [chapterId, d.id] as const));
+  const same = (a: MathState, b: MathState) => stateKey(a, "exact") === stateKey(b, "exact");
+  it.each(all)("%s: %s", (chapterId, drillId) => {
+    const ch = CHAPTERS.find((c) => c.id === chapterId)!;
+    const rules = rulesOf(ch.id);
+    const drill = DRILLS[chapterId].find((d) => d.id === drillId)!;
+    for (const seed of [11, 222]) {
+      const ex = drillExercise(chapterId, drillId, seed)!;
+      const start = startOf(ex.start, ch);
+      const goals = [ex.goal, ...ex.also].map((g) => startOf(g, ch));
+      const stops = (ex.via ?? []).map((v) => startOf(v, ch));
+      const reached = (s: MathState) => goals.some((g) => stepDone(start, s, g));
+      const toward = (s: MathState) => reached(s) || (stops.length > 0 && stepDone(start, tidied(start, s), stops[0]));
+      const first = planDemo(start, rules, drill.rule, 720, 160, toward, drill.carries && ((s, id) => carries(s, id, drill.carries!)));
+      expect(first, `${ex.start}: the lesson's move`).not.toBeNull();
+      let at = tidied(start, first!.next);
+      const shown = [printState(at)];
+      let way: MathState[] | null = null;
+      while (!reached(at)) {
+        if (way?.length && same(at, way[0])) way = way.slice(1);
+        else way = wayOn(at, stops, reached, rules);
+        expect(way?.length, `${ex.start}: no way on from ${printState(at)} (shown: ${shown.join(" ; ")})`).toBeGreaterThan(0);
+        const next = way![0];
+        const from = at;
+        const step = planStepTo(from, rules, 720, 160, (s) => same(tidied(from, s), next));
+        expect(step, `${ex.start}: can't show ${printState(from)} → ${printState(next)}`).not.toBeNull();
+        at = tidied(from, step!.next);
+        shown.push(printState(at));
+        expect(shown.length, `${ex.start}: ${shown.join(" ; ")}`).toBeLessThan(30);
+      }
+    }
+  }, 120_000);
 });

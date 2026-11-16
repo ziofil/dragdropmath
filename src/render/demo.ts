@@ -1,6 +1,8 @@
 /**
  * "Show me": where a hand would press and let go to make one move, so the
- * app can play it with the real drag engine (see MathCanvas's demo). Worked
+ * app can play it with the real drag engine (see MathCanvas's demo): the
+ * lesson's own move (planDemo), then each step on to the board's end
+ * (planStepTo). Worked
  * out headlessly, with the headless hand the drag tests use too (headless.ts), from the
  * drag's own aims: a merge is carried to where it completes, any other move
  * to where the drag aims it (searching along the row, or around it, only
@@ -9,11 +11,13 @@
 import { Vec2 } from "dragology";
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
-import { movesFor, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
+import { handles, movesFor, operatorTap, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
 import { ANCHOR, Grip, harness } from "./headless";
 
 export type Demo =
   | { kind: "tap"; id: string; next: MathState }
+  /** The +, − or · in front of piece `id` tapped (operatorTap). */
+  | { kind: "op-tap"; id: string; next: MathState }
   /** Press at `from` (held first, when a quick press would take its term), let go at `to` (canvas coordinates). */
   | { kind: "drag"; id: string; from: Vec2; to: Vec2; next: MathState; hold: boolean };
 
@@ -41,7 +45,6 @@ export function planDemo(
   /** The piece to carry, when the words say which (see Carry in game/generate/moves.ts). */
   prefer: (state: MathState, id: string) => boolean = () => false,
 ): Demo | null {
-  const moves = movesFor(state, rules);
   const steps = stepsFrom(state, rules).filter((st) => st.ways.some((w) => w.candidate.rule === rule));
   // Heading for the goal first, then with the named piece, then by the lesson's own move.
   const rank = (st: Step, w: Way) => (good(st.state) ? 0 : 4) + (prefer(state, w.id) ? 0 : 2) + (w.candidate.rule === rule ? 0 : 1);
@@ -54,6 +57,33 @@ export function planDemo(
     const t = ways.find((w) => w.tap);
     return t ? { kind: "tap", id: t.id, next: t.candidate.state } : null;
   }
+  return dragOf(state, rules, W, H, ways);
+}
+
+/**
+ * How to show the next step of a board, one that `lands` likes (the state
+ * the board then shows, tidied: see game/showWay.ts), as the lessons' words
+ * put such steps: a tap first — the +, − or · between two pieces ("tap the −
+ * to work it out"), then a piece ("tap the fraction bar") — else a drag, a
+ * quick press before one held. Null if none can be shown.
+ */
+export function planStepTo(state: MathState, rules: readonly RuleId[], W: number, H: number, lands: (s: MathState) => boolean): Demo | null {
+  for (const id of handles(state)) {
+    const next = operatorTap(state, id, rules);
+    if (next && lands(next)) return { kind: "op-tap", id, next };
+  }
+  const ways = stepsFrom(state, rules)
+    .filter((st) => lands(st.state))
+    .flatMap((st) => st.ways);
+  const tap = ways.find((w) => w.tap);
+  if (tap) return { kind: "tap", id: tap.id, next: tap.candidate.state };
+  const moves = movesFor(state, rules);
+  return dragOf(state, rules, W, H, [...ways.filter((w) => moves.pressable(w.id)), ...ways.filter((w) => !moves.pressable(w.id))]);
+}
+
+/** The first of `ways` (in order) a hand can make by dragging: where to press, and where to let go. */
+function dragOf(state: MathState, rules: readonly RuleId[], W: number, H: number, ways: readonly Way[]): Demo | null {
+  const moves = movesFor(state, rules);
   const h = harness(state, rules, W, H);
   for (const { id, tap, candidate: c } of ways) {
     if (tap) continue;

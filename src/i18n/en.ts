@@ -76,6 +76,8 @@ export const en = {
   },
   progressNotABackup: "That file isn't a DragDropMath progress file.",
   showMove: "Show",
+  /** Show is playing: stop it (the board goes back to the start). */
+  stopShow: "Stop",
   /** The three ways through a chapter. */
   lesson: "Lesson",
   practice: "Practice",

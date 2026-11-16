@@ -7,7 +7,7 @@ import { movesFor, operatorTap, type RuleId } from "../rules";
 import { OP_TAP, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
 import { thumbLift } from "../render/drag/lift";
-import { planDemo } from "../render/demo";
+import { planDemo, planStepTo } from "../render/demo";
 import { DebugPanel, noteRecording, useDebug } from "./debug";
 import { t } from "../i18n";
 
@@ -20,8 +20,23 @@ const NO_RULES: readonly RuleId[] = [];
  */
 const PRESS_SLOP = 6;
 
-/** Plays one move on the board, as a hand would (see Demo): false if it can't be shown. */
-export type ShowMove = (rule: RuleId, good?: (s: MathState) => boolean, prefer?: (s: MathState, id: string) => boolean) => Promise<boolean>;
+/**
+ * A step for Show to play: the lesson's own move (by `rule`, heading where
+ * `good` likes, carrying the piece `prefer` names), or the next step on, to
+ * a state `to` likes (played a little quicker).
+ */
+export type ShowStep =
+  | {
+      rule: RuleId;
+      good?: (s: MathState) => boolean;
+      prefer?: (s: MathState, id: string) => boolean;
+      /** Told what the move will give as soon as it's planned, before it's played. */
+      planned?: (next: MathState) => void;
+    }
+  | { to: (s: MathState) => boolean };
+
+/** Plays one step on the board, as a hand would (see Demo): the state it gave, or null if it can't be shown. */
+export type ShowMove = (step: ShowStep) => Promise<MathState | null>;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -103,38 +118,45 @@ export function MathCanvas({
     return () => box.removeEventListener("pointerdown", block, true);
   }, [width.ref]);
   if (show)
-    show.current = async (rule, good, prefer) => {
+    show.current = async (step) => {
       playing.current = true;
       try {
-        return await play(rule, good, prefer);
+        return await play(step);
       } finally {
         playing.current = false;
       }
     };
-  const play: ShowMove = async (rule, good, prefer) => {
+  const play: ShowMove = async (step) => {
       const box = width.ref.current;
       const svg = box?.querySelector("svg");
-      const plan = planDemo(now.current.state, now.current.rules, rule, width.value, height, good, prefer);
-      if (!box || !svg || !plan) return false;
+      const { state: at0, rules: live0 } = now.current;
+      const own = "rule" in step;
+      const plan = own ? planDemo(at0, live0, step.rule, width.value, height, step.good, step.prefer) : planStepTo(at0, live0, width.value, height, step.to);
+      if (!box || !svg || !plan) return null;
+      if (own) step.planned?.(plan.next);
+      // The steps after the lesson's own move go a little quicker.
+      const pause = own ? 450 : 300;
       const r = svg.getBoundingClientRect();
       const k = r.width / width.value;
       const client = (p: { x: number; y: number }) => ({ clientX: r.left + p.x * k, clientY: r.top + p.y * k });
-      if (plan.kind === "tap") {
-        const g = svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`)?.getBoundingClientRect();
-        if (!g) return false;
+      if (plan.kind === "tap" || plan.kind === "op-tap") {
+        // A piece, or the +, − or · in front of one (found as taps are: by its hit area).
+        const el = plan.kind === "tap" ? svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`) : svg.querySelector(`[${OP_TAP}="${CSS.escape(plan.id)}"]`);
+        const g = el?.getBoundingClientRect();
+        if (!g) return null;
         const at = { x: (g.left + g.width / 2 - r.left) / k, y: (g.top + g.height / 2 - r.top) / k };
         setFinger({ ...at, down: false });
-        await wait(450);
+        await wait(pause);
         setFinger({ ...at, down: true });
         await wait(250);
         onDropRef.current(plan.next);
         setFinger({ ...at, down: false });
         await wait(400);
         setFinger(null);
-        return true;
+        return plan.next;
       }
       setFinger({ ...plan.from, down: false });
-      await wait(450);
+      await wait(pause);
       const init = (p: { x: number; y: number }, buttons: number): PointerEventInit => ({
         ...client(p),
         bubbles: true,
@@ -149,7 +171,7 @@ export function MathCanvas({
       const target = svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`);
       if (!target) {
         setFinger(null);
-        return false;
+        return null;
       }
       setFinger({ ...plan.from, down: true });
       if (plan.hold) {
@@ -158,7 +180,7 @@ export function MathCanvas({
         setTimeout(() => setHeldAt(null), 450);
       }
       target.dispatchEvent(new PointerEvent("pointerdown", init(plan.from, 1)));
-      const ms = Math.min(1400, Math.max(700, plan.to.sub(plan.from).len() * 4));
+      const ms = (own ? 1 : 0.75) * Math.min(1400, Math.max(700, plan.to.sub(plan.from).len() * 4));
       const t0 = performance.now();
       for (;;) {
         await new Promise((res) => requestAnimationFrame(res));
@@ -173,7 +195,7 @@ export function MathCanvas({
       setFinger({ ...plan.to, down: false });
       await wait(400);
       setFinger(null);
-      return true;
+      return plan.next;
     };
   return (
     <>
