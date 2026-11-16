@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { decodeSet, encodeSet, movesOf, positiveOf, readSet, setKey } from "./sets";
+import { decodeSet, encodeSet, movesOf, positiveOf, setKey } from "./sets";
+import { readSet } from "./readSet";
 import { rulesOf } from "./puzzles";
 import { solveMoves } from "./solveWorker";
 import { LEVELS, PRACTICE } from "./generate/practice";

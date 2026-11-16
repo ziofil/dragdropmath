@@ -2,7 +2,7 @@
 // and a report says how much of English it covers (English stands in for the rest).
 import { afterAll, describe, expect, it } from "vitest";
 import { CHAPTERS } from "../game/puzzles";
-import { readSet } from "../game/sets";
+import { readSet } from "../game/readSet";
 import { chapterText, en, englishText, LANGS, loadLanguage, t, TRANSLATIONS, type Lang } from ".";
 
 type Other = Exclude<Lang, "en">;

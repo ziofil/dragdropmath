@@ -51,10 +51,11 @@ export function Board({
       <div className="board-bar">
         <div className="board-actions">
           {before}
-          <button onClick={moves.undo} disabled={off}>
+          {/* Nothing to undo yet: not shown (but their room kept, so nothing moves when they appear). */}
+          <button onClick={moves.undo} disabled={off} className={moves.canUndo ? "" : "unseen"}>
             {t().undo}
           </button>
-          <button onClick={moves.reset} disabled={off}>
+          <button onClick={moves.reset} disabled={off} className={moves.canUndo ? "" : "unseen"}>
             {t().startOver}
           </button>
           {after}

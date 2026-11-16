@@ -16,16 +16,11 @@
  * path); without `moves`, all of them. Without `wrong`, wrong answers are made
  * from classic slips (autoDecoys).
  */
-import { parse as parseYaml } from "yaml";
-import type { MathState } from "../expr/types";
 import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { ALL_RULES } from "../rules";
 import { CHAPTERS, lettersPositive, rulesOf, type Chapter } from "./puzzles";
-import { follows, hasValue, isWrong, shapeMismatch } from "./answers";
-import { autoDecoys } from "./autoDecoys";
-import { allTitles, t } from "../i18n";
-import type { Mismatch } from "./answers";
+import { allTitles } from "../i18n";
 
 export type SetExercise = { start: string; goal: string; wrong?: string[]; hint?: string; moves?: string };
 export type ExerciseSet = { title: string; moves?: string; exercises: SetExercise[] };
@@ -41,6 +36,8 @@ export type CheckedExercise = {
 };
 
 export type CheckedSet = { set: ExerciseSet | null; problems: string[]; exercises: CheckedExercise[] };
+
+/** Reading and checking a set's YAML: readSet.ts (with the YAML library, loaded only by the set maker). */
 
 /** A chapter named by its id, its number on the path (1, 2, …) or its title (in any language: a set is shared across them). */
 export function chapterNamed(name: string): Chapter | undefined {
@@ -60,11 +57,6 @@ const toLink = (name: string | undefined) => (name ? (chapterNamed(name)?.id ?? 
 /** A chapter as a link kept it: a number from an old link is a chapter of the order then. */
 const fromLink = (name: string) => (/^\d+$/.test(name.trim()) ? (NUMBERED_UNTIL_2026_11_15[Number(name) - 1] ?? name) : name);
 
-function why(m: Mismatch): string {
-  const s = t().set;
-  return m.kind === "count" ? s.shapeCount : m.kind === "relation" ? s.shapeRelation : s.shapeIsolated(m.letter);
-}
-
 /** The chapter whose moves an exercise in a set uses, if one is named. */
 export function chapterOf(set: ExerciseSet, ex: SetExercise): Chapter | undefined {
   const name = ex.moves ?? set.moves;
@@ -79,78 +71,6 @@ export function movesOf(set: ExerciseSet, ex: SetExercise): RuleId[] {
 
 /** Its letters stand for positive numbers: as its chapter's would, or (no chapter) where it has a power, a root or a log. */
 export const positiveOf = (set: ExerciseSet, ex: SetExercise): boolean => lettersPositive(chapterOf(set, ex), ex.start);
-
-const str = (v: unknown) => (typeof v === "number" ? String(v) : typeof v === "string" ? v.trim() : undefined);
-
-function tryParse(src: string): MathState | string {
-  try {
-    return parseState(src);
-  } catch (e) {
-    return (e as Error).message;
-  }
-}
-
-/** Read a set from YAML and check every exercise in it. */
-export function readSet(text: string): CheckedSet {
-  let raw: unknown;
-  try {
-    raw = parseYaml(text);
-  } catch (e) {
-    return { set: null, problems: [t().set.badYaml((e as Error).message.split("\n")[0])], exercises: [] };
-  }
-  const s = t().set;
-  const obj = (raw ?? {}) as Record<string, unknown>;
-  const problems: string[] = [];
-  if (typeof raw !== "object" || Array.isArray(raw)) problems.push(s.expectedTop);
-  const title = str(obj.title) || s.defaultTitle;
-  const moves = str(obj.moves);
-  if (moves !== undefined && !chapterNamed(moves)) problems.push(s.noChapter(moves));
-  const list = Array.isArray(obj.exercises) ? obj.exercises : [];
-  if (!Array.isArray(obj.exercises)) problems.push(s.expectedList);
-  else if (list.length === 0) problems.push(s.emptyList);
-
-  const exercises: SetExercise[] = list.map((item) => {
-    const o = (item ?? {}) as Record<string, unknown>;
-    const wrong = Array.isArray(o.wrong) ? o.wrong.map(str).filter((w): w is string => !!w) : undefined;
-    return { start: str(o.start) ?? "", goal: str(o.goal) ?? "", ...(wrong ? { wrong } : {}), ...(str(o.hint) ? { hint: str(o.hint) } : {}), ...(str(o.moves) ? { moves: str(o.moves) } : {}) };
-  });
-  const set: ExerciseSet = { title, ...(moves ? { moves } : {}), exercises };
-  return { set: problems.length ? null : set, problems, exercises: exercises.map((ex, i) => checkExercise(ex, i + 1)) };
-}
-
-function checkExercise(ex: SetExercise, n: number): CheckedExercise {
-  const problems: string[] = [];
-  const notes: string[] = [];
-  let decoys: string[] = [];
-  const s = t().set;
-  if (!ex.start) problems.push(s.needsStart);
-  if (!ex.goal) problems.push(s.needsGoal);
-  if (ex.moves && !chapterNamed(ex.moves)) problems.push(s.noChapterShort(ex.moves));
-  const start = ex.start ? tryParse(ex.start) : null;
-  const goal = ex.goal ? tryParse(ex.goal) : null;
-  if (typeof start === "string") problems.push(s.cantReadStart(start));
-  if (typeof goal === "string") problems.push(s.cantReadGoal(goal));
-  if (start && goal && typeof start !== "string" && typeof goal !== "string") {
-    if (!hasValue(start)) problems.push(s.noValue);
-    else if (!follows(start, goal)) problems.push(s.doesntFollow);
-    if (ex.wrong) {
-      if (ex.wrong.length !== 2) problems.push(s.twoWrong);
-      for (const w of ex.wrong) {
-        const parsed = tryParse(w);
-        const mismatch = typeof parsed === "string" ? null : shapeMismatch(goal, parsed);
-        if (typeof parsed === "string") problems.push(s.cantReadWrong(w, parsed));
-        else if (mismatch) problems.push(s.wrongShape(w, why(mismatch)));
-        else if (!isWrong(goal, parsed) || follows(start, parsed)) problems.push(s.wrongIsRight(w));
-      }
-      decoys = ex.wrong.slice(0, 2);
-    } else {
-      decoys = autoDecoys(start, goal);
-      if (decoys.length < 2) notes.push(s.noDecoys);
-      else notes.push(s.decoysMade(decoys.join(", ")));
-    }
-  }
-  return { n, exercise: ex, problems, notes, decoys: problems.length || decoys.length < 2 ? [] : decoys };
-}
 
 // ---------- the link ----------
 

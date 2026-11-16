@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useSyncExternalStore } from "react";
 import { chapterById } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
-import { SetMaker, SetRoute } from "./SetView";
+import { SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
 import { ExerciseRoute } from "./Practice";
 import { NotFound } from "./NotFound";
@@ -11,6 +11,9 @@ import { setDebug, useSettings } from "./settings";
 import { SettingsButton } from "./SettingsPanel";
 import { anchorOf, href, parse, type Route } from "./routes";
 import { t } from "../i18n";
+
+/** The set maker, loaded when opened: it brings the YAML library, which no other page needs. */
+const SetMaker = lazy(() => import("./SetMaker").then((m) => ({ default: m.SetMaker })));
 
 const subscribeHash = (f: () => void) => {
   window.addEventListener("hashchange", f);
@@ -62,7 +65,11 @@ function Page({ route }: { route: Route }) {
     case "set":
       return <SetRoute key={href(route)} code={route.code} n={route.n} />;
     case "make":
-      return <SetMaker />;
+      return (
+        <Suspense fallback={<main className="page" aria-busy="true" />}>
+          <SetMaker />
+        </Suspense>
+      );
     case "sandbox":
       return <Sandbox />;
     case "about":

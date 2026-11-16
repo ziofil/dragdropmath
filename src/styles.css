@@ -1624,3 +1624,8 @@ div.predict-choice {
 .set-form-made input[type="number"] {
   width: 4.5em;
 }
+
+/* A button with nothing to do yet (Undo before a move): its room kept, so nothing moves when it appears. */
+.unseen {
+  visibility: hidden;
+}

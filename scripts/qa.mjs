@@ -12,7 +12,7 @@ let errs = [];
 let failed = 0;
 p.on("pageerror", (e) => errs.push("pageerror: " + e.message.slice(0, 200)));
 p.on("console", (m) => m.type() === "error" && errs.push("console: " + m.text().slice(0, 200)));
-p.on("response", (r) => r.status() === 404 && !r.url().endsWith("/favicon.ico") && errs.push("404: " + r.url()));
+p.on("response", (r) => r.status() === 404 && errs.push("404: " + r.url()));
 const check = (what, ok, detail = "") => {
   if (!ok) failed++;
   console.log(`${ok ? "ok  " : "FAIL"} ${what}${ok || !detail ? "" : `: ${detail}`}`);
