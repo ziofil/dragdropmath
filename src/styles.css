@@ -1570,3 +1570,57 @@ div.predict-choice {
     opacity: 1;
   }
 }
+
+/* The set maker's form (SetForm.tsx): the set without YAML. */
+.maker-view {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: auto;
+}
+.set-form {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+}
+.set-form-field {
+  display: grid;
+  gap: 4px;
+}
+.set-form-field > span,
+.set-form-made legend {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.set-form input,
+.set-form select {
+  font-size: 1rem; /* 16px: no zoom on iPhone */
+  min-width: 0;
+}
+.set-form-rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.6em;
+}
+.set-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.set-form-row input {
+  font-family: var(--font-math);
+  font-size: 1.1rem;
+}
+.set-form-made {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px 12px;
+}
+.set-form-made input[type="number"] {
+  width: 4.5em;
+}

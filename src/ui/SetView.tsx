@@ -15,6 +15,7 @@ import { StaticMath } from "./MathCanvas";
 import { NotFound } from "./NotFound";
 import { href } from "./routes";
 import { PuzzleView, type Exercise } from "./PuzzleView";
+import { SetForm } from "./SetForm";
 import { t } from "../i18n";
 
 // ---------- making a set ----------
@@ -52,6 +53,13 @@ export function SetMaker() {
   const usable = checked?.set && checked.exercises.every((e) => e.problems.length === 0) ? checked.set : null;
   const solvable = useSolvable(usable);
 
+  // The form for most; the YAML (the same set, as text) for those who'd rather type it.
+  const [view, setView] = useState<"form" | "yaml">("form");
+  const edit = (next: string) => {
+    setText(next);
+    setChecked(null);
+    setLink(null);
+  };
   const check = (t = text) => {
     setChecked(readSet(t));
     setLink(null);
@@ -86,6 +94,14 @@ export function SetMaker() {
       <h1>{t().ownTitle}</h1>
       <p className="page-intro">{t().ownIntro}</p>
       <div className="maker-actions">
+        <span className="maker-view" role="group" aria-label={t().form.viewLabel}>
+          <button aria-pressed={view === "form"} onClick={() => setView("form")}>
+            {t().form.asForm}
+          </button>
+          <button aria-pressed={view === "yaml"} onClick={() => setView("yaml")}>
+            {t().form.asYaml}
+          </button>
+        </span>
         <button onClick={() => file.current?.click()}>{t().upload}</button>
         <input ref={file} type="file" accept=".yaml,.yml,.txt,text/yaml" hidden onChange={(e) => {
             upload(e.target.files?.[0]);
@@ -95,18 +111,11 @@ export function SetMaker() {
         />
         <button onClick={() => (setText(exampleSet), check(exampleSet))}>{t().startFromExample}</button>
       </div>
-      <textarea
-        className="maker-yaml"
-        value={text}
-        spellCheck={false}
-        onChange={(e) => {
-          setText(e.target.value);
-          setChecked(null);
-          setLink(null);
-        }}
-        rows={16}
-        aria-label={t().yamlLabel}
-      />
+      {view === "form" ? (
+        <SetForm text={text} onText={edit} />
+      ) : (
+        <textarea className="maker-yaml" value={text} spellCheck={false} onChange={(e) => edit(e.target.value)} rows={16} aria-label={t().yamlLabel} />
+      )}
       <div className="maker-actions">
         <button className="primary" onClick={() => check()}>
           {t().check}

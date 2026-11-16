@@ -222,6 +222,27 @@ export const en = {
   upload: "Upload a .yaml file",
   startFromExample: "Start from the example",
   yamlLabel: "The exercise set, in YAML",
+  /** The set maker's form (the set without YAML). */
+  form: {
+    asForm: "Form",
+    asYaml: "YAML",
+    viewLabel: "Write the set as",
+    title: "Title",
+    moves: "Moves allowed",
+    allMoves: "All moves",
+    upTo: (n: number, title: string) => `Up to ${n}. ${title}`,
+    start: (n: number) => `Exercise ${n}: start`,
+    goal: (n: number) => `Exercise ${n}: goal`,
+    remove: (n: number) => `Remove exercise ${n}`,
+    addOne: "Add an exercise",
+    fromChapter: "Add exercises from a chapter's practice",
+    chapter: "Chapter",
+    level: "Level",
+    howMany: "How many",
+    addMade: (n: number) => `Add ${n}`,
+    making: "Making them…",
+    cantRead: "This set's YAML has a mistake, so the form can't show it. Fix it in the YAML view, or start from the example.",
+  },
   check: "Check",
   checking: "Checking it can be solved with these moves…",
   unsolvable: "Couldn't solve it in 10 steps with these moves. It may need moves from a later chapter (`moves:`).",
@@ -309,7 +330,7 @@ export type Strings = typeof en;
  * strings are written in English only: a translation may lack them, and
  * English stands in.
  */
-export type Translation = Omit<Partial<Strings>, "drills" | "set"> & { drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>; set?: Partial<Strings["set"]> };
+export type Translation = Omit<Partial<Strings>, "drills" | "set" | "form"> & { drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>; set?: Partial<Strings["set"]>; form?: Partial<Strings["form"]> };
 
 /** A move's words: its name, what to do on its board, why it works, and a common mistake. */
 export type MoveWords = { name: string; how: string; text: string[] };
