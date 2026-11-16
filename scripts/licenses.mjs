@@ -27,8 +27,10 @@ for (const dir of [...new Set(dirs)].sort()) {
 const header = `DragDropMath uses the following open-source software.
 Each is the property of its authors and is used under the license shown.
 
-Fonts (loaded from Google Fonts): STIX Two Text, Space Grotesk and Manrope,
-under the SIL Open Font License 1.1 (https://openfontlicense.org).`;
+Fonts (served with the site, from Google Fonts' files): STIX Two Text,
+Space Grotesk, Manrope, IM Fell English and IM Fell English SC, under the
+SIL Open Font License 1.1: their copyright notices and the license are in
+fonts/OFL.txt.`;
 
 mkdirSync("public", { recursive: true });
 writeFileSync("public/third-party-licenses.txt", [header, ...parts].join(`\n\n${"=".repeat(72)}\n\n`) + "\n");
