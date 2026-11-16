@@ -58,6 +58,12 @@ export const esChapters: ChapterTexts = {
     blurb: "Dos ecuaciones con dos incógnitas que se cumplen a la vez. Despeja una letra en una de las ecuaciones y sustitúyela en la otra.",
   },
 
+  quadratic: {
+    title: "Ecuaciones de segundo grado",
+    blurb:
+      "Una ecuación con x² puede tener dos soluciones. Deja un miembro igual a 0 y escribe el otro como un producto: un producto solo vale 0 si alguno de sus factores es 0. O deja el cuadrado solo: x² = 9 significa x = 3 o x = −3.",
+  },
+
   roots: {
     title: "Radicales",
     blurb: "√x es x elevado a ½, y ∛x es x elevado a ⅓, así que las propiedades de las potencias también sirven para las raíces.",

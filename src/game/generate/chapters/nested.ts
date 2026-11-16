@@ -113,7 +113,8 @@ const roots: Shape[] = [
         shape: "root-of-powers",
         start: `√(${over(`${pw("x", 2 * a + 2 * b)}·${pw("y", c)}`, `${pw("x", 2 * b)}·${pw("y", c + 2 * d)}`)})`,
         goal: `${pw("x", a)}/${pw("y", d)}`,
-        via: [`√(${over(`${pw("x", 2 * a + 2 * b)}·y^(-${2 * d})`, pw("x", 2 * b))})`, `√(${over(pw("x", 2 * a + 2 * b), `${pw("x", 2 * b)}·${pw("y", 2 * d)}`)})`, `√(${pw("x", 2 * a)}/${pw("y", 2 * d)})`],
+        // One tap on the bar merges both letters' powers; then the exponents worked out and the negative one sent back under a bar.
+        via: [`√(${pw("x", 2 * a)}·y^(-${2 * d}))`, `√(${pw("x", 2 * a)}/${pw("y", 2 * d)})`],
       };
     },
   },
@@ -207,7 +208,8 @@ const fractions: Shape[] = [
         shape: "divide-letter-fractions",
         start: `((${p}x)/y)/(x^2/(${q}y)) + ${s}/x`,
         goal: `${p * q + s}/x`,
-        via: [`((${p}x)/y)·((${q}y)/x^2) + ${s}/x`, `(${p * q}x·y)/(y·x^2) + ${s}/x`, `${p * q}/x + ${s}/x`],
+        // The q and the y under two bars go up onto the top (they multiply), then everything cancels down.
+        via: [`((${p}x·${q}·y)/y)/x^2 + ${s}/x`, `${p * q}/x + ${s}/x`],
       };
     },
   },
@@ -224,7 +226,8 @@ const fractions: Shape[] = [
         shape: "fraction-over-flipped",
         start: `((${p}x)/y)/(y/(${q}x)) - ${co(s, "x^2")}/y^2`,
         goal: `(${p * q - s}x^2)/y^2`,
-        via: [`((${p}x)/y)·((${q}x)/y) - ${co(s, "x^2")}/y^2`, `(${p * q}x^2)/y^2 - ${co(s, "x^2")}/y^2`],
+        // The q and the x under two bars go up onto the top, the outer y joins the inner bottom.
+        via: [`((${p}x·${q}·x)/y)/y - ${co(s, "x^2")}/y^2`, `(${p * q}x^2)/y^2 - ${co(s, "x^2")}/y^2`],
       };
     },
   },

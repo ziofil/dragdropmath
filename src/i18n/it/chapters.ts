@@ -70,4 +70,10 @@ export const itChapters: ChapterTexts = {
     blurb:
       "ln(x) è l'esponente da dare a e per ottenere x. Quindi ln ed e^ si annullano a vicenda, e il logaritmo di un prodotto è la somma dei logaritmi.",
   },
+
+  quadratic: {
+    title: "Equazioni di secondo grado",
+    blurb:
+      "Un'equazione con x² può avere due soluzioni. Porta tutto a un membro, in modo che l'altro sia 0, e scrivilo come prodotto: un prodotto è 0 solo quando lo è uno dei suoi fattori. Oppure isola il quadrato: x² = 9 vuol dire x = 3 oppure x = −3.",
+  },
 };

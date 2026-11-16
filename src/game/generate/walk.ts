@@ -14,7 +14,7 @@ import { parseState } from "../../expr/parse";
 import { printState, stateKey } from "../../expr/key";
 import { stepsFrom, type RuleId } from "../../rules";
 import { tidied } from "../tidy";
-import { searchBest } from "../solver";
+import { matchesGoal, searchBest } from "../solver";
 import { CHAPTERS, rulesOf } from "../puzzles";
 import { OWN_STEPS } from "./walks/steps";
 import type { UnMove } from "./unmove";
@@ -191,11 +191,15 @@ const EVERY = 4;
  * factors). Searched briefly, on the draft practice picks only; the way
  * found gives its milestones, states the moves really reach.
  */
-function stillSolves(d: Draft, rules: readonly RuleId[]): Draft | null {
+export function stillSolves(d: Draft, rules: readonly RuleId[]): Draft | null {
   const start = { ...parseState(d.start), ...(d.positive ? { letters: "positive" as const } : {}) };
   const goal = parseState(d.goal);
-  const way = searchBest(start, (x) => sameTerms(x, goal), rules, { ordered: false, maxStates: CHECK_STATES });
+  // (Rows in any order, each either way round: the answers of x² = 9 come as x = 3 or x = −3, or the other way.)
+  const way = searchBest(start, (x) => matchesGoal(x, goal, false), rules, { ordered: false, maxStates: CHECK_STATES });
   if (!way) return null;
   const via = way.slice(1, -1).filter((_, i) => (i + 1) % EVERY === 0).map((s) => printState({ ...s, letters: undefined }));
   return { ...d, via };
 }
+
+/** A shape that makes its exercises some other way, checked like a walk's: the picked one is solved once, its way giving the milestones. */
+export const searched = (s: Omit<Shape, "check">, chapterId: string): Shape => ({ ...s, check: (d) => stillSolves(d, rulesOf(chapterId)) });

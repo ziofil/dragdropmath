@@ -3,6 +3,8 @@ import type { RuleId } from "../rules";
 import { MathCanvas, type ShowMove } from "./MathCanvas";
 import type { MoveHistory } from "./useMoveHistory";
 import { t } from "../i18n";
+import { printState } from "../expr/key";
+import type { Condition, Expr } from "../expr/types";
 
 /**
  * A board: the maths to drag (no frame: a piece carried past its edge is
@@ -40,6 +42,12 @@ export function Board({
   return (
     <section className={`board ${locked ? "board-locked" : ""}`}>
       <MathCanvas state={moves.current} rules={rules} onDrop={moves.onDrop} height={height} show={show} locked={locked} />
+      {/* What the letters must satisfy, given from the start and true all along. */}
+      {moves.current.conditions?.length ? (
+        <p className="board-conditions">
+          {t().where} {moves.current.conditions.map((c) => conditionText(c)).join(",  ")}
+        </p>
+      ) : null}
       <div className="board-bar">
         <div className="board-actions">
           {before}
@@ -57,4 +65,10 @@ export function Board({
       </div>
     </section>
   );
+}
+
+/** A condition as it reads: "x ≥ −7", "x ≠ 2". */
+function conditionText(c: Condition): string {
+  const side = (e: Expr) => printState({ sides: [e] }).replace(/\*/g, "·").replace(/-/g, "−");
+  return `${side(c.sides[0])} ${c.rel} ${side(c.sides[1])}`;
 }

@@ -1,5 +1,5 @@
 import type { Expr } from "../expr/types";
-import { num, pow, sum } from "../expr/build";
+import { cloneFresh, neg, num, pow, prod, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { allNodes, nodeAt, withChildren } from "../expr/tree";
 import { roleOf, viewTerm } from "./view";
@@ -31,6 +31,37 @@ export const commute: Rule = {
 };
 
 /** 3x + 2x → 5x, 4 + 3 → 7, x − x → 0 (drop a term onto a like term). */
+/** A term's number in front (a whole number or a fraction of two, with its sign), and the rest; null if it has none of those, or more than one. */
+function coefficient(t: Expr): { c: Expr; rest: Expr[]; fraction: boolean } | null {
+  const negative = t.kind === "neg";
+  const body = t.kind === "neg" ? t.arg : t;
+  const fs = body.kind === "prod" ? body.factors : [body];
+  const isNumber = (f: Expr) => f.kind === "num" || (f.kind === "frac" && f.num.kind === "num" && f.den.kind === "num");
+  const numbers = fs.filter(isNumber);
+  if (numbers.length > 1) return null;
+  const rest = fs.filter((f) => !isNumber(f));
+  if (!rest.length) return null;
+  const c = numbers.length ? cloneFresh(numbers[0]) : num(1);
+  return { c: negative ? neg(c) : c, rest, fraction: numbers[0]?.kind === "frac" };
+}
+
+/**
+ * Like terms where one has a fraction for its number in front: ¾x + ½x →
+ * (¾ + ½)x, x − ⅓x → (1 − ⅓)x. Null where neither has one (whole numbers are
+ * added straight away).
+ */
+function fractionLike(mine: Expr, terms: readonly Expr[], index: number): { j: number; merged: Expr }[] | null {
+  const a = coefficient(mine);
+  if (!a) return null;
+  const out = terms.flatMap((t, j) => {
+    if (j === index) return [];
+    const b = coefficient(t);
+    if (!b || !(a.fraction || b.fraction) || key(prod(a.rest), false) !== key(prod(b.rest), false)) return [];
+    return [{ j, merged: prod([sum([a.c, b.c]), ...b.rest]) }];
+  });
+  return a.fraction || out.length ? out : null;
+}
+
 export const combine: Rule = {
   id: "combine",
   name: "Combine like terms",
@@ -38,10 +69,14 @@ export const combine: Rule = {
   apply(state, id) {
     // Whole terms only: a quick press picks up a term, and its pieces (held) have moves of their own.
     const r = roleOf(state, id);
-    if (!r || r.term.frac || r.terms.length < 2 || r.part !== "term") return [];
+    if (!r || r.terms.length < 2 || r.part !== "term") return [];
     const S = nodeAt(state, r.holderLoc) as Extract<Expr, { kind: "sum" }>;
     const c = { node: r.term.term, index: r.index, parent: S, parentLoc: r.holderLoc };
     const terms = c.parent.terms;
+    // A fraction for a number in front: ¾x + ½x → (¾ + ½)x, the fractions then added in the bracket.
+    const byFraction = fractionLike(c.node, terms, c.index);
+    if (byFraction) return byFraction.map(({ j, merged }) => ({ rule: "combine", state: mergeInto(state, c.parentLoc!, c.parent!, c.index, j, merged), targetId: terms[j].id }));
+    if (r.term.frac) return [];
     const mine = splitCoef(c.node);
     const isFraction = (m: { rest: Expr[] }) => m.rest.length === 1 && m.rest[0].kind === "frac";
     if (isFraction(mine)) return []; // fractions are added with add-fractions
@@ -192,7 +227,7 @@ export const multiplyOut: Rule = {
   // After tidying: x·2·3 is first written 2·3·x.
   tapOrder: 2,
   name: "Multiply out",
-  gesture: "Tap a product of numbers, like 2·3, to work it out.",
+  gesture: "Tap a product of numbers, like 2·3, to work it out (anything times 0 is 0).",
   tap: true,
   apply(state, id) {
     const c = dragCtx(state, id);
@@ -202,6 +237,9 @@ export const multiplyOut: Rule = {
     const P = c.node.kind === "prod" ? c.node : c.node.kind === "num" && c.parent?.kind === "prod" ? c.parent : null;
     const loc = c.node.kind === "prod" ? c.loc : c.parentLoc;
     const ns = P ? nums(P) : [];
+    // Anything times 0 is 0: 0·(x − 3) → 0.
+    const zero = ns.find((f) => f.value === 0);
+    if (P && loc && zero) return [{ rule: "multiply-out", state: replaceIn(state, loc, num(0, zero.id)) }];
     if (!P || !loc || ns.length < 2) return [];
     const value = num(
       ns.reduce((a, f) => a * f.value, 1),

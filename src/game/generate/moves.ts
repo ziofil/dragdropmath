@@ -36,12 +36,10 @@ export type Carry = "bottom" | "exponent" | "outer-exponent" | "number";
 
 const CARRIES: Record<string, Carry> = {
   "power-of-power": "outer-exponent",
-  "divide-powers": "bottom",
   "zero-power": "exponent",
   "power-one": "exponent",
-  "divide-numbers": "bottom",
-  "cancel-factor": "bottom",
   "divide-by-fraction": "bottom",
+  rationalise: "bottom",
   "move-term": "number",
   "ineq-move-term": "number",
 };
@@ -246,7 +244,8 @@ export const DRILLS: Record<string, Drill[]> = {
     d("divide-numbers", (r) => {
       const g = r.int(2, 5);
       const [p, q] = pick(r, [[2, 3], [3, 2], [3, 4], [4, 3], [2, 5], [5, 2], [3, 5]]);
-      return `${g * p}/${g * q} + ${letter(r)}`;
+      // A letter on top: two plain numbers would just be worked out (evaluate-fraction).
+      return `${g * p}${letter(r)}/${g * q}`;
     }),
     d("cancel-factor", (r) => {
       const a = r.int(2, 9);
@@ -330,6 +329,12 @@ export const DRILLS: Record<string, Drill[]> = {
       const [x, k] = [letter(r), r.int(1, 3)];
       return { start: `√${x}·${x}^${k}`, goal: `${x}^(${2 * k + 1}/2)` };
     }, "merge-powers"),
+    // A whole number under the bar: the root that's there, dropped onto the top (Fractions' own move).
+    d("rationalise", (r) => {
+      const [a, b] = [r.int(1, 5), pick(r, [2, 3, 5, 6, 7])];
+      const goal = a % b === 0 ? `${a / b === 1 ? "" : a / b}√${b}` : `${a === 1 ? "" : a}√${b}/${b}`;
+      return { start: `${a}/√${b}`, goal };
+    }, "expand-fraction"),
   ],
   explog: [
     d("exp-of-log", (r) => (r.next() < 0.5 ? `e^(ln(${letter(r)}))` : `2^(log_2(${letter(r)}))`)),
@@ -350,6 +355,46 @@ export const DRILLS: Record<string, Drill[]> = {
       const x = letter(r);
       return { start: `ln(√${x})`, goal: `(1/2)ln(${x})` };
     }, "root-notation"),
+  ],
+  quadratic: [
+    d("zero-product", (r) => {
+      const [a, b] = [r.int(1, 8), r.int(1, 8)];
+      const x = letter(r);
+      return { start: `(${x} - ${a})(${x} + ${b}) = 0`, goal: `${x} = ${a} or ${x} = -${b}` };
+    }),
+    d("plus-minus", (r) => {
+      const n = r.int(2, 9);
+      const x = letter(r);
+      return { start: `${x}^2 = ${n * n}`, goal: `${x} = ${n} or ${x} = -${n}` };
+    }, "root-across"),
+    d("take-out-then-split", (r) => {
+      const a = r.int(2, 9);
+      const x = letter(r);
+      return { start: `${x}^2 - ${a}${x} = 0`, goal: `${x} = 0 or ${x} = ${a}` };
+    }, "factor-out"),
+    d("split-middle", (r) => {
+      const [u, v] = [r.int(1, 6), r.int(1, 6)];
+      if (u === v) return { start: "x^2 + x - 6 = 0", goal: "x = 2 or x = -3" };
+      // (x + u)(x − v) = x² + (u − v)x − uv.
+      const b = u - v;
+      const mid = b === 0 ? "" : b === 1 ? " + x" : b === -1 ? " - x" : b > 0 ? ` + ${b}x` : ` - ${-b}x`;
+      return { start: `x^2${mid} - ${u * v} = 0`, goal: `x = ${v} or x = -${u}` };
+    }, "split-term"),
+    // The root squared away: its conditions, given at the start, keep the answers honest.
+    d("square-both-sides", (r) => {
+      const [dd, x0] = [r.int(1, 3), r.int(0, 5)];
+      const k = 2 * dd * x0 + dd * dd;
+      const where = `where x ≥ ${-dd}`;
+      const left = `x^2 + ${k} =`;
+      const via = [
+        `${left} (x + ${dd})^2 ${where}`,
+        `${left} (x + ${dd})(x + ${dd}) ${where}`,
+        ...(dd === 1 ? [] : [`${left} x(x + ${dd}) + ${dd}(x + ${dd}) ${where}`]),
+        `${left} x·x + ${dd === 1 ? "" : dd}x + ${dd === 1 ? "" : dd}x + ${dd * dd} ${where}`,
+        `${left} x^2 + ${2 * dd}x + ${dd * dd} ${where}`,
+      ];
+      return { start: `√(x^2 + ${k}) = x + ${dd} ${where}`, goal: `x = ${x0}`, via };
+    }, "root-across"),
   ],
 };
 

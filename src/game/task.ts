@@ -13,6 +13,7 @@ import type { MathState } from "../expr/types";
 import { allNodes } from "../expr/tree";
 import { differ, isolated, rowsOf } from "./answers";
 import { matchesGoal } from "./solver";
+import { standing } from "../expr/conditions";
 
 export type Task = { kind: "match" } | { kind: "solve"; letters: string[] };
 
@@ -24,13 +25,16 @@ export function taskOf(goal: MathState): Task {
     if (!x) return { kind: "match" };
     letters.push(x);
   }
-  return { kind: "solve", letters };
+  // (The answers of one equation name the same letter: x = 3 or x = −3 asks for x once.)
+  return { kind: "solve", letters: [...new Set(letters)] };
 }
 
 const hasLetters = (s: MathState) => s.sides.some((e) => allNodes(e).some((n) => n.kind === "var"));
 
 /** Has board `s` done what `goal` asks? */
-export function isDone(goal: MathState, s: MathState, task: Task = taskOf(goal)): boolean {
+export function isDone(goal: MathState, board: MathState, task: Task = taskOf(goal)): boolean {
+  // Rows that break a condition (x = −3 where x ≥ −1) aren't answers: they're crossed out, and don't count.
+  const s = standing(board);
   if (task.kind === "match") return matchesGoal(s, goal, "exact");
   if (matchesGoal(s, goal, false)) return true;
   // A number for an answer must be worked out (x = 6/2 isn't done); a formula's answer may take any equal form.

@@ -194,7 +194,7 @@ export const pl: Translation = {
     },
     "divide-numbers": {
       name: "Skracanie ułamka",
-      how: "Naciśnij i przytrzymaj liczbę w mianowniku, a potem upuść ją na liczbę w liczniku albo dotknij kreski ułamkowej. Obie dzielą się przez ich wspólny dzielnik.",
+      how: "Dotknij kreski ułamkowej. Licznik i mianownik dzielą się przez swój wspólny dzielnik.",
       text: ["Ułamek można skrócić, dzieląc licznik i mianownik przez tę samą liczbę: `6/8 = 3/4`. Jego wartość się nie zmienia."],
     },
     "letter-in": {
@@ -206,14 +206,14 @@ export const pl: Translation = {
     },
     "factor-then-cancel": {
       name: "Wyłącz, a potem skróć",
-      how: "Przytrzymaj liczbę w wyrazie z licznika i wyciągnij ją na początek, za lewy koniec. Potem upuść na nią liczbę z mianownika: skracają się.",
+      how: "Przytrzymaj liczbę w wyrazie z licznika i wyciągnij ją na początek, za lewy koniec. Potem dotknij kreski ułamkowej: czynnik się skraca.",
       text: [
         "Skrócić można tylko czynnik całego licznika. W `(2x + 6)/2` dwójka jest czynnikiem każdego wyrazu, więc najpierw wyłącz ją przed nawias: `(2(x + 3))/2`. Teraz jest czynnikiem całego licznika i skraca się z mianownikiem.",
       ],
     },
     "cancel-factor": {
       name: "Skracanie wspólnego czynnika",
-      how: "Upuść liczbę z mianownika na taką samą liczbę w liczniku. Obie znikają.",
+      how: "Dotknij kreski ułamkowej. To, co licznik i mianownik mają wspólne, się skraca.",
       text: ["Ta sama liczba w liczniku i w mianowniku się skraca: `(3x)/3` to `x`."],
     },
     "power-of-power": {
@@ -223,7 +223,7 @@ export const pl: Translation = {
     },
     "divide-powers": {
       name: "Ta sama podstawa: odejmij wykładniki",
-      how: "Upuść potęgę z mianownika na potęgę w liczniku. Wykładniki się odejmują: dotknij −, żeby obliczyć różnicę.",
+      how: "Dotknij kreski ułamkowej. Potęgi o tej samej podstawie łączą się, a ich wykładniki się odejmują: dotknij −, żeby obliczyć różnicę.",
       text: [
         "W `x⁵/x²` jest pięć iksów w liczniku i dwa w mianowniku. Dwa iksy z licznika skracają się z dwoma z mianownika i w liczniku zostają trzy: przy dzieleniu wykładniki się odejmuje.",
       ],
@@ -338,8 +338,54 @@ export const pl: Translation = {
     },
     "divide-by-fraction": {
       name: "Dzielenie przez ułamek",
-      how: "Przeciągnij ułamek z mianownika w górę, do licznika. Zamienia się w swoją odwrotność i mnoży. Potem dotknij ·, żeby obliczyć iloczyn.",
-      text: ["Dzielenie przez ułamek to mnożenie przez jego odwrotność: `4/(3/5)` to `4·(5/3)`."],
+      how: "Przeciągnij mianownik dolnego ułamka w górę, do licznika: mnoży licznik. Potem dotknij · i kreski ułamkowej, żeby to obliczyć.",
+      text: [
+        "To, co robi liczba, zależy od tego, pod iloma kreskami ułamkowymi stoi. W `4/(3/5)` piątka jest pod dwiema kreskami: dzieli przez dzielenie, czyli mnoży. Dlatego można ją przenieść w górę, do licznika, i wartość się nie zmieni: `(4·5)/3`.",
+        "Właśnie dlatego dzielenie przez ułamek to mnożenie przez jego odwrotność: `4/(3/5) = 4·5/3`.",
+      ],
+    },
+    rationalise: {
+      name: "Usuwanie niewymierności z mianownika",
+      how: "Przeciągnij pierwiastek z mianownika w górę, do licznika: licznik i mianownik mnożą się przez niego. Potem dotknij · w mianowniku.",
+      text: [
+        "Pomnożenie licznika i mianownika przez tę samą liczbę nie zmienia wartości ułamka. Wybierz pierwiastek, który już stoi w mianowniku: `√3·√3 = 3`, więc `1/√3 = √3/(√3·√3) = √3/3`. Teraz pod kreską ułamkową nie ma już pierwiastka.",
+      ],
+    },
+    "zero-product": {
+      name: "Iloczyn równy 0",
+      how: "Ściągnij jeden nawias w dół, poza iloczyn: równanie rozpada się na dwa, ten nawias jest równy 0 albo drugi. Potem rozwiąż każde z nich.",
+      text: [
+        "Iloczyn jest równy 0 tylko wtedy, gdy któryś z czynników jest równy 0: `3·0 = 0`, ale `3·2` już nie. Zatem `(x − 2)(x + 3) = 0` oznacza, że `x − 2 = 0` lub `x + 3 = 0`: są dwa rozwiązania.",
+        "Dlatego nigdy nie dzielimy obu stron przez coś, co może być zerem: tutaj zgubilibyśmy jedno rozwiązanie.",
+      ],
+    },
+    "plus-minus": {
+      name: "Dwa pierwiastki kwadratowe",
+      how: "Przeciągnij dwójkę na drugą stronę =. Liczba ma dwa pierwiastki kwadratowe: równanie rozpada się na dwa, jedno z +, drugie z −.",
+      text: [
+        "`3² = 9`, ale też `(−3)² = 9`. Zatem `x² = 9` oznacza, że `x = 3` lub `x = −3`. Kto zapomni o minusie, gubi jedno rozwiązanie.",
+      ],
+    },
+    "take-out-then-split": {
+      name: "Wyłącz x, a potem rozbij",
+      how: "Przytrzymaj x w jednym wyrazie i wyciągnij je na początek, za lewy koniec. Potem ściągnij je w dół, poza iloczyn.",
+      text: [
+        "Gdy nie ma wyrazu wolnego, w każdym wyrazie jest x: wyłącz je przed nawias, `x² − 3x = x(x − 3)`. Teraz to iloczyn równy 0, więc `x = 0` lub `x − 3 = 0`.",
+      ],
+    },
+    "split-middle": {
+      name: "Rozłóż na czynniki, a potem rozbij",
+      how: "Dotknij środkowego wyrazu: rozbija się na dwa. Z każdej pary wyłącz wspólny czynnik, a potem wspólny nawias. Na koniec ściągnij jeden nawias w dół, poza iloczyn.",
+      text: [
+        "`x² + x − 6` to iloczyn dwóch nawiasów: `(x + 3)(x − 2)`. Te dwie liczby dają w iloczynie `−6`, a w sumie `1`, czyli współczynnik przy x. Gdy mamy iloczyn równy 0, każdy nawias daje jedno rozwiązanie.",
+      ],
+    },
+    "square-both-sides": {
+      name: "Podnoszenie obu stron do kwadratu",
+      how: "Przeciągnij pierwiastek na drugą stronę =: druga strona zostaje podniesiona do kwadratu. Potem wymnóż i rozwiąż. Pod spodem są założenia: rozwiązanie, które któregoś z nich nie spełnia, zostaje skreślone.",
+      text: [
+        "Pierwiastek nigdy nie jest ujemny, więc `√(x² + 5) = x + 1` może zachodzić tylko wtedy, gdy `x + 1 ≥ 0`. Po podniesieniu obu stron do kwadratu ta informacja ginie: `x² + 5 = (x + 1)²` byłoby prawdziwe także wtedy, gdyby `x + 1` było ujemne. Dlatego założenia podaje się na początku i obowiązują przez całe rozwiązanie.",
+      ],
     },
     "split-fraction": {
       name: "Rozbijanie ułamka",
@@ -528,6 +574,7 @@ export const pl: Translation = {
   hint: "Podpowiedź",
   undo: "Cofnij",
   solvedBang: "Rozwiązane!",
+  where: "dla",
   moveCrashed: "Coś poszło nie tak przy tym ruchu.",
   moveCrashedDetails: "Szczegóły są w konsoli przeglądarki.",
   tryAgain: "Spróbuj jeszcze raz",

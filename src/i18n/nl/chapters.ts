@@ -65,4 +65,9 @@ export const nlChapters: ChapterTexts = {
     title: "Exponenten en logaritmen",
     blurb: "ln(x) is de exponent die je op e moet zetten om x te krijgen. Dus ln en e^ heffen elkaar op, en de logaritme van een product is een som van logaritmen.",
   },
+
+  quadratic: {
+    title: "Tweedegraadsvergelijkingen",
+    blurb: "Een vergelijking met x² kan twee oplossingen hebben. Maak één kant 0 en schrijf de andere als product: een product is alleen 0 als een van de factoren 0 is. Of zet het kwadraat apart: x² = 9 betekent x = 3 of x = −3.",
+  },
 };

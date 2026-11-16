@@ -50,8 +50,8 @@ describe("undoing a square across = asks the sign", () => {
   it("(2√x)² = 12: 2√x can't be negative, so nothing is lost (12.23)", () => {
     expect(carrySquare(parseState("(2√x)^2 = 12"))).toEqual(["2*√(x) = 12^(1/2)"]);
   });
-  it("x² = 4: x could be −2 too, so not in general…", () => {
-    expect(carrySquare(parseState("x^2 = 4"))).toEqual([]);
+  it("x² = 4: x could be −2 too, so both roots: two rows, x = 2 or x = −2…", () => {
+    expect(carrySquare(parseState("x^2 = 4"))).toEqual(["x = 4^(1/2) or x = -4^(1/2)"]);
   });
   it("…but yes where letters stand for positive numbers (12.30)", () => {
     expect(carrySquare({ ...parseState("x^2 = 4"), letters: "positive" })).toEqual(["x = 4^(1/2)"]);

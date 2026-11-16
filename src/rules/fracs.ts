@@ -1,5 +1,7 @@
-import type { Expr } from "../expr/types";
+import type { Expr, MathState } from "../expr/types";
+import type { Loc } from "../expr/tree";
 import { cloneFresh, frac, neg, num, prod, sum } from "../expr/build";
+import { dropFactor } from "./shapes";
 import { key } from "../expr/key";
 import { allNodes, nodeAt } from "../expr/tree";
 import { roleOf, viewTerm } from "./view";
@@ -17,6 +19,18 @@ const smallestPrime = (n: number) => {
   for (let p = 2; p * p <= n; p++) if (n % p === 0) return p;
   return n;
 };
+
+/** The same fraction, top and bottom multiplied by a copy of `f` (dropped from one side onto the other). */
+function ownFraction(state: MathState, f: Expr, part: { F: Extract<Expr, { kind: "frac" }>; fracLoc: Loc; inDen: boolean }): Candidate[] {
+  const { F, fracLoc, inDen } = part;
+  // Only a root from the bottom, to make the bottom whole (1/√3 → √3/(√3·√3)): any other piece carried up
+  // across the bar flips to a negative exponent (flip-across-bar), landing right where this would.
+  // In a fraction of fractions, pieces cross the main bar by that move (divide-by-fraction).
+  const isRoot = allNodes(f).some((n) => n.kind === "pow" && n.radical);
+  if (!inDen || !isRoot || F.num.kind === "frac" || F.den.kind === "frac") return [];
+  const expanded = frac(timesVisible(F.num, cloneFresh(f)), timesVisible(F.den, cloneFresh(f)), F.id);
+  return [{ rule: "expand-fraction", state: replaceIn(state, fracLoc, expanded), targetId: inDen ? F.num.id : F.den.id }];
+}
 
 // ---------- rules ----------
 
@@ -59,15 +73,19 @@ export const expandFraction: Rule = {
   apply(state, id) {
     const c = dragCtx(state, id);
     const part = c && fractionPart(state, c);
-    if (!c || !part?.inDen) return [];
+    if (!c || !part) return [];
+    // A root from the bottom onto its own top: top and bottom are both multiplied by it (1/√3 → √3/(√3·√3)).
+    const own = ownFraction(state, c.node, part);
+    if (!part.inDen) return own;
+
     // The fraction it came from must be a term (or −term) of a sum.
     const r = roleOf(state, part.F.id);
-    if (!r || (r.part !== "term" && r.part !== "body") || r.terms.length < 2) return [];
+    if (!r || (r.part !== "term" && r.part !== "body") || r.terms.length < 2) return own;
     const S = nodeAt(state, r.holderLoc);
     const termCtx = { index: r.index, parent: S, parentLoc: r.holderLoc };
     const terms = r.terms;
     const f = c.node;
-    return terms.flatMap((T, j): Candidate[] => {
+    return [...own, ...terms.flatMap((T, j): Candidate[] => {
       if (j === termCtx.index) return [];
       const { negative, body } = signed(T);
       if (allNodes(body).some((n) => n.id === f.id)) return [];
@@ -84,7 +102,7 @@ export const expandFraction: Rule = {
           targetId: T.id,
         },
       ];
-    });
+    })];
   },
 };
 
@@ -173,17 +191,79 @@ export const multiplyFractions: Rule = {
   },
 };
 
-/** (1/2)/(3/4) → (1/2)·(4/3) (carry the bottom fraction up across the bar; it flips over). */
+/**
+ * A fraction of fractions, (A/B)/(C/D): a factor's meaning is how many bars
+ * are over it — under none or two it multiplies (A, D), under one it divides
+ * (B, C). So it may move to the other side of the main bar, into the place
+ * with as many bars over it, and nothing changes: D dropped onto the top,
+ * (A·D/B)/C; C onto the top, (A/(B·C))/(1/D); B onto the bottom, A/(C·B/D).
+ * 6/(3/6): the 6 under the 3 goes up, (6·6)/3. A factor of A only moves when
+ * it can't be 0 (it would become a divisor).
+ */
 export const divideByFraction: Rule = {
   id: "divide-by-fraction",
-  name: "Dividing by a fraction",
-  gesture: "Carry a fraction from the bottom up onto the top — it flips upside down and multiplies.",
+  name: "A fraction of fractions",
+  gesture: "Carry a factor across the main bar of a fraction of fractions, onto the other side: it lands where it means the same.",
   apply(state, id) {
     const c = dragCtx(state, id);
-    if (c?.parent?.kind !== "frac" || c.index !== 1 || c.node.kind !== "frac") return [];
-    const D = c.node;
-    const flipped = frac(D.den, D.num, D.id);
-    // Brought up onto the top, which it multiplies.
-    return [{ rule: "divide-by-fraction", state: replaceIn(state, c.parentLoc!, prod([c.parent.num, flipped])), targetId: c.parent.num.id }];
+    const at = c && placeIn(state, c.loc);
+    if (!c || !at || c.node.kind === "frac" || (c.node.kind === "num" && c.node.value === 1)) return [];
+    const { F, fracLoc, side, inner, partLoc } = at;
+    const f = c.node;
+    // Bars over it: its side's (the bottom's one), and its inner fraction's (a bottom's one).
+    const bars = side + inner;
+    // A factor of A becomes a divisor: only what can't be 0.
+    if (bars === 0 && (allNodes(f).some((n) => n.kind === "var") ? state.letters !== "positive" : f.kind === "num" && f.value === 0)) return [];
+    // Taken from where it was (1 left if it was all of it; a bottom of 1 goes).
+    const part = nodeAt(state, partLoc);
+    const left = part.id === f.id ? num(1) : (dropFactor(part, (x) => x.id === f.id) ?? part);
+    const sideNow = (k: 0 | 1) => (k === 0 ? F.num : F.den);
+    const from = sideNow(side as 0 | 1);
+    let source: Expr;
+    if (from.kind === "frac" && partLoc.path.length > fracLoc.path.length + 1) {
+      const inTop = partLoc.path[partLoc.path.length - 1] === 0;
+      const top = inTop ? left : from.num;
+      const bottom = inTop ? from.den : left;
+      source = bottom.kind === "num" && bottom.value === 1 ? top : frac(top, bottom, from.id);
+    } else source = left;
+    // Into the other side, where as many bars are over it.
+    const other = sideNow((1 - side) as 0 | 1);
+    const intoTop = (bars - (1 - side)) % 2 === 0;
+    const copy = cloneFresh(f);
+    const target =
+      other.kind === "frac"
+        ? intoTop
+          ? frac(timesVisible(other.num, copy), other.den, other.id)
+          : frac(other.num, timesVisible(other.den, copy), other.id)
+        : intoTop
+          ? timesVisible(other, copy)
+          : frac(other, copy);
+    const [top, bottom] = side === 0 ? [source, target] : [target, source];
+    const result = bottom.kind === "num" && bottom.value === 1 ? top : frac(top, bottom, F.id);
+    return [{ rule: "divide-by-fraction", state: replaceIn(state, fracLoc, result), targetId: other.id }];
   },
 };
+
+/**
+ * Where a factor is in a fraction of fractions (the main bar's fraction F,
+ * with a fraction above or below it): which side of the main bar (0 top, 1
+ * bottom), and on which side of its own inner bar (0, or 1 when it's under
+ * it); the factor's part (the product it's in, or itself). Null elsewhere.
+ */
+function placeIn(state: MathState, loc: Loc): { F: Extract<Expr, { kind: "frac" }>; fracLoc: Loc; side: number; inner: number; partLoc: Loc } | null {
+  const up = loc.path.length ? { ...loc, path: loc.path.slice(0, -1) } : null;
+  const partLoc = up && nodeAt(state, up).kind === "prod" ? up : loc;
+  const above = partLoc.path.length ? { ...partLoc, path: partLoc.path.slice(0, -1) } : null;
+  if (!above) return null;
+  const G = nodeAt(state, above);
+  if (G.kind !== "frac") return null;
+  const gSide = partLoc.path[partLoc.path.length - 1];
+  const aboveG = above.path.length ? { ...above, path: above.path.slice(0, -1) } : null;
+  const F = aboveG && nodeAt(state, aboveG);
+  // Inside an inner fraction G, itself the top or bottom of F.
+  if (F?.kind === "frac") return { F, fracLoc: aboveG!, side: above.path[above.path.length - 1], inner: gSide, partLoc };
+  // Or a top or bottom of G that isn't a fraction, when G's other side is one.
+  const otherSide = gSide === 0 ? G.den : G.num;
+  if (otherSide.kind === "frac") return { F: G, fracLoc: above, side: gSide, inner: 0, partLoc };
+  return null;
+}

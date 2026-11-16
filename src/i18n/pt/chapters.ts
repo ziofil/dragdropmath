@@ -58,6 +58,12 @@ export const ptChapters: ChapterTexts = {
     blurb: "Duas equações com duas incógnitas, as duas valendo ao mesmo tempo. Isole uma letra numa equação e substitua na outra.",
   },
 
+  quadratic: {
+    title: "Equações do 2º grau",
+    blurb:
+      "Uma equação com x² pode ter duas soluções. Deixe um dos membros igual a 0 e escreva o outro como um produto: um produto só dá 0 quando um dos fatores é 0. Ou isole o quadrado: x² = 9 quer dizer x = 3 ou x = −3.",
+  },
+
   roots: {
     title: "Radicais",
     blurb: "√x é x elevado a ½, e ∛x é x elevado a ⅓, então as propriedades das potências valem também para as raízes.",

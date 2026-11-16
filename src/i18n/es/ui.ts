@@ -189,7 +189,7 @@ export const es: Translation = {
     },
     "divide-numbers": {
       name: "Simplificar una fracción",
-      how: "Mantén pulsado el denominador y suéltalo sobre el numerador, o toca la raya de fracción. Los dos se dividen entre su factor común.",
+      how: "Toca la raya de fracción. El numerador y el denominador se dividen entre su factor común.",
       text: ["Una fracción se simplifica dividiendo el numerador y el denominador entre el mismo número: `6/8 = 3/4`. Su valor no cambia."],
     },
     "letter-in": {
@@ -199,14 +199,14 @@ export const es: Translation = {
     },
     "factor-then-cancel": {
       name: "Sacar factor común y simplificar",
-      how: "Mantén pulsado el número de un término del numerador y arrástralo hacia fuera, delante de todo, más allá del extremo izquierdo. Luego suelta el denominador sobre él: se simplifican.",
+      how: "Mantén pulsado el número de un término del numerador y arrástralo hacia fuera, delante de todo, más allá del extremo izquierdo. Luego toca la raya de fracción: se simplifica.",
       text: [
         "Solo se puede simplificar un factor de todo el numerador. En `(2x + 6)/2`, el 2 es factor de cada término, así que primero sácalo factor común: `(2(x + 3))/2`. Ahora sí es factor de todo el numerador, y se simplifica con el denominador.",
       ],
     },
     "cancel-factor": {
       name: "Simplificar un factor común",
-      how: "Suelta el número del denominador sobre el mismo número del numerador. Desaparecen los dos.",
+      how: "Toca la raya de fracción. Lo que tienen en común el numerador y el denominador se simplifica.",
       text: ["El mismo número en el numerador y en el denominador se simplifica: `(3x)/3` es `x`."],
     },
     "power-of-power": {
@@ -216,7 +216,7 @@ export const es: Translation = {
     },
     "divide-powers": {
       name: "Misma base: restar exponentes",
-      how: "Suelta la potencia del denominador sobre la del numerador. Los exponentes se restan: toca el − para hacer la resta.",
+      how: "Toca la raya de fracción. Las potencias de la misma base se juntan y sus exponentes se restan: toca el − para hacer la resta.",
       text: ["`x⁵/x²` tiene cinco x en el numerador y dos en el denominador. Se van dos de cada lado y quedan tres arriba: al dividir, se restan los exponentes."],
     },
     "flip-across-bar": {
@@ -319,8 +319,52 @@ export const es: Translation = {
     },
     "divide-by-fraction": {
       name: "Dividir entre una fracción",
-      how: "Arrastra la fracción del denominador hacia arriba, al numerador. Se da la vuelta y pasa a multiplicar. Luego toca el · para hacer la multiplicación.",
-      text: ["Dividir entre una fracción es multiplicar por su inversa: `4/(3/5)` es `4·(5/3)`."],
+      how: "Arrastra el denominador de la fracción de abajo hacia arriba, al numerador: pasa a multiplicarlo. Luego toca el · y la raya de fracción para calcular.",
+      text: [
+        "Lo que hace un número depende de cuántas rayas de fracción tiene encima. En `4/(3/5)` el 5 está bajo dos rayas: divide a algo que ya divide, así que multiplica. Por eso puede subir al numerador sin que cambie nada: `(4·5)/3`.",
+        "Por eso dividir entre una fracción es multiplicar por su inversa: `4/(3/5) = 4·5/3`.",
+      ],
+    },
+    rationalise: {
+      name: "Sin raíces en el denominador",
+      how: "Arrastra la raíz del denominador hacia arriba, al numerador: el numerador y el denominador quedan multiplicados por ella. Luego toca el · de abajo.",
+      text: [
+        "Multiplicar el numerador y el denominador por el mismo número no cambia una fracción. Elige la raíz que ya está abajo: `√3·√3 = 3`, así que `1/√3 = √3/(√3·√3) = √3/3`. Ya no queda ninguna raíz bajo la raya.",
+      ],
+    },
+    "zero-product": {
+      name: "Un producto igual a 0",
+      how: "Arrastra uno de los paréntesis hacia abajo, fuera del producto: la ecuación se separa en dos, o ese paréntesis vale 0 o lo vale el otro. Luego resuelve cada una.",
+      text: [
+        "Un producto solo vale 0 si alguno de sus factores es 0: `3·0 = 0`, pero `3·2` no. Así que `(x − 2)(x + 3) = 0` significa `x − 2 = 0` o `x + 3 = 0`: dos soluciones.",
+        "Por eso nunca se dividen los dos miembros entre algo que pueda valer 0: aquí perderías una solución.",
+      ],
+    },
+    "plus-minus": {
+      name: "Las dos raíces de un cuadrado",
+      how: "Arrastra el 2 al otro lado del =. Un cuadrado tiene dos raíces: la ecuación se separa en dos, una con + y otra con −.",
+      text: ["`3² = 9`, y también `(−3)² = 9`. Así que `x² = 9` significa `x = 3` o `x = −3`. Si te olvidas del signo menos, pierdes una solución."],
+    },
+    "take-out-then-split": {
+      name: "Sacar la x factor común y separar",
+      how: "Mantén pulsada la x de un término y arrástrala hacia fuera, delante de todo, más allá del extremo izquierdo. Luego arrástrala hacia abajo, fuera del producto.",
+      text: [
+        "Si no hay término independiente, todos los términos llevan x: saca factor común, `x² − 3x = x(x − 3)`. Ahora es un producto igual a 0, así que `x = 0` o `x − 3 = 0`.",
+      ],
+    },
+    "split-middle": {
+      name: "Factorizar y separar",
+      how: "Toca el término del medio: se separa en dos. Saca factor común en cada pareja y luego el paréntesis que comparten. Después arrastra un paréntesis hacia abajo, fuera del producto.",
+      text: [
+        "`x² + x − 6` es el producto de dos paréntesis: `(x + 3)(x − 2)`. Los dos números multiplicados dan `−6` y sumados dan `1`, el coeficiente de la x. Cuando ya es un producto igual a 0, cada paréntesis da una solución.",
+      ],
+    },
+    "square-both-sides": {
+      name: "Elevar al cuadrado los dos miembros",
+      how: "Arrastra la raíz al otro lado del =: el otro miembro queda elevado al cuadrado. Luego desarrolla y resuelve. Debajo están las condiciones: la solución que no cumpla alguna queda tachada.",
+      text: [
+        "Una raíz nunca es negativa, así que `√(x² + 5) = x + 1` solo se cumple donde `x + 1 ≥ 0`. Al elevar al cuadrado los dos miembros eso se pierde: `x² + 5 = (x + 1)²` se cumpliría también si `x + 1` fuera negativo. Por eso las condiciones se dan desde el principio, y se mantienen a lo largo de todo el ejercicio.",
+      ],
     },
     "split-fraction": {
       name: "Separar una fracción",
@@ -497,6 +541,7 @@ export const es: Translation = {
   hint: "Pista",
   undo: "Deshacer",
   solvedBang: "¡Resuelto!",
+  where: "con",
   moveCrashed: "Algo salió mal con ese movimiento.",
   moveCrashedDetails: "Los detalles están en la consola del navegador.",
   tryAgain: "Volver a intentarlo",

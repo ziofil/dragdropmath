@@ -42,6 +42,7 @@ const PLACES: Record<string, [col: number, row: number]> = {
   inequalities: [0.5, 10],
   formulas: [2.5, 10],
   simultaneous: [2.5, 11],
+  quadratic: [2.5, 12],
 };
 
 export function layoutPath(chapters: readonly Chapter[] = CHAPTERS): PathLayout {

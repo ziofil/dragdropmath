@@ -575,6 +575,29 @@ svg.static-math {
 .m-bar {
   fill: var(--ink);
 }
+/* The conditions on the letters, under a board: faint, true all along. */
+.board-conditions {
+  margin: 4px 0 0;
+  text-align: center;
+  font-family: var(--font-math);
+  font-style: italic;
+  color: var(--ink-soft);
+  opacity: 0.8;
+}
+/* An answer that breaks a condition: not an answer (expr/conditions.ts). */
+.m-veil {
+  fill: var(--bg);
+  opacity: 0.6;
+}
+.m-strike {
+  stroke: var(--warn);
+  stroke-width: 2.5;
+}
+/* "or" between the answers of one equation. */
+.m-or {
+  font-family: var(--font-ui);
+  fill: var(--ink-soft);
+}
 path.m-root {
   fill: none;
   stroke: var(--ink);

@@ -5,6 +5,8 @@ import { rootIndex } from "../expr/key";
 import { signId } from "../rules";
 import { allNodes } from "../expr/tree";
 import { textWidth } from "./measure";
+import { t } from "../i18n";
+import { breaks } from "../expr/conditions";
 
 /**
  * Math typesetting in plain SVG (Dragology needs real SVG elements it can
@@ -587,10 +589,33 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const parts: Svgx[] = [];
   for (let r = 0; r < n; r++) {
     const dx = dxOf(r);
-    parts.push(b.sides[2 * r].draw(xs[2 * r] + dx, baselines[2 * r]));
-    parts.push(relation(rc.state, cx + dx, baselines[2 * r], size, 0, r === 0 ? REL : `${REL}${r}`));
-    parts.push(b.sides[2 * r + 1].draw(xs[2 * r + 1] + dx, baselines[2 * r]));
+    const row = [
+      b.sides[2 * r].draw(xs[2 * r] + dx, baselines[2 * r]),
+      relation(rc.state, cx + dx, baselines[2 * r], size, 0, r === 0 ? REL : `${REL}${r}`),
+      b.sides[2 * r + 1].draw(xs[2 * r + 1] + dx, baselines[2 * r]),
+    ];
+    // An answer that breaks a condition (x = −3 where x ≥ −1): faded, and struck through.
+    if (breaks(rc.state, r)) {
+      const [x0, x1] = [xs[2 * r] + dx, xs[2 * r + 1] + dx + b.sides[2 * r + 1].w];
+      const y = baselines[2 * r] - 0.3 * size;
+      // (Faded by a veil of the page's colour over it: the drawing is flattened into layers, so a group's opacity is lost.)
+      const top = baselines[2 * r] - ASC * size;
+      parts.push(
+        ...row,
+        <g id={`crossed${r}`} dragologyZIndex="/1">
+          <rect x={x0 - 0.1 * size} y={top} width={x1 - x0 + 0.2 * size} height={1.05 * size} className="m-veil" />
+          <line x1={x0 - 0.1 * size} x2={x1 + 0.1 * size} y1={y} y2={y} className="m-strike" />
+        </g>,
+      );
+    } else parts.push(...row);
     if (r === 0) rc.eq = { left: cx + dx - f.eqW / 2, right: cx + dx + f.eqW / 2, centre: cx + dx, baseline: baselines[0], size };
+    // The answers of one equation: "or" between them, under the = column.
+    if (rc.state.join === "or" && r < n - 1) {
+      const word = t().or;
+      const small = 0.45 * size;
+      const y = (baselines[2 * r] + baselines[2 * r + 2]) / 2 - (ASC * size - small) / 2;
+      parts.push(glyph(`or${r}`, word, cx - textWidth(word, small) / 2, y, small, "m-or"));
+    }
   }
   return <g>{parts}</g>;
 }

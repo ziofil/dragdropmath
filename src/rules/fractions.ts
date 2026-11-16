@@ -1,33 +1,56 @@
 import { frac, num } from "../expr/build";
 import { key } from "../expr/key";
-import { dragCtx, replaceIn, type Candidate, type Rule } from "./types";
+import type { Expr, MathState } from "../expr/types";
+import { dragCtx, replaceIn, type Rule } from "./types";
 import { fractionOf, rebuildTerm } from "./view";
 
 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 
+/** The fraction tapped (its bar), seen whole: with whatever multiplies it (6·(x/3) is 6x over 3). */
+function tappedFraction(state: MathState, id: string) {
+  const c = dragCtx(state, id);
+  if (c?.node.kind !== "frac") return null;
+  return fractionOf(state, c.node.num.id);
+}
+
 /**
- * 8/2 → 4, 6/4 → 3/2, 6x/(3y) → 2x/y (drop a number on the bottom onto a
- * number on top: both are divided by what they share). The top includes
- * whatever multiplies the fraction: 6·(x/3) → 2x.
+ * 6x/(3y) → 2x/y, 16x/12 → 4x/3 (tap the fraction bar: numbers on top and
+ * bottom are divided by what they share). Simplifying is always a tap on the
+ * bar; dropping a piece across it multiplies top and bottom (expand-fraction).
  */
 export const divideNumbers: Rule = {
   id: "divide-numbers",
   name: "Divide numbers",
-  gesture: "Drop a number on the bottom of a fraction onto a number on top.",
+  gesture: "Tap the fraction bar: numbers on top and bottom are divided by what they share.",
+  tap: true,
+  tapOrder: 0.4,
   apply(state, id) {
-    const c = dragCtx(state, id);
-    const h = fractionOf(state, id);
-    if (c?.node.kind !== "num" || c.node.value === 0 || !h || h.onTop) return [];
-    const d = c.node;
+    const h = tappedFraction(state, id);
+    if (!h) return [];
     const { view } = h;
-    return view.top.flatMap((t): Candidate[] => {
-      const g = t.kind === "num" ? gcd(t.value, d.value) : 1;
-      if (t.kind !== "num" || g <= 1) return [];
-      // A top number that comes out 1 goes, unless it's all there is (1/2).
-      const top = view.top.flatMap((x) => (x !== t ? [x] : t.value / g === 1 && view.top.length > 1 ? [] : [num(t.value / g, t.id)]));
-      const bottom = view.bottom.flatMap((x) => (x.id !== d.id ? [x] : d.value / g === 1 ? [] : [num(d.value / g, d.id)]));
-      return [{ rule: "divide-numbers", state: replaceIn(state, h.loc, rebuildTerm(view, top, bottom)), targetId: t.id }];
-    });
+    const top = [...view.top];
+    const bottom = [...view.bottom];
+    let any = false;
+    for (let j = 0; j < bottom.length; j++) {
+      const d = bottom[j];
+      if (d.kind !== "num" || d.value === 0) continue;
+      for (let i = 0; i < top.length; i++) {
+        const t = top[i];
+        if (t.kind !== "num") continue;
+        const g = gcd(t.value, (bottom[j] as Extract<Expr, { kind: "num" }>).value);
+        if (g <= 1) continue;
+        top[i] = num(t.value / g, t.id);
+        bottom[j] = num((bottom[j] as Extract<Expr, { kind: "num" }>).value / g, d.id);
+        any = true;
+      }
+    }
+    if (!any) return [];
+    // A number that came out 1 goes (unless it's all there is on top: 1/2).
+    const ones = (xs: Expr[], keepOne: boolean) => {
+      const out = xs.filter((x) => !(x.kind === "num" && x.value === 1));
+      return out.length || !keepOne ? out : [num(1)];
+    };
+    return [{ rule: "divide-numbers", state: replaceIn(state, h.loc, rebuildTerm(view, ones(top, true), ones(bottom, false))) }];
   },
 };
 
@@ -50,26 +73,31 @@ export const evaluateFraction: Rule = {
 };
 
 /**
- * ab/b → a, (2·3)/(2·5) → 3/5, 3·(x/3) → x (drop a factor onto the same
- * factor across the bar, either way: both go).
+ * ab/b → a, (2·3)/(2·5) → 3/5, 3·(x/3) → x, (x + 1)/(2(x + 1)) → 1/2 (tap the
+ * fraction bar: whatever the top and bottom share cancels).
  */
 export const cancelFactor: Rule = {
   id: "cancel-factor",
   name: "Cancel a common factor",
-  gesture: "Drop a factor onto the same factor across the fraction bar — both disappear.",
+  gesture: "Tap the fraction bar: the factors the top and bottom share cancel.",
+  tap: true,
+  tapOrder: 0.2,
   apply(state, id) {
-    const c = dragCtx(state, id);
-    const h = fractionOf(state, id);
-    if (!c || !h) return [];
+    const h = tappedFraction(state, id);
+    if (!h) return [];
     const { view } = h;
-    const [mine, theirs] = h.onTop ? [view.top, view.bottom] : [view.bottom, view.top];
-    // The piece is one factor of its side, or (a whole top or bottom of several factors) all of it.
-    const left = mine.some((x) => x.id === c.node.id) ? mine.filter((x) => x.id !== c.node.id) : [];
-    return theirs.flatMap((t): Candidate[] => {
-      if (key(t) !== key(c.node)) return [];
-      const kept = theirs.filter((x) => x !== t);
-      const [top, bottom] = h.onTop ? [left, kept] : [kept, left];
-      return [{ rule: "cancel-factor", state: replaceIn(state, h.loc, rebuildTerm(view, top, bottom)), targetId: t.id }];
-    });
+    const top = [...view.top];
+    const bottom = [...view.bottom];
+    let any = false;
+    for (let i = 0; i < top.length; i++) {
+      const j = bottom.findIndex((b) => key(b) === key(top[i]));
+      if (j < 0) continue;
+      top.splice(i, 1);
+      bottom.splice(j, 1);
+      i--;
+      any = true;
+    }
+    if (!any) return [];
+    return [{ rule: "cancel-factor", state: replaceIn(state, h.loc, rebuildTerm(view, top, bottom)) }];
   },
 };

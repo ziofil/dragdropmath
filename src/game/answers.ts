@@ -78,7 +78,10 @@ export function isWrong(goal: MathState, other: MathState): boolean {
   if (printState(goal) === printState(other)) return false;
   const g = rowsOf(goal);
   const o = rowsOf(other);
-  return g.length !== o.length || g.some((row, k) => rowWrong(row, o[k]));
+  if (g.length !== o.length) return true;
+  // The answers of one equation (x = 3 or x = −3): the same ones in any order are right.
+  if (goal.join === "or") return (other.join ?? "and") !== "or" || g.some((row) => o.every((mine) => rowWrong(row, mine))) || o.some((mine) => g.every((row) => rowWrong(row, mine)));
+  return g.some((row, k) => rowWrong(row, o[k]));
 }
 
 /** Truth of a row (an equation or inequality) at these values. */
@@ -131,6 +134,15 @@ export function follows(start: MathState, goal: MathState): boolean {
     });
   }
   const said = goalRows.map(isolated);
+  // The answers of one equation (x = 3 or x = −3): each, put into the start, makes it true.
+  if (goal.join === "or" && said.every((x) => x !== null)) {
+    return goalRows.every((r, k) =>
+      envs(all).every((env) => {
+        const e = { ...env, [said[k]!]: evaluate(r.sides[1], env) };
+        return Number.isFinite(e[said[k]!]) && startRows.every((row) => holds(row, e));
+      }),
+    );
+  }
   if (said.every((x) => x !== null) && new Set(said).size === said.length) {
     // Put what the goal says each letter is into the start.
     return envs(all).every((env) => {

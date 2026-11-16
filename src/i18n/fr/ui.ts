@@ -195,7 +195,7 @@ export const fr: Translation = {
     },
     "divide-numbers": {
       name: "Simplifier une fraction",
-      how: "Appuie longuement sur le dénominateur, puis dépose-le sur le numérateur, ou appuie sur la barre de fraction. Les deux sont divisés par leur facteur commun.",
+      how: "Appuie sur la barre de fraction. Le numérateur et le dénominateur sont divisés par leur facteur commun.",
       text: ["On simplifie une fraction en divisant son numérateur et son dénominateur par un même nombre : `6/8 = 3/4`. Sa valeur ne change pas."],
     },
     "letter-in": {
@@ -205,12 +205,12 @@ export const fr: Translation = {
     },
     "factor-then-cancel": {
       name: "Factoriser, puis simplifier",
-      how: "Appuie longuement sur le nombre d'un terme du numérateur, puis fais-le glisser devant, au-delà du bord gauche. Ensuite, dépose le dénominateur dessus : ils se simplifient.",
+      how: "Appuie longuement sur le nombre d'un terme du numérateur, puis fais-le glisser devant, au-delà du bord gauche. Ensuite, appuie sur la barre de fraction : ça se simplifie.",
       text: ["On ne peut simplifier que par un facteur de tout le numérateur. Dans `(2x + 6)/2`, le 2 est un facteur de chaque terme : mets-le d'abord en facteur, `(2(x + 3))/2`. Maintenant, c'est un facteur de tout le numérateur, et il se simplifie avec le dénominateur."],
     },
     "cancel-factor": {
       name: "Simplifier par un facteur commun",
-      how: "Dépose le nombre du dénominateur sur le même nombre au numérateur. Les deux disparaissent.",
+      how: "Appuie sur la barre de fraction. Ce que le numérateur et le dénominateur ont en commun se simplifie.",
       text: ["Un même nombre au numérateur et au dénominateur se simplifie : `(3x)/3`, c'est `x`."],
     },
     "power-of-power": {
@@ -220,7 +220,7 @@ export const fr: Translation = {
     },
     "divide-powers": {
       name: "Même base : soustraire les exposants",
-      how: "Dépose la puissance du dénominateur sur celle du numérateur. Les exposants se soustraient : appuie sur le − pour calculer.",
+      how: "Appuie sur la barre de fraction. Les puissances d'une même base se regroupent et leurs exposants se soustraient : appuie sur le − pour calculer.",
       text: ["`x⁵/x²` a cinq x au numérateur et deux au dénominateur. On en simplifie deux de chaque côté, et il en reste trois au numérateur : diviser, c'est soustraire les exposants."],
     },
     "flip-across-bar": {
@@ -321,10 +321,46 @@ export const fr: Translation = {
       how: "Appuie sur le · entre les fractions, ou dépose l'une sur l'autre : on multiplie les numérateurs entre eux, et les dénominateurs entre eux.",
       text: ["Multiplier, c'est plus simple : on multiplie les numérateurs, et on multiplie les dénominateurs. La moitié d'un tiers, c'est `(1·1)/(2·3) = 1/6`."],
     },
+    rationalise: {
+      name: "Un entier au dénominateur",
+      how: "Fais monter la racine du dénominateur jusqu'au numérateur : le numérateur et le dénominateur sont tous les deux multipliés par elle. Ensuite, appuie sur le · du dénominateur.",
+      text: ["Multiplier le numérateur et le dénominateur par un même nombre ne change pas une fraction. Prends la racine qui est déjà au dénominateur : `√3·√3 = 3`, donc `1/√3 = √3/(√3·√3) = √3/3`. Il n'y a plus de racine sous la barre."],
+    },
+    "zero-product": {
+      name: "Un produit nul",
+      how: "Fais descendre une parenthèse hors du produit : l'équation se sépare en deux, cette parenthèse vaut 0 ou l'autre vaut 0. Ensuite, résous chacune des deux.",
+      text: [
+        "Un produit est nul seulement si l'un de ses facteurs est nul : `3·0 = 0`, mais `3·2` ne l'est pas. Donc `(x − 2)(x + 3) = 0` veut dire `x − 2 = 0` ou `x + 3 = 0` : deux solutions.",
+        "C'est pour ça qu'on ne divise jamais les deux membres par quelque chose qui peut valoir 0 : ici, on perdrait une solution.",
+      ],
+    },
+    "plus-minus": {
+      name: "Les deux racines d'un carré",
+      how: "Fais passer le 2 de l'autre côté du =. Un carré a deux racines : l'équation se sépare en deux, une avec + et une avec −.",
+      text: ["`3² = 9`, et `(−3)² = 9` aussi. Donc `x² = 9` veut dire `x = 3` ou `x = −3`. Si tu oublies le moins, tu perds une solution."],
+    },
+    "take-out-then-split": {
+      name: "Factoriser par x, puis séparer",
+      how: "Appuie longuement sur le x d'un terme, puis fais-le glisser devant, au-delà du bord gauche. Ensuite, fais-le descendre hors du produit.",
+      text: ["Quand il n'y a pas de nombre tout seul, chaque terme contient un x : mets-le en facteur, `x² − 3x = x(x − 3)`. C'est maintenant un produit nul, donc `x = 0` ou `x − 3 = 0`."],
+    },
+    "split-middle": {
+      name: "Factoriser, puis séparer",
+      how: "Appuie sur le terme du milieu : il se coupe en deux. Mets un facteur en évidence dans chaque paire, puis la parenthèse qu'elles ont en commun. Ensuite, fais descendre une parenthèse hors du produit.",
+      text: ["`x² + x − 6` est le produit de deux parenthèses : `(x + 3)(x − 2)`. Les deux nombres ont pour produit `−6` et pour somme `1`, le coefficient de x. Une fois qu'on a un produit nul, chaque parenthèse donne une solution."],
+    },
+    "square-both-sides": {
+      name: "Élever les deux membres au carré",
+      how: "Fais passer la racine de l'autre côté du = : l'autre membre est élevé au carré. Ensuite, développe et résous. En dessous, il y a les conditions : une solution qui n'en respecte pas une est barrée.",
+      text: ["Une racine n'est jamais négative, donc `√(x² + 5) = x + 1` n'est vraie que si `x + 1 ≥ 0`. En élevant les deux membres au carré, on perd cette information : `x² + 5 = (x + 1)²` serait vraie aussi si `x + 1` était négatif. C'est pour ça que les conditions sont données dès le départ, et restent vraies jusqu'au bout."],
+    },
     "divide-by-fraction": {
       name: "Diviser par une fraction",
-      how: "Fais monter la fraction du dénominateur jusqu'au numérateur. Elle se retourne et multiplie. Ensuite, appuie sur le · pour calculer.",
-      text: ["Diviser par une fraction, c'est multiplier par son inverse : `4/(3/5)`, c'est `4·(5/3)`."],
+      how: "Fais monter le dénominateur de la petite fraction jusqu'au numérateur : il le multiplie. Ensuite, appuie sur le · et sur la barre pour calculer.",
+      text: [
+        "Ce que fait un nombre dépend du nombre de barres au-dessus de lui. Dans `4/(3/5)`, le 5 est sous deux barres : on divise par une division, donc il multiplie. Il peut donc monter au numérateur sans rien changer : `(4·5)/3`.",
+        "Voilà pourquoi diviser par une fraction, c'est multiplier par son inverse : `4/(3/5) = 4·5/3`.",
+      ],
     },
     "split-fraction": {
       name: "Séparer une fraction",
@@ -497,6 +533,7 @@ export const fr: Translation = {
   hint: "Indice",
   undo: "Annuler",
   solvedBang: "Résolu !",
+  where: "où",
   moveCrashed: "Ce mouvement a provoqué une erreur.",
   moveCrashedDetails: "Les détails sont dans la console du navigateur.",
   tryAgain: "Réessayer",

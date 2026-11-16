@@ -71,4 +71,10 @@ export const deChapters: ChapterTexts = {
     blurb:
       "ln(x) ist der Exponent, mit dem man e potenzieren muss, um x zu bekommen. Darum heben sich ln und e^ gegenseitig auf, und der Logarithmus eines Produkts ist die Summe der Logarithmen.",
   },
+
+  quadratic: {
+    title: "Quadratische Gleichungen",
+    blurb:
+      "Eine Gleichung mit x² kann zwei Lösungen haben. Sorge dafür, dass auf einer Seite 0 steht, und schreib die andere als Produkt: Ein Produkt ist nur dann 0, wenn einer seiner Faktoren 0 ist. Oder stell das Quadrat allein: x² = 9 heißt x = 3 oder x = −3.",
+  },
 };

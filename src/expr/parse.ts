@@ -1,4 +1,4 @@
-import type { Expr, MathState, Rel } from "./types";
+import type { Condition, Expr, MathState, Rel } from "./types";
 import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable } from "./build";
 
 /**
@@ -17,10 +17,24 @@ import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable 
  * The letter e is the constant e.
  */
 export function parseState(src: string): MathState {
-  // Rows: "x + y = 5; x - y = 1" (both at once).
+  // Conditions on the letters, after "where": "√(x + 7) = x + 1 where x ≥ -7, x ≥ -1".
+  const [main, where] = src.split(/\s+where\s+/);
+  if (where !== undefined) return { ...parseState(main), conditions: where.split(",").map(parseCondition) };
+  // Rows: "x + y = 5; x - y = 1" (both at once), or "x = 2 or x = -3" (either).
   const rows = src.split(";");
   if (rows.length > 1) return { sides: rows.flatMap((r) => parseRow(r).sides), join: "and" };
+  const either = src.split(/\s+or\s+/);
+  if (either.length > 1) return { sides: either.flatMap((r) => parseRow(r).sides), join: "or" };
   return parseRow(src);
+}
+
+/** One condition: "x ≥ -7", "x ≠ 2" (also "!="). */
+function parseCondition(src: string): Condition {
+  const ne = src.split(/≠|!=/);
+  if (ne.length === 2) return { sides: [parseRow(ne[0]).sides[0], parseRow(ne[1]).sides[0]], rel: "≠" };
+  const row = parseRow(src);
+  if (row.sides.length !== 2) throw new Error(`A condition needs two sides: ${src}`);
+  return { sides: [row.sides[0], row.sides[1]], rel: row.rel ?? "=" };
 }
 
 function parseRow(src: string): MathState {

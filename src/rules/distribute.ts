@@ -181,7 +181,10 @@ export const factorShared: Rule = {
       if (restKey(splitCoef(terms[at.index])) === restKey(splitCoef(t))) return []; // like terms
       const [lo, hi] = j < at.index ? [j, at.index] : [at.index, j];
       const inside = j < at.index ? [theirs, mine] : [mine, theirs];
-      const shared = prod([f, sum(inside)]);
+      // A number taken out of a term written with a minus takes the minus along: −4x + 12 → −4(x − 3), as by hand
+      // (4(−x + 3) never factors on with x(x − 3)).
+      const minus = f.kind === "num" && viewTerm(terms[at.index]).negative;
+      const shared = minus ? neg(prod([f, sum(inside.map(negate))])) : prod([f, sum(inside)]);
       const newTerms = terms.map((x, k) => (k === lo ? shared : x)).filter((_, k) => k !== hi);
       return [{ rule: "factor-shared", state: replaceIn(state, at.sumLoc, sum(newTerms, at.s.id)), targetId: t.id }];
     });

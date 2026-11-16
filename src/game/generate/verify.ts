@@ -11,7 +11,7 @@ import { parseState } from "../../expr/parse";
 import { printState } from "../../expr/key";
 import type { MathState } from "../../expr/types";
 import type { RuleId } from "../../rules";
-import { matchesGoal, search } from "../solver";
+import { matchesGoal, search, searchBest } from "../solver";
 import { isDone, taskOf } from "../task";
 
 export type Checkable = { start: string; goal: string; via: readonly string[]; positive?: boolean; legs?: readonly (readonly RuleId[])[] };
@@ -23,6 +23,8 @@ export type Checked = { path: MathState[] } | { stuck: string };
 const LEG = 5;
 const STATES = 40_000;
 const QUICK_STATES = 600;
+/** States looked at best-first before searching breadth-first. */
+const BEST_STATES = 3000;
 
 /**
  * `quick`: only the moves each stretch says it takes, a few hundred states a
@@ -43,8 +45,11 @@ export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, stat
     const at = path[path.length - 1];
     // The moves the stretch takes, when the draft knows them (a few, so quick), else (or failing that) all the chapter's.
     const own = d.legs?.[i]?.filter((x) => allowed.has(x));
-    const find = (done: (s: MathState) => boolean, from: MathState, opts: { ordered: false | "exact"; maxDepth: number; maxStates: number }) =>
-      quick ? search(from, done, own ?? [], { ...opts, maxStates: QUICK_STATES }) : (own && search(from, done, own, opts)) || search(from, done, rules, opts);
+    // Best-first first (quick where a stretch is a few obvious moves among many possible ones), breadth-first failing that.
+    const find = (done: (s: MathState) => boolean, from: MathState, opts: { ordered: false | "exact"; maxDepth: number; maxStates: number }) => {
+      if (quick) return searchBest(from, done, own ?? [], { ordered: opts.ordered, maxStates: QUICK_STATES }) ?? search(from, done, own ?? [], { ...opts, maxStates: QUICK_STATES });
+      return (own && search(from, done, own, opts)) || searchBest(from, done, rules, { ordered: opts.ordered, maxStates: BEST_STATES }) || search(from, done, rules, opts);
+    };
     let way: MathState[] | null;
     if (last && exact) {
       // A goal to match exactly: its terms in any order first (the work), then put in its order (a few drags).

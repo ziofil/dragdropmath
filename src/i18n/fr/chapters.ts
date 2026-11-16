@@ -70,4 +70,10 @@ export const frChapters: ChapterTexts = {
     blurb:
       "ln(x) est la puissance de e qui donne x. Donc ln et e^ s'annulent l'un l'autre, et le logarithme d'un produit est une somme de logarithmes.",
   },
+
+  quadratic: {
+    title: "Équations du second degré",
+    blurb:
+      "Une équation avec x² peut avoir deux solutions. Ramène un membre à 0 et écris l'autre sous forme de produit : un produit est nul seulement si l'un de ses facteurs est nul. Ou isole le carré : x² = 9 veut dire x = 3 ou x = −3.",
+  },
 };

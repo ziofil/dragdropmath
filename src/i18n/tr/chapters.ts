@@ -65,4 +65,9 @@ export const trChapters: ChapterTexts = {
     title: "Üstel ifadeler ve logaritma",
     blurb: "ln(x), e'nin hangi kuvvetinin x ettiğini söyler. Bu yüzden ln ile e^ birbirini geri alır, bir çarpımın logaritması da logaritmaların toplamıdır.",
   },
+
+  quadratic: {
+    title: "İkinci dereceden denklemler",
+    blurb: "İçinde x² olan bir denklemin iki kökü olabilir. Bir tarafı 0 yap, öbür tarafı da bir çarpım olarak yaz: bir çarpım ancak çarpanlarından biri 0 ise 0 olur. Ya da kareyi yalnız bırak: x² = 9 ise x = 3 ya da x = −3 olur.",
+  },
 };

@@ -196,7 +196,7 @@ export const tr: Translation = {
     },
     "divide-numbers": {
       name: "Kesri sadeleştir",
-      how: "Paydadaki sayıyı basılı tut, sonra paydaki sayının üstüne bırak ya da kesir çizgisine dokun. İkisi de ortak çarpanlarına bölünür.",
+      how: "Kesir çizgisine dokun. Paydaki ve paydadaki sayılar ortak çarpanlarına bölünür.",
       text: ["Bir kesrin payı ve paydası aynı sayıya bölünerek sadeleştirilebilir: `6/8 = 3/4`. Kesrin değeri değişmez."],
     },
     "letter-in": {
@@ -206,14 +206,14 @@ export const tr: Translation = {
     },
     "factor-then-cancel": {
       name: "Önce dışarı al, sonra sadeleştir",
-      how: "Paydaki bir terimin sayısını basılı tut ve en soldan dışarı, öne sürükle. Sonra paydadaki sayıyı onun üstüne bırak: sadeleşirler.",
+      how: "Paydaki bir terimin sayısını basılı tut ve en soldan dışarı, öne sürükle. Sonra kesir çizgisine dokun: sadeleşir.",
       text: [
         "Yalnızca payın tamamının çarpanı olan bir sayı sadeleştirilebilir. `(2x + 6)/2` ifadesinde 2, terimlerin her birinin çarpanıdır; bu yüzden önce onu dışarı al: `(2(x + 3))/2`. Artık 2 payın tamamının çarpanıdır ve paydadaki 2 ile sadeleşir.",
       ],
     },
     "cancel-factor": {
       name: "Ortak çarpanı sadeleştir",
-      how: "Paydadaki sayıyı, paydaki aynı sayının üstüne bırak. İkisi de ortadan kalkar.",
+      how: "Kesir çizgisine dokun. Pay ile paydanın ortak çarpanı sadeleşir.",
       text: ["Pay ile paydadaki aynı sayı birbirini götürür: `(3x)/3`, `x` olur."],
     },
     "power-of-power": {
@@ -223,7 +223,7 @@ export const tr: Translation = {
     },
     "divide-powers": {
       name: "Aynı taban: üsleri çıkar",
-      how: "Paydadaki kuvveti paydaki kuvvetin üstüne bırak. Üsler çıkarılır: hesaplamak için − işaretine dokun.",
+      how: "Kesir çizgisine dokun. Tabanı aynı olan kuvvetler birleşir, üsleri çıkarılır: hesaplamak için − işaretine dokun.",
       text: ["`x⁵/x²` ifadesinde üstte beş, altta iki x var. Her birinden ikişer tane sadeleşir ve üstte üç x kalır: bölmede üsler çıkarılır."],
     },
     "flip-across-bar": {
@@ -326,8 +326,11 @@ export const tr: Translation = {
     },
     "divide-by-fraction": {
       name: "Kesre böl",
-      how: "Paydadaki kesri yukarı, payın üstüne sürükle. Ters çevrilir ve çarpan olur. Sonra hesaplamak için · işaretine dokun.",
-      text: ["Bir kesre bölmek, o kesrin tersiyle çarpmaktır: `4/(3/5)`, `4·(5/3)` demektir."],
+      how: "Alttaki kesrin paydasını yukarı, payın üstüne sürükle. Payla çarpılır. Sonra hesaplamak için · işaretine ve kesir çizgisine dokun.",
+      text: [
+        "Bir sayının ne yaptığı, üstünde kaç kesir çizgisi olduğuna bağlıdır. `4/(3/5)` ifadesinde 5 iki kesir çizgisinin altında: bir bölmeye bölündüğü için çarpma yapar. Bu yüzden anlamı değişmeden yukarı, paya çıkabilir: `(4·5)/3`.",
+        "Bir kesre bölmenin, o kesrin tersiyle çarpmak olması da bundandır: `4/(3/5) = 4·5/3`.",
+      ],
     },
     "split-fraction": {
       name: "Kesri ayır",
@@ -471,6 +474,39 @@ export const tr: Translation = {
       how: "Harfin önündeki sayıyı eşitsizlik işaretinin karşı tarafına sürükle. Öbür tarafı böler, eşitsizliğin yönü ise aynı kalır. Sonra kesir çizgisine dokun.",
       text: ["İki tarafı pozitif bir sayıyla çarpmak ya da bölmek de eşitsizliğin yönünü değiştirmez: `2x < 8` ise `x < 8/2` olur."],
     },
+    "rationalise": {
+      name: "Paydada tam sayı",
+      how: "Paydadaki kökü yukarı, payın üstüne sürükle: pay da payda da onunla çarpılır. Sonra paydadaki · işaretine dokun.",
+      text: ["Pay ile paydayı aynı sayıyla çarpmak kesrin değerini değiştirmez. Zaten paydada olan kökü seç: `√3·√3 = 3`, yani `1/√3 = √3/(√3·√3) = √3/3`. Artık kesir çizgisinin altında kök kalmadı."],
+    },
+    "zero-product": {
+      name: "Sıfıra eşit bir çarpım",
+      how: "Parantezlerden birini aşağı, çarpımın dışına çek: denklem ikiye ayrılır; ya bu parantez 0'dır ya da öbürü. Sonra ikisini de ayrı ayrı çöz.",
+      text: [
+        "Bir çarpım ancak çarpanlarından biri 0 ise 0 olur: `3·0 = 0` ama `3·2` öyle değil. Yani `(x − 2)(x + 3) = 0` ise `x − 2 = 0` ya da `x + 3 = 0` olur: iki kök.",
+        "Bu yüzden iki tarafı asla 0 olabilecek bir şeye bölmeyiz: burada bir kökü kaybederdik.",
+      ],
+    },
+    "plus-minus": {
+      name: "Karenin iki kökü",
+      how: "2'yi = işaretinin karşısına sürükle. Karenin iki kökü vardır: denklem ikiye ayrılır, biri + ile, öbürü − ile.",
+      text: ["`3² = 9`, ama `(−3)² = 9` de doğru. Yani `x² = 9` ise `x = 3` ya da `x = −3` olur. Eksiyi unutursan bir kökü kaybedersin."],
+    },
+    "take-out-then-split": {
+      name: "x'i dışarı al, sonra ayır",
+      how: "Terimlerden birindeki x'i basılı tut ve en soldan dışarı, öne sürükle. Sonra onu aşağı, çarpımın dışına çek.",
+      text: ["Sabit terim yoksa her terimde bir x vardır: onu ortak paranteze al, `x² − 3x = x(x − 3)`. Artık sıfıra eşit bir çarpım var; yani `x = 0` ya da `x − 3 = 0`."],
+    },
+    "split-middle": {
+      name: "Çarpanlarına ayır, sonra ayır",
+      how: "Ortadaki terime dokun: ikiye ayrılır. Her ikiliden bir çarpanı dışarı al, sonra ortak parantezi. Ardından parantezlerden birini aşağı, çarpımın dışına çek.",
+      text: ["`x² + x − 6` iki parantezin çarpımıdır: `(x + 3)(x − 2)`. Bu iki sayının çarpımı `−6`, toplamı da x'in katsayısı olan `1`. Sıfıra eşit bir çarpım elde edince her parantez bir kök verir."],
+    },
+    "square-both-sides": {
+      name: "İki tarafın karesini al",
+      how: "Kökü = işaretinin karşısına sürükle: öbür tarafın karesi alınır. Sonra parantezi aç ve çöz. Altta koşullar var: birini sağlamayan kök üstü çizilir.",
+      text: ["Karekök hiçbir zaman negatif değildir; bu yüzden `√(x² + 5) = x + 1` ancak `x + 1 ≥ 0` olduğunda geçerlidir. İki tarafın karesini alınca bu bilgi kaybolur: `x² + 5 = (x + 1)²`, `x + 1` negatif olsaydı da geçerli olurdu. Koşullar bu yüzden en başta verilir ve çözüm boyunca geçerli kalır."],
+    },
   },
 
   // Progress
@@ -503,6 +539,7 @@ export const tr: Translation = {
   hint: "İpucu",
   undo: "Geri al",
   solvedBang: "Çözdün!",
+  where: "öyle ki",
   moveCrashed: "Bu hamlede bir şeyler ters gitti.",
   moveCrashedDetails: "Ayrıntılar tarayıcı konsolunda.",
   tryAgain: "Yeniden dene",

@@ -70,24 +70,27 @@ describe("rules do what they say", () => {
     ["2x + 1 = 7", "move-factor", "2", []], // not on a side of several terms: a press there picks up 2x
     ["-x = 6", "move-sign", "sign:-x", ["x = -6"]], // carry just the −…
     ["-x = 6", "move-sign", "-x", []], // …not the whole −x
-    ["8/2", "divide-numbers", "2", ["4"]],
-    ["6/4", "divide-numbers", "4", ["3/2"]],
-    ["6x/3", "divide-numbers", "3", ["2*x"]],
-    ["ab/b", "cancel-factor", "b", ["a"], 1],
-    ["(2·3)/(2·5)", "cancel-factor", "2", ["3/5"], 0], // top 2 onto bottom 2…
-    ["(2·3)/(2·5)", "cancel-factor", "2", ["3/5"], 1], // …or bottom onto top
-    ["ab/b", "cancel-factor", "b", ["a"], 0],
+    // Simplifying is a tap on the bar.
+    ["8/2", "divide-numbers", "8/2", ["4"]],
+    ["6/4", "divide-numbers", "6/4", ["3/2"]],
+    ["6x/3", "divide-numbers", "(6*x)/3", ["2*x"]],
+    ["ab/b", "cancel-factor", "(a*b)/b", ["a"]],
+    ["(2·3)/(2·5)", "cancel-factor", "(2*3)/(2*5)", ["3/5"]],
+    ["(x + 1)/(2(x + 1))", "cancel-factor", "(x + 1)/(2*(x + 1))", ["1/2"]],
     // A fraction is read with what multiplies it, and its bottom may have letters too.
-    ["3·(x/3)", "cancel-factor", "3", ["x"], 1],
-    ["3·(x/3)", "cancel-factor", "3", ["x"], 0],
-    ["6x/(3y)", "divide-numbers", "3", ["(2*x)/y"]],
+    ["3·(x/3)", "cancel-factor", "x/3", ["x"]], // what multiplies the fraction counts as its top
+    ["6x/(3y)", "divide-numbers", "(6*x)/(3*y)", ["(2*x)/y"]],
     // A power of a common factor comes out of a higher power.
     ["x^3 + x^2", "factor-out", "x^2", ["x^2*(x + 1)"]],
     ["x^3 + x^2", "factor-out", "x", ["x*(x^2 + x)"]],
     ["1/6", "split-number", "6", ["1/(2*3)"]],
-    ["1/2 + 1/3", "expand-fraction", "3", ["(1*3)/(2*3) + 1/3"]], // copies of the 3, top and bottom
+    // A bottom's factor dropped onto another term multiplies its top and bottom (copies of the 3).
+    ["1/2 + 1/3", "expand-fraction", "3", ["(1*3)/(2*3) + 1/3"]],
     ["1/2 + 1/3", "expand-fraction", "2", ["1/2 + (1*2)/(3*2)"]],
     ["2 + 1/3", "expand-fraction", "3", ["(2*3)/3 + 1/3"]], // a whole number becomes a fraction
+    // A root dropped onto its own top: top and bottom times it, and the bottom comes out whole.
+    ["1/√3", "expand-fraction", "√(3)", ["(1*√(3))/(√(3)*√(3))"]],
+    ["x/2", "expand-fraction", "x", []],
     ["1/5 + 2/5", "add-fractions", "2/5", ["(1 + 2)/5"]],
     ["1/5 - 2/5", "add-fractions", "1/5", ["(1 - 2)/5"]],
     ["1/6 + 1/6", "combine", "1/6", []], // fractions add as fractions, not as "like terms"
@@ -95,7 +98,10 @@ describe("rules do what they say", () => {
     ["(x + 2)/2", "split-fraction", "x", ["x/2 + 2/2"]],
     ["(x/3)·(6/x)", "multiply-fractions", "6/x", ["(x*6)/(3*x)"]],
     ["2·(3/4)", "multiply-fractions", "2", ["(2*3)/4"]],
-    ["(1/2)/(3/4)", "divide-by-fraction", "3/4", ["(1/2)*(4/3)"]],
+    // A fraction of fractions: a factor crosses the main bar to where as many bars are over it.
+    ["(1/2)/(3/4)", "divide-by-fraction", "4", ["((1*4)/2)/3"]],
+    ["6/(3/6)", "divide-by-fraction", "6", ["(6*6)/3"], 1],
+    ["(a/b)/(c/d)", "divide-by-fraction", "c", ["(a/(b*c))/(1/d)"]],
     ["√9", "evaluate-power", "1/2", []], // no jump: √9 is worked out step by step…
     ["√9", "split-square", "9", ["√(3*3)"]], // …starting with 9 → 3·3
     ["√9", "evaluate-root", "√(9)", ["3"]], // or tap the root: it comes out whole
@@ -166,9 +172,14 @@ describe("rules do what they say", () => {
     ["√x = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x^(1/2) = 3", "root-across", "1/2", ["x = 3^2"]],
     ["x = 3^2", "root-across", "2", ["x^(1/2) = 3"]], // and back again
-    ["x^2 = 9", "root-across", "2", []], // not when it could lose x = −3
+    ["x^2 = 9", "root-across", "2", ["x = 9^(1/2) or x = -9^(1/2)"]], // both roots: x could be −3 too
+    ["x^2 = -4", "root-across", "2", []], // no square is negative
+    ["x^2 = 0", "root-across", "2", ["x = 0"]],
+    ["(x - 2)(x + 3) = 0", "zero-product", "x - 2", ["x - 2 = 0 or x + 3 = 0"]], // a product is 0 when a factor is
+    ["(x - 2)(x + 3) = 5", "zero-product", "x - 2", []], // only a product equal to 0
+    ["3x = 0", "zero-product", "3", []], // a number isn't an answer: move it across
     ["(2^x)^2 = 16", "root-across", "2", ["2^x = 16^(1/2)"], 1], // 2ˣ is never negative: nothing lost (13.30)
-    ["(x - 1)^2 = 16", "root-across", "2", []],
+    ["(x - 1)^2 = 16", "root-across", "2", ["x - 1 = 16^(1/2) or x - 1 = -16^(1/2)"]], // a whole bracket too
     ["√x = -3", "root-across", "1/2", []], // no solution: squaring would invent x = 9 (QA #4)
     ["x^(1/2) = y", "root-across", "1/2", []], // y might be negative
     ["-x = 0", "move-sign", "sign:-x", ["x = 0"]], // the − is absorbed by the 0 (QA #5)
@@ -182,7 +193,7 @@ describe("rules do what they say", () => {
     ["(x^2/y)^3", "pull-out-of-power", "y", ["x^(2*3)/y^3"]], // a fraction under a power splits too
     ["x^0 + 4", "zero-power", "0", ["1 + 4"]],
     ["2^3", "evaluate-power", "3", ["8"]],
-    ["x^5/x^2", "divide-powers", "x^2", ["x^(5 - 2)"]],
+    ["x^5/x^2", "divide-powers", "x^5/x^2", ["x^(5 - 2)"]],
     ["1/x^3", "flip-across-bar", "x^3", ["x^(-3)"]],
     ["x^-2·x^5", "merge-powers", "x^5", ["x^(-2 + 5)"]],
     ["x^2·x^3", "merge-powers", "x^2", ["x^(2 + 3)"]], // order kept whichever is carried
@@ -237,7 +248,7 @@ describe("rules do what they say", () => {
     ["2^x = -8", "exp-across", "2", []], // no solution: no log of −8
     ["log_(1/3)(x) > 2", "log-across", "log_(1/3)(x)", ["x < (1/3)^2"]],
     ["y/√x", "flip-across-bar", "√(x)", ["y*x^(-1/2)"]],
-    ["6/0", "divide-numbers", "0", []],
+    ["6/0", "divide-numbers", "6/0", []],
     ["ln(x^3)", "log-of-power", "3", ["3*ln(x)"]],
     ["3ln(x)", "power-into-log", "3", ["ln(x^3)"]],
     ["ln(a) + ln(b)", "combine-logs", "ln(b)", ["ln(a*b)"]],
@@ -462,7 +473,7 @@ describe("√9 step by step", () => {
     expect(printState(s)).toBe("3^((1 + 1)/2)");
     s = step(s, "combine", "1", 1);
     expect(printState(s)).toBe("3^(2/2)");
-    s = step(s, "divide-numbers", "2", 1);
+    s = step(s, "divide-numbers", "2/2");
     expect(printState(s)).toBe("3^1");
     s = step(s, "power-one", "1");
     expect(printState(s)).toBe("3");
@@ -564,7 +575,7 @@ describe("tapping a fraction's bar", () => {
     expect(tap("x = 12/3 + 1")).toBe("evaluate-fraction: x = 4 + 1");
     expect(tap("x = 6/4")).toBe("evaluate-fraction: x = 3/2");
     expect(tap("x = 3/5")).toBeNull();
-    expect(tap("x = 6x/3")).toBeNull();
+    expect(tap("x = 6x/3")).toBe("divide-numbers: x = 2*x"); // the bar simplifies what it can
   });
 });
 

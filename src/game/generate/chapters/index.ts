@@ -10,6 +10,7 @@ import { shapes as collect } from "./collect";
 import { shapes as distribute } from "./distribute";
 import { shapes as brackets } from "./brackets";
 import { shapes as factor } from "./factor";
+import { shapesByLevel as quadratic } from "./quadratic";
 import { shapes as powers } from "./powers";
 import { shapes as roots } from "./roots";
 import { shapes as fractions } from "./fractions";
@@ -18,7 +19,7 @@ import { shapes as formulas } from "./formulas";
 import { shapes as inequalities } from "./inequalities";
 import { shapes as simultaneous } from "./simultaneous";
 
-const BY_CHAPTER: Record<string, Record<Level, Shape[]>> = { balance, shuffle, collect, distribute, brackets, factor, powers, roots, fractions, explog, formulas, inequalities, simultaneous };
+const BY_CHAPTER: Record<string, Record<Level, Shape[]>> = { balance, shuffle, collect, distribute, brackets, factor, powers, roots, fractions, explog, formulas, inequalities, simultaneous, quadratic };
 
 /**
  * A chapter's shape as practice serves it: every draft says whether its

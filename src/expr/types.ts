@@ -50,6 +50,9 @@ export type Expr = Num | Var | Neg | Sum | Prod | Frac | Pow | Const | Log;
 export type Rel = "=" | "<" | ">" | "≤" | "≥";
 
 /** One side = a plain expression; two sides = an equation (or an inequality). */
+/** A condition on the letters: x ≥ −7, x ≠ 2. */
+export type Condition = { sides: [Expr, Expr]; rel: Rel | "≠" };
+
 export type MathState = {
   /**
    * One expression, or the two sides of an equation. Several equations at once
@@ -59,14 +62,24 @@ export type MathState = {
   sides: Expr[];
   /** The relation between two sides (default "="; rows are always equations). */
   rel?: Rel;
-  /** Rows go together: all true at once (simultaneous equations). */
-  join?: "and";
+  /**
+   * How rows go together: all true at once (simultaneous equations), or any
+   * one of them true (the answers of one equation: x = 2 or x = −3).
+   */
+  join?: "and" | "or";
   /**
    * What the letters stand for: "positive" where the exercise says so (the
    * powers, roots and logs chapters), else any number. Moves whose correctness
    * depends on a sign ask rules/signs.ts, which reads this.
    */
   letters?: "positive";
+  /**
+   * What the letters must satisfy, given at the start and true throughout:
+   * a root's inside isn't negative, nor what a root equals (√(x + 7) = x + 1:
+   * x ≥ −7, x ≥ −1); a bottom isn't 0 (x ≠ 2). A row that breaks one isn't an
+   * answer (squaring can make such rows): it's crossed out.
+   */
+  conditions?: Condition[];
   /**
    * Previews only: draw the side holding node `id` shifted so that node's
    * symbol starts at canvas x (a merge target staying put while it changes,

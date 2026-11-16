@@ -7,6 +7,7 @@ import { asPower, dropFactor, fractionPart, raise as raiseTo } from "./shapes";
 import { factorsOf, roleOf, viewTerm } from "./view";
 import { assumeOf, canBeNegative, isPositive, splitsOver } from "./signs";
 import { allNodes, nodeAt } from "../expr/tree";
+import { intoRows } from "./either";
 
 // ---------- helpers ----------
 
@@ -178,27 +179,34 @@ export const joinPowers: Rule = {
 export const dividePowers: Rule = {
   id: "divide-powers",
   name: "Same base: subtract exponents",
-  gesture: "Drop a power from the bottom onto the same base on top — the exponents subtract.",
+  gesture: "Tap the fraction bar: powers of the same base on top and bottom merge, their exponents subtracted.",
+  tap: true,
+  tapOrder: 0.3,
   apply(state, id) {
     const c = dragCtx(state, id);
-    const fc = c && fractionPart(state, c);
-    if (!c || !fc || !fc.inDen) return [];
-    const { F, fracLoc } = fc;
-    const mine = asPower(c.node);
-    return factorsOf(F.num).flatMap((t): Candidate[] => {
-      const theirs = asPower(t);
-      if (key(theirs.base) !== key(mine.base)) return [];
-      // Neither a power: they just cancel (y/y → 1, 6/2 → 3), not y^(1−1).
-      if (t.kind !== "pow" && c.node.kind !== "pow") return [];
-      // The very same power on top and bottom: it cancels (cancel-factor), not y^(3−3).
-      if (key(t) === key(c.node)) return [];
+    if (c?.node.kind !== "frac") return [];
+    const F = c.node;
+    let top = F.num;
+    let bottom: Expr | null = F.den;
+    let any = false;
+    for (const d of factorsOf(F.den)) {
+      const mine = asPower(d);
+      const t = factorsOf(top).find((t) => {
+        const theirs = asPower(t);
+        // Same base; at least one a power (y/y and 6/2 cancel or divide instead), and not the very same power (it cancels).
+        return key(theirs.base) === key(mine.base) && (t.kind === "pow" || d.kind === "pow") && key(t) !== key(d);
+      });
+      if (!t || !bottom) continue;
       // Show the operation: x⁵/x² → x^(5−2); the learner subtracts themselves.
+      const theirs = asPower(t);
       const exp = sum([theirs.exp, negate(mine.exp)]);
       const merged = t.kind === "pow" ? pow(t.base, exp, t.id) : pow(t, exp);
-      const top = replaceFactor(F.num, t.id, merged);
-      const bottom = removeFactor(F.den, c.node.id);
-      return [{ rule: "divide-powers", state: replaceIn(state, fracLoc, frac(top, bottom, F.id)), targetId: t.id }];
-    });
+      top = replaceFactor(top, t.id, merged);
+      bottom = factorsOf(bottom).length === 1 ? null : removeFactor(bottom, d.id);
+      any = true;
+    }
+    if (!any) return [];
+    return [{ rule: "divide-powers", state: replaceIn(state, c.loc, bottom ? frac(top, bottom, F.id) : top) }];
   },
 };
 
@@ -617,18 +625,48 @@ export const rootAcross: Rule = {
   apply(state, id) {
     if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
+    // A whole root, alone on its side, carried across: as its ½ would be (√(x + 7) = x + 1 → x + 7 = (x + 1)²).
+    if (c && c.node.kind === "pow" && c.node.radical && c.loc.path.length === 0) {
+      const n = rootOrder(c.node.exp);
+      const sides = state.sides.slice();
+      const other = partner(c.loc.side);
+      if (!n || (canBeNegative(sides[other], assumeOf(state)) && !state.conditions?.length)) return [];
+      sides[c.loc.side] = c.node.base;
+      sides[other] = pow(sides[other], num(n), c.node.id);
+      return [{ rule: "root-across", state: setSides(sides) }];
+    }
     const P = c && exponentOf(c);
     if (!c || !P || c.parentLoc!.path.length !== 0) return [];
     const sides = state.sides.slice();
     const other = partner(c.loc.side);
     const n = rootOrder(c.node);
     // Only when the other side can't be negative: √x = −3 has no solution,
-    // and squaring would invent one (x = 9).
-    if (n && !canBeNegative(sides[other], assumeOf(state))) {
+    // and squaring would invent one (x = 9). Or where the exercise gives its
+    // conditions from the start (x ≥ −1 for √(x + 7) = x + 1): a row squaring
+    // invents breaks one, and is crossed out (expr/conditions.ts).
+    if (n && (!canBeNegative(sides[other], assumeOf(state)) || !!state.conditions?.length)) {
       // The carried √ itself turns into the ² (same identity).
       sides[c.loc.side] = P.base;
       sides[other] = pow(sides[other], num(n, c.node.id));
       return [{ rule: "root-across", state: setSides(sides) }];
+    }
+    // x² = 9 when x could be negative: x = 3 or x = −3 (an even power has two roots); x³ = −8: x = ∛(−8), one.
+    if (c.node.kind === "num" && c.node.value >= 2 && canBeNegative(P.base, assumeOf(state)) && (state.rel ?? "=") === "=" && state.join !== "and") {
+      const n = c.node.value;
+      const k = sides[other];
+      if (n % 2 === 1) {
+        sides[c.loc.side] = P.base;
+        sides[other] = pow(k, frac(num(1), num(n), c.node.id));
+        return [{ rule: "root-across", state: { ...setSides(sides), ...(state.join ? { join: state.join } : {}) } }];
+      }
+      // Even: what's on the other side mustn't be negative (x² = −4 has no answer).
+      if (canBeNegative(k, assumeOf(state))) return [];
+      const base = (e: Expr): [Expr, Expr] => (c.loc.side % 2 === 0 ? [cloneFresh(P.base), e] : [e, cloneFresh(P.base)]);
+      const row = c.loc.side >> 1;
+      if (k.kind === "num" && k.value === 0) return [{ rule: "root-across", state: intoRows(state, row, [base(num(0))]) }];
+      // The carried 2 becomes the first row's ½ (where the drag aims it).
+      const r = (id?: string) => pow(cloneFresh(k), frac(num(1), num(n), id));
+      return [{ rule: "root-across", state: intoRows(state, row, [base(r(c.node.id)), base(neg(r()))]) }];
     }
     if (c.node.kind === "num" && c.node.value >= 2 && !canBeNegative(P.base, assumeOf(state))) {
       // …and the carried ² turns back into a ½ exponent: (2ˣ)² = 16 → 2ˣ = 16^(1/2),

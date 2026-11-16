@@ -57,6 +57,11 @@ export const plChapters: ChapterTexts = {
     title: "Układy równań",
     blurb: "Dwa równania z dwiema niewiadomymi, prawdziwe jednocześnie. Wyznacz jedną literę z jednego równania i podstaw ją do drugiego.",
   },
+  quadratic: {
+    title: "Równania kwadratowe",
+    blurb:
+      "Równanie z x² może mieć dwa rozwiązania. Doprowadź do tego, żeby po jednej stronie było 0, a drugą stronę zapisz jako iloczyn: iloczyn jest równy 0 tylko wtedy, gdy któryś z czynników jest zerem. Albo zostaw sam kwadrat po jednej stronie: x² = 9 oznacza x = 3 lub x = −3.",
+  },
 
   roots: {
     title: "Pierwiastki",

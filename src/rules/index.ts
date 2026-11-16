@@ -36,6 +36,7 @@ import {
   evaluateRoot,
   splitSquare,
   zeroPower, tapPower } from "./powlog";
+import { zeroProduct } from "./either";
 import { addFractions, divideByFraction, expandFraction, multiplyFractions, splitFraction, splitNumber } from "./fracs";
 
 export type { Candidate, Feel, Rule, RuleId } from "./types";
@@ -96,6 +97,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     evaluateRoot,
     splitSquare,
     rootAcross,
+    zeroProduct,
     expAcross,
     logAcross,
   ].map((r) => [r.id, r]),
@@ -296,7 +298,7 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   const state = withoutMarks(withMarks);
   const seen = new Set([stateKey(state, "exact")]);
   const out: Candidate[] = [];
-  const kept = Object.fromEntries((["rel", "join", "letters"] as const).flatMap((k) => (state[k] ? [[k, state[k]]] : []))) as Partial<MathState>;
+  const kept = Object.fromEntries((["rel", "join", "letters", "conditions"] as const).flatMap((k) => (state[k] ? [[k, state[k]]] : []))) as Partial<MathState>;
   for (const id of enabled) {
     for (const found of RULES[id].apply(state, draggedId)) {
       // Rules rewrite sides; the relation, how rows go together and what the letters
@@ -317,15 +319,12 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
  * bracket of 4(x + 6) on the 4, ln x on the 4 of 4·ln x, …).
  */
 const MIRRORED: RuleId[] = [
-  "divide-numbers",
   "power-of-power",
-  "divide-powers",
   "evaluate-power",
   "distribute",
   "substitute",
   "exp-of-log",
   "power-into-log",
-  "divide-by-fraction",
   "times-one",
   "power-one",
   "zero-power",

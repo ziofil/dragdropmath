@@ -56,7 +56,12 @@ export function measure(d: { start: string; goal: string; via: readonly string[]
 export function judge(d: { start: string; goal: string; via: readonly string[] }): Verdict {
   const why: string[] = [];
   const notes: string[] = [];
-  const { start, answer: x, numbers, along } = measure(d);
+  const m = measure(d);
+  const { start, answer: x } = m;
+  // The answers of one equation (x = 0 or x = 7): 0 is an answer, and "… = 0" how it's solved.
+  const either = parseState(d.goal).join === "or" || !!parseState(d.start).conditions?.length;
+  const numbers = either ? m.numbers.filter((n) => n !== 0) : m.numbers;
+  const along = either ? m.along.filter((n) => n !== 0) : m.along;
 
   // ---- hard rules ----
   if (x !== undefined && x === 0) why.push("answer 0");

@@ -193,7 +193,7 @@ export const nl: Translation = {
     },
     "divide-numbers": {
       name: "Breuk vereenvoudigen",
-      how: "Houd het getal in de noemer ingedrukt en sleep het op het getal in de teller, of tik op de breukstreep. Ze worden allebei gedeeld door hun gemeenschappelijke factor.",
+      how: "Tik op de breukstreep. De getallen in de teller en de noemer worden gedeeld door hun gemeenschappelijke factor.",
       text: ["Je vereenvoudigt een breuk door teller en noemer door hetzelfde getal te delen: `6/8 = 3/4`. De waarde van de breuk blijft hetzelfde."],
     },
     "letter-in": {
@@ -203,12 +203,40 @@ export const nl: Translation = {
     },
     "factor-then-cancel": {
       name: "Eerst buiten haakjes, dan wegdelen",
-      how: "Houd het getal in een term in de teller ingedrukt en sleep het naar voren, voorbij het linkeruiteinde. Sleep daarna het getal in de noemer erop: ze vallen tegen elkaar weg.",
+      how: "Houd het getal in een term in de teller ingedrukt en sleep het naar voren, voorbij het linkeruiteinde. Tik daarna op de breukstreep: de factor valt weg.",
       text: ["Je mag alleen een factor van de hele teller wegdelen. In `(2x + 6)/2` is de 2 een factor van elke term, dus breng je die eerst buiten haakjes: `(2(x + 3))/2`. Nu is het een factor van de hele teller, en valt hij weg tegen de noemer."],
+    },
+    "zero-product": {
+      name: "Een product gelijk aan 0",
+      how: "Trek één paar haakjes omlaag, los van het product: de vergelijking splitst in tweeën, die haakjes zijn 0 of de andere. Los daarna elk deel op.",
+      text: [
+        "Een product is alleen 0 als een van de factoren 0 is: `3·0 = 0`, maar `3·2` niet. Dus `(x − 2)(x + 3) = 0` betekent `x − 2 = 0` of `x + 3 = 0`: twee oplossingen.",
+        "Daarom deel je nooit beide kanten door iets dat 0 kan zijn: hier zou je dan een oplossing kwijtraken.",
+      ],
+    },
+    "plus-minus": {
+      name: "Twee wortels van een kwadraat",
+      how: "Sleep de 2 over het =. Een kwadraat heeft twee wortels: de vergelijking splitst in tweeën, één met + en één met −.",
+      text: ["`3² = 9`, maar ook `(−3)² = 9`. Dus `x² = 9` betekent `x = 3` of `x = −3`. Vergeet je het minteken, dan raak je een oplossing kwijt."],
+    },
+    "take-out-then-split": {
+      name: "x buiten haakjes, dan splitsen",
+      how: "Houd de x in een term ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde. Trek hem daarna omlaag, los van het product.",
+      text: ["Staat er geen los getal, dan zit in elke term een x: haal die buiten haakjes, `x² − 3x = x(x − 3)`. Nu heb je een product gelijk aan 0, dus `x = 0` of `x − 3 = 0`."],
+    },
+    "split-middle": {
+      name: "Ontbinden, dan splitsen",
+      how: "Tik op de middelste term: hij splitst in tweeën. Haal uit elk tweetal een factor buiten haakjes, en daarna de haakjes die ze gemeen hebben. Trek dan één paar haakjes omlaag, los van het product.",
+      text: ["`x² + x − 6` is een product van twee paar haakjes: `(x + 3)(x − 2)`. De twee getallen geven vermenigvuldigd `−6` en opgeteld `1`, het getal voor de x. Is het eenmaal een product gelijk aan 0, dan levert elk paar haakjes een oplossing op."],
+    },
+    "square-both-sides": {
+      name: "Beide kanten kwadrateren",
+      how: "Sleep de wortel over het =: de andere kant wordt gekwadrateerd. Werk daarna de haakjes uit en los op. Eronder staan de voorwaarden: een oplossing die daar niet aan voldoet, wordt doorgestreept.",
+      text: ["Een wortel is nooit negatief, dus `√(x² + 5) = x + 1` klopt alleen als `x + 1 ≥ 0`. Door beide kanten te kwadrateren raak je dat kwijt: `x² + 5 = (x + 1)²` zou ook kloppen als `x + 1` negatief was. Daarom staan de voorwaarden er vanaf het begin bij, en blijven ze de hele tijd gelden."],
     },
     "cancel-factor": {
       name: "Gemeenschappelijke factor wegdelen",
-      how: "Sleep het getal in de noemer op hetzelfde getal in de teller. Ze verdwijnen allebei.",
+      how: "Tik op de breukstreep. Wat teller en noemer gemeen hebben, valt tegen elkaar weg.",
       text: ["Hetzelfde getal in de teller en in de noemer valt tegen elkaar weg: `(3x)/3` is `x`."],
     },
     "power-of-power": {
@@ -218,7 +246,7 @@ export const nl: Translation = {
     },
     "divide-powers": {
       name: "Zelfde grondtal: exponenten aftrekken",
-      how: "Sleep de macht in de noemer op die in de teller. De exponenten worden van elkaar afgetrokken: tik op de − om het uit te rekenen.",
+      how: "Tik op de breukstreep. Machten met hetzelfde grondtal worden samengenomen en hun exponenten van elkaar afgetrokken: tik op de − om het uit te rekenen.",
       text: ["`x⁵/x²` heeft vijf x'en in de teller en twee in de noemer. Boven en onder vallen er twee weg, en er blijven er drie over in de teller: bij delen trek je de exponenten van elkaar af."],
     },
     "flip-across-bar": {
@@ -306,6 +334,11 @@ export const nl: Translation = {
       how: "De noemers zijn gelijk: sleep de ene breuk op de andere, of tik op de + ertussen. Tik daarna op de + in de teller om de tellers op te tellen.",
       text: ["`3/4` betekent drie vierde. Zijn de noemers gelijk, dan tel je gewoon de tellers op: één vijfde plus twee vijfde is drie vijfde, dus `1/5 + 2/5 = 3/5`."],
     },
+    "rationalise": {
+      name: "Een geheel getal in de noemer",
+      how: "Sleep de wortel uit de noemer omhoog, naar de teller: teller en noemer worden er allebei mee vermenigvuldigd. Tik daarna op de · in de noemer.",
+      text: ["Teller en noemer met hetzelfde getal vermenigvuldigen verandert de waarde van een breuk niet. Neem de wortel die al in de noemer staat: `√3·√3 = 3`, dus `1/√3 = √3/(√3·√3) = √3/3`. Nu staat er geen wortel meer onder de breukstreep."],
+    },
     "expand-fraction": {
       name: "Gelijknamig maken",
       how: "Houd de noemer van de ene breuk ingedrukt en sleep hem op de andere breuk, en daarna andersom: nu hebben ze dezelfde noemer. Tik op elke · om de tellers en noemers uit te rekenen, en tel dan de breuken op.",
@@ -321,8 +354,11 @@ export const nl: Translation = {
     },
     "divide-by-fraction": {
       name: "Delen door een breuk",
-      how: "Sleep de breuk in de noemer omhoog, naar de teller. Hij wordt omgekeerd en gaat vermenigvuldigen. Tik daarna op de · om het uit te rekenen.",
-      text: ["Delen door een breuk is vermenigvuldigen met het omgekeerde: `4/(3/5)` is `4·(5/3)`."],
+      how: "Sleep de noemer van de onderste breuk omhoog, naar de teller. Daar gaat hij de teller vermenigvuldigen. Tik daarna op de · en op de breukstreep om het uit te rekenen.",
+      text: [
+        "Wat een getal doet, hangt af van het aantal breukstrepen erboven. In `4/(3/5)` staat de 5 onder twee breukstrepen: je deelt door een deling, dus hij vermenigvuldigt. Je mag hem dus naar de teller brengen zonder dat de waarde verandert: `(4·5)/3`.",
+        "Daarom is delen door een breuk hetzelfde als vermenigvuldigen met het omgekeerde: `4/(3/5) = 4·5/3`.",
+      ],
     },
     "split-fraction": {
       name: "Breuk splitsen",
@@ -494,6 +530,7 @@ export const nl: Translation = {
   hint: "Tip",
   undo: "Ongedaan maken",
   solvedBang: "Opgelost!",
+  where: "waarbij",
   moveCrashed: "Er ging iets mis bij die zet.",
   moveCrashedDetails: "Details staan in de console van de browser.",
   tryAgain: "Probeer opnieuw",

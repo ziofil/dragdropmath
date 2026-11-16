@@ -7,6 +7,7 @@ import { collect } from "./chapters/collect";
 import { distribute } from "./chapters/distribute";
 import { brackets } from "./chapters/brackets";
 import { factor } from "./chapters/factor";
+import { quadratic } from "./chapters/quadratic";
 import { balance } from "./chapters/balance";
 import { inequalities } from "./chapters/inequalities";
 import { formulas } from "./chapters/formulas";
@@ -50,6 +51,7 @@ export const CHAPTERS: Chapter[] = [
   inequalities,
   formulas,
   simultaneous,
+  quadratic,
 ];
 
 export const chapterById = (id: string | undefined): Chapter | undefined => CHAPTERS.find((c) => c.id === id);
@@ -78,7 +80,8 @@ export const hasPowerRootLog = (s: MathState): boolean => s.sides.some((e) => al
  * a root or a log in it. (Generated exercises say for themselves: Draft.positive.)
  */
 export function lettersPositive(chapter: Chapter | undefined, start: string): boolean {
-  if (chapter?.positive) return true;
+  // A chapter that says so either way (Second-degree equations: letters may be negative, x² = 9 has two answers).
+  if (chapter?.positive !== undefined) return chapter.positive;
   try {
     return hasPowerRootLog(parseState(start));
   } catch {

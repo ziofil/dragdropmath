@@ -193,7 +193,7 @@ export const de: Translation = {
     },
     "divide-numbers": {
       name: "Bruch kürzen",
-      how: "Halte die Zahl im Nenner gedrückt und zieh sie auf die im Zähler, oder tippe auf den Bruchstrich. Beide werden durch ihren gemeinsamen Teiler geteilt.",
+      how: "Tippe auf den Bruchstrich. Zähler und Nenner werden durch ihren gemeinsamen Teiler geteilt.",
       text: ["Du kürzt einen Bruch, indem du Zähler und Nenner durch dieselbe Zahl teilst: `6/8 = 3/4`. Sein Wert ändert sich dabei nicht."],
     },
     "letter-in": {
@@ -203,12 +203,40 @@ export const de: Translation = {
     },
     "factor-then-cancel": {
       name: "Erst ausklammern, dann kürzen",
-      how: "Halte die Zahl in einem Term im Zähler gedrückt und zieh sie nach vorn, links über das Ende hinaus. Dann zieh die Zahl im Nenner darauf: Die beiden kürzen sich.",
+      how: "Halte die Zahl in einem Term im Zähler gedrückt und zieh sie nach vorn, links über das Ende hinaus. Dann tippe auf den Bruchstrich: Die Zahl kürzt sich weg.",
       text: ["Kürzen darfst du nur einen Faktor des ganzen Zählers. In `(2x + 6)/2` steckt die 2 in jedem Term einzeln, also klammerst du sie zuerst aus: `(2(x + 3))/2`. Jetzt ist sie ein Faktor des ganzen Zählers und lässt sich mit dem Nenner kürzen."],
+    },
+    "zero-product": {
+      name: "Satz vom Nullprodukt",
+      how: "Zieh eine Klammer nach unten aus dem Produkt heraus: Die Gleichung zerfällt in zwei, entweder ist diese Klammer 0 oder die andere. Dann löst du beide.",
+      text: [
+        "Ein Produkt ist nur dann 0, wenn einer seiner Faktoren 0 ist: `3·0 = 0`, aber `3·2` nicht. Also heißt `(x − 2)(x + 3) = 0`: `x − 2 = 0` oder `x + 3 = 0`. Das sind zwei Lösungen.",
+        "Darum teilst du beide Seiten nie durch etwas, das 0 sein könnte: Hier würdest du dabei eine Lösung verlieren.",
+      ],
+    },
+    "plus-minus": {
+      name: "Plus oder minus",
+      how: "Zieh die 2 über das =. Ein Quadrat hat zwei Wurzeln: Die Gleichung zerfällt in zwei, eine mit + und eine mit −.",
+      text: ["`3² = 9`, aber auch `(−3)² = 9`. Also heißt `x² = 9`: `x = 3` oder `x = −3`. Vergisst du das Minus, fehlt dir eine Lösung."],
+    },
+    "take-out-then-split": {
+      name: "x ausklammern, dann aufteilen",
+      how: "Halte das x in einem Term gedrückt und zieh es nach vorn, links über das Ende hinaus. Dann zieh es nach unten aus dem Produkt heraus.",
+      text: ["Steht keine Zahl allein da, steckt in jedem Term ein x: Klammere es aus, `x² − 3x = x(x − 3)`. Jetzt ist es ein Produkt gleich 0, also `x = 0` oder `x − 3 = 0`."],
+    },
+    "split-middle": {
+      name: "Faktorisieren, dann aufteilen",
+      how: "Tippe auf den mittleren Term: Er wird in zwei Terme zerlegt. Klammere aus jedem Paar einen Faktor aus, dann die gemeinsame Klammer. Zum Schluss zieh eine Klammer nach unten aus dem Produkt heraus.",
+      text: ["`x² + x − 6` ist ein Produkt aus zwei Klammern: `(x + 3)(x − 2)`. Die beiden Zahlen ergeben multipliziert `−6` und addiert `1`, die Zahl vor dem x. Sobald ein Produkt gleich 0 dasteht, liefert jede Klammer eine Lösung."],
+    },
+    "square-both-sides": {
+      name: "Beide Seiten quadrieren",
+      how: "Zieh die Wurzel über das =: Die andere Seite wird quadriert. Dann multiplizierst du aus und löst. Darunter stehen die Bedingungen: Eine Lösung, die eine davon verletzt, wird durchgestrichen.",
+      text: ["Eine Wurzel ist nie negativ, also gilt `√(x² + 5) = x + 1` nur, wenn `x + 1 ≥ 0` ist. Beim Quadrieren geht das verloren: `x² + 5 = (x + 1)²` würde auch gelten, wenn `x + 1` negativ wäre. Deshalb stehen die Bedingungen schon am Anfang da, und sie gelten die ganze Rechnung über."],
     },
     "cancel-factor": {
       name: "Gemeinsamen Faktor kürzen",
-      how: "Zieh die Zahl im Nenner auf dieselbe Zahl im Zähler. Beide fallen weg.",
+      how: "Tippe auf den Bruchstrich. Was Zähler und Nenner gemeinsam haben, kürzt sich weg.",
       text: ["Dieselbe Zahl im Zähler und im Nenner kürzt sich weg: `(3x)/3` ist `x`."],
     },
     "power-of-power": {
@@ -218,7 +246,7 @@ export const de: Translation = {
     },
     "divide-powers": {
       name: "Gleiche Basis: Exponenten subtrahieren",
-      how: "Zieh die Potenz im Nenner auf die im Zähler. Die Exponenten werden subtrahiert: Tippe auf das −, um es auszurechnen.",
+      how: "Tippe auf den Bruchstrich. Potenzen mit gleicher Basis werden zusammengefasst und ihre Exponenten subtrahiert: Tippe auf das −, um es auszurechnen.",
       text: ["In `x⁵/x²` stehen fünf x im Zähler und zwei im Nenner. Zwei kürzen sich jeweils weg, und drei bleiben im Zähler: Beim Dividieren werden die Exponenten subtrahiert."],
     },
     "flip-across-bar": {
@@ -314,6 +342,11 @@ export const de: Translation = {
         "So machst du Brüche gleichnamig. Um `1/2 + 1/3` zu rechnen, erweiterst du `1/2` mit 3 und `1/3` mit 2: Jetzt sind beides Sechstel.",
       ],
     },
+    "rationalise": {
+      name: "Nenner rational machen",
+      how: "Zieh die Wurzel im Nenner nach oben in den Zähler: Zähler und Nenner werden beide mit ihr multipliziert. Dann tippe auf das · im Nenner.",
+      text: ["Multiplizierst du Zähler und Nenner mit derselben Zahl, ändert sich der Bruch nicht. Nimm die Wurzel, die schon im Nenner steht: `√3·√3 = 3`, also `1/√3 = √3/(√3·√3) = √3/3`. Jetzt steht keine Wurzel mehr unter dem Bruchstrich."],
+    },
     "multiply-fractions": {
       name: "Brüche multiplizieren",
       how: "Tippe auf das · zwischen den Brüchen oder zieh einen auf den anderen: Zähler mal Zähler, Nenner mal Nenner.",
@@ -321,8 +354,11 @@ export const de: Translation = {
     },
     "divide-by-fraction": {
       name: "Durch einen Bruch teilen",
-      how: "Zieh den Bruch im Nenner nach oben in den Zähler. Er wird zum Kehrwert und multipliziert. Dann tippe auf das ·, um es auszurechnen.",
-      text: ["Durch einen Bruch teilst du, indem du mit seinem Kehrwert multiplizierst: `4/(3/5)` ist `4·(5/3)`."],
+      how: "Zieh den Nenner des unteren Bruchs nach oben in den Zähler. Dort multipliziert er. Dann tippe auf das · und auf den Bruchstrich, um es auszurechnen.",
+      text: [
+        "Was eine Zahl bewirkt, hängt davon ab, wie viele Bruchstriche über ihr stehen. In `4/(3/5)` steht die 5 unter zwei Bruchstrichen: Sie teilt einen Nenner, also multipliziert sie. Darum darf sie nach oben in den Zähler wandern, ohne dass sich etwas ändert: `(4·5)/3`.",
+        "Deshalb teilst du durch einen Bruch, indem du mit seinem Kehrwert multiplizierst: `4/(3/5) = 4·5/3`.",
+      ],
     },
     "split-fraction": {
       name: "Bruch aufteilen",
@@ -493,6 +529,7 @@ export const de: Translation = {
   hint: "Tipp",
   undo: "Rückgängig",
   solvedBang: "Gelöst!",
+  where: "wobei",
   moveCrashed: "Bei diesem Schritt ist etwas schiefgegangen.",
   moveCrashedDetails: "Details stehen in der Browser-Konsole.",
   tryAgain: "Nochmal versuchen",

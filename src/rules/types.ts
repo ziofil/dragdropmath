@@ -59,7 +59,8 @@ export type RuleId =
   | "move-exponent-term"
   | "split-term"
   | "difference-of-squares"
-  | "join-powers";
+  | "join-powers"
+  | "zero-product";
 
 /**
  * A state the dragged node can lead to.

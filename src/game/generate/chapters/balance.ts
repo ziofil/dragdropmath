@@ -9,6 +9,7 @@ import { composed } from "../compose";
 import { rulesOf } from "../../puzzles";
 import * as L from "../linear";
 import * as E from "../equations";
+import { fractionCoefficient, rootCoefficient } from "../coefficients";
 import { letter, type Level, type Shape } from "../write";
 
 const shape = (rc: L.Recipe) => L.shapeOf(rc, { letter: LETTERED.has(rc) ? letter : undefined });
@@ -23,8 +24,9 @@ export const shapes: Record<Level, Shape[]> = {
   medium: [
     ...[L.bracketsBoth, L.minusBracket, L.fraction, L.bracketsAndX, L.minusTimesBracket, L.twoFractions, L.fractionsAx, L.nested, L.bracketOver].map(shape),
     ...[E.cancelEquals, E.letterUnlikeEquals, E.squareOfTimesRoot, E.rootsSumEquals, E.sameBaseProduct, E.logSumEquals, E.logWithE, E.isolateExp, E.isolateLn, E.splitLog].map(shape),
+    fractionCoefficient,
     composed("medium", () => rulesOf("balance"), false, 19),
   ],
   // Brackets inside brackets, squares that cancel, logs of quotients.
-  hard: [...[L.nestedBrackets, L.bracketInFraction, L.squareExpand, L.bracketsSquare, E.logOfQuotient, E.powersInLogs].map(shape), composed("hard", () => rulesOf("balance"), false, 12)],
+  hard: [...[L.nestedBrackets, L.bracketInFraction, L.squareExpand, L.bracketsSquare, E.logOfQuotient, E.powersInLogs].map(shape), rootCoefficient, composed("hard", () => rulesOf("balance"), false, 12)],
 };

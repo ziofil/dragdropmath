@@ -11,6 +11,7 @@ import { flipRel, negate, normalize, num, pow, prod } from "../expr/build";
 import { children, withChildren } from "../expr/tree";
 import { printState } from "../expr/key";
 import { follows, isWrong, rowsOf, shapeMismatch } from "./answers";
+import { breaks } from "../expr/conditions";
 
 /** `e` with the node `id` replaced. */
 function replace(e: Expr, id: string, by: Expr): Expr {
@@ -78,7 +79,9 @@ export function autoDecoys(start: MathState, goal: MathState): string[] {
     }
   });
   const goalPrint = printState(goal);
-  const ok = (c: MathState) => shapeMismatch(goal, c) === null && isWrong(goal, c) && !follows(start, c) && printState(c) !== goalPrint;
+  // A wrong answer the conditions would rule out gives the right one away: every one satisfies them.
+  const allowed = (c: MathState) => !start.conditions?.length || rowsOf(c).every((_, k) => !breaks({ ...c, conditions: start.conditions }, k));
+  const ok = (c: MathState) => shapeMismatch(goal, c) === null && isWrong(goal, c) && !follows(start, c) && printState(c) !== goalPrint && allowed(c);
   // One from each kind in turn, so the two differ in what went wrong.
   const picked: string[] = [];
   const queues = KINDS.map((k) => byKind.get(k)!.slice());

@@ -64,13 +64,13 @@ export function stateKey(s: MathState, ordered: Ordering = false, notation = ord
   return joinRows(s, (e) => key(e, ordered, notation));
 }
 
-/** Each row's sides with their relation, rows joined by ;. */
+/** Each row's sides with their relation, rows joined by ; (all at once) or "or" (either). */
 function joinRows(s: MathState, f: (e: Expr) => string): string {
   const row = (k: number) => s.sides.slice(k, k + 2).map(f).join(` ${s.rel ?? "="} `);
   if (s.sides.length <= 2) return row(0);
   const rows = [];
   for (let k = 0; k < s.sides.length; k += 2) rows.push(row(k));
-  return rows.join(" ; ");
+  return rows.join(s.join === "or" ? " or " : " ; ");
 }
 
 /** n if this exponent is 1/n (n ≥ 2): a power that can be written as a root. */
@@ -118,5 +118,6 @@ export function print(e: Expr): string {
 }
 
 export function printState(s: MathState): string {
-  return joinRows(s, print);
+  const where = s.conditions?.length ? ` where ${s.conditions.map((c) => `${print(c.sides[0])} ${c.rel} ${print(c.sides[1])}`).join(", ")}` : "";
+  return joinRows(s, print) + where;
 }
