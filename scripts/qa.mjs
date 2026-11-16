@@ -82,7 +82,8 @@ const cards = () => p.$$("button.predict-choice");
 const rightCard = () =>
   p.evaluate(async () => {
     const [, , chapter, level, seed] = location.hash.split("/");
-    const goal = (await import("/src/game/generate/practice.ts")).practiceExercise(chapter, level, Number(seed)).goal;
+    const { practiceExercise, predictSeed } = await import("/src/game/generate/practice.ts");
+    const goal = practiceExercise(chapter, level, predictSeed(Number(seed))).goal;
     const { parseState } = await import("/src/expr/parse.ts");
     const { printState } = await import("/src/expr/key.ts");
     const label = printState(parseState(goal)).replace(/\*/g, "·");
@@ -105,22 +106,24 @@ for (const [w, h] of [[375, 800], [1100, 900]]) {
   check(`${w}px: revealing moves neither the board nor its buttons (bug 5)`, b0 === (await boardTop()) && a0 === (await actionsTop()));
 }
 
-// Bugs 1, 2, 4: a reveal is kept; after it, no prompt without cards, and it takes one off the score.
+// Bugs 1, 2, 4: a reveal is kept; after it, no prompt without cards, and it costs nothing (better than a guess).
 await fresh();
 await scoreAt(9);
 await go("#/predict/balance/easy/7", 500);
 await p.click("text=Reveal");
 await p.waitForTimeout(150);
 check("after Reveal: no 'predict first' without cards (bugs 1, 4)", !(await said()).includes("Pick an answer"));
-check("after Reveal: the Easy score goes down by 1", (await easyScore()) === 8 && (await said()).includes("Easy score: 8 (−1)"), await said());
+check("after Reveal: the Easy score stays as it was", (await easyScore()) === 9 && !(await said()).includes("score"), await said());
+check("after Reveal: no Another one until the board is solved", !(await p.$(".board-actions a.button.primary")));
 await reload();
-check("Reveal, reload: the cards stay answered, the score not taken again (bug 2)", (await cards()).length === 0 && (await said()).includes("green one") && (await easyScore()) === 8);
+check("Reveal, reload: the cards stay answered (bug 2)", (await cards()).length === 0 && (await said()).includes("green one") && (await easyScore()) === 9);
 // A wrong pick: one down; a right one: one up, once.
 await scoreAt(9);
 await go("#/predict/balance/easy/8", 500);
 await (await cards())[((await rightCard()) + 1) % 3].click();
 await p.waitForTimeout(150);
 check("a wrong pick: the score down by 1", (await easyScore()) === 8);
+check("a pick isn't the end of it: no Another one until the board is solved", !(await p.$(".board-actions a.button.primary")));
 await scoreAt(9);
 await go("#/predict/balance/easy/9", 500);
 const rightAt = await rightCard();
@@ -195,10 +198,10 @@ check("Settings holds the progress backup", !!(await p.$(".settings-panel .setti
 await p.keyboard.press("Escape");
 check("Escape closes Settings", !(await p.$(".settings-panel")));
 
-// The footer on every page: a link to About, which says who owns it.
+// About, from the top bar: it says who owns it.
 await go("#/", 400);
-check("the footer has no copyright, only About", !(await p.textContent(".footer")).includes("©"));
-await p.click(".footer a");
+check("no copyright line outside About", !(await p.textContent("body")).includes("©"));
+await p.click(".topbar a[href='#/about']");
 await p.waitForTimeout(300);
 check("…and leads to About, which says it in full", (await p.textContent("h1")).includes("About") && (await p.textContent(".about-rights")).includes("All rights reserved"));
 
@@ -232,6 +235,38 @@ for (const h of ["#/", "#/sets/new", "#/sandbox", ...chapters.map((c) => `#/c/${
   }
   if (["#/", "#/c/fractions", "#/predict/roots/hard/1"].includes(h)) await p.screenshot({ path: `scripts/.out/qa-phone-${h.replace(/[#/]/g, "") || "home"}.png` });
 }
+// Touch: a finger drags a piece as a mouse does (a phone, emulated: touch events through the browser's own input).
+{
+  const ctx = await b.newContext({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  const tp = await ctx.newPage();
+  await tp.goto(BASE + "#/sandbox");
+  await tp.waitForTimeout(600);
+  await tp.fill(".sandbox-form input", "x + 3 = 10");
+  await tp.press(".sandbox-form input", "Enter");
+  await tp.waitForTimeout(500);
+  const drawn = () => tp.evaluate(() => [...document.querySelectorAll(".canvas text")].map((t) => t.textContent).join(""));
+  const at = (txt) => tp.evaluate((txt) => { const r = [...document.querySelectorAll(".canvas text")].find((t) => t.textContent === txt).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, txt);
+  const [from, to] = [await at("3"), await at("10")];
+  const cdp = await ctx.newCDPSession(tp);
+  const touch = (type, pt) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x: pt.x, y: pt.y, id: 1 }] });
+  await touch("touchStart", from);
+  for (let k = 1; k <= 20; k++) {
+    await touch("touchMove", { x: from.x + ((to.x - from.x) * k) / 20, y: from.y + ((to.y - from.y) * k) / 20 });
+    await tp.waitForTimeout(16);
+  }
+  await touch("touchEnd", to);
+  await tp.waitForTimeout(1200);
+  check("touch: dragging the 3 of x + 3 = 10 across makes x = 10 − 3", (await drawn()) === "x=10−3", await drawn());
+  await ctx.close();
+}
+
+// Lesson boards start undone: Swap the sides once read "Done." before any move.
+await p.setViewportSize({ width: 1100, height: 900 });
+for (const h of ["#/c/balance", "#/c/inequalities"]) {
+  await go(h, 800);
+  check(`${h}: no lesson board is done before a move`, !(await p.$$eval(".lesson-move .board-status", (ss) => ss.some((s) => s.textContent.includes("Done")))));
+}
+
 console.log(failed ? `${failed} failed` : "all good");
 await b.close();
 process.exit(failed ? 1 : 0);

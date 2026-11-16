@@ -10,7 +10,7 @@
  */
 import { useMemo } from "react";
 import { chapterById, rulesOf, type Chapter } from "../game/puzzles";
-import { freshSeed, LEVELS, practiceExercise, type Level } from "../game/generate/practice";
+import { freshSeed, LEVELS, practiceExercise, predictSeed, type Level } from "../game/generate/practice";
 import { loadScore } from "../game/scoring";
 import { parseState } from "../expr/parse";
 import { autoDecoys } from "../game/autoDecoys";
@@ -40,9 +40,6 @@ export function LevelButtons({ mode, chapter }: { mode: Mode; chapter: Chapter }
     </div>
   );
 }
-
-/** The mind's eye's exercise at a seed is practice's at another. */
-const predictSeed = (seed: number) => (seed ^ 0x5bd1e995) >>> 0;
 
 function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number): Exercise | null {
   const d = practiceExercise(chapter.id, level, mode === "predict" ? predictSeed(seed) : seed);

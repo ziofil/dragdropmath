@@ -37,6 +37,9 @@ const NEAR_BEST = 10;
  */
 export const practiceExercise = (chapterId: string, level: Level, seed: number): Exercise | null => exerciseOf(PRACTICE[chapterId]?.[level] ?? [], seed);
 
+/** The mind's eye's exercise at a seed is practice's at another: one solved in practice would be a free point there. */
+export const predictSeed = (seed: number) => (seed ^ 0x5bd1e995) >>> 0;
+
 /** The exercise for this seed among these shapes (see practiceExercise). */
 export function exerciseOf(shapes: readonly Shape[], seed: number): Exercise | null {
   // Weighted rendezvous: each shape draws u in (0, 1) from (seed, id); the largest u^(1/weight) wins.
