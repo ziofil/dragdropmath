@@ -156,6 +156,28 @@ export function outInFront(env: DragEnv, draggedId: string, result: MathState): 
  * Swapping the sides: carry a whole side past the far end of the other side
  * (past its left end, coming from the right, and the other way round).
  */
+/**
+ * Onto the other side (see Feel): anywhere over it, by the finger or by the
+ * carried piece's middle (a wide root is held at its left end, its middle
+ * far to the right of the finger). Past it, it crosses as a term. (It
+ * doesn't swap the sides too: the other side, carried, does.)
+ */
+export function ontoSide(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
+  const at = locate(env.rc.state, draggedId)!;
+  const side = env.rc.state.sides[at.side ^ 1];
+  const { rc, d } = env;
+  return d.custom((ctx: DragInitContext<MathState>) => {
+    const preview = lazily(() => renderStateReadOnly(ctx, result));
+    const box = canvasBox(rc, side.id);
+    const overIt = (p: Vec2) => p.x >= box.symLeft.x && p.x <= box.symRight.x;
+    return (frame) => {
+      const centre = carriedCentre(rc, ctx, frame.pointer);
+      const over = overIt(centre) || overIt(frame.pointer);
+      return { preview, dropState: result, gap: over ? 0 : Infinity };
+    };
+  });
+}
+
 export function farEnd(env: DragEnv, draggedId: string, result: MathState): DragSpec<MathState> {
   return aimAt(env, result, AIMS["far-end"](env.rc, draggedId, result));
 }
@@ -167,7 +189,7 @@ type Aim = () => Vec2;
  * target is carried (see Feel): what the drag measures against, and what
  * tests drop at to check the move can be reached.
  */
-export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "far-end", (rc: RenderCtx, draggedId: string, result: MathState) => Aim> = {
+export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "far-end" | "onto-side", (rc: RenderCtx, draggedId: string, result: MathState) => Aim> = {
   // Where the piece itself sits afterwards.
   landing: (rc, id, result) => () => canvasBox(laidOut(result, rc.canvas!.W, rc.canvas!.H), id).centre,
   "pull-out": (rc, id) => () => pullOutAim(rc, id),
@@ -187,6 +209,12 @@ export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "f
       const b = canvasBox(rc, first ?? id);
       return b.symLeft.sub(Vec2(0.9 * b.h, 0));
     };
+  },
+  // The middle of the other side.
+  "onto-side": (rc, id) => {
+    const at = locate(rc.state, id)!;
+    const other = rc.state.sides[at.side ^ 1];
+    return () => canvasBox(rc, other.id).centre;
   },
   // At the far edge of the other side itself: past it, a long side would put the aim out of reach.
   "far-end": (rc, id) => {

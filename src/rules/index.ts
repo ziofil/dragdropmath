@@ -175,9 +175,37 @@ export function operatorTap(state: MathState, itemId: string, enabled: readonly 
   const kinds = enabled.filter((r) => RULES[r].operatorTap === (row.kind === "sum" ? "sum" : "product"));
   const moves = movesFor(state, enabled);
   const merge = (from: string, onto: string) => moves.drag(from).find((k) => kinds.includes(k.rule) && k.targetId === onto);
-  const found = merge(itemId, prev.id) ?? merge(prev.id, itemId);
+  const found = merge(itemId, prev.id) ?? merge(prev.id, itemId) ?? (row.kind === "sum" ? shareOut(state, row.terms, prev.id, itemId, enabled) : undefined);
   if (!found) return null;
   return found.rule === "multiply-fractions" ? workedOut(found.state, prev.id, itemId) : found.state;
+}
+
+/**
+ * Two terms side by side that don't combine: what they share comes out, as
+ * pressing and holding it in one and dropping it on the other would (x² + 3x
+ * → x(x + 3), −2x − 6 → −2(x + 3)); a sum of just those two, by taking it
+ * out in front (x(x + 3) − 2(x + 3) → (x + 3)(x − 2)). A bracket they share
+ * first, then a letter, then a number.
+ */
+function shareOut(state: MathState, terms: readonly MathState["sides"][number][], a: string, b: string, enabled: readonly RuleId[]): Candidate | undefined {
+  const moves = movesFor(state, enabled);
+  const pair = terms.length === 2;
+  const term = (id: string) => terms.find((t) => t.id === id)!;
+  const rank = (id: string) => {
+    const n = allNodes(term(a)).concat(allNodes(term(b))).find((x) => x.id === id);
+    return n?.kind === "sum" ? 0 : n?.kind === "num" ? 2 : 1;
+  };
+  const found: { c: Candidate; r: number }[] = [];
+  for (const [from, onto] of [[a, b], [b, a]] as const) {
+    for (const n of allNodes(term(from))) {
+      if (n.id === from && !pair) continue;
+      for (const c of moves.drag(n.id)) {
+        const shares = pair ? c.rule === "factor-out" : c.rule === "factor-shared" && c.targetId === onto;
+        if (shares) found.push({ c, r: rank(n.id) });
+      }
+    }
+  }
+  return found.sort((x, y) => x.r - y.r)[0]?.c;
 }
 
 /** The fraction a number-times-fraction tap made, with its products of numbers multiplied out ((6·1)/12 → 6/12). */
@@ -251,7 +279,7 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
     return !row || Math.abs(ca!.index - cb!.index) === 1;
   };
   const drag = memo((id): Candidate[] => {
-    const mine = own(id);
+    const mine = squaredAcross(own(id));
     // A piece carried out in front (a factor, a bracket taken out) passes over its neighbours on
     // the way: the merges it only has the other way round would form there instead (the bracket of
     // x(x + 6) + 2(x + 6) multiplying into its x). They're its neighbours' to make.
@@ -298,6 +326,13 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   byRules.set(rulesKey, moves);
   return moves;
 }
+
+/**
+ * A root alone on its side, carried onto the other, squares it (see
+ * Feel "onto-side"): it doesn't also swap the sides there, which would take
+ * the same place. The other side, carried, still swaps them.
+ */
+const squaredAcross = (cs: Candidate[]): Candidate[] => (cs.some((c) => c.rule === "root-across" && c.carry === "onto-side") ? cs.filter((c) => c.rule !== "swap-sides") : cs);
 
 function collect(withMarks: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
   // Copies made by the previous move are ordinary pieces now.

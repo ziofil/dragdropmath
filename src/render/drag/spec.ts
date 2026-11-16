@@ -4,7 +4,7 @@ import { children, locate } from "../../expr/tree";
 import { feelOf, movesFor, operatorTap, type Candidate, type RuleId } from "../../rules";
 import { dragCtx } from "../../rules/types";
 import type { RenderCtx } from "../typeset";
-import { below, farEnd, landing, outInFront, overOtherSide, pullOut, rowSlot, SLIDE } from "./carry";
+import { below, farEnd, landing, ontoSide, outInFront, overOtherSide, pullOut, rowSlot, SLIDE } from "./carry";
 import type { DragEnv } from "./env";
 import { growLog, shedLog } from "./logs";
 import { flipSign } from "./sign";
@@ -86,7 +86,9 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
             ? below(env, id, c.state)
             : how === "far-end"
               ? farEnd(env, id, c.state)
-            : landing(env, id, c.state);
+              : how === "onto-side"
+                ? ontoSide(env, id, c.state)
+                : landing(env, id, c.state);
     }),
     // Across =: anywhere over the other side will do, too.
     ...away.filter((c) => carry(c) === "landing").flatMap((c) => overOtherSide(env, id, c.state)),

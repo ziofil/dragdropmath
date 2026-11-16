@@ -637,7 +637,7 @@ export const splitSquare: Rule = {
 export const rootAcross: Rule = {
   id: "root-across",
   name: "Undo a root (or square) across =",
-  gesture: "Carry a √ across = — it becomes a square on the other side. Carry the square back and it becomes ½ again.",
+  gesture: "Drop a √ onto the other side of = — that side is squared. Carry the square back and it becomes ½ again.",
   apply(state, id) {
     if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
@@ -648,8 +648,9 @@ export const rootAcross: Rule = {
       const other = partner(c.loc.side);
       if (!n || (canBeNegative(sides[other], assumeOf(state)) && !state.conditions?.length)) return [];
       sides[c.loc.side] = c.node.base;
-      sides[other] = pow(sides[other], num(n), c.node.id);
-      return [{ rule: "root-across", state: setSides(sides) }];
+      // The carried √ turns into the ² (it lands where the square is written, over the other side).
+      sides[other] = pow(sides[other], num(n, c.node.id));
+      return [{ rule: "root-across", state: setSides(sides), carry: "onto-side" }];
     }
     const P = c && exponentOf(c);
     if (!c || !P || c.parentLoc!.path.length !== 0) return [];
