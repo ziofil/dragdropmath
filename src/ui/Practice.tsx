@@ -8,12 +8,12 @@
  *   costs nothing). Not the same exercises as practice's at the same seed:
  *   one solved there would be a free point here.
  */
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { chapterById, rulesOf, type Chapter } from "../game/puzzles";
-import { freshSeed, LEVELS, practiceExercise, predictSeed, type Level } from "../game/generate/practice";
+import { freshSeed, LEVELS, type Level } from "../game/generate/practice";
+import { makeExercise, type Made, type MakeRequest } from "../game/exerciseWorker";
+import { workerClient } from "../util/worker";
 import { loadScore } from "../game/scoring";
-import { parseState } from "../expr/parse";
-import { autoDecoys } from "../game/autoDecoys";
 import { choicesFor } from "../game/predict";
 import { PuzzleView, type Exercise } from "./PuzzleView";
 import { NotFound } from "./NotFound";
@@ -41,18 +41,33 @@ export function LevelButtons({ mode, chapter }: { mode: Mode; chapter: Chapter }
   );
 }
 
-function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number): Exercise | null {
-  const d = practiceExercise(chapter.id, level, mode === "predict" ? predictSeed(seed) : seed);
-  if (!d) return null;
+/** Exercises made (or being made) off the page's thread, by request: the next one is made while this one is played. */
+const make = workerClient(() => new Worker(new URL("../game/exerciseWorker.ts", import.meta.url), { type: "module" }), makeExercise, 30_000);
+const making = new Map<string, Promise<Made>>();
+const made = new Map<string, Made>();
+const keyOf = (r: MakeRequest) => `${r.mode}/${r.chapter}/${r.level}/${r.seed}`;
+function madeFor(r: MakeRequest): Promise<Made> {
+  const k = keyOf(r);
+  let p = making.get(k);
+  if (!p) {
+    p = make(r).then((m) => {
+      made.set(k, m);
+      return m;
+    });
+    making.set(k, p);
+    // The latest few only.
+    for (const old of [...making.keys()].slice(0, Math.max(0, making.size - 12))) {
+      making.delete(old);
+      made.delete(old);
+    }
+  }
+  return p;
+}
+
+function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number, d: NonNullable<Made>, onwardSeed: number): Exercise {
   const id = `${mode}-${chapter.id}-${level}-${seed}`;
   // Predicting first: the wrong answers are the usual slips.
-  let choices: string[] | null = null;
-  if (mode === "predict")
-    try {
-      choices = choicesFor({ id, goal: d.goal }, autoDecoys(parseState(d.start), parseState(d.goal)));
-    } catch {
-      /* no wrong answers to offer: straight to solving */
-    }
+  const choices = mode === "predict" ? choicesFor({ id, goal: d.goal }, d.decoys) : null;
   return {
     puzzle: { id, start: d.start, goal: d.goal },
     rules: rulesOf(chapter.id),
@@ -63,7 +78,7 @@ function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number): E
       { href: href({ page: "chapter", chapter: chapter.id }), text: t().lessonLink(chapterText(chapter).title) },
     ],
     levels: LEVELS.map((l) => ({ href: exerciseHref(mode, chapter, l), text: t().level[l], current: l === level })),
-    onward: { href: exerciseHref(mode, chapter, level), text: t().anotherOne },
+    onward: { href: href({ page: "exercise", mode, chapter: chapter.id, level, seed: onwardSeed }), text: t().anotherOne },
     context: { kind: mode, chapter: chapter.id, level },
     positiveLetters: d.positive,
   };
@@ -71,11 +86,34 @@ function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number): E
 
 export function ExerciseRoute({ mode, chapterId, level, seed }: { mode: Mode; chapterId: string; level: string; seed: number }) {
   const chapter = chapterById(chapterId);
+  const valid = !!chapter && (LEVELS as readonly string[]).includes(level);
+  const req: MakeRequest | null = valid ? { mode, chapter: chapter.id, level: level as Level, seed } : null;
+  const key = req ? keyOf(req) : "";
+  // Made off the page's thread (already made, if it was the "another one" of the last).
+  const [d, setD] = useState<Made | undefined>(() => (req ? made.get(key) : null));
   // Once per exercise: its links to another one (new seeds) mustn't change while it's open.
-  const ex = useMemo(
-    () => (chapter && (LEVELS as readonly string[]).includes(level) ? exerciseOf(mode, chapter, level as Level, seed) : null),
-    [mode, chapter, level, seed],
-  );
-  if (!ex) return <NotFound />;
+  const [onwardSeed] = useState(freshSeed);
+  useEffect(() => {
+    if (!req || d !== undefined) return;
+    let live = true;
+    madeFor(req).then((m) => live && setD(m));
+    return () => {
+      live = false;
+    };
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  // While this one is played, the next is made.
+  useEffect(() => {
+    if (req && d) void madeFor({ ...req, seed: onwardSeed });
+  }, [d]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ex = useMemo(() => (chapter && req && d ? exerciseOf(mode, chapter, req.level, seed, d, onwardSeed) : null), [d]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!valid || d === null) return <NotFound />;
+  if (!ex)
+    return (
+      <main className="puzzle puzzle-making" aria-busy="true">
+        <p className="puzzle-making-note" role="status">
+          {t().makingExercise}
+        </p>
+      </main>
+    );
   return <PuzzleView exercise={ex} />;
 }

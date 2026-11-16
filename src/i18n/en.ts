@@ -42,6 +42,8 @@ export const en = {
   // Chapter page
   backToPath: "← Learning path",
   level: { easy: "Easy", medium: "Medium", hard: "Hard" },
+  /** While an exercise is being made (a Hard one can take a moment). */
+  makingExercise: "Making an exercise…",
   anotherOne: "Another one →",
   progressHere: "Your progress is kept in this browser only. Save it to a file to keep it safe, or to carry it to another device.",
   saveProgress: "Export progress to a file",

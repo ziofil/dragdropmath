@@ -1554,3 +1554,19 @@ div.predict-choice {
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
+
+/* While an exercise is made (off the page's thread): said only if it takes a moment, so a quick one doesn't flash. */
+.puzzle-making-note {
+  margin: 3rem auto;
+  text-align: center;
+  color: var(--ink-soft);
+  animation: making-in 0.2s ease-out 0.4s both;
+}
+@keyframes making-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
