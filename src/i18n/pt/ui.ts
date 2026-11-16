@@ -10,8 +10,6 @@ export const pt: Translation = {
   // Top bar
   makeExercises: "Criar exercícios",
   sandbox: "Laboratório",
-  openSandbox: "Abrir o laboratório →",
-  sandboxIntro: "Digite qualquer expressão ou equação e experimente todos os movimentos.",
   sandboxInput: "Expressão ou equação",
   sandboxPlaceholder: "ex.: 3(x - 2) = 2x + 1   ou   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Carregar",
@@ -24,15 +22,12 @@ export const pt: Translation = {
   heroText:
     "Arraste qualquer parte de uma equação. Ela só se mexe do jeito que a matemática permite. Transforme a equação até ela ficar igual ao objetivo.",
   learningPath: "Trilha de aprendizagem",
-  everyChapterOpen: "Todos os capítulos estão liberados. As setas mostram uma ordem sugerida.",
   chapterN: (n: number) => `Capítulo ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Usa o que você viu em ${titles}.`,
   startLesson: "Começar a lição →",
   // Chapter page
   backToPath: "← Trilha de aprendizagem",
-  leadsOnToStart: "Prepara para ",
-  leadsOnToEnd: ". Você pode ir para lá quando quiser.",
   level: { easy: "Fácil", medium: "Médio", hard: "Difícil" },
   anotherOne: "Outro →",
   practice: "Prática",

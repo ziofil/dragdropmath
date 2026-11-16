@@ -95,6 +95,8 @@ export type Shape = {
   positive?: boolean;
   /** Written by hand, numbers and all (real formulas): not held to the beauty rules (beauty.ts). */
   curated?: boolean;
+  /** A last check, on the draft picked only (a search: too slow for every try): the draft as it passed (it may add what it found), or null to pick another. */
+  check?: (d: Draft) => Draft | null;
 };
 
 /** The shapes with these ids, in this order: a level's list. */

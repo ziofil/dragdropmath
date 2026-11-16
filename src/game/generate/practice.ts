@@ -64,10 +64,15 @@ export function nicest(s: Shape, r: Rng): Draft | null {
     if (!v.ok || !predictable(d)) continue;
     found.push({ d, score: v.score });
   }
-  if (!found.length) return null;
-  const best = Math.max(...found.map((f) => f.score));
-  const near = found.filter((f) => f.score >= best - NEAR_BEST);
-  return near[r.int(0, near.length - 1)].d;
+  while (found.length) {
+    const best = Math.max(...found.map((f) => f.score));
+    const near = found.filter((f) => f.score >= best - NEAR_BEST);
+    const pick = near[r.int(0, near.length - 1)];
+    const passed = s.check ? s.check(pick.d) : pick.d;
+    if (passed) return passed;
+    found.splice(found.indexOf(pick), 1);
+  }
+  return null;
 }
 
 /** It has two wrong answers to predict between (see autoDecoys). */

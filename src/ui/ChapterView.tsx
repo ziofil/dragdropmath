@@ -1,4 +1,4 @@
-import { CHAPTERS, leadsTo, rulesOf, type Chapter } from "../game/puzzles";
+import { CHAPTERS, rulesOf, type Chapter } from "../game/puzzles";
 import { useState } from "react";
 import { carries, carryOf, drillExercise, drillsOf, type Drill } from "../game/generate/moves";
 import { freshSeed } from "../game/generate/practice";
@@ -38,26 +38,7 @@ export function ChapterView({ chapter }: { chapter: Chapter }) {
         ))}
       </div>
 
-      <LeadsTo chapter={chapter} />
     </main>
-  );
-}
-
-/** "Leads on to A, B": the chapters that build on this one, as links. */
-export function LeadsTo({ chapter }: { chapter: Chapter }) {
-  const next = leadsTo(chapter);
-  if (!next.length) return null;
-  return (
-    <p className="leads-to">
-      {t().leadsOnToStart}
-      {next.map((c, k) => (
-        <span key={c.id}>
-          {k > 0 && ", "}
-          <a href={href({ page: "chapter", chapter: c.id })}>{chapterText(c).title}</a>
-        </span>
-      ))}
-      {t().leadsOnToEnd}
-    </p>
   );
 }
 

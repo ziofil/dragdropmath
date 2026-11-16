@@ -10,8 +10,6 @@ export const nl: Translation = {
   // Top bar
   makeExercises: "Oefeningen maken",
   sandbox: "Zandbak",
-  openSandbox: "Open de zandbak →",
-  sandboxIntro: "Typ een willekeurige uitdrukking of vergelijking en probeer alle zetten uit.",
   sandboxInput: "Uitdrukking of vergelijking",
   sandboxPlaceholder: "bijv. 3(x - 2) = 2x + 1   of   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Laden",
@@ -24,15 +22,12 @@ export const nl: Translation = {
   heroText:
     "Sleep elk stukje van een vergelijking. Het kan alleen bewegen zoals de wiskunde het toestaat. Schuif net zo lang tot het eruitziet als het doel.",
   learningPath: "Leerpad",
-  everyChapterOpen: "Alle hoofdstukken zijn open. De pijlen geven een handige volgorde aan.",
   chapterN: (n: number) => `Hoofdstuk ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} en ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Bouwt voort op ${titles}.`,
   startLesson: "Begin met de les →",
   // Chapter page
   backToPath: "← Leerpad",
-  leadsOnToStart: "Hierna komt ",
-  leadsOnToEnd: ". Daar kun je altijd heen.",
   level: { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" },
   anotherOne: "Nog een →",
   practice: "Oefenen",

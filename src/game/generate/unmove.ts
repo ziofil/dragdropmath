@@ -110,6 +110,8 @@ export type UnMove = {
   quiet?: boolean;
   /** It only holds where letters are positive (√(x²) = x, ln(x²) = 2ln(x)). */
   positive?: boolean;
+  /** Its `rules` always undo what it makes, wherever it makes it: a walk needn't check (walk.ts; the tests still do). */
+  trusted?: boolean;
 };
 
 /** Row `row` (sides 2row, 2row + 1) changed by f; the relation turned round when f says. */

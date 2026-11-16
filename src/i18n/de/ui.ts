@@ -10,8 +10,6 @@ export const de: Translation = {
   // Top bar
   makeExercises: "Aufgaben erstellen",
   sandbox: "Spielwiese",
-  openSandbox: "Zur Spielwiese →",
-  sandboxIntro: "Gib einen beliebigen Term oder eine Gleichung ein und probier alle Umformungen aus.",
   sandboxInput: "Term oder Gleichung",
   sandboxPlaceholder: "z. B. 3(x - 2) = 2x + 1   oder   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Laden",
@@ -24,15 +22,12 @@ export const de: Translation = {
   heroText:
     "Zieh an einem beliebigen Teil einer Gleichung. Er bewegt sich nur so, wie es die Mathematik erlaubt. Forme um, bis alles aussieht wie das Ziel.",
   learningPath: "Lernpfad",
-  everyChapterOpen: "Alle Kapitel sind offen. Die Pfeile zeigen eine sinnvolle Reihenfolge.",
   chapterN: (n: number) => `Kapitel ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} und ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Setzt voraus: ${titles}.`,
   startLesson: "Zur Lektion →",
   // Chapter page
   backToPath: "← Lernpfad",
-  leadsOnToStart: "Darauf baut auf: ",
-  leadsOnToEnd: ". Du kannst jederzeit dorthin wechseln.",
   level: { easy: "Leicht", medium: "Mittel", hard: "Schwer" },
   anotherOne: "Noch eine →",
   practice: "Üben",

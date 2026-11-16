@@ -1,5 +1,7 @@
 /** Exercise shapes for the chapter "roots" (see ../write.ts). */
 import { NESTED } from "./nested";
+import { walked } from "../walk";
+import { walks } from "../walks/roots";
 import { ax, plus, byIds, letter, type Level, type Shape } from "../write";
 
 /** Numbers with no square factor, to stay inside a root. */
@@ -130,8 +132,8 @@ const all: Shape[] = [
 ];
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: byIds(all, "simplify", "square-times-letter", "root-times-bracket", "add-roots", "cube-simplify", "nth-root-of-power"),
-  medium: byIds(all, "simplify-with-letter", "square-of-root-plus", "cube-root-and-like"),
-  // Hard nests one thing in another, with x and y: chapters/nested.ts.
-  hard: NESTED.roots,
+  easy: [...byIds(all, "simplify", "square-times-letter", "root-times-bracket", "add-roots", "cube-simplify", "nth-root-of-power"), ...walks.easy.map((w) => walked(w, "roots"))],
+  medium: [...byIds(all, "simplify-with-letter", "square-of-root-plus", "cube-root-and-like"), ...walks.medium.map((w) => walked(w, "roots"))],
+  // Hard nests one thing in another, with x and y: chapters/nested.ts; and walks every way at once.
+  hard: [...NESTED.roots, ...walks.hard.map((w) => walked(w, "roots"))],
 };

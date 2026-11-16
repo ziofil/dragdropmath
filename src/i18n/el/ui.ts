@@ -10,8 +10,6 @@ export const el: Translation = {
   // Top bar
   makeExercises: "Φτιάξε ασκήσεις",
   sandbox: "Εργαστήριο",
-  openSandbox: "Άνοιξε το εργαστήριο →",
-  sandboxIntro: "Γράψε όποια παράσταση ή εξίσωση θέλεις και δοκίμασε όλες τις κινήσεις.",
   sandboxInput: "Παράσταση ή εξίσωση",
   sandboxPlaceholder: "π.χ. 3(x - 2) = 2x + 1   ή   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Φόρτωσε",
@@ -24,15 +22,12 @@ export const el: Translation = {
   heroText:
     "Σύρε όποιο κομμάτι μιας εξίσωσης θέλεις. Κινείται μόνο με τρόπους που επιτρέπουν τα μαθηματικά. Άλλαξέ τη μέχρι να γίνει ίδια με τον στόχο.",
   learningPath: "Διαδρομή μάθησης",
-  everyChapterOpen: "Όλα τα κεφάλαια είναι ανοιχτά. Τα βέλη δείχνουν μια προτεινόμενη σειρά.",
   chapterN: (n: number) => `Κεφάλαιο ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} και ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Χρειάζεσαι πρώτα: ${titles}.`,
   startLesson: "Ξεκίνα το μάθημα →",
   // Chapter page
   backToPath: "← Διαδρομή μάθησης",
-  leadsOnToStart: "Μετά συνεχίζεις με: ",
-  leadsOnToEnd: ". Μπορείς να πας εκεί όποτε θέλεις.",
   level: { easy: "Εύκολη", medium: "Μέτρια", hard: "Δύσκολη" },
   anotherOne: "Άλλη μία →",
   practice: "Εξάσκηση",

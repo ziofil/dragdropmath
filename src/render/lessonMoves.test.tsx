@@ -14,7 +14,8 @@ import { handles, RULES, tapFor } from "../rules";
 import { stepDone } from "../game/solver";
 
 const cases = Object.entries(DRILLS).flatMap(([chapterId, drills]) =>
-  drills.filter((d) => RULES[d.rule].feel?.carry !== "pull-out").map((d) => [chapterId, d.id] as const),
+  // Pulled out of a container, or carried out in front of a sum: a drag outwards, not onto a piece (drag.test.tsx, and every exercise's reach check).
+  drills.filter((d) => !["pull-out", "out-in-front"].includes(RULES[d.rule].feel?.carry ?? "")).map((d) => [chapterId, d.id] as const),
 );
 
 describe("lesson moves, by hand", () => {

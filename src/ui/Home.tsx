@@ -6,7 +6,6 @@ import { loadScore } from "../game/scoring";
 import { LEVELS } from "../game/generate/write";
 import { chapterText, t } from "../i18n";
 import { LevelButtons } from "./Practice";
-import { LeadsTo } from "./ChapterView";
 import { href } from "./routes";
 
 /** Height of one row of the path. */
@@ -45,21 +44,11 @@ export function Home({ at }: { at?: Chapter }) {
       {/* Coming back from a chapter, the page opens here (routes.ts). */}
       <div className="path-layout" id="path">
         <section className="card path-card" aria-label={t().learningPath}>
-          <div className="path-legend">
-            <span className="path-open">{t().everyChapterOpen}</span>
-          </div>
           <PathMap selected={selected} onSelect={select} />
         </section>
 
         <ChapterPanel panelRef={panel} chapter={selected} />
       </div>
-
-      <section className="card home-sandbox">
-        <a href={href({ page: "sandbox" })} className="button">
-          {t().openSandbox}
-        </a>
-        <p>{t().sandboxIntro}</p>
-      </section>
 
     </main>
   );
@@ -180,9 +169,7 @@ function ChapterPanel({ panelRef, chapter }: { panelRef: Ref<HTMLElement>; chapt
       <div className="panel-mode">
         <h3 className="panel-mode-name">{t().predict}</h3>
         <LevelButtons mode="predict" chapter={chapter} />
-        <p className="panel-mode-note">{t().predictNote}</p>
       </div>
-      <LeadsTo chapter={chapter} />
     </section>
   );
 }
@@ -201,7 +188,6 @@ function Scores() {
           </li>
         ))}
       </ul>
-      <p className="scores-note">{t().scoresNote}</p>
     </section>
   );
 }

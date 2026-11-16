@@ -9,8 +9,6 @@ export const pl: Translation = {
   // Top bar
   makeExercises: "Ułóż zadania",
   sandbox: "Piaskownica",
-  openSandbox: "Otwórz piaskownicę →",
-  sandboxIntro: "Wpisz dowolne wyrażenie lub równanie i wypróbuj wszystkie ruchy.",
   sandboxInput: "Wyrażenie lub równanie",
   sandboxPlaceholder: "np. 3(x - 2) = 2x + 1   albo   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Wczytaj",
@@ -23,15 +21,12 @@ export const pl: Translation = {
   heroText:
     "Przeciągnij dowolną część równania. Da się ją przesunąć tylko tak, jak pozwala matematyka. Przekształcaj je, aż dojdziesz do celu.",
   learningPath: "Ścieżka nauki",
-  everyChapterOpen: "Wszystkie rozdziały są otwarte. Strzałki pokazują proponowaną kolejność.",
   chapterN: (n: number) => `Rozdział ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} i ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Najpierw warto znać: ${titles}.`,
   startLesson: "Zacznij lekcję →",
   // Chapter page
   backToPath: "← Ścieżka nauki",
-  leadsOnToStart: "Dalej możesz przejść do: ",
-  leadsOnToEnd: ". Zajrzyj tam, kiedy chcesz.",
   level: { easy: "Łatwe", medium: "Średnie", hard: "Trudne" },
   anotherOne: "Jeszcze jedno →",
   practice: "Ćwiczenia",

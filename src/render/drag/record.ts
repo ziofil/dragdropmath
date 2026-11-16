@@ -7,7 +7,7 @@ import type { Recording } from "../testing/recording";
 /**
  * Records a drag as it happens: the state it started from, the piece and
  * where on it it was grabbed, and every pointer position (canvas
- * coordinates) — enough to replay it exactly in a test (testing/harness `replay`).
+ * coordinates) — enough to replay it exactly in a test (headless.ts `replay`).
  */
 class Record extends Modifier<MathState> {
   readonly name = "record";

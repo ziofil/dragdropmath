@@ -13,8 +13,6 @@ export const tr: Translation = {
   // Top bar
   makeExercises: "Alıştırma hazırla",
   sandbox: "Deneme alanı",
-  openSandbox: "Deneme alanını aç →",
-  sandboxIntro: "İstediğin bir ifadeyi ya da denklemi yaz, bütün hamleleri dene.",
   sandboxInput: "İfade ya da denklem",
   sandboxPlaceholder: "örn. 3(x - 2) = 2x + 1   veya   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Yükle",
@@ -27,15 +25,12 @@ export const tr: Translation = {
   heroText:
     "Bir denklemin istediğin parçasını sürükle. Parçalar yalnızca matematiğin izin verdiği şekilde hareket eder. Hedefe benzeyene kadar düzenlemeye devam et.",
   learningPath: "Öğrenme yolu",
-  everyChapterOpen: "Bütün bölümler açık. Oklar önerilen sırayı gösteriyor.",
   chapterN: (n: number) => `Bölüm ${n}`,
   list: (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} ve ${items[items.length - 1]}`),
   buildsOn: (titles: string) => `Ön bilgi: ${titles}.`,
   startLesson: "Konuya başla →",
   // Chapter page
   backToPath: "← Öğrenme yolu",
-  leadsOnToStart: "Sonra gelenler: ",
-  leadsOnToEnd: ". İstediğin zaman geçebilirsin.",
   level: { easy: "Kolay", medium: "Orta", hard: "Zor" },
   anotherOne: "Bir tane daha →",
   practice: "Alıştırma yap",

@@ -1,5 +1,7 @@
 /** Powers: multiply, divide, a power of a power, negative exponents, numbers in front. Letters are positive. */
 import { NESTED } from "./nested";
+import { walked } from "../walk";
+import { walks } from "../walks/powers";
 import { byIds, one, pw, type Draft, type Level, type Rng, type Shape } from "../write";
 
 /** c·x^e: "3x^5", "x^4", "-x". */
@@ -293,8 +295,8 @@ export const all: Shape[] = [
 /** Easy: one rule, once. Medium: numbers, powers of powers and brackets together. Hard: a power of a quotient, a quotient of powers, with x and y (nested.ts). */
 export const shapes: Record<Level, Shape[]> = {
   // (Powers with brackets to multiply out come after the distributive law: chapters/brackets.ts.)
-  easy: byIds(all, "multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters"),
-  medium: byIds(all, "two-products", "letters-and-number"),
-  // Hard nests one thing in another, with x and y: chapters/nested.ts.
-  hard: NESTED.powers,
+  easy: [...byIds(all, "multiply", "divide", "power-of-power", "number-inside", "three-powers", "two-letters"), ...walks.easy.map((w) => walked(w, "powers"))],
+  medium: [...byIds(all, "two-products", "letters-and-number"), ...walks.medium.map((w) => walked(w, "powers"))],
+  // Hard nests one thing in another, with x and y: chapters/nested.ts; and walks every way at once.
+  hard: [...NESTED.powers, ...walks.hard.map((w) => walked(w, "powers"))],
 };

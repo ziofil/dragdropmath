@@ -1,7 +1,7 @@
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { allNodes, locate, nodeAt, parentLoc, withoutFrom } from "../expr/tree";
-import { dragCtx, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
+import { dragCtx, handles, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { num } from "../expr/build";
 import { roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
@@ -126,6 +126,35 @@ export function isGrabbable(state: MathState, id: string, enabled: readonly Rule
   return movesFor(state, enabled).grabbable(id);
 }
 
+
+/** One way to make a step: piece `id` carried (onto `candidate.targetId`, if any), or tapped. */
+export type Way = { id: string; tap: boolean; candidate: Candidate };
+/** One step a learner can make: the state it gives, and every way to make it (by any rule). */
+export type Step = { state: MathState; ways: Way[] };
+
+/**
+ * Every step one move away from `state`: each distinct result once, with all
+ * the ways of making it — the pieces a learner can pick up and carry, and
+ * taps. A learner thinks in steps ("6x/6 became x"), not in rules (the bottom
+ * 6 carried up divides the numbers; the top one carried down cancels a
+ * factor): the solver, the lessons and Show all read moves from here.
+ */
+export function stepsFrom(state: MathState, enabled: readonly RuleId[]): Step[] {
+  const moves = movesFor(state, enabled);
+  const byKey = new Map<string, Step>();
+  const add = (w: Way) => {
+    const k = stateKey(w.candidate.state, "exact");
+    const step = byKey.get(k);
+    if (step) step.ways.push(w);
+    else byKey.set(k, { state: w.candidate.state, ways: [w] });
+  };
+  for (const id of handles(state)) {
+    if (moves.grabbable(id)) for (const c of moves.drag(id)) add({ id, tap: false, candidate: c });
+    const t = moves.tap(id);
+    if (t) add({ id, tap: true, candidate: t });
+  }
+  return [...byKey.values()];
+}
 
 /** Merges a tap on the operator between two pieces does: what dropping the second on the first would. */
 const SUM_TAPS: RuleId[] = ["combine", "add-fractions", "combine-logs"];
@@ -253,13 +282,8 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   const grabbable = memo((id) => drag(id).some((c) => !isCosmetic(state, id, c)));
   const pressable = memo((id) => {
     if (!grabbable(id)) return false;
-    // An exponent written as a sum (2^(x − 3)) has no brackets to press: a press
-    // anywhere on it takes it all, when it has a move of its own (a hold, a term of it).
-    const c = signOwner(id) ? null : dragCtx(state, id);
-    const up = c?.parent && dragCtx(state, c.parent.id);
-    if (c?.parent?.kind === "sum" && up?.parent?.kind === "pow" && up.index === 1 && grabbable(c.parent.id)) return false;
-    const term = termAround(state, id);
-    return term === null || !grabbable(term);
+    const around = signOwner(id) ? null : pieceAround(state, id);
+    return around === null || !grabbable(around);
   });
   const tappable = memo((id) => tap(id) !== null);
   const moves = { drag, tap, grabbable, pressable, tappable };
@@ -342,25 +366,36 @@ export function forgetMoves(state: MathState): void {
 }
 
 /**
- * The term of a sum (with others) that `id` sits in side by side with other
- * factors: 3xy for the x of 3xy + 2, 2(x + 1) for its 2 or its bracket. Null
- * if it is itself such a term, in no sum with others, or set apart from its
- * term on screen — a fraction's top or bottom, an exponent, what a log or a
- * root holds: those are pressed directly. (A power's base isn't set apart:
- * the x of 3x² is pressed as part of its term.)
+ * The bigger piece a quick press on `id` takes instead (holding still takes
+ * `id` itself), or null if a quick press takes `id`. The one place this is
+ * decided:
+ *
+ * - In a sum with others, its term: 3xy for the x of 3xy + 2, 2(x + 1) for
+ *   its 2 or its bracket (side by side through factors, a minus, and a
+ *   power's base: the x of 3x² is part of its term).
+ * - A term of a sum that is an exponent (2^(x − 3)): the whole exponent (it
+ *   has no brackets to press).
+ * - Inside a fraction on top of or under another's bar: that fraction (the
+ *   3 of 6/(3/6) takes 3/6).
+ * - Set apart on screen — a fraction's top or bottom, an exponent, what a
+ *   log or a root holds: nothing; it is pressed directly.
+ *
+ * Only a piece around that can itself be picked up takes the press (see
+ * Moves.pressable).
  */
-function termAround(state: MathState, id: string): string | null {
+function pieceAround(state: MathState, id: string): string | null {
   let loc = locate(state, id);
   while (loc && loc.path.length > 0) {
     const up = parentLoc(loc)!;
     const P = nodeAt(state, up);
     if (P.kind === "sum" && P.terms.length >= 2) {
       const t = nodeAt(state, loc).id;
+      // An exponent written as a sum is pressed as a whole.
+      const holder = up.path.length > 0 ? nodeAt(state, parentLoc(up)!) : null;
+      if (t === id && holder?.kind === "pow" && up.path.at(-1) === 1) return P.id;
       return t === id ? null : t;
     }
-    // A fraction on top of or under another's bar is one piece: a quick press on its 3 takes 3/6 in 6/(3/6) (held, the 3).
     if (P.kind === "frac" && up.path.length > 0 && nodeAt(state, parentLoc(up)!).kind === "frac") return P.id;
-    // Side by side: factors, a minus, and a power's base (the x of x², not its exponent, nor what a √ holds).
     const besideIt = P.kind === "prod" || P.kind === "neg" || (P.kind === "pow" && !P.radical && loc.path.at(-1) === 0);
     if (!besideIt) return null;
     loc = up;

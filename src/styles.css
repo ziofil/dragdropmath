@@ -134,15 +134,9 @@
   --num: #2e6b4f;
   --good: #4f6b23;
   --good-soft: #dfe0b4;
-  /* "Solved!" is a fresh sheet laid on the page, written in red chalk. */
-  /* "Solved!" is a fresh sheet laid on the page, written in red chalk: grain and fibres, an ink
-     blot by its far edge, edges browned with age, and an outline worn uneven (the shadow follows it). */
+  /* "Solved!" is a fresh sheet laid on the page, written in red chalk: grain and fibres, edges
+     browned with age, and an outline worn uneven (the shadow follows it). */
   --solved-bg:
-    radial-gradient(circle at calc(100% - 18px) calc(100% - 12px), rgba(44, 24, 9, 0.82) 0 6px, rgba(44, 24, 9, 0.34) 7.5px, transparent 11px),
-    radial-gradient(ellipse 9px 6px at calc(100% - 27px) calc(100% - 15px), rgba(44, 24, 9, 0.7) 0 55%, transparent 80%),
-    radial-gradient(ellipse 26px 16px at calc(100% - 11px) calc(100% - 16px), rgba(48, 26, 10, 0.45), rgba(48, 26, 10, 0.12) 60%, transparent 74%),
-    radial-gradient(circle at calc(100% - 31px) calc(100% - 6px), rgba(48, 26, 10, 0.6) 0 1.6px, transparent 2.6px),
-    radial-gradient(circle at calc(100% - 6px) calc(100% - 27px), rgba(48, 26, 10, 0.5) 0 1.2px, transparent 2.2px),
     radial-gradient(ellipse at 20% 0%, rgba(255, 252, 240, 0.85), transparent 60%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.09' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.3  0 0 0 0 0.12  0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.42  0 0 0 0 0.27  0 0 0 0 0.1  0 0 0 0.11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
@@ -931,17 +925,6 @@ div.predict-choice {
 .feel-hit {
   fill: transparent;
 }
-.home-sandbox {
-  margin-top: 16px;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.home-sandbox p {
-  margin: 0;
-  color: var(--ink-soft);
-}
 
 .path-layout {
   display: grid;
@@ -953,18 +936,6 @@ div.predict-choice {
 .path-card {
   padding: 16px 12px 8px;
   min-width: 0;
-}
-.path-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  align-items: center;
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  padding: 0 4px 12px;
-}
-.path-open {
-  flex-basis: 100%;
 }
 
 .path {
@@ -1101,9 +1072,6 @@ div.predict-choice {
 .path-panel .levels {
   grid-template-columns: repeat(3, 1fr);
 }
-.path-panel .leads-to {
-  font-size: 0.9rem;
-}
 
 /* ---------- the mind's eye's scores (Home) ---------- */
 .scores {
@@ -1121,7 +1089,6 @@ div.predict-choice {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  max-width: 420px;
 }
 .score {
   display: flex;
@@ -1140,11 +1107,6 @@ div.predict-choice {
   line-height: 1.1;
 }
 .score-level {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-.scores-note {
-  margin: 0;
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
@@ -1219,10 +1181,6 @@ div.predict-choice {
 }
 .lesson-move {
   margin-bottom: 28px;
-}
-.leads-to {
-  margin: 16px 0 0;
-  color: var(--ink-soft);
 }
 
 /* ---------- sets of one's own: making one (SetView.tsx) ---------- */
@@ -1542,12 +1500,6 @@ div.predict-choice {
   gap: 12px;
   font-weight: 600;
 }
-.settings-row small {
-  display: block;
-  font-weight: 400;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-}
 .settings-row input[type="checkbox"] {
   width: 20px;
   height: 20px;
@@ -1570,7 +1522,6 @@ div.predict-choice {
   flex-wrap: wrap;
   gap: 8px;
 }
-
 
 /* ---------- footer, on every page ---------- */
 .footer {

@@ -1,5 +1,7 @@
 /** Exercise shapes for the chapter "explog" (see ../write.ts). */
 import { NESTED } from "./nested";
+import { walked } from "../walk";
+import { walks } from "../walks/explog";
 import { byIds, letter, type Level, type Rng, type Shape } from "../write";
 
 /** A base and an exponent whose power stays small: 2 to 2⁵, 3 to 3³, 5². */
@@ -72,8 +74,8 @@ const all: Shape[] = [
 ];
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: byIds(all, "log-of-power", "logs-of-powers"),
-  medium: byIds(all, "split-number-log", "exp-of-power-log"),
-  // Hard nests one thing in another, with x and y: chapters/nested.ts.
-  hard: NESTED.explog,
+  easy: [...byIds(all, "log-of-power", "logs-of-powers"), ...walks.easy.map((w) => walked(w, "explog"))],
+  medium: [...byIds(all, "split-number-log", "exp-of-power-log"), ...walks.medium.map((w) => walked(w, "explog"))],
+  // Hard nests one thing in another, with x and y: chapters/nested.ts; and walks every way at once.
+  hard: [...NESTED.explog, ...walks.hard.map((w) => walked(w, "explog"))],
 };

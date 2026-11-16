@@ -3,7 +3,7 @@ import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
 import { stateKey, type Ordering } from "../expr/key";
 import { allNodes } from "../expr/tree";
-import { candidatesFor, forgetMoves, handles, isGrabbable, tapFor, type RuleId } from "../rules";
+import { forgetMoves, stepsFrom, type RuleId } from "../rules";
 
 /**
  * Has the learner reached the goal? "Make it look like" means it must look
@@ -34,13 +34,9 @@ export function matchesGoal(state: MathState, goal: MathState, ordered: Ordering
   return false;
 }
 
-/** Every state one move away, as the move leaves it (before tidying). */
+/** Every state one move away, as the move leaves it (before tidying): each step once (see stepsFrom). */
 export function moves(state: MathState, rules: readonly RuleId[]): MathState[] {
-  return handles(state).flatMap((id) => [
-    // Only drags a learner can actually make (a handle's), and taps.
-    ...(isGrabbable(state, id, rules) ? candidatesFor(state, id, rules).map((c) => c.state) : []),
-    ...(tapFor(state, id, rules) ? [tapFor(state, id, rules)!.state] : []),
-  ]);
+  return stepsFrom(state, rules).map((s) => s.state);
 }
 
 /** Every state one move away, tidied as the app tidies it. */

@@ -5,7 +5,7 @@
  * one move away). Each drill has its own words in i18n (`drills`).
  */
 import type { RuleId } from "../../rules";
-import { candidatesFor, handles, isGrabbable, tapFor } from "../../rules";
+import { stepsFrom } from "../../rules";
 import type { MathState } from "../../expr/types";
 import { parseState } from "../../expr/parse";
 import { allNodes, locate, nodeAt } from "../../expr/tree";
@@ -103,6 +103,11 @@ export const DRILLS: Record<string, Drill[]> = {
       return { start: `${a}(${x} + ${b})`, goal: `${a}${x} + ${a * b}` };
     }),
     d("distribute-neg", (r) => `-(${letter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
+    // Back to Powers: a letter times a bracket makes a power (x·x = x²).
+    d("letter-in", (r) => {
+      const [x, a] = [letter(r), r.int(2, 9)];
+      return { start: `${x}(${x} + ${a})`, goal: `${x}^2 + ${a}${x}` };
+    }, "distribute"),
   ],
   brackets: [
     d("bracket-times-bracket", (r) => {
@@ -271,6 +276,11 @@ export const DRILLS: Record<string, Drill[]> = {
     }),
     d("split-fraction", (r) => `(${letter(r)} + ${r.int(1, 9)})/${r.int(2, 9)}`),
     d("times-one", (r) => `1·${letter(r)} + ${r.int(2, 9)}`),
+    // Back to Factoring: take out the factor the top shares with the bottom, then cancel it.
+    d("factor-then-cancel", (r) => {
+      const [x, k, a] = [letter(r), r.int(2, 5), r.int(1, 7)];
+      return { start: `(${k}${x} + ${k * a})/${k}`, goal: `${x} + ${a}` };
+    }, "factor-out"),
   ],
   simultaneous: [
     d("substitute", (r) => {
@@ -310,6 +320,16 @@ export const DRILLS: Record<string, Drill[]> = {
       return { start: `√${a}·√${b}`, goal: `√(${a}*${b})` };
     }),
     d("root-notation", (r) => `${r.next() < 0.6 ? "√" : `root_${r.int(3, 4)}`}(${letter(r)}) + ${r.int(2, 9)}`),
+    // Back to Powers: a root of a power is a power of a power.
+    d("root-of-power", (r) => {
+      const [x, n, m] = [letter(r), pick(r, [2, 3, 3, 4]), r.int(2, 3)];
+      return { start: `${n === 2 ? "√" : `root_${n}`}(${x}^${n * m})`, goal: `${x}^${m}` };
+    }, "root-notation"),
+    // Back to Powers and Fractions: a root times a power, as one power (the exponents add, as fractions).
+    d("fraction-power", (r) => {
+      const [x, k] = [letter(r), r.int(1, 3)];
+      return { start: `√${x}·${x}^${k}`, goal: `${x}^(${2 * k + 1}/2)` };
+    }, "merge-powers"),
   ],
   explog: [
     d("exp-of-log", (r) => (r.next() < 0.5 ? `e^(ln(${letter(r)}))` : `2^(log_2(${letter(r)}))`)),
@@ -325,6 +345,11 @@ export const DRILLS: Record<string, Drill[]> = {
       const [x, y] = letters2(r);
       return `ln(${x}) ${pick(r, ["+", "-"])} ln(${y})`;
     }),
+    // Back to Roots: a root is a power, so its exponent comes out of the log too.
+    d("log-of-root", (r) => {
+      const x = letter(r);
+      return { start: `ln(√${x})`, goal: `(1/2)ln(${x})` };
+    }, "root-notation"),
   ],
 };
 
@@ -336,21 +361,9 @@ export const drillById = (chapterId: string, id: string) => drillsOf(chapterId).
 
 /** Every state one `rule` move makes of `state` (drags a learner can make, and taps). */
 export function oneMove(state: MathState, rule: RuleId, rules: readonly RuleId[]): MathState[] {
-  const seen = new Set<string>();
-  const out: MathState[] = [];
-  for (const id of handles(state)) {
-    const found = [
-      ...(isGrabbable(state, id, rules) ? candidatesFor(state, id, rules).filter((c) => c.rule === rule) : []),
-      ...[tapFor(state, id, rules)].filter((c) => c?.rule === rule),
-    ];
-    for (const c of found) {
-      const k = stateKey(c!.state, "exact");
-      if (seen.has(k)) continue;
-      seen.add(k);
-      out.push(c!.state);
-    }
-  }
-  return out;
+  return stepsFrom(state, rules)
+    .filter((s) => s.ways.some((w) => w.candidate.rule === rule))
+    .map((s) => s.state);
 }
 
 /**

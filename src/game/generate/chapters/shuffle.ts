@@ -1,4 +1,6 @@
 /** Exercise shapes for the chapter "shuffle": terms in any order, numbers worked out (see ../write.ts). */
+import { walked } from "../walk";
+import { walks } from "../walks/shuffle";
 import { ax, byIds, lin, one, shuffled, signedSum, type Draft, type Level, type Rng, type Shape } from "../write";
 
 const letter = (r: Rng) => one(r, ["x", "y", "a", "b"]);
@@ -202,7 +204,7 @@ all.push(
 );
 
 export const shapes: Record<Level, Shape[]> = {
-  easy: byIds(all, "numbers-around", "numbers-together"),
-  medium: byIds(all, "two-products", "three-plain"),
-  hard: byIds(all, "long-sum", "long-ab"),
+  easy: [...byIds(all, "numbers-around", "numbers-together"), ...walks.easy.map((w) => walked(w, "shuffle"))],
+  medium: [...byIds(all, "two-products", "three-plain"), ...walks.medium.map((w) => walked(w, "shuffle"))],
+  hard: [...byIds(all, "long-sum", "long-ab"), ...walks.hard.map((w) => walked(w, "shuffle"))],
 };

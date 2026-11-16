@@ -50,10 +50,7 @@ function SettingsPanel() {
         <input type="checkbox" className="settings-numbers" checked={numbers} onChange={(e) => setNumbers(e.target.checked)} />
       </label>
       <label className="settings-row">
-        <span>
-          {t().debugMode}
-          <small>{t().debugModeNote}</small>
-        </span>
+        <span>{t().debugMode}</span>
         <input type="checkbox" className="settings-debug" checked={debug} onChange={(e) => setDebug(e.target.checked)} />
       </label>
       <ProgressBackup />

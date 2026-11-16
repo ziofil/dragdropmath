@@ -206,7 +206,7 @@ check("…and leads to About", (await p.textContent("h1")).includes("About"));
 for (const skin of ["modern", "codex", "paper", "blackboard"]) {
   await pickSkin(skin);
   await p.waitForTimeout(400);
-  for (const [h, sels] of [["#/", [".scores", ".path-card", ".path-panel", ".home-sandbox"]], ["#/predict/balance/easy/3", [".predict-choice"]]]) {
+  for (const [h, sels] of [["#/", [".scores", ".path-card", ".path-panel"]], ["#/predict/balance/easy/3", [".predict-choice"]]]) {
     await go(h, 400);
     const looks = await p.evaluate((sels) => sels.flatMap((s) => [...document.querySelectorAll(s)].map((e) => { const c = getComputedStyle(e); return `${c.borderTopWidth} ${c.borderLeftWidth} ${c.borderTopStyle}`; })), sels);
     check(`${skin}: ${h} frames alike`, new Set(looks).size <= 1, looks.join(", "));

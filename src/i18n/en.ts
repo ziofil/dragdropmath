@@ -18,10 +18,7 @@ export const en = {
   settings: "Settings",
   numbersInColour: "Numbers in colour",
   debugMode: "Debug mode",
-  debugModeNote: "Shows how each drag works, for chasing bugs.",
   sandbox: "Sandbox",
-  openSandbox: "Open the sandbox →",
-  sandboxIntro: "Type any expression or equation and play with every move.",
   sandboxInput: "Expression or equation",
   sandboxPlaceholder: "e.g. 3(x - 2) = 2x + 1   or   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Load",
@@ -34,7 +31,6 @@ export const en = {
   heroAfter: ".",
   heroText: "Drag any part of an equation. It can only move in ways the maths allows. Rearrange it until it matches the goal.",
   learningPath: "Learning path",
-  everyChapterOpen: "Every chapter is open. The arrows show a suggested order.",
   chapterNodeLabel: (n: number, title: string) => `Chapter ${n}: ${title}`,
   chapterN: (n: number) => `Chapter ${n}`,
   /** A list of names: "A", "A and B", "A, B and C". */
@@ -44,13 +40,10 @@ export const en = {
 
   // Chapter page
   backToPath: "← Learning path",
-  /** Followed by the chapters' links, then leadsOnToEnd. */
-  leadsOnToStart: "Leads on to ",
-  leadsOnToEnd: ". You can go there any time.",
   level: { easy: "Easy", medium: "Medium", hard: "Hard" },
   anotherOne: "Another one →",
   progressHere: "Your progress is kept in this browser only. Save it to a file to keep it safe, or to carry it to another device.",
-  saveProgress: "Save my progress",
+  saveProgress: "Export progress to a file",
   loadProgress: "Load progress from a file",
   progressSaved: "Saved. Load that file here, or in any browser, to get your progress back.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. All rights reserved.`,
@@ -85,10 +78,8 @@ export const en = {
   lesson: "Lesson",
   practice: "Practice",
   predict: "Mind's eye",
-  predictNote: "See the answer in your mind's eye, pick it, then solve it by hand to check. A right answer adds 1 to your score at its level; a wrong one, or a reveal, takes 1 away.",
   /** The mind's eye's scores, one per level across every chapter. */
   scores: "Mind's eye scores",
-  scoresNote: "One for each level, across every chapter: +1 for a right answer, −1 for a wrong one or a reveal.",
   /** On a level's button: its score. */
   scoreOf: (n: number) => `score ${n}`,
   /** After a first answer: the score at its level, and how it moved. */
@@ -118,6 +109,8 @@ export const en = {
     "swap-sides": { name: "Swap the sides", how: "Drag one side across the = and past the far end. The two sides change places.", text: ["`7 = x` and `x = 7` say the same thing, so the two sides can change places."] },
     "evaluate-fraction": { name: "Work out a fraction", how: "Tap the fraction bar to work it out.", text: ["A fraction that comes out whole can be worked out: `12/3` is 4."] },
     "divide-numbers": { name: "Simplify a fraction", how: "Press and hold the bottom number, then drop it onto the top one, or tap the fraction bar. Both are divided by their common factor.", text: ["A fraction can be simplified by dividing its top and bottom by the same number: `6/8 = 3/4`. Its value doesn't change."] },
+    "letter-in": { name: "A letter times a bracket", how: "Drop the letter in front onto the brackets. Then drop the two x's together: `x·x` is `x²`.", text: ["The letter multiplies every term inside, just as a number does: `x(x + 3) = x·x + x·3`. And `x·x` is a power, `x²`, as in Powers."] },
+    "factor-then-cancel": { name: "Take out, then cancel", how: "Hold the number in a term on top and drag it out in front, past the left end. Then drop the bottom number onto it: they cancel.", text: ["You can only cancel a factor of the whole top. In `(2x + 6)/2` the 2 is a factor of each term, so take it out first: `(2(x + 3))/2`. Now it is a factor of the whole top, and cancels with the bottom."] },
     "cancel-factor": { name: "Cancel a common factor", how: "Drop the number on the bottom onto the same number on top. Both disappear.", text: ["The same number on the top and the bottom cancels out: `(3x)/3` is `x`."] },
     "power-of-power": { name: "Power of a power", how: "Drop the outer exponent onto the inner one. They multiply: tap the · to work it out.", text: ["`(x²)³` is `x²·x²·x²`. That's 2 + 2 + 2 = 6 x's, so the exponents multiply."] },
     "divide-powers": { name: "Same base: subtract exponents", how: "Drop the power on the bottom onto the one on top. The exponents subtract: tap the − to work it out.", text: ["`x⁵/x²` has five x's on top and two on the bottom. Two cancel from each, leaving three on top: dividing subtracts the exponents."] },
@@ -147,11 +140,14 @@ export const en = {
     "join-powers": { name: "Join roots", how: "Drop one root onto the other. They share one root sign.", text: ["`√2·√3` squared is `2·3`, so `√2·√3` is the number whose square is 6: `√(2·3) = √6`. Two roots of the same kind join under one.", "The same goes for any shared exponent: `x³y³` is xxx·yyy, which is xy·xy·xy, so `(xy)³`."] },
     "pull-out-of-power": { name: "Split a root", how: "Pull the number out of the root: it gets its own root. Then tap that root to work it out.", text: ["The root of a product is the product of the roots: `√(4x) = √4·√x = 2√x`."] },
     "root-notation": { name: "A root as a power", how: "Tap the root to write it as a power: √ is a power of ½, ∛ a power of ⅓.", text: ["Every root is a power: `√x = x^(1/2)`, `∛x = x^(1/3)`, and the nth root of x is `x^(1/n)`. So all the rules for powers work for roots too: `√x·√x = x^(1/2 + 1/2) = x`."] },
+    "root-of-power": { name: "A root of a power", how: "Tap the root to write it as a power. Then drop its outer exponent onto the inner one, and work out the product.", text: ["A root is a power, so a root of a power is a power of a power: `∛(x⁶) = (x⁶)^(1/3) = x^(6·1/3) = x²`. The exponents multiply, as in Powers."] },
+    "fraction-power": { name: "Roots and powers together", how: "Drop the root onto the power: the exponents add. Then add the fractions in the exponent.", text: ["`√x` is `x^(1/2)`, so `√x·x² = x^(1/2 + 2) = x^(5/2)`. A fraction exponent works like any other: to multiply powers, add the exponents."] },
     "root-across": { name: "A root's power across the =", how: "Drag the ½ (or ⅓, or ¼) across the =. On the other side it becomes a square (or a cube, or a fourth power). Then tap the exponent to work it out.", text: ["To solve `√x = 3`, square both sides. Written as a power, `x^(1/2) = 3`, the ½ moves across and becomes a square: `x = 3²`."] },
     "exp-of-log": { name: "A power undoes a log", how: "Drop the base onto the log in its exponent. They undo each other.", text: ["`e` is a special number, about 2.718. `ln(x)` is the power of e that gives x, so ln and e^ undo each other: `e^(ln x) = x`. Logs to other bases work the same way: `2^(log₂ x) = x`."] },
     "evaluate-log": { name: "Logs you know", how: "Tap the log to work it out: `ln(e) = 1`, and the log of 1 is 0.", text: ["`ln(e) = 1`, since `e¹ = e`. And the log of 1 is 0, since anything to the power 0 is 1."] },
     "power-of-base": { name: "As a power of the base", how: "Tap the number in the log to write it as a power of 2. Then drag the exponent out in front of the log, and tap the log.", text: ["To work out `log₂(8)`, write 8 as a power of 2: `8 = 2³`, so `log₂(8) = 3`."] },
     "log-of-product": { name: "Split a log", how: "Pull the number out of the log. It gets its own log.", text: ["Multiplying powers adds their exponents. So the log of a product is a sum of logs: `ln(2x) = ln(2) + ln(x)`."] },
+    "log-of-root": { name: "A log of a root", how: "Tap the root to write it as a power. Then drag the exponent out in front of the log.", text: ["A root is a power, `√x = x^(1/2)`, so its exponent comes out of the log like any other: `ln(√x) = ½ln(x)`."] },
     "log-of-power": { name: "Exponent out of a log", how: "Drag the exponent out in front of the log.", text: ["`x³` is `x·x·x`, so `ln(x³) = ln(x) + ln(x) + ln(x) = 3ln(x)`."] },
     "power-into-log": { name: "Number into a log", how: "Drop the number in front onto the log. It becomes an exponent inside.", text: ["The other way round: `3ln(x)` is `ln(x³)`."] },
     "combine-logs": { name: "Combine logs", how: "Drop one log onto the other, or tap the + (or −) between them. Adding logs multiplies inside, subtracting divides.", text: ["The other way round too: `ln(a) + ln(b) = ln(ab)`, and `ln(a) − ln(b) = ln(a/b)`."] },

@@ -1,7 +1,7 @@
 /**
  * "Show me": where a hand would press and let go to make one move, so the
  * app can play it with the real drag engine (see MathCanvas's demo). Worked
- * out headlessly, the way the drag tests do (testing/harness.ts), from the
+ * out headlessly, with the headless hand the drag tests use too (headless.ts), from the
  * drag's own aims: a merge is carried to where it completes, any other move
  * to where the drag aims it (searching along the row, or around it, only
  * if letting go there doesn't give the move).
@@ -9,8 +9,8 @@
 import { Vec2 } from "dragology";
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
-import { handles, movesFor, RULES, type Candidate, type RuleId } from "../rules";
-import { ANCHOR, Grip, harness } from "./testing/harness";
+import { movesFor, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
+import { ANCHOR, Grip, harness } from "./headless";
 
 export type Demo =
   | { kind: "tap"; id: string; next: MathState }
@@ -25,8 +25,11 @@ const AROUND = Array.from({ length: 21 * 11 }, (_, i) => Vec2((i % 21) * 16 - 16
 const same = (a: MathState, b: MathState) => stateKey(a, "exact") === stateKey(b, "exact");
 
 /**
- * How to show `rule` on `state` in a W×H canvas: preferring a move that
- * `good` likes (one that heads for the board's goal). Null if none can be shown.
+ * How to show a step on `state` in a W×H canvas: one the lesson's move
+ * (`rule`) makes, the first that `good` likes (heading for the board's goal),
+ * made with the piece the words name (`prefer`) where there is one — by
+ * whichever rule that piece makes it (the bottom 6 of 6x/6 carried up divides
+ * the numbers: x, as cancelling does). Null if none can be shown.
  */
 export function planDemo(
   state: MathState,
@@ -39,24 +42,21 @@ export function planDemo(
   prefer: (state: MathState, id: string) => boolean = () => false,
 ): Demo | null {
   const moves = movesFor(state, rules);
-  const ids = handles(state);
+  const steps = stepsFrom(state, rules).filter((st) => st.ways.some((w) => w.candidate.rule === rule));
+  // Heading for the goal first, then with the named piece, then by the lesson's own move.
+  const rank = (st: Step, w: Way) => (good(st.state) ? 0 : 4) + (prefer(state, w.id) ? 0 : 2) + (w.candidate.rule === rule ? 0 : 1);
+  const ways = steps
+    .flatMap((st) => st.ways.map((w) => ({ w, r: rank(st, w) })))
+    .sort((a, b) => a.r - b.r)
+    .map((x) => x.w);
+  // A tap is shown as a tap (its rule is one), never as some drag that happens to give the same.
   if (RULES[rule].tap) {
-    const taps = ids.flatMap((id) => {
-      const c = moves.tap(id);
-      return c && c.rule === rule ? [{ id, c }] : [];
-    });
-    const t = taps.find((x) => good(x.c.state)) ?? taps[0];
-    return t ? { kind: "tap", id: t.id, next: t.c.state } : null;
+    const t = ways.find((w) => w.tap);
+    return t ? { kind: "tap", id: t.id, next: t.candidate.state } : null;
   }
   const h = harness(state, rules, W, H);
-  // The move itself; or, with the piece the words name, any move that makes the same step
-  // (the bottom 6 of 6x/6 carried up divides the numbers: x, as cancelling does).
-  const all: { id: string; c: Candidate }[] = ids
-    .filter((id) => moves.grabbable(id))
-    .flatMap((id) => moves.drag(id).filter((c) => c.rule === rule || (prefer(state, id) && good(c.state))).map((c) => ({ id, c })));
-  const rank = (x: (typeof all)[number]) => (good(x.c.state) ? 0 : 2) + (prefer(state, x.id) ? 0 : 1);
-  const ordered = [...all].sort((a, b) => rank(a) - rank(b));
-  for (const { id, c } of ordered) {
+  for (const { id, tap, candidate: c } of ways) {
+    if (tap) continue;
     const origin = h.originOf(id);
     if (!origin) continue;
     if (c.targetId) {
