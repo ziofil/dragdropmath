@@ -101,13 +101,16 @@ export function movedSlips(start: MathState, goal: MathState): MathState[] {
   return out;
 }
 
+/** A number written as one (3, 3/4), not a surd or a constant: two of them multiplied is a sum left unworked. */
+const plainNumber = (e: Expr): boolean => e.kind === "num" || (e.kind === "frac" && e.num.kind === "num" && e.den.kind === "num");
+
 /** Written as no answer is: 18/8, 10/2, 2·3x (a right answer is always simplified, so these give themselves away). */
 export function unsimplified(s: MathState): boolean {
   return s.sides.some((side) =>
     nodes(side).some(
       (n) =>
         (n.kind === "frac" && n.num.kind === "num" && n.den.kind === "num" && (n.den.value === 1 || gcd(n.num.value, n.den.value) > 1)) ||
-        (n.kind === "prod" && n.factors.filter(isConstant).length > 1),
+        (n.kind === "prod" && n.factors.filter(plainNumber).length > 1),
     ),
   );
 }

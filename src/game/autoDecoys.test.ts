@@ -55,6 +55,7 @@ describe("automatic wrong answers", () => {
     expect(unsimplified(parseState("x = 18/8"))).toBe(true);
     expect(unsimplified(parseState("2*(8/5)"))).toBe(true);
     expect(unsimplified(parseState("-6*(4*x - 5)"))).toBe(false);
+    expect(unsimplified(parseState("3*√(6) + 2*root_3(3)"))).toBe(false); // a number times a surd is how it's written
   });
 
   it("include slips made on the way (a term carried across with its sign kept)", () => {
