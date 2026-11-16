@@ -3,7 +3,7 @@ import type { ChapterTexts } from "..";
 export const ptChapters: ChapterTexts = {
   shuffle: {
     title: "Ordem dos termos",
-    blurb: "Numa soma, os termos podem vir em qualquer ordem, e as contas só com números já podem ser feitas.",
+    blurb: "Numa soma, os termos podem vir em qualquer ordem, e as contas só com números podem ser feitas.",
   },
 
   collect: {
@@ -13,8 +13,7 @@ export const ptChapters: ChapterTexts = {
 
   distribute: {
     title: "Propriedade distributiva",
-    blurb:
-      "Um número fora dos parênteses multiplica cada termo de dentro. Um fator que aparece em todos os termos pode ser colocado em evidência.",
+    blurb: "Um número fora dos parênteses multiplica cada termo de dentro.",
   },
 
   brackets: {
@@ -23,9 +22,9 @@ export const ptChapters: ChapterTexts = {
   },
 
   balance: {
-    title: "Equações do 1º grau",
+    title: "Resolução de equações",
     blurb:
-      "Faça a mesma coisa nos dois membros e a igualdade continua valendo. Um termo que passa para o outro lado do = vai com a operação inversa.",
+      "Faça a mesma coisa nos dois membros e a igualdade continua valendo. O que passa para o outro lado do = faz o contrário lá: o mais vira menos, a multiplicação vira divisão, a raiz vira potência, o log vira potência.",
   },
 
   powers: {
@@ -35,7 +34,7 @@ export const ptChapters: ChapterTexts = {
 
   factor: {
     title: "Fatoração",
-    blurb: "Fatorar é fazer a distributiva ao contrário. Ache um fator que está em todos os termos e coloque-o em evidência.",
+    blurb: "Fatorar é escrever uma soma como um produto. Um fator que está em todos os termos pode aparecer uma vez só, na frente dos parênteses: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -61,7 +60,7 @@ export const ptChapters: ChapterTexts = {
 
   roots: {
     title: "Radicais",
-    blurb: "√x é x elevado a ½, então as propriedades das potências valem também para as raízes.",
+    blurb: "√x é x elevado a ½, e ∛x é x elevado a ⅓, então as propriedades das potências valem também para as raízes.",
   },
 
   explog: {

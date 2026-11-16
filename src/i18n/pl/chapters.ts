@@ -13,7 +13,7 @@ export const plChapters: ChapterTexts = {
 
   distribute: {
     title: "Rozdzielność mnożenia",
-    blurb: "Liczba przed nawiasem mnoży każdy wyraz w nawiasie. Czynnik, który mają wszystkie wyrazy, można z powrotem wyłączyć przed nawias.",
+    blurb: "Liczba przed nawiasem mnoży każdy wyraz w nawiasie.",
   },
 
   brackets: {
@@ -23,7 +23,7 @@ export const plChapters: ChapterTexts = {
 
   balance: {
     title: "Równania",
-    blurb: "Gdy z obiema stronami zrobisz to samo, równanie dalej jest prawdziwe. Wyraz przeniesiony na drugą stronę = zmienia działanie na przeciwne.",
+    blurb: "Gdy z obiema stronami zrobisz to samo, równanie dalej jest prawdziwe. To, co przechodzi na drugą stronę =, robi tam coś odwrotnego: plus staje się minusem, mnożenie dzieleniem, pierwiastek potęgą, a logarytm potęgą.",
   },
 
   powers: {
@@ -33,7 +33,7 @@ export const plChapters: ChapterTexts = {
 
   factor: {
     title: "Rozkład na czynniki",
-    blurb: "Rozkład na czynniki to wymnażanie na odwrót. Znajdź czynnik, który ma każdy wyraz, i wyłącz go przed nawias.",
+    blurb: "Rozkład na czynniki to zapisanie sumy w postaci iloczynu. Czynnik, który ma każdy wyraz, wystarczy zapisać raz, przed nawiasem: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -60,11 +60,11 @@ export const plChapters: ChapterTexts = {
 
   roots: {
     title: "Pierwiastki",
-    blurb: "√x to x do potęgi ½, więc prawa działań na potęgach działają też dla pierwiastków.",
+    blurb: "√x to x do potęgi ½, a ∛x to x do potęgi ⅓, więc prawa działań na potęgach działają też dla pierwiastków.",
   },
 
   explog: {
-    title: "Logarytmy",
+    title: "Funkcja wykładnicza i logarytmy",
     blurb:
       "ln(x) to wykładnik, do którego trzeba podnieść e, żeby dostać x. Dlatego ln i e^ znoszą się nawzajem, a logarytm iloczynu to suma logarytmów.",
   },

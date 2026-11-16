@@ -15,10 +15,11 @@ export const en = {
   makeExercises: "Make exercises",
   /** Any expression, every move: the page, its link on the home page, and its input. */
   skin: "Theme",
+  /** The themes' names (Codex is a name: the same everywhere). */
+  skins: { modern: "Modern", codex: "Codex", paper: "Paper", blackboard: "Blackboard" },
   settings: "Settings",
   numbersInColour: "Numbers in colour",
   debugMode: "Debug mode",
-  sandbox: "Sandbox",
   sandboxInput: "Expression or equation",
   sandboxPlaceholder: "e.g. 3(x - 2) = 2x + 1   or   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Load",

@@ -89,9 +89,12 @@ export function App() {
               debug ✕
             </button>
           )}
-          <a href={href({ page: "sandbox" })} className="button quiet" aria-current={route.page === "sandbox" ? "page" : undefined}>
-            {t().sandbox}
-          </a>
+          {/* A tool for chasing moves: shown in debug mode only. Its name is the same in every language. */}
+          {debug && (
+            <a href={href({ page: "sandbox" })} className="button quiet" aria-current={route.page === "sandbox" ? "page" : undefined}>
+              Sandbox
+            </a>
+          )}
           {/* For teachers (or anyone): write exercises and share them as a link. */}
           <a href={href({ page: "make" })} className="button quiet" aria-current={route.page === "make" ? "page" : undefined}>
             {t().makeExercises}

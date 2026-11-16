@@ -3,7 +3,7 @@ import type { ChapterTexts } from "..";
 export const trChapters: ChapterTexts = {
   shuffle: {
     title: "Terimleri sıralama",
-    blurb: "Toplamada terimlerin sırası fark etmez. İfadedeki sayılar da hesaplanıp tek bir sayıya indirilebilir.",
+    blurb: "Terimler herhangi bir sırayla toplanabilir; yalnızca sayılardan oluşan işlemler de hesaplanabilir.",
   },
 
   collect: {
@@ -13,7 +13,7 @@ export const trChapters: ChapterTexts = {
 
   distribute: {
     title: "Dağılma özelliği",
-    blurb: "Parantezin önündeki sayı, içerideki her terimle çarpılır. Her terimde ortak olan bir çarpan da yeniden parantezin önüne alınabilir.",
+    blurb: "Parantezin önündeki sayı, içerideki her terimle çarpılır.",
   },
 
   brackets: {
@@ -23,7 +23,7 @@ export const trChapters: ChapterTexts = {
 
   balance: {
     title: "Denklem çözme",
-    blurb: "Eşitliğin iki tarafına aynı işlemi yaparsan eşitlik bozulmaz. = işaretinin karşı tarafına geçen terim, orada ters işleme dönüşür.",
+    blurb: "İki tarafa aynı işlemi yaparsan denklem doğru kalır. = işaretinin karşı tarafına geçen her şey orada tersini yapar: artı eksi olur, çarpma bölme olur, kök kuvvet olur, logaritma kuvvet olur.",
   },
 
   powers: {
@@ -33,7 +33,7 @@ export const trChapters: ChapterTexts = {
 
   factor: {
     title: "Çarpanlara ayırma",
-    blurb: "Çarpanlara ayırma, parantez açmanın tersidir. Her terimde ortak olan bir çarpan bul ve onu parantezin önüne al.",
+    blurb: "Çarpanlara ayırmak, bir toplamı çarpım olarak yazmaktır. Her terimde bulunan bir çarpan, parantezin önüne bir kez yazılabilir: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -58,7 +58,7 @@ export const trChapters: ChapterTexts = {
 
   roots: {
     title: "Köklü ifadeler",
-    blurb: "√x, x üzeri ½ demektir. Bu yüzden üslü ifadelerin kuralları kökler için de geçerlidir.",
+    blurb: "√x, x üzeri ½; ∛x de x üzeri ⅓ demektir. Bu yüzden üslü ifadelerin kuralları kökler için de geçerlidir.",
   },
 
   explog: {

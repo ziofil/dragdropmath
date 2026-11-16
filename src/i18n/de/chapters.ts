@@ -14,7 +14,7 @@ export const deChapters: ChapterTexts = {
   distribute: {
     title: "Distributivgesetz",
     blurb:
-      "Eine Zahl vor der Klammer wird mit jedem Term in der Klammer multipliziert. Einen Faktor, den alle Terme haben, kannst du wieder ausklammern.",
+      "Eine Zahl vor der Klammer wird mit jedem Term in der Klammer multipliziert.",
   },
 
   brackets: {
@@ -25,7 +25,7 @@ export const deChapters: ChapterTexts = {
   balance: {
     title: "Gleichungen lösen",
     blurb:
-      "Machst du auf beiden Seiten dasselbe, bleibt die Gleichung richtig. Bringst du einen Term auf die andere Seite des =, kehrt sich dort seine Rechenart um.",
+      "Machst du auf beiden Seiten dasselbe, bleibt die Gleichung richtig. Was über das = wandert, bewirkt auf der anderen Seite das Gegenteil: Aus plus wird minus, aus mal wird geteilt, aus einer Wurzel wird eine Potenz, aus einem Logarithmus wird eine Potenz.",
   },
 
   powers: {
@@ -35,7 +35,7 @@ export const deChapters: ChapterTexts = {
 
   factor: {
     title: "Faktorisieren",
-    blurb: "Faktorisieren ist Ausmultiplizieren rückwärts. Such einen Faktor, den alle Terme haben, und klammere ihn aus.",
+    blurb: "Faktorisieren heißt, eine Summe als Produkt zu schreiben. Einen Faktor, den jeder Term hat, schreibst du nur einmal, vor eine Klammer: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -63,11 +63,11 @@ export const deChapters: ChapterTexts = {
 
   roots: {
     title: "Wurzeln",
-    blurb: "√x ist x hoch ½, deshalb gelten die Potenzgesetze auch für Wurzeln.",
+    blurb: "√x ist x hoch ½ und ∛x ist x hoch ⅓, deshalb gelten die Potenzgesetze auch für Wurzeln.",
   },
 
   explog: {
-    title: "Logarithmen",
+    title: "Exponentialfunktionen und Logarithmen",
     blurb:
       "ln(x) ist der Exponent, mit dem man e potenzieren muss, um x zu bekommen. Darum heben sich ln und e^ gegenseitig auf, und der Logarithmus eines Produkts ist die Summe der Logarithmen.",
   },

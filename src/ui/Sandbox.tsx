@@ -31,7 +31,7 @@ export function Sandbox() {
         <a href={href({ page: "home" })} className="back-link">
           {t().backToPath}
         </a>
-        <div className="puzzle-title">{t().sandbox}</div>
+        <div className="puzzle-title">Sandbox</div>
       </header>
 
       <form className="sandbox-form" onSubmit={load}>

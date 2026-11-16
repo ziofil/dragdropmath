@@ -13,7 +13,7 @@ export const nlChapters: ChapterTexts = {
 
   distribute: {
     title: "Haakjes wegwerken",
-    blurb: "Het getal voor de haakjes vermenigvuldig je met elke term tussen de haakjes. Een factor die in elke term zit, kun je weer buiten haakjes brengen.",
+    blurb: "Het getal voor de haakjes vermenigvuldig je met elke term tussen de haakjes.",
   },
 
   brackets: {
@@ -23,7 +23,7 @@ export const nlChapters: ChapterTexts = {
 
   balance: {
     title: "Vergelijkingen oplossen",
-    blurb: "Doe aan beide kanten hetzelfde, dan blijft de vergelijking kloppen. Een term die naar de andere kant van het = gaat, doet daar het omgekeerde.",
+    blurb: "Doe aan beide kanten hetzelfde, dan blijft de vergelijking kloppen. Wat naar de andere kant van het = gaat, doet daar het omgekeerde: plus wordt min, keer wordt delen, een wortel wordt een macht en een logaritme wordt een macht.",
   },
 
   powers: {
@@ -33,7 +33,7 @@ export const nlChapters: ChapterTexts = {
 
   factor: {
     title: "Ontbinden in factoren",
-    blurb: "Ontbinden is haakjes wegwerken, maar dan andersom. Zoek een factor die in elke term zit en breng die buiten haakjes.",
+    blurb: "Ontbinden in factoren is een som schrijven als een product. Een factor die in elke term zit, zet je één keer voor de haakjes: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -58,7 +58,7 @@ export const nlChapters: ChapterTexts = {
 
   roots: {
     title: "Wortels",
-    blurb: "√x is x tot de macht ½, dus de rekenregels voor machten gelden ook voor wortels.",
+    blurb: "√x is x tot de macht ½ en ∛x is x tot de macht ⅓, dus de rekenregels voor machten gelden ook voor wortels.",
   },
 
   explog: {

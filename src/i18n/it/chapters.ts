@@ -3,7 +3,7 @@ import type { ChapterTexts } from "..";
 export const itChapters: ChapterTexts = {
   shuffle: {
     title: "Riordinare i termini",
-    blurb: "I termini di una somma si possono scrivere in qualsiasi ordine, e i numeri si possono sommare o moltiplicare tra loro.",
+    blurb: "I termini di una somma si possono scrivere in qualsiasi ordine, e le operazioni tra soli numeri si possono calcolare.",
   },
 
   collect: {
@@ -13,8 +13,7 @@ export const itChapters: ChapterTexts = {
 
   distribute: {
     title: "Proprietà distributiva",
-    blurb:
-      "Un numero davanti a una parentesi moltiplica ogni termine al suo interno. Un fattore comune a tutti i termini si può raccogliere fuori.",
+    blurb: "Un numero davanti a una parentesi moltiplica ogni termine al suo interno.",
   },
 
   brackets: {
@@ -25,7 +24,7 @@ export const itChapters: ChapterTexts = {
   balance: {
     title: "Equazioni",
     blurb:
-      "Se fai la stessa cosa a entrambi i membri, l'equazione resta vera. Un termine che passa dall'altra parte dell'= fa l'operazione opposta.",
+      "Se fai la stessa cosa a entrambi i membri, l'equazione resta vera. Ciò che passa dall'altra parte dell'= fa l'operazione opposta: un più diventa un meno, una moltiplicazione diventa una divisione, una radice diventa una potenza, un logaritmo diventa una potenza.",
   },
 
   powers: {
@@ -35,7 +34,7 @@ export const itChapters: ChapterTexts = {
 
   factor: {
     title: "Scomposizione in fattori",
-    blurb: "Scomporre è il contrario di sviluppare. Trova un fattore comune a tutti i termini e raccoglilo davanti a una parentesi.",
+    blurb: "Scomporre vuol dire scrivere una somma come prodotto. Un fattore che compare in tutti i termini si può scrivere una volta sola, davanti a una parentesi: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -63,7 +62,7 @@ export const itChapters: ChapterTexts = {
 
   roots: {
     title: "Radicali",
-    blurb: "√x è x elevato a ½, quindi le proprietà delle potenze valgono anche per le radici.",
+    blurb: "√x è x elevato a ½, e ∛x è x elevato a ⅓, quindi le proprietà delle potenze valgono anche per le radici.",
   },
 
   explog: {

@@ -39,7 +39,7 @@ function SettingsPanel() {
     <section className="card settings-panel" role="dialog" aria-label={t().settings}>
       <label className="settings-row">
         <span>{t().skin}</span>
-        <Pick value={skin} label={t().skin} options={SKINS.map((s) => [s.id, s.name])} onPick={(v) => setSkin(v as SkinId)} />
+        <Pick value={skin} label={t().skin} options={SKINS.map((s) => [s.id, t().skins[s.id]])} onPick={(v) => setSkin(v as SkinId)} />
       </label>
       <label className="settings-row">
         <span>{t().language}</span>

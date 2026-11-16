@@ -13,7 +13,7 @@ export const esChapters: ChapterTexts = {
 
   distribute: {
     title: "Propiedad distributiva",
-    blurb: "Un número fuera del paréntesis multiplica a cada término de dentro. Y un factor que tienen todos los términos se puede sacar factor común.",
+    blurb: "Un número fuera del paréntesis multiplica a cada término de dentro.",
   },
 
   brackets: {
@@ -23,7 +23,7 @@ export const esChapters: ChapterTexts = {
 
   balance: {
     title: "Resolver ecuaciones",
-    blurb: "Si haces lo mismo en los dos miembros, la igualdad se mantiene. Un término que pasa al otro lado del = hace lo contrario: si sumaba, pasa restando.",
+    blurb: "Si haces lo mismo en los dos miembros, la igualdad se mantiene. Lo que pasa al otro lado del = hace lo contrario: si sumaba, pasa restando; si multiplicaba, pasa dividiendo; una raíz pasa como potencia, y un logaritmo, también como potencia.",
   },
 
   powers: {
@@ -33,7 +33,7 @@ export const esChapters: ChapterTexts = {
 
   factor: {
     title: "Factorización",
-    blurb: "Factorizar es lo contrario de desarrollar. Busca un factor que tengan todos los términos y sácalo delante de un paréntesis.",
+    blurb: "Factorizar es escribir una suma como un producto. Un factor que tienen todos los términos se puede escribir una sola vez, delante de un paréntesis: 3x + 3y = 3(x + y).",
   },
 
   formulas: {
@@ -60,7 +60,7 @@ export const esChapters: ChapterTexts = {
 
   roots: {
     title: "Radicales",
-    blurb: "√x es x elevado a ½, así que las propiedades de las potencias también sirven para las raíces.",
+    blurb: "√x es x elevado a ½, y ∛x es x elevado a ⅓, así que las propiedades de las potencias también sirven para las raíces.",
   },
 
   explog: {

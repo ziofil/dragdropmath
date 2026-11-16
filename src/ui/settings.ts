@@ -15,14 +15,15 @@ import { ENGLISH_ONLY, isLang, loadLanguage, t, type Lang } from "../i18n";
 
 export type SkinId = "modern" | "codex" | "paper" | "blackboard";
 
-export const SKINS: { id: SkinId; name: string; math: string }[] = [
-  { id: "modern", name: "Modern", math: `"STIX Two Text"` },
+/** The themes, and the font each draws the maths in (their names are in i18n: skins). */
+export const SKINS: { id: SkinId; math: string }[] = [
+  { id: "modern", math: `"STIX Two Text"` },
   // Leonardo's notebooks: iron-gall ink and red chalk on parchment.
-  { id: "codex", name: "Codex", math: `"IM Fell English"` },
+  { id: "codex", math: `"IM Fell English"` },
   // A LaTeX article: black on white, nothing else.
-  { id: "paper", name: "Paper", math: `"STIX Two Text"` },
+  { id: "paper", math: `"STIX Two Text"` },
   // The same article, in chalk: white on black.
-  { id: "blackboard", name: "Blackboard", math: `"STIX Two Text"` },
+  { id: "blackboard", math: `"STIX Two Text"` },
 ];
 
 export type Settings = { lang: Lang; skin: SkinId; numbers: boolean; debug: boolean };

@@ -1492,6 +1492,9 @@ div.predict-choice {
   padding: 16px;
   text-align: left;
   box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 18%, transparent);
+  /* Opaque in every theme (Codex's cards let the parchment through): nothing under it shows. */
+  background: linear-gradient(var(--surface), var(--surface)), var(--bg);
+  backdrop-filter: none;
 }
 .settings-row {
   display: flex;
