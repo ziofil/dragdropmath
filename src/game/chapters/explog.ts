@@ -67,12 +67,13 @@ export const explog: Chapter = {
   drills: [
     d("exp-of-log", (r) => (r.next() < 0.5 ? `e^(ln(${letter(r)}))` : `2^(log_2(${letter(r)}))`)),
     d("evaluate-log", (r) => (r.next() < 0.5 ? `${letter(r)} + ln(e)` : `log_${r.int(2, 9)}(1) + ${letter(r)}`)),
+    // First the exponent out of a log: working out log₂(8) takes it (8 = 2³, then the 3 comes out).
+    d("log-of-power", (r) => `ln(${letter(r)}^${r.int(2, 5)})`),
     d("power-of-base", (r) => {
       const k = r.int(2, 5);
       return { start: `log_2(${2 ** k})`, goal: `${k}` };
     }),
     d("log-of-product", (r) => `ln(${r.int(2, 9)}${letter(r)})`),
-    d("log-of-power", (r) => `ln(${letter(r)}^${r.int(2, 5)})`),
     d("power-into-log", (r) => `${r.int(2, 5)}ln(${letter(r)})`),
     d("combine-logs", (r) => {
       const [x, y] = letters2(r);
