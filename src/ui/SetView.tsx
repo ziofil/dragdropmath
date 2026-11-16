@@ -9,7 +9,8 @@ import { choicesFor } from "../game/predict";
 import { seen } from "../game/scoring";
 import { autoDecoys } from "../game/autoDecoys";
 import { decodeSet, encodeSet, movesOf, positiveOf, readSet, setKey, type CheckedSet, type ExerciseSet } from "../game/sets";
-import type { SolveAnswer, SolveRequest } from "../game/solveWorker";
+import { solveMoves } from "../game/solveWorker";
+import { workerClient } from "../util/worker";
 import { StaticMath } from "./MathCanvas";
 import { NotFound } from "./NotFound";
 import { href } from "./routes";
@@ -18,16 +19,25 @@ import { t } from "../i18n";
 
 // ---------- making a set ----------
 
-/** Can each exercise be solved with its moves? Checked one by one in a worker; null while not known yet. */
+/**
+ * Can each exercise be solved with its moves? Checked one by one in a worker
+ * ("checking" until known; null: no way found, or none within 20 s). Without
+ * a working worker, checked here.
+ */
 function useSolvable(set: ExerciseSet | null): (number | null | "checking")[] {
   const [found, setFound] = useState<(number | null | "checking")[]>([]);
   useEffect(() => {
     if (!set) return setFound([]);
     setFound(set.exercises.map(() => "checking"));
-    const worker = new Worker(new URL("../game/solveWorker.ts", import.meta.url), { type: "module" });
-    worker.onmessage = (e: MessageEvent<SolveAnswer>) => setFound((f) => f.map((v, i) => (i === e.data.id ? e.data.moves : v)));
-    set.exercises.forEach((ex, id) => worker.postMessage({ id, start: ex.start, goal: ex.goal, rules: movesOf(set, ex), positive: positiveOf(set, ex) } satisfies SolveRequest));
-    return () => worker.terminate();
+    const solve = workerClient(() => new Worker(new URL("../game/solveWorker.ts", import.meta.url), { type: "module" }), solveMoves, 20_000);
+    let live = true;
+    set.exercises.forEach((ex, id) =>
+      solve({ start: ex.start, goal: ex.goal, rules: movesOf(set, ex), positive: positiveOf(set, ex) }).then((moves) => live && setFound((f) => f.map((v, i) => (i === id ? moves : v)))),
+    );
+    return () => {
+      live = false;
+      solve.stop();
+    };
   }, [set]);
   return found;
 }

@@ -42,11 +42,10 @@ export function wayOn(from: MathState, stops: readonly MathState[], done: (s: Ma
 }
 
 /** Asked of the worker (showWorker.ts): states as written (printState), the board's letters as it says. */
-export type WayRequest = { id: number; start: string; from: string; stops: string[]; goals: string[]; rules: RuleId[]; positive: boolean };
-export type WayAnswer = { id: number; way: string[] | null };
+export type WayRequest = { start: string; from: string; stops: string[]; goals: string[]; rules: RuleId[]; positive: boolean };
 
 /** The way on (see wayOn) for a request: the board's own done-check rebuilt from its start and goals. */
-export function wayFor({ start, from, stops, goals, rules, positive }: Omit<WayRequest, "id">): string[] | null {
+export function wayFor({ start, from, stops, goals, rules, positive }: WayRequest): string[] | null {
   const read = (s: string) => assuming(parseState(s), positive);
   const begin = read(start);
   const wants = goals.map(read);

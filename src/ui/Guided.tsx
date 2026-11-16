@@ -5,7 +5,8 @@ import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { stepDone } from "../game/solver";
 import { tidied } from "../game/tidy";
-import { wayFor, type WayAnswer, type WayRequest } from "../game/showWay";
+import { wayFor } from "../game/showWay";
+import { workerClient } from "../util/worker";
 import { printState, stateKey } from "../expr/key";
 import type { ShowMove } from "./MathCanvas";
 import { Board } from "./Board";
@@ -82,43 +83,47 @@ export function MoveBoard({
     }
     stopped.current = false;
     setShowing(true);
-    if (canUndo) {
-      reset();
-      await wait(450);
-    }
-    // The lesson's own move, heading for the first checkpoint (or the end); the way on from where it
-    // leads is searched (off the page's thread) while it's played.
-    const toward = (s: MathState) => reached(s) || (stops.length > 0 && stepDone(start, tidied(start, s), stops[0]));
-    const ask = (from: MathState) => askWay({ start: startText, from: printState(from), stops: via ?? [], goals, rules: [...rules], positive: !!positive }).then((w) => (w ?? []).map((x) => assuming(parseState(x), positive)));
-    // (Set by `planned`, while the move is played: written so, the checker doesn't take them for always null.)
-    let expected = null as MathState | null;
-    let pending = null as Promise<MathState[]> | null;
-    let way: MathState[] = [];
-    let before = start;
-    const planned = (next: MathState) => {
-      expected = tidied(start, next);
-      pending = ask(expected);
-    };
-    let dropped = (await showMove.current?.({ rule, good: toward, prefer, planned })) ?? null;
-    // Then every step on to the end, along that way (searched again only if the board isn't where it said).
-    for (let n = 0; dropped && n < 40; n++) {
-      await settle(tidied(before, dropped));
-      if (stopped.current || reached(latest.current)) break;
-      if (pending) {
-        way = await pending;
-        pending = null;
+    // Whatever happens on the way (a search that fails), the board ends as it began: Show never sticks on Stop.
+    try {
+      if (canUndo) {
+        reset();
+        await wait(450);
       }
-      if (!expected || !same(latest.current, expected)) way = await ask(latest.current);
-      if (stopped.current || !way.length) break;
-      before = latest.current;
-      const next = way[0];
-      way = way.slice(1);
-      expected = next;
-      dropped = (await showMove.current?.({ to: (s) => same(tidied(before, s), next) })) ?? null;
+      // The lesson's own move, heading for the first checkpoint (or the end); the way on from where it
+      // leads is searched (off the page's thread) while it's played.
+      const toward = (s: MathState) => reached(s) || (stops.length > 0 && stepDone(start, tidied(start, s), stops[0]));
+      const ask = (from: MathState) => askWay({ start: startText, from: printState(from), stops: via ?? [], goals, rules: [...rules], positive: !!positive }).then((w) => (w ?? []).map((x) => assuming(parseState(x), positive)));
+      // (Set by `planned`, while the move is played: written so, the checker doesn't take them for always null.)
+      let expected = null as MathState | null;
+      let pending = null as Promise<MathState[]> | null;
+      let way: MathState[] = [];
+      let before = start;
+      const planned = (next: MathState) => {
+        expected = tidied(start, next);
+        pending = ask(expected);
+      };
+      let dropped = (await showMove.current?.({ rule, good: toward, prefer, planned })) ?? null;
+      // Then every step on to the end, along that way (searched again only if the board isn't where it said).
+      for (let n = 0; dropped && n < 40; n++) {
+        await settle(tidied(before, dropped));
+        if (stopped.current || reached(latest.current)) break;
+        if (pending) {
+          way = await pending;
+          pending = null;
+        }
+        if (!expected || !same(latest.current, expected)) way = await ask(latest.current);
+        if (stopped.current || !way.length) break;
+        before = latest.current;
+        const next = way[0];
+        way = way.slice(1);
+        expected = next;
+        dropped = (await showMove.current?.({ to: (s) => same(tidied(before, s), next) })) ?? null;
+      }
+      if (!stopped.current) await wait(1300);
+    } finally {
+      reset();
+      setShowing(false);
     }
-    if (!stopped.current) await wait(1300);
-    reset();
-    setShowing(false);
   };
 
   return (
@@ -149,27 +154,7 @@ const same = (a: MathState, b: MathState) => stateKey(a, "exact") === stateKey(b
 
 /**
  * Show's way on, searched by a worker (one for every board, made when Show is
- * first pressed); where there are no workers, searched here.
+ * first pressed); where there's no working worker, searched here. An answer
+ * that takes over 15 s is given up (Show stops there).
  */
-let worker: Worker | null | undefined;
-const waiting = new Map<number, (way: string[] | null) => void>();
-let asked = 0;
-function askWay(req: Omit<WayRequest, "id">): Promise<string[] | null> {
-  if (worker === undefined) {
-    try {
-      worker = new Worker(new URL("../game/showWorker.ts", import.meta.url), { type: "module" });
-      worker.onmessage = (e: MessageEvent<WayAnswer>) => {
-        waiting.get(e.data.id)?.(e.data.way);
-        waiting.delete(e.data.id);
-      };
-    } catch {
-      worker = null;
-    }
-  }
-  if (!worker) return Promise.resolve(wayFor(req));
-  const id = asked++;
-  return new Promise((resolve) => {
-    waiting.set(id, resolve);
-    worker!.postMessage({ ...req, id } satisfies WayRequest);
-  });
-}
+const askWay = workerClient(() => new Worker(new URL("../game/showWorker.ts", import.meta.url), { type: "module" }), wayFor, 15_000);

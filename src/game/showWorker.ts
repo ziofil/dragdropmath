@@ -3,8 +3,7 @@
  * takes a second or so to search, and the page must keep playing the move
  * being shown meanwhile.
  */
-import { wayFor, type WayAnswer, type WayRequest } from "./showWay";
+import { wayFor } from "./showWay";
+import { serve } from "../util/worker";
 
-self.onmessage = (e: MessageEvent<WayRequest>) => {
-  self.postMessage({ id: e.data.id, way: wayFor(e.data) } satisfies WayAnswer);
-};
+serve(wayFor);

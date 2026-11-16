@@ -10,13 +10,13 @@ import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { matchesGoal, search, searchBest } from "./solver";
 import { isDone, taskOf } from "./task";
+import { serve } from "../util/worker";
 
 /** `positive`: the letters stand for positive numbers, as when the exercise is played. */
-export type SolveRequest = { id: number; start: string; goal: string; rules: RuleId[]; positive: boolean };
-export type SolveAnswer = { id: number; moves: number | null };
+export type SolveRequest = { start: string; goal: string; rules: RuleId[]; positive: boolean };
 
 /** The moves a way through takes (not always the fewest), or null if none was found. */
-export function solveMoves({ start, goal, rules, positive }: Omit<SolveRequest, "id">): number | null {
+export function solveMoves({ start, goal, rules, positive }: SolveRequest): number | null {
   const from = parseState(start);
   const to = parseState(goal);
   const task = taskOf(to);
@@ -27,8 +27,5 @@ export function solveMoves({ start, goal, rules, positive }: Omit<SolveRequest, 
   return order ? way.length + order.length - 2 : null;
 }
 
-// (In a worker; imported elsewhere, as by the tests, it only lends solveMoves.)
-if (typeof self !== "undefined")
-  self.onmessage = (e: MessageEvent<SolveRequest>) => {
-    self.postMessage({ id: e.data.id, moves: solveMoves(e.data) } satisfies SolveAnswer);
-  };
+// (In a worker; imported elsewhere, as by the tests or the page when there's no worker, it only lends solveMoves.)
+serve(solveMoves);
