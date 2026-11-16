@@ -7,6 +7,7 @@
  * each stretch takes: searched with those alone first, a check takes
  * milliseconds.
  */
+import { assuming } from "../../expr/setting";
 import { parseState } from "../../expr/parse";
 import { printState } from "../../expr/key";
 import type { MathState } from "../../expr/types";
@@ -34,7 +35,7 @@ export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, stat
   if (quick && !d.legs) return { path: [] };
   const start = parseState(d.start);
   const goal = parseState(d.goal);
-  const path: MathState[] = [d.positive ? { ...start, letters: "positive" } : start];
+  const path: MathState[] = [assuming(start, d.positive)];
   const targets = [...d.via.map(parseState), goal];
   // Terms in any order count, except at the end of a "make it look like this" (task.ts).
   const exact = taskOf(goal).kind === "match";

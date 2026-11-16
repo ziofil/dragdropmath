@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import type { MathState } from "../expr/types";
 import { printState, stateKey } from "../expr/key";
 import { allNodes } from "../expr/tree";
+import { flipRel, relOf } from "../expr/build";
 import { evaluate, variables } from "../expr/eval";
 import { candidatesFor, handles, isGrabbable, signOwner, tapFor } from ".";
 import { corpus, SLOW } from "../game/testing/corpus";
@@ -36,6 +37,10 @@ describe("every move keeps the pieces whole", () => {
               if (new Set(ids).size !== ids.length) problems.add(`a piece twice: ${what}`);
               if (k !== tap && !k.targetId && !ids.includes(signOwner(h) ?? h)) problems.add(`the dragged piece lost: ${what}`);
               if (k.targetId && !before.has(k.targetId)) problems.add(`a target that wasn't there: ${what}`);
+              // The setting carries over: letters and conditions always; the relation unless turned round; the join unless a row splits into "or" rows.
+              if (k.state.letters !== s.letters || JSON.stringify(k.state.conditions) !== JSON.stringify(s.conditions)) problems.add(`lost its setting: ${what}`);
+              if (relOf(k.state) !== relOf(s) && relOf(k.state) !== flipRel(relOf(s))) problems.add(`a relation from nowhere: ${what}`);
+              if (k.state.join !== s.join && !(k.state.join === "or" && k.state.sides.length > s.sides.length)) problems.add(`lost how its rows go together: ${what}`);
               if (s.sides.length === 1 && k.state.sides.length === 1)
                 for (const n of [1, 2, 3]) {
                   const e = env(s, n);

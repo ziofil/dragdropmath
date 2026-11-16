@@ -4,6 +4,7 @@
  * judges it (task.ts: a solved equation's terms in any order), so even an
  * exercise of ten moves is found in well under a second.
  */
+import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { matchesGoal, search, searchBest } from "./solver";
@@ -19,7 +20,7 @@ export function solveMoves({ start, goal, rules, positive }: Omit<SolveRequest, 
   const to = parseState(goal);
   const task = taskOf(to);
   // The terms in any order first (what takes the work); a goal to match exactly is then a few swaps away.
-  const way = searchBest(positive ? { ...from, letters: "positive" } : from, (s) => (task.kind === "match" ? matchesGoal(s, to, false) : isDone(to, s, task)), rules, { ordered: false });
+  const way = searchBest(assuming(from, positive), (s) => (task.kind === "match" ? matchesGoal(s, to, false) : isDone(to, s, task)), rules, { ordered: false });
   if (!way || task.kind !== "match") return way ? way.length - 1 : null;
   const order = search(way[way.length - 1], (s) => isDone(to, s, task), rules.filter((r) => r === "commute" || r === "numbers-first"), { ordered: "exact", maxDepth: 8, maxStates: 20_000 });
   return order ? way.length + order.length - 2 : null;

@@ -10,6 +10,7 @@
  * any order, anywhere they apply, as many as the level asks for.
  */
 import type { MathState } from "../../expr/types";
+import { assuming } from "../../expr/setting";
 import { parseState } from "../../expr/parse";
 import { printState, stateKey } from "../../expr/key";
 import { stepsFrom, type RuleId } from "../../rules";
@@ -127,18 +128,17 @@ function stepBack(
   r: Rng,
   positive: boolean,
 ) {
-  const letters = positive ? { letters: "positive" as const } : {};
-  const at = { ...s, ...letters };
+  const at = assuming(s, positive);
   const mine = () => shuffled(r, backFrom(at, back, r));
   const theirs = () => shuffled(r, backFrom(at, earlier, r));
   const groups = r.next() < OWN_FIRST ? [mine, theirs] : [theirs, mine];
   for (const group of groups)
     for (const o of group()) {
-      const next = { ...canonical(o.state), ...letters };
+      const next = assuming(canonical(o.state), positive);
       const k = stateKey(next, "exact");
       if (seen.has(k)) continue;
       const undoers = o.undo?.filter((x) => rules.includes(x));
-      const undo = o.trusted && undoers?.length ? undoers : undoneBy(next, { ...s, ...letters }, undoers?.length ? undoers : rules);
+      const undo = o.trusted && undoers?.length ? undoers : undoneBy(next, at, undoers?.length ? undoers : rules);
       if (undo.length) return { next, undo, k };
     }
   return null;
@@ -177,7 +177,7 @@ const CHECK_STATES = 1500;
 
 /** The walk's end written as a person writes it (see Walk.settle), as the start. */
 function settle(write: Settle, path: MathState[], positive: boolean): void {
-  const start = { ...canonical(write(path[path.length - 1])), ...(positive ? { letters: "positive" as const } : {}) };
+  const start = assuming(canonical(write(path[path.length - 1])), positive);
   // In place of the walk's end: the moves needn't pass through it (12 splits as 2·6, not as the 4·3 it was).
   path[path.length - 1] = start;
 }
@@ -192,7 +192,7 @@ const EVERY = 4;
  * found gives its milestones, states the moves really reach.
  */
 export function stillSolves(d: Draft, rules: readonly RuleId[]): Draft | null {
-  const start = { ...parseState(d.start), ...(d.positive ? { letters: "positive" as const } : {}) };
+  const start = assuming(parseState(d.start), d.positive);
   const goal = parseState(d.goal);
   // (Rows in any order, each either way round: the answers of x² = 9 come as x = 3 or x = −3, or the other way.)
   const way = searchBest(start, (x) => matchesGoal(x, goal, false), rules, { ordered: false, maxStates: CHECK_STATES });

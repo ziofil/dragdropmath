@@ -1,6 +1,7 @@
 // More practice: every level makes good exercises, and each shape's can be solved with the chapter's moves (run by practice.*.test.ts).
 import { describe, expect, it } from "vitest";
 import { rulesOf } from "../../puzzles";
+import { assuming } from "../../../expr/setting";
 import { parseState } from "../../../expr/parse";
 import { stateKey } from "../../../expr/key";
 import { follows } from "../../answers";
@@ -46,7 +47,7 @@ export function practiceChecks(chapters: (id: string) => boolean) {
               // in a slow run for every shape, without the stretches' word.
               if (!d!.legs || SLOW) expect(stuckOf(verify(SLOW ? { ...d!, legs: undefined } : d!, rules)), d!.start).toBe("");
               const start = parseState(d!.start);
-              expect(follows(d!.positive ? { ...start, letters: "positive" } : start, parseState(d!.goal)), `${d!.start} ⇒ ${d!.goal}`).toBe(true);
+              expect(follows(assuming(start, d!.positive), parseState(d!.goal)), `${d!.start} ⇒ ${d!.goal}`).toBe(true);
             }
           }, 120_000);
       }

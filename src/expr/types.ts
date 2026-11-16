@@ -49,10 +49,14 @@ export type Expr = Num | Var | Neg | Sum | Prod | Frac | Pow | Const | Log;
  */
 export type Rel = "=" | "<" | ">" | "≤" | "≥";
 
-/** One side = a plain expression; two sides = an equation (or an inequality). */
 /** A condition on the letters: x ≥ −7, x ≠ 2. */
 export type Condition = { sides: [Expr, Expr]; rel: Rel | "≠" };
 
+/**
+ * A board: rows of expressions (what moves rewrite) and the setting they live
+ * in (see Setting). One side = a plain expression; two sides = an equation
+ * (or an inequality).
+ */
 export type MathState = {
   /**
    * One expression, or the two sides of an equation. Several equations at once
@@ -87,3 +91,14 @@ export type MathState = {
    */
   pin?: { id: string; x: number };
 };
+
+/**
+ * What a board says about its rows rather than what's written in them: the
+ * relation, how rows go together, what the letters stand for, the conditions.
+ * Moves rewrite the rows; the setting carries over unless a move says
+ * otherwise (an inequality turned round, one row split into "or" rows).
+ */
+export type Setting = Pick<MathState, "rel" | "join" | "letters" | "conditions">;
+
+/** Every key of a Setting (the type checker makes a new one appear here). */
+export const SETTING_KEYS = Object.keys({ rel: 1, join: 1, letters: 1, conditions: 1 } satisfies Record<keyof Setting, 1>) as (keyof Setting)[];

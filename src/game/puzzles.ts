@@ -1,5 +1,6 @@
 import type { RuleId } from "../rules";
 import type { MathState } from "../expr/types";
+import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
 import { allNodes } from "../expr/tree";
 import { shuffle } from "./chapters/shuffle";
@@ -91,8 +92,7 @@ export function lettersPositive(chapter: Chapter | undefined, start: string): bo
 
 /** An exercise's start, with what its letters stand for. */
 export function startOf(start: string, chapter?: Chapter, positive = chapter !== undefined && lettersPositive(chapter, start)): MathState {
-  const s = parseState(start);
-  return positive ? { ...s, letters: "positive" } : s;
+  return assuming(parseState(start), positive);
 }
 
 /** The chapters that build directly on this one. */

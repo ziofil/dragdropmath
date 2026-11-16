@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MathState } from "../expr/types";
+import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
 import { isDone, taskOf } from "../game/task";
 import type { RuleId } from "../rules";
@@ -40,7 +41,7 @@ export type Exercise = {
 
 export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   const { puzzle, rules, choices, context } = ex;
-  const start = useMemo((): MathState => ({ ...parseState(puzzle.start), ...(ex.positiveLetters ? { letters: "positive" as const } : {}) }), [puzzle, ex.positiveLetters]);
+  const start = useMemo((): MathState => assuming(parseState(puzzle.start), ex.positiveLetters), [puzzle, ex.positiveLetters]);
   const goal = useMemo(() => parseState(puzzle.goal), [puzzle]);
   const task = useMemo(() => taskOf(goal), [goal]);
   // What was done here before: its prediction is shown as it was, never asked again.

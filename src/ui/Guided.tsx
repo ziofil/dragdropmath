@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
+import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
 import type { RuleId } from "../rules";
 import { stepDone } from "../game/solver";
@@ -39,7 +40,7 @@ export function MoveBoard({
   /** A button for a fresh one. */
   more: { text: string; onClick: () => void };
 }) {
-  const start = useMemo((): MathState => ({ ...parseState(startText), ...(positive ? { letters: "positive" as const } : {}) }), [startText, positive]);
+  const start = useMemo((): MathState => assuming(parseState(startText), positive), [startText, positive]);
   const wants = useMemo(() => goals.map((g) => parseState(g)), [goals]);
   const reached = (s: MathState) => wants.some((w) => stepDone(start, s, w));
   const moves = useMoveHistory(start, reached);

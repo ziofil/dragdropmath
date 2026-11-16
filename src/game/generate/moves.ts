@@ -7,6 +7,7 @@
 import type { RuleId } from "../../rules";
 import { stepsFrom } from "../../rules";
 import type { MathState } from "../../expr/types";
+import { assuming } from "../../expr/setting";
 import { parseState } from "../../expr/parse";
 import { allNodes, locate, nodeAt } from "../../expr/tree";
 import { key, printState, stateKey } from "../../expr/key";
@@ -431,7 +432,7 @@ export function drillExercise(chapterId: string, drillId: string, seed: number):
     const { start, want, goal: finish, via } = typeof made === "string" ? { start: made, via: undefined } : made;
     const parsed = parseState(start);
     const positive = lettersPositive(chapter, start);
-    const state: MathState = positive ? { ...parsed, letters: "positive" } : parsed;
+    const state: MathState = assuming(parsed, positive);
     const results = oneMove(state, drill.rule, rules).filter((s) => !want || key(firstTerm(s)) === key(parseState(want).sides[0]));
     if (!results.length) continue;
     // Finished a few moves on: that's the goal, whichever way the move was made.

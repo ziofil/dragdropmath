@@ -657,7 +657,7 @@ export const rootAcross: Rule = {
       if (n % 2 === 1) {
         sides[c.loc.side] = P.base;
         sides[other] = pow(k, frac(num(1), num(n), c.node.id));
-        return [{ rule: "root-across", state: { ...setSides(sides), ...(state.join ? { join: state.join } : {}) } }];
+        return [{ rule: "root-across", state: setSides(sides) }];
       }
       // Even: what's on the other side mustn't be negative (x² = −4 has no answer).
       if (canBeNegative(k, assumeOf(state))) return [];

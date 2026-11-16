@@ -1,5 +1,6 @@
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
+import { inSetting } from "../expr/setting";
 import { allNodes, locate, nodeAt, parentLoc, withoutFrom } from "../expr/tree";
 import { dragCtx, handles, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { num } from "../expr/build";
@@ -298,12 +299,11 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   const state = withoutMarks(withMarks);
   const seen = new Set([stateKey(state, "exact")]);
   const out: Candidate[] = [];
-  const kept = Object.fromEntries((["rel", "join", "letters", "conditions"] as const).flatMap((k) => (state[k] ? [[k, state[k]]] : []))) as Partial<MathState>;
   for (const id of enabled) {
     for (const found of RULES[id].apply(state, draggedId)) {
       // Rules rewrite sides; the relation, how rows go together and what the letters
       // stand for carry over (unless the move sets them: an inequality turned round).
-      const cand = { ...found, state: { ...kept, ...found.state } };
+      const cand = { ...found, state: inSetting(found.state, state) };
       const k = stateKey(cand.state, "exact");
       if (seen.has(k)) continue;
       seen.add(k);
