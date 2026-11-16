@@ -73,9 +73,8 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   }, [solved, puzzle.id, context]);
 
   const asking = phase.kind === "asking";
-  // A chapter's predict exercise is done once answered: on to another straight away (solving it shows why).
-  // "Another one" has one place, the board's buttons: once answered, or once solved.
-  const onwardNow = context.kind === "predict" && phase.kind === "answered";
+  // "Another one" has one place, the board's buttons, once the board is solved: an answer picked
+  // is only half of an exercise (picking and moving on would score without doing any maths).
 
   return (
     <main className="puzzle">
@@ -160,7 +159,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           asking ? (
             <button onClick={() => pick(null)}>{t().reveal}</button>
           ) : (
-            (onwardNow || solved) && (
+            solved && (
               <a className="button primary" href={ex.onward.href}>
                 {ex.onward.text}
               </a>

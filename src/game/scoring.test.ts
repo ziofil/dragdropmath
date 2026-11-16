@@ -30,13 +30,15 @@ describe("record", () => {
     expect(seen("p1")).toEqual({ predicted: "right", pick: "x = 4" });
   });
 
-  it("takes one away for a wrong answer or a reveal, never below 0", () => {
+  it("takes one away for a wrong answer, never below 0; a reveal costs nothing", () => {
     record("a", predict(), "right");
     record("b", predict(), "right");
     record("c", predict(), "wrong");
     expect(score().easy).toBe(1);
-    expect(record("d", predict(), "revealed")).toMatchObject({ score: { was: 1, now: 0 } });
-    expect(record("e", predict(), "wrong")).toMatchObject({ score: { was: 0, now: 0 } });
+    expect(record("d", predict(), "revealed")).toMatchObject({ first: true, score: null });
+    expect(score().easy).toBe(1);
+    record("e", predict(), "wrong");
+    expect(record("f", predict(), "wrong")).toMatchObject({ score: { was: 0, now: 0 } });
     expect(score().easy).toBe(0);
   });
 
@@ -44,7 +46,7 @@ describe("record", () => {
     record("a", predict(), "right");
     record("p1", predict(), "revealed");
     expect(record("p1", predict(), "right", "x = 4")).toMatchObject({ first: false });
-    expect(score().easy).toBe(0);
+    expect(score().easy).toBe(1);
     expect(seen("p1").predicted).toBe("revealed");
   });
 

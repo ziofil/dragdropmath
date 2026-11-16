@@ -9,8 +9,9 @@
  *   second pick earns nothing more.
  * - A chapter's mind's-eye exercises: a right first answer adds 1 to the
  *   score at its level (one score per level, across every chapter); a wrong
- *   one, or revealing it, takes 1 away (never below 0). One with no answers
- *   to pick from counts as right once solved.
+ *   one takes 1 away (never below 0). Revealing it costs nothing, and earns
+ *   nothing: better than guessing. One with no answers to pick from counts as
+ *   right once solved.
  * - Practice and sets count towards nothing: there's no score there.
  *
  * Per-viewer convenience only: storage can be missing or blocked.
@@ -79,7 +80,7 @@ export function record(id: string, ctx: Context, outcome: Outcome, pick?: string
     // Solved with nothing predicted: there were no answers to pick from, and solving it is its answer.
     const right = outcome === "right" || (outcome === "solved" && !was.predicted);
     if (outcome === "solved" && !was.predicted) now.predicted = "right";
-    if (right || outcome === "wrong" || outcome === "revealed") result.score = nextScore(ctx.level, right);
+    if (right || outcome === "wrong") result.score = nextScore(ctx.level, right);
   }
 
   // The latest last; the oldest forgotten beyond KEEP.

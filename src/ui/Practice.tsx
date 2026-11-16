@@ -4,7 +4,9 @@
  *
  * - practice: solved straight away, counted nowhere (no score);
  * - the mind's eye (predict): the answer picked first, in one's head; a right
- *   one adds 1 to the score at its level, a wrong one takes 1 away.
+ *   one adds 1 to the score at its level, a wrong one takes 1 away (Reveal
+ *   costs nothing). Not the same exercises as practice's at the same seed:
+ *   one solved there would be a free point here.
  */
 import { useMemo } from "react";
 import { chapterById, rulesOf, type Chapter } from "../game/puzzles";
@@ -39,8 +41,11 @@ export function LevelButtons({ mode, chapter }: { mode: Mode; chapter: Chapter }
   );
 }
 
+/** The mind's eye's exercise at a seed is practice's at another. */
+const predictSeed = (seed: number) => (seed ^ 0x5bd1e995) >>> 0;
+
 function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number): Exercise | null {
-  const d = practiceExercise(chapter.id, level, seed);
+  const d = practiceExercise(chapter.id, level, mode === "predict" ? predictSeed(seed) : seed);
   if (!d) return null;
   const id = `${mode}-${chapter.id}-${level}-${seed}`;
   // Predicting first: the wrong answers are the usual slips.
