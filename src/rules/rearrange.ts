@@ -202,6 +202,7 @@ export const timesOne: Rule = {
 /** x·2 → 2x, x·1 → x (tap a product to write it the usual way: numbers in front, no ·1). */
 export const numbersFirst: Rule = {
   id: "numbers-first",
+  tidy: true,
   // Tidies a whole product, so a more specific tap on the thing tapped (log₂2 → 1 in log₂2·3) comes first.
   tapOrder: 1,
   name: "Numbers in front",

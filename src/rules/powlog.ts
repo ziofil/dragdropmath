@@ -72,6 +72,7 @@ export const powerOfPower: Rule = {
 /** x¹ → x (drop the 1 onto its base). */
 export const powerOne: Rule = {
   id: "power-one",
+  tidy: true,
   either: true,
   name: "Power of one",
   gesture: "Drop an exponent of 1 onto its base — x¹ is just x.",

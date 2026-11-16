@@ -10,9 +10,10 @@ import type { Expr, MathState } from "../expr/types";
 import { key, stateKey } from "../expr/key";
 import { allNodes, children, mapTree } from "../expr/tree";
 import { normalize } from "../expr/build";
-import { candidatesFor, handles, signOwner, tapFor, type RuleId } from "../rules";
+import { ALL_RULES, candidatesFor, handles, RULES, signOwner, tapFor } from "../rules";
 
-const TIDY_RULES: RuleId[] = ["numbers-first", "power-one"];
+/** The moves that are tidying (Rule.tidy). */
+const TIDY_RULES = ALL_RULES.filter((id) => RULES[id].tidy);
 
 /** Each tidying step is shown as a move of its own, this long after the one before. */
 export const TIDY_STEP_MS = 420;

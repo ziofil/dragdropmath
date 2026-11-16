@@ -111,6 +111,12 @@ export type Rule = {
    * these undo it (game/generate/back.ts).
    */
   undoneBy?: readonly RuleId[];
+  /**
+   * Tidying, not a step: writing things the usual way (x·2 → 2x, x¹ → x).
+   * Made for the learner right after a move that leaves it to do, on what
+   * that move touched (game/tidy.ts); never a move of its own to learn.
+   */
+  tidy?: true;
   apply(state: MathState, draggedId: string): Candidate[];
 };
 

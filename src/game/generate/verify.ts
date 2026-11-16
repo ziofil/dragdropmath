@@ -76,7 +76,7 @@ export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, stat
 }
 
 /** Moves that only put terms in another order (or a number in front). */
-const REORDER: RuleId[] = ["commute", "numbers-first"];
+export const REORDER: RuleId[] = ["commute", "numbers-first"];
 
 /** Its stuck stretch, for a test's message ("" when it went through). */
 export const stuckOf = (c: Checked) => ("stuck" in c ? c.stuck : "");
