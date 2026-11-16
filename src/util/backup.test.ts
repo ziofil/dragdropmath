@@ -29,6 +29,10 @@ describe("progress backup", () => {
     expect(Object.fromEntries(store)).toEqual({ "mathbyhand.outcomes.v1": '{"a":1}', "mathbyhand.skin.v1": '"codex"' });
   });
 
+  it("loads a backup saved under the site's earlier name", () => {
+    expect(loadBackup('{"app":"math-by-hand","version":1,"saved":"","data":{"mathbyhand.score.v1":"{}"}}')).toBe(1);
+  });
+
   it("refuses what isn't a backup", () => {
     expect(loadBackup("not json")).toBeNull();
     expect(loadBackup('{"app":"other","version":1,"data":{}}')).toBeNull();

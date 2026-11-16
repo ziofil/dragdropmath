@@ -57,8 +57,8 @@ class GrowLog extends Modifier<MathState> {
   ) {
     super(ctx, inner);
     const id = ctx.draggedId!;
-    this.home = canvasBox(rc, ctx, id).centre;
-    this.aim = pullOutAim(rc, ctx, id);
+    this.home = canvasBox(rc, id).centre;
+    this.aim = pullOutAim(rc, id);
     // The piece as it looks now (no brackets of its own yet), in every preview.
     this.bare = layerChildren(renderStateReadOnly(ctx, rc.state), id);
     // The new log around the piece in the result: its label is what we carry.
@@ -114,8 +114,8 @@ class ShedLog extends Modifier<MathState> {
   ) {
     super(ctx, inner);
     const id = ctx.draggedId!;
-    this.home = canvasBox(rc, ctx, id).centre;
-    this.aims = joins.map((c) => mergeAim(rc, ctx, id, c.state, c.targetId!));
+    this.home = canvasBox(rc, id).centre;
+    this.aims = joins.map((c) => mergeAim(rc, id, c.state, c.targetId!));
     const T = dragCtx(rc.state, id)!.node;
     const L = (T.kind === "neg" ? T.arg : T) as Log;
     this.whole = [...allNodes(L.base).map((n) => n.id), ...(T.kind === "neg" ? [signId(T.id)] : [])];

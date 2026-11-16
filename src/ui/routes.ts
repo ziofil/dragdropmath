@@ -10,6 +10,7 @@
  *   #/set/<code>[/<n>]                  a set of one's own, from its link (and its exercise n)
  *   #/sets/new                          making a set
  *   #/sandbox                           any expression, every move
+ *   #/about                             who made it, and why
  */
 export type Mode = "practice" | "predict";
 
@@ -20,6 +21,7 @@ export type Route =
   | { page: "set"; code: string; n?: number }
   | { page: "make" }
   | { page: "sandbox" }
+  | { page: "about" }
   | { page: "missing" };
 
 /** Earlier forms of a link, and what they are now. */
@@ -60,6 +62,9 @@ export function parse(hash: string): Route {
       break;
     case "sandbox":
       if (rest.length === 0) return { page: "sandbox" };
+      break;
+    case "about":
+      if (rest.length === 0) return { page: "about" };
   }
   return { page: "missing" };
 }
@@ -78,6 +83,8 @@ export function href(r: Route): string {
       return "#/sets/new";
     case "sandbox":
       return "#/sandbox";
+    case "about":
+      return "#/about";
     case "missing":
       return "#/missing";
   }

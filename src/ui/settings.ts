@@ -1,5 +1,5 @@
 /**
- * The viewer's settings: language, skin, debug mode. One store, kept in this
+ * The viewer's settings: language, skin, numbers in colour, debug mode. One store, kept in this
  * browser; components read it with `useSettings` and redraw in place when it
  * changes (nothing is remounted, so work in progress stays).
  *
@@ -13,34 +13,40 @@ import { createStore } from "../util/store";
 import { readJson, writeJson } from "../util/storage";
 import { ENGLISH_ONLY, isLang, loadLanguage, t, type Lang } from "../i18n";
 
-export type SkinId = "classic" | "codex" | "paper" | "neon";
+export type SkinId = "modern" | "codex" | "paper" | "blackboard";
 
 export const SKINS: { id: SkinId; name: string; math: string }[] = [
-  { id: "classic", name: "Classic", math: `"STIX Two Text"` },
+  { id: "modern", name: "Modern", math: `"STIX Two Text"` },
   // Leonardo's notebooks: iron-gall ink and red chalk on parchment.
   { id: "codex", name: "Codex", math: `"IM Fell English"` },
   // A LaTeX article: black on white, nothing else.
   { id: "paper", name: "Paper", math: `"STIX Two Text"` },
-  // The future, loudly: neon on black.
-  { id: "neon", name: "Neon", math: `"STIX Two Text"` },
+  // The same article, in chalk: white on black.
+  { id: "blackboard", name: "Blackboard", math: `"STIX Two Text"` },
 ];
 
-export type Settings = { lang: Lang; skin: SkinId; debug: boolean };
+export type Settings = { lang: Lang; skin: SkinId; numbers: boolean; debug: boolean };
 
-const KEYS = { lang: "mathbyhand.lang.v1", skin: "mathbyhand.skin.v1", debug: "mathbyhand.debug" } as const;
+const KEYS = { lang: "mathbyhand.lang.v1", skin: "mathbyhand.skin.v1", numbers: "mathbyhand.numbers.v1", debug: "mathbyhand.debug" } as const;
+const isFlag = (v: unknown): v is number => v === 0 || v === 1;
 const isSkin = (v: unknown): v is SkinId => SKINS.some((s) => s.id === v);
 
 function initial(): Settings {
   const debugParam = typeof location !== "undefined" && new URLSearchParams(location.search).has("debug");
-  return { lang: initialLang(), skin: readJson<SkinId>(KEYS.skin, "classic", isSkin), debug: debugParam || readJson<number>(KEYS.debug, 0, (v) => v === 0 || v === 1) === 1 };
+  return {
+    lang: initialLang(),
+    skin: readJson<SkinId>(KEYS.skin, "modern", isSkin),
+    numbers: readJson<number>(KEYS.numbers, 0, isFlag) === 1,
+    debug: debugParam || readJson<number>(KEYS.debug, 0, isFlag) === 1,
+  };
 }
 
-/** The kept language, else the browser's, else English. */
+/** The kept language, else the browser's (not while ENGLISH_ONLY: only one picked in Settings), else English. */
 function initialLang(): Lang {
-  if (ENGLISH_ONLY) return "en";
   // Kept as plain text (not JSON) by earlier versions.
   const kept = readJson<Lang | null>(KEYS.lang, null, isLang) ?? rawLang();
   if (kept) return kept;
+  if (ENGLISH_ONLY) return "en";
   for (const w of typeof navigator === "undefined" ? [] : (navigator.languages ?? [navigator.language])) {
     const code = w?.slice(0, 2).toLowerCase();
     if (isLang(code)) return code;
@@ -106,6 +112,18 @@ export async function setLang(lang: Lang): Promise<void> {
   update({ lang });
 }
 
+/** Numbers drawn in the skin's number colour (--num), to tell them from letters at a glance. */
+const applyNumbers = (on: boolean) => {
+  if (on) document.documentElement.dataset.numbers = "colour";
+  else delete document.documentElement.dataset.numbers;
+};
+
+export function setNumbers(on: boolean): void {
+  writeJson(KEYS.numbers, on ? 1 : 0);
+  update({ numbers: on });
+  applyNumbers(on);
+}
+
 export function setDebug(on: boolean): void {
   writeJson(KEYS.debug, on ? 1 : 0);
   update({ debug: on });
@@ -113,7 +131,8 @@ export function setDebug(on: boolean): void {
 
 /** Before the first draw: the skin and its font, and the language. */
 export async function startSettings(): Promise<void> {
-  const { skin, lang } = store.get();
+  const { skin, lang, numbers } = store.get();
+  applyNumbers(numbers);
   await Promise.all([applySkin(skin), loadLanguage(lang).catch(() => loadLanguage("en"))]);
   showLanguage();
 }

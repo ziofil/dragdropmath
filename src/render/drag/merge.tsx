@@ -6,8 +6,7 @@
 import {
   Box,
   DistanceLine,
-  getElementPositionCheap,
-  operator,
+    operator,
   Operator,
   renderStateReadOnly,
   Vec2,
@@ -71,9 +70,9 @@ export function onTarget(rc: RenderCtx, ctx: DragInitContext<MathState>, dragged
   // under it, so there the grab point itself must reach it, after a real move.
   const loc = locate(rc.state, draggedId);
   const nested = !!loc && allNodes(nodeAt(rc.state, loc)).some((n) => n.id === targetId);
-  const t = canvasBox(rc, ctx, targetId);
-  const me = canvasBox(rc, ctx, draggedId);
-  const home = getElementPositionCheap(ctx, rc.state);
+  const t = canvasBox(rc, targetId);
+  const me = canvasBox(rc, draggedId);
+  const home = originOf(rc, draggedId);
   const reachX = Math.max(t.w / 2, ON_TARGET * Math.max(me.w, t.w));
   const reachY = (me.h + t.h) / 4;
   // Only after a real move: a press that hasn't gone anywhere isn't a drop on something.
@@ -110,17 +109,16 @@ export function onTarget(rc: RenderCtx, ctx: DragInitContext<MathState>, dragged
  */
 export function mergePlan(
   rc: RenderCtx,
-  ctx: DragInitContext<MathState>,
   draggedId: string,
   result: MathState,
   targetId: string,
   /** A piece the move keeps where it is while held (see Candidate.stays). */
   stays?: string,
 ): { aim: Vec2; pinned: boolean; shown: MathState } {
-  const plan = mergePlanUnclamped(rc, ctx, draggedId, result, targetId, stays);
+  const plan = mergePlanUnclamped(rc, draggedId, result, targetId, stays);
   // Wherever it completes, the carried piece stays on the canvas: an aim that would put
   // part of it past an edge (a wide bracket carried left onto its 2) is moved in.
-  const me = canvasBox(rc, ctx, draggedId);
+  const me = canvasBox(rc, draggedId);
   const W = rc.canvas?.W;
   if (W === undefined) return plan;
   const margin = 4;
@@ -131,15 +129,14 @@ export function mergePlan(
 
 function mergePlanUnclamped(
   rc: RenderCtx,
-  ctx: DragInitContext<MathState>,
   draggedId: string,
   result: MathState,
   targetId: string,
   stays?: string,
 ): { aim: Vec2; pinned: boolean; shown: MathState } {
-  const target = canvasBox(rc, ctx, targetId);
-  const home = canvasBox(rc, ctx, draggedId).centre;
-  const pinAt = (id: string): MathState => pinned(result, id, canvasBox(rc, ctx, id).symLeft.x);
+  const target = canvasBox(rc, targetId);
+  const home = canvasBox(rc, draggedId).centre;
+  const pinAt = (id: string): MathState => pinned(result, id, canvasBox(rc, id).symLeft.x);
   // A minus carried on its own (its own handle, not a node): aim at the target.
   const loc = locate(rc.state, draggedId);
   if (!loc) return { aim: target.centre, pinned: false, shown: result };
@@ -148,8 +145,8 @@ function mergePlanUnclamped(
   // Absorbed: the target stays put (or, if it's replaced, the part of it that stays: the 2 of √2·√2 → 2).
   if (!survivor) return { aim: target.centre, pinned: true, shown: inResult.has(targetId) || !stays || !inResult.has(stays) ? pinAt(targetId) : pinAt(stays) };
   const shown = stays && inResult.has(stays) ? pinAt(stays) : result;
-  const before = originOf(ctx, survivor, rc.state);
-  const after = originOf(ctx, survivor, shown);
+  const before = originOf(rc, survivor);
+  const after = originOf(rc, survivor, shown);
   if (!before || !after) return { aim: target.centre, pinned: false, shown };
   const aim = home.add(after.sub(before));
   if (aim.dist(home) >= target.h) return { aim, pinned: false, shown };
@@ -158,7 +155,7 @@ function mergePlanUnclamped(
   // x), it completes once the piece reaches that piece's near edge; otherwise
   // at the target.
   if (stays && inResult.has(stays)) {
-    const s = canvasBox(rc, ctx, stays);
+    const s = canvasBox(rc, stays);
     const edge = home.x < s.centre.x ? s.symLeft.x : s.symRight.x;
     return { aim: Vec2(edge, s.centre.y), pinned: false, shown };
   }
@@ -247,7 +244,7 @@ class MergeApproach extends Operator<MathState> {
     const id = ctx.draggedId!;
     this.carry = this.child("carry", carrySpec);
     this.still = this.child("still", rowSlot(env, id, [], 0, new Map()).withFloating());
-    this.home = canvasBox(rc, ctx, id).centre;
+    this.home = canvasBox(rc, id).centre;
     // (A minus carried on its own has its own handle, not a node: no kind.)
     const kindOf = (nid: string) => {
       const loc = locate(rc.state, nid);
@@ -255,7 +252,7 @@ class MergeApproach extends Operator<MathState> {
     };
     this.merges = merges.map((c) => {
       // What stays put (a pinned target, a term being multiplied) stays where it is in the picture until the drop.
-      const plan = mergePlan(rc, ctx, id, c.state, c.targetId!, c.stays);
+      const plan = mergePlan(rc, id, c.state, c.targetId!, c.stays);
       return {
         state: c.state,
         targetId: c.targetId!,
@@ -325,10 +322,20 @@ class MergeApproach extends Operator<MathState> {
     return dir !== 0 && (c.x - (dir > 0 ? m.zone.right : m.zone.left)) * dir > 0;
   }
 
-  /** Whether the carried centre `c` has gone beyond where merge `m` completes. */
+  /**
+   * Whether the carried centre `c` has gone beyond where merge `m` completes
+   * (or, where it completes back the other way — (a + b) carried right onto
+   * (c − d) multiplies out to its left — gone the other way at all).
+   */
   private past(m: Merge, c: Vec2): boolean {
     const d = m.aim.sub(this.home);
-    return c.sub(this.home).dot(d) > d.dot(d);
+    const along = c.sub(this.home).dot(d);
+    return along > d.dot(d) || (along < 0 && (m.zone.centre.x - this.home.x) * d.x < 0);
+  }
+
+  /** Whether the carried piece is on merge `m`'s target: not once it has left it on the far side, wherever the hand holds it. */
+  private hits(m: Merge, pointer: Vec2, c: Vec2): boolean {
+    return m.zone.hit(pointer) && (m.zone.nested || !this.beyond(m, c));
   }
 
   frame(frame: DragFrame): OpResult<MathState> {
@@ -345,13 +352,13 @@ class MergeApproach extends Operator<MathState> {
     // What you see is what you get.
     // Two moves can share a target ((x + 1) onto (x + 1): multiply out, or
     // square): when the leading one's is hit, that's the one.
-    const hit = (best.zone.hit(frame.pointer) ? best : this.merges.find((m) => m.zone.hit(frame.pointer))) ?? (mix >= MERGE_AT ? best : undefined);
+    const c = carriedCentre(this.env.rc, this.ctx, frame.pointer);
+    const hit = (this.hits(best, frame.pointer, c) ? best : this.merges.find((m) => this.hits(m, frame.pointer, c))) ?? (mix >= MERGE_AT ? best : undefined);
     // A forming merge wins over reordering past the neighbour (it mustn't
     // jump aside while it turns into the result) until the piece is carried
     // on beyond where the merge completes.
     // (Whether or not it has started forming yet. Beyond = over the target's
     // far edge and past where the merge completes, which may be further.)
-    const c = carriedCentre(this.env.rc, this.ctx, frame.pointer);
     const r = carried.dropState;
     const blocked = this.reorders.includes(r) && this.merges.some((m) => (hit ? m === hit : !(this.beyond(m, c) && this.past(m, c))) && this.swapsWith(r, m.targetId));
     if (blocked) carried = this.still.run(frame);

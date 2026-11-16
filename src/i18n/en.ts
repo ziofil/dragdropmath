@@ -7,21 +7,25 @@
 export const en = {
   /** <html lang>, and the page title. */
   htmlLang: "en",
-  pageTitle: "Math by Hand",
-  logo: "math by hand",
+  pageTitle: "DragDropMath",
+  logo: "DragDropMath",
   language: "Language",
 
   // Top bar
   makeExercises: "Make exercises",
   /** Any expression, every move: the page, its link on the home page, and its input. */
-  skin: "Look",
+  skin: "Theme",
+  settings: "Settings",
+  numbersInColour: "Numbers in colour",
+  debugMode: "Debug mode",
+  debugModeNote: "Shows how each drag works, for chasing bugs.",
   sandbox: "Sandbox",
   openSandbox: "Open the sandbox →",
   sandboxIntro: "Type any expression or equation and play with every move.",
   sandboxInput: "Expression or equation",
   sandboxPlaceholder: "e.g. 3(x - 2) = 2x + 1   or   ln(x^2) = e^(ln(4))",
   sandboxLoad: "Load",
-  debugOn: "Debug mode is on (Shift+D)",
+  debugOn: "Debug mode is on: tap to turn it off",
 
   // Home
   /** "Algebra you can feel.": the word is drawn with letters you can drag. Keep it one short word. */
@@ -49,7 +53,33 @@ export const en = {
   saveProgress: "Save my progress",
   loadProgress: "Load progress from a file",
   progressSaved: "Saved. Load that file here, or in any browser, to get your progress back.",
-  progressNotABackup: "That file isn't a Math by Hand progress file.",
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. All rights reserved.`,
+  aboutLink: "About",
+  /** The About page: who made the site, why, and what happens to what learners do. */
+  about: {
+    title: "About DragDropMath",
+    sections: [
+      {
+        heading: "What it is",
+        text: [
+          "DragDropMath is algebra you do with your hands. You drag any part of an expression or equation, and it can only move in ways the maths allows. A wrong move simply doesn't happen, so you learn what's allowed by feeling it, not by memorising rules.",
+          "There is a learning path from rearranging terms to simultaneous equations. Each chapter has a lesson, practice at three levels, and Mind's eye exercises, where you picture the answer before you work it out. Teachers can write their own sets of exercises and share them as a link.",
+        ],
+      },
+      {
+        heading: "Who made it",
+        text: ["DragDropMath is made by Filippo Miatto, to make algebra something you can see and touch rather than a list of rules to remember."],
+      },
+      {
+        heading: "Your privacy",
+        text: [
+          "There are no accounts, no ads and no tracking. Your progress is kept only in your own browser, and nothing you do is sent anywhere. You can save it to a file in Settings, to keep it safe or move it to another device.",
+          "A set of exercises lives entirely inside its link: nothing about it is stored online.",
+        ],
+      },
+    ] as { heading: string; text: string[] }[],
+  },
+  progressNotABackup: "That file isn't a DragDropMath progress file.",
   showMove: "Show",
   /** The three ways through a chapter. */
   lesson: "Lesson",

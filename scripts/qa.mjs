@@ -25,6 +25,12 @@ const reload = async () => {
   await p.reload();
   await p.waitForTimeout(500);
 };
+/** A skin, from Settings (opened and closed again). */
+const pickSkin = async (skin) => {
+  await p.click(".settings-toggle");
+  await p.selectOption(".settings-panel .pick select", skin);
+  await p.keyboard.press("Escape");
+};
 const fresh = async () => {
   await go("#/");
   await p.evaluate(() => localStorage.clear());
@@ -135,16 +141,16 @@ check("at 0, a reveal leaves the score at 0", (await easyScore()) === 0);
 // Bug 6: switching skin keeps work in progress (and doesn't ask the prediction again).
 await go("#/sandbox", 400);
 await p.fill(".sandbox-form input", "3x = 12");
-await p.selectOption(".topbar-pick select", "codex");
+await pickSkin("codex");
 await p.waitForTimeout(600);
 check("switching skin keeps what's typed (bug 6)", (await p.inputValue(".sandbox-form input")) === "3x = 12");
 await fresh();
 await go("#/predict/balance/medium/3", 500);
 await (await cards())[0].click();
-await p.selectOption(".topbar-pick select", "neon");
+await pickSkin("blackboard");
 await p.waitForTimeout(600);
 check("switching skin mid-exercise doesn't ask again (bug 3)", (await cards()).length === 0);
-await p.selectOption(".topbar-pick select", "classic");
+await pickSkin("modern");
 
 // The three ways into a chapter start from its node on the path: the lesson, practice, the mind's eye.
 await p.setViewportSize({ width: 1100, height: 900 });
@@ -169,9 +175,36 @@ await p.waitForTimeout(300);
 const markStyle = await p.$eval(".maker-mark", (m) => getComputedStyle(m).borderStyle);
 check("the set maker's ✓ has no dashed pill (bug 8)", markStyle === "none");
 
+// Settings: numbers in colour, debug mode, the backup, all in one panel.
+await go("#/sandbox", 400);
+const numFill = () => p.$eval(".canvas .m-num", (e) => getComputedStyle(e).fill);
+await p.fill(".sandbox-form input", "3x = 12");
+await p.press(".sandbox-form input", "Enter");
+await p.waitForTimeout(400);
+const inkFill = await numFill();
+await p.click(".settings-toggle");
+await p.check(".settings-numbers");
+await p.waitForTimeout(100);
+check("numbers in colour: numbers change colour", (await numFill()) !== inkFill, `${inkFill} → ${await numFill()}`);
+await p.uncheck(".settings-numbers");
+check("…and back", (await numFill()) === inkFill);
+await p.check(".settings-debug");
+check("debug mode from Settings", !!(await p.$(".topbar-debug")));
+await p.uncheck(".settings-debug");
+check("Settings holds the progress backup", !!(await p.$(".settings-panel .settings-backup button")));
+await p.keyboard.press("Escape");
+check("Escape closes Settings", !(await p.$(".settings-panel")));
+
+// The footer on every page, leading to About.
+await go("#/", 400);
+check("the footer says who owns it", (await p.textContent(".footer")).includes("All rights reserved"));
+await p.click(".footer a");
+await p.waitForTimeout(300);
+check("…and leads to About", (await p.textContent("h1")).includes("About"));
+
 // Bug 9: every skin draws every framed box and every button the same way.
-for (const skin of ["classic", "codex", "paper", "neon"]) {
-  await p.selectOption(".topbar-pick select", skin);
+for (const skin of ["modern", "codex", "paper", "blackboard"]) {
+  await pickSkin(skin);
   await p.waitForTimeout(400);
   for (const [h, sels] of [["#/", [".scores", ".path-card", ".path-panel", ".home-sandbox"]], ["#/predict/balance/easy/3", [".predict-choice"]]]) {
     await go(h, 400);
@@ -179,10 +212,10 @@ for (const skin of ["classic", "codex", "paper", "neon"]) {
     check(`${skin}: ${h} frames alike`, new Set(looks).size <= 1, looks.join(", "));
   }
   await go("#/sets/new", 300);
-  const radii = await p.$$eval(".topbar .button, .maker-actions button, .topbar-pick select", (bs) => [...new Set(bs.map((b) => getComputedStyle(b).borderTopLeftRadius))]);
+  const radii = await p.$$eval(".topbar .button, .maker-actions button", (bs) => [...new Set(bs.map((b) => getComputedStyle(b).borderTopLeftRadius))]);
   check(`${skin}: buttons share one corner`, radii.length === 1, radii.join(", "));
 }
-await p.selectOption(".topbar-pick select", "classic");
+await pickSkin("modern");
 if (errs.length) {
   failed++;
   console.log("FAIL console during the checks:", [...new Set(errs)]);

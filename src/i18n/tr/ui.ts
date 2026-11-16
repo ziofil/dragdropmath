@@ -6,8 +6,8 @@ import type { Translation } from "../en";
  */
 export const tr: Translation = {
   htmlLang: "tr",
-  pageTitle: "Math by Hand",
-  logo: "math by hand",
+  pageTitle: "DragDropMath",
+  logo: "DragDropMath",
   language: "Dil",
 
   // Top bar

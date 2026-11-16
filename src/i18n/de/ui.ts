@@ -3,8 +3,8 @@ import type { Translation } from "../en";
 
 export const de: Translation = {
   htmlLang: "de",
-  pageTitle: "Math by Hand",
-  logo: "math by hand",
+  pageTitle: "DragDropMath",
+  logo: "DragDropMath",
   language: "Sprache",
 
   // Top bar

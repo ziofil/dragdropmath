@@ -6,10 +6,11 @@ import { SetMaker, SetRoute } from "./SetView";
 import { Sandbox } from "./Sandbox";
 import { ExerciseRoute } from "./Practice";
 import { NotFound } from "./NotFound";
-import { useDebugShortcut } from "./debug";
-import { setDebug, setLang, setSkin, SKINS, useSettings, type SkinId } from "./settings";
+import { About } from "./About";
+import { setDebug, useSettings } from "./settings";
+import { SettingsButton } from "./SettingsPanel";
 import { anchorOf, href, parse, type Route } from "./routes";
-import { ENGLISH_ONLY, LANGS, t, type Lang } from "../i18n";
+import { t } from "../i18n";
 
 const subscribeHash = (f: () => void) => {
   window.addEventListener("hashchange", f);
@@ -64,6 +65,8 @@ function Page({ route }: { route: Route }) {
       return <SetMaker />;
     case "sandbox":
       return <Sandbox />;
+    case "about":
+      return <About />;
     case "missing":
       return <NotFound />;
   }
@@ -71,8 +74,7 @@ function Page({ route }: { route: Route }) {
 
 export function App() {
   const route = useRoute();
-  const { debug, skin, lang } = useSettings();
-  useDebugShortcut();
+  const { debug } = useSettings();
 
   return (
     <div className="app">
@@ -94,26 +96,14 @@ export function App() {
           <a href={href({ page: "make" })} className="button quiet" aria-current={route.page === "make" ? "page" : undefined}>
             {t().makeExercises}
           </a>
-          <Pick value={skin} label={t().skin} options={SKINS.map((s) => [s.id, s.name])} onPick={(v) => setSkin(v as SkinId)} />
-          {!ENGLISH_ONLY && <Pick value={lang} label={t().language} options={LANGS.map((l) => [l.code, l.name])} onPick={(v) => setLang(v as Lang)} />}
+          <SettingsButton />
         </span>
       </nav>
       <Page route={route} />
+      <footer className="footer">
+        <span>{t().copyright(new Date().getFullYear())}</span>
+        <a href={href({ page: "about" })}>{t().aboutLink}</a>
+      </footer>
     </div>
-  );
-}
-
-/** A setting's drop-down, as a quiet button (its arrow drawn by .topbar-pick: the select's own sits too far right). */
-function Pick({ value, label, options, onPick }: { value: string; label: string; options: [string, string][]; onPick: (v: string) => void }) {
-  return (
-    <span className="topbar-pick">
-      <select className="button quiet" value={value} onChange={(e) => onPick(e.target.value)} aria-label={label}>
-        {options.map(([v, name]) => (
-          <option key={v} value={v}>
-            {name}
-          </option>
-        ))}
-      </select>
-    </span>
   );
 }

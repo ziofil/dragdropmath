@@ -8,7 +8,6 @@ import { chapterText, t } from "../i18n";
 import { LevelButtons } from "./Practice";
 import { LeadsTo } from "./ChapterView";
 import { href } from "./routes";
-import { backupText, loadBackup } from "../util/backup";
 
 /** Height of one row of the path. */
 const ROW = 136;
@@ -62,7 +61,6 @@ export function Home({ at }: { at?: Chapter }) {
         <p>{t().sandboxIntro}</p>
       </section>
 
-      <ProgressBackup />
     </main>
   );
 }
@@ -204,43 +202,6 @@ function Scores() {
         ))}
       </ul>
       <p className="scores-note">{t().scoresNote}</p>
-    </section>
-  );
-}
-
-/** Saving progress to a file and loading it back: it otherwise lives only in this browser. */
-function ProgressBackup() {
-  const [said, setSaid] = useState<string | null>(null);
-  const file = useRef<HTMLInputElement>(null);
-  const save = () => {
-    const blob = new Blob([backupText()], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `math-by-hand-progress-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    setSaid(t().progressSaved);
-  };
-  const load = async (f: File | undefined) => {
-    if (!f) return;
-    const n = loadBackup(await f.text());
-    if (n === null) return setSaid(t().progressNotABackup);
-    // Everything reads its progress afresh.
-    location.reload();
-  };
-  return (
-    <section className="card home-backup">
-      <p>{t().progressHere}</p>
-      <div className="home-backup-actions">
-        <button onClick={save}>{t().saveProgress}</button>
-        <button onClick={() => file.current?.click()}>{t().loadProgress}</button>
-        <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => load(e.target.files?.[0])} />
-      </div>
-      {said && (
-        <p className="home-backup-said" role="status">
-          {said}
-        </p>
-      )}
     </section>
   );
 }

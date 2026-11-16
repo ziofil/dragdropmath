@@ -172,10 +172,6 @@ export function checkMergesAnimate(src: string | MathState, rules: readonly Rule
  * what's wrong). Listed as todos so every run shows them, not as failures.
  */
 const KNOWN: Record<string, { reach?: string; animate?: string }> = {
-  "brackets/hard/letter-bracket-minus-product": { reach: "(x + 3y)(x − y) after a minus: no spot to swap the two brackets, merges cover it" },
-  "balance/hard/powers-in-logs": { reach: "ln(x²) + ln(x) − 1: no spot just after ln(x), the merge with it covers it" },
-  "simultaneous/medium/composed-3": { reach: "a log on a fraction's bottom, in the first of two equations: carrying it up across the bar (its landing ~30px left, same height) loses to staying put; fine in one equation" },
-  "distribute/hard/products-and-brackets": { reach: "in 3·3(x + 2y) the first 3 can't jump the second to multiply out the bracket", animate: "the same: the 3 merges with the other 3 on the way" },
 };
 
 /** Both checks, on every `n`th case of the corpus from the `k`th: one shard of the whole set. */

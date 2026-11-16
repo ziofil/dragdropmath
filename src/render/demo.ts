@@ -1,9 +1,10 @@
 /**
  * "Show me": where a hand would press and let go to make one move, so the
  * app can play it with the real drag engine (see MathCanvas's demo). Worked
- * out headlessly, the way the drag tests do (testing/harness.ts): a merge is
- * carried to where it completes; any other drag goes to the nearest point
- * along the row (or around it) where letting go gives the move.
+ * out headlessly, the way the drag tests do (testing/harness.ts), from the
+ * drag's own aims: a merge is carried to where it completes, any other move
+ * to where the drag aims it (searching along the row, or around it, only
+ * if letting go there doesn't give the move).
  */
 import { Vec2 } from "dragology";
 import type { MathState } from "../expr/types";
@@ -53,7 +54,9 @@ export function planDemo(state: MathState, rules: readonly RuleId[], rule: RuleI
     const from = origin.add(ANCHOR);
     // A fresh drag for each point tried, as a hand would.
     const gives = (v: Vec2) => same(new Grip(h, id, ANCHOR).at(from.add(v)).state, c.state);
-    const o = ROW.find(gives) ?? AROUND.find(gives);
+    // Where the drag itself aims this move (its layout, as the drag reads it); only failing that, a search.
+    const aim = h.aimOf(id, c).sub(h.centreOf(id));
+    const o = [aim].find(gives) ?? ROW.find(gives) ?? AROUND.find(gives);
     if (o) return { kind: "drag", id, from, to: from.add(o), next: c.state, hold: !moves.pressable(id) };
   }
   return null;

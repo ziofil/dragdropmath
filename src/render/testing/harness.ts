@@ -209,7 +209,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
     },
     /** Canvas position of node `id`'s origin (baseline-left) when showing `s`. */
     originOf(id: string, s: MathState = state): Vec2 | null {
-      return originOf(ctxFor(id), id, s);
+      return originOf(laidOut(s), id);
     },
     /** Node `id`'s size when showing `s`. */
     sizeOf(id: string, s: MathState = state): Size {
@@ -240,8 +240,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
       // (`rule`: which move, when two share the target.)
       const c = h.candidates(id).find((k) => k.targetId === targetId && (!rule || k.rule === rule))!;
       const rc = h.rc(id);
-      const ctx = ctxFor(id);
-      return mergePlan(rc, ctx, id, c.state, targetId, c.stays).aim.sub(canvasBox(rc, ctx, id).centre);
+      return mergePlan(rc, id, c.state, targetId, c.stays).aim.sub(canvasBox(rc, id).centre);
     },
     /**
      * Where a move without a target aims (the carried symbol's centre), as the
@@ -250,7 +249,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
      */
     aimOf(id: string, c: Candidate): Vec2 {
       const carry = feelOf(c).carry ?? "landing";
-      return AIMS[carry === "reorder" ? "landing" : carry](h.rc(id), id, c.state)(ctxFor(id));
+      return AIMS[carry === "reorder" ? "landing" : carry](h.rc(id), id, c.state)();
     },
     /** Pick up node `id` (or the first piece printing as `text`) at a point on it (default: near its symbol's start). */
     grab(idOrText: string, at?: Vec2): Grip {

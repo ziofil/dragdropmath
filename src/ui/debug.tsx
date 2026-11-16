@@ -4,33 +4,20 @@
  * state (every piece's id, marks, and moves), and a recorder for the last
  * drag that can be saved and replayed as a test.
  *
- * On with `?debug` in the address, or Shift+D (remembered in this browser).
+ * On from Settings, or with `?debug` in the address (remembered in this browser).
  */
-import { useEffect } from "react";
 import type { Expr, MathState } from "../expr/types";
 import { printState, stateKey } from "../expr/key";
 import { allNodes, children } from "../expr/tree";
 import { movesFor, signId, type RuleId } from "../rules";
 import type { Recording } from "../render/testing/recording";
 import { createStore } from "../util/store";
-import { setDebug, settings, useSettings } from "./settings";
+import { useSettings } from "./settings";
 
 // ---------- on/off (a setting: settings.ts) ----------
 
 /** Whether debug mode is on (re-renders when it changes). */
 export const useDebug = (): boolean => useSettings().debug;
-
-/** Shift+D toggles debug mode (not while typing in a field). */
-export function useDebugShortcut() {
-  useEffect(() => {
-    const on = (e: KeyboardEvent) => {
-      const typing = e.target instanceof HTMLElement && ["INPUT", "TEXTAREA"].includes(e.target.tagName);
-      if (!typing && e.shiftKey && e.key.toLowerCase() === "d") setDebug(!settings().debug);
-    };
-    window.addEventListener("keydown", on);
-    return () => window.removeEventListener("keydown", on);
-  }, []);
-}
 
 // ---------- the last drag ----------
 

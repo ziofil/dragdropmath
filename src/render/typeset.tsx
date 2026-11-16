@@ -37,6 +37,10 @@ export type RenderCtx = {
   fontSizes?: Map<string, number>;
   /** Filled in by layout: the canvas size it was laid out for. */
   canvas?: { W: number; H: number };
+  /** Filled in by layout: the drawing itself (where each piece is: see placesOf). */
+  drawn?: Svgx;
+  /** Each id'd piece's origin on the canvas, read off the drawing once (placesOf). */
+  places?: Map<string, { x: number; y: number }>;
   /** Filled in by layout: where the = sign's glyph starts and ends (x), if there is one. */
   eq?: { left: number; right: number; centre: number; baseline: number; size: number };
 };
@@ -147,9 +151,16 @@ function layoutNode(
       >
         <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
         {L &&
-          (e.kind === "neg" && interactive
-            ? signHandle(rc, e.id, L, size)
-            : glyph(`lead-${lead}`, L.glyph, L.left * size, 0, size, "m-op"))}
+          (e.kind === "neg" && interactive ? (
+            signHandle(rc, e.id, L, size)
+          ) : e.kind === "neg" ? (
+            // Placed as its handle would be, so a still layout knows where the − is too (placesOf).
+            <g id={signId(e.id)} transform={translate(L.left * size, 0)}>
+              {glyph(`lead-${lead}`, L.glyph, 0, 0, size, "m-op")}
+            </g>
+          ) : (
+            glyph(`lead-${lead}`, L.glyph, L.left * size, 0, size, "m-op")
+          ))}
         {content.parts(leadW)}
       </g>
     ),
@@ -470,6 +481,23 @@ export function relation(state: MathState, cx: number, baseline: number, size: n
 
 /** Lay out a whole expression or equation centred in a W×H canvas (or with a piece pinned: see MathState.pin). */
 export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
+  const drawn = layoutCanvas(rc, W, H);
+  rc.drawn = drawn;
+  rc.places = undefined;
+  return drawn;
+}
+
+/**
+ * The one layout: where every piece of a laid-out canvas is (its origin,
+ * baseline-left), as drawn. The drag's aims, its hit-testing, Show and the
+ * tests all read places from here.
+ */
+export function placesOf(rc: RenderCtx): Map<string, { x: number; y: number }> {
+  if (!rc.drawn) throw new Error("placesOf: not laid out");
+  return (rc.places ??= originsOf(rc.drawn));
+}
+
+function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
   rc.fontSizes ??= new Map();
   rc.canvas = { W, H };
@@ -519,7 +547,10 @@ export function renderState(rc: RenderCtx, W: number, H: number): Svgx {
 
 /**
  * Several equations (rows), stacked with their = signs in one column: a system
- * (x + y = 5 and x − y = 1).
+ * (x + y = 5 and x − y = 1). Each row has an equal share of the canvas's
+ * height and is centred in it, as one equation is on the whole canvas: a move
+ * in one row never shifts another, and a row that gets shorter (a fraction
+ * gone) stays where it was, so a piece lands where it's carried.
  */
 function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const n = rc.state.sides.length / 2;
@@ -537,18 +568,18 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   };
   let b = build(BASE_SIZE);
   let f = fit(b);
-  const scale = Math.min(1, (W / 2 - 16) / f.half, (H - 16) / (n * f.rowH));
+  const slot = (H - 16) / n;
+  const scale = Math.min(1, (W / 2 - 16) / f.half, slot / f.rowH);
   if (scale < 1) {
     b = build(BASE_SIZE * scale);
     f = fit(b);
   }
   const { size } = b;
   const cx = W / 2;
-  const top = H / 2 - (n * f.rowH) / 2;
   const gap = { left: cx - f.eqW / 2 - f.space, right: cx + f.eqW / 2 + f.space };
   const baselines = b.sides.map((_, k) => {
     const [L, R] = [b.sides[k - (k % 2)], b.sides[k - (k % 2) + 1]];
-    return top + Math.floor(k / 2) * f.rowH + f.rowH / 2 + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
+    return 8 + (Math.floor(k / 2) + 0.5) * slot + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
   });
   const xs = b.sides.map((s, k) => (k % 2 === 0 ? gap.left - s.w : gap.right));
   const pinned = pinShift(rc, b.sides, xs, baselines, W);

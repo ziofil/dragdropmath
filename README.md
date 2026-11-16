@@ -1,4 +1,4 @@
-# Math by Hand
+# DragDropMath
 
 Algebra you can feel. Drag pieces of an expression around. They only go where the maths allows. Each exercise asks you to work an expression into a given shape. There is no move counting: it only matters that it gets solved.
 

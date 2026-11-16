@@ -1,6 +1,6 @@
-import { getElementPositionCheap, Vec2, type DragInitContext } from "dragology";
+import { Vec2, type DragInitContext } from "dragology";
 import type { MathState } from "../expr/types";
-import type { RenderCtx } from "./typeset";
+import { placesOf, renderState, type RenderCtx } from "./typeset";
 
 /**
  * Geometry of a node on the canvas, measured on the *symbol* (the box minus
@@ -10,26 +10,35 @@ import type { RenderCtx } from "./typeset";
  */
 export type CanvasBox = { symLeft: Vec2; symRight: Vec2; centre: Vec2; w: number; h: number };
 
-/**
- * Canvas position of node `id`'s origin (baseline-left) when the canvas shows
- * `state`. Each lookup renders the whole board, and a drag asks the same ones
- * again and again (a piece's place in a state never changes): kept per state
- * and drawing.
- */
-export function originOf(ctx: DragInitContext<MathState>, id: string, state: MathState): Vec2 | null {
-  let byDrawing = origins.get(state);
-  if (!byDrawing) origins.set(state, (byDrawing = new WeakMap()));
-  let byId = byDrawing.get(ctx.draggable);
-  if (!byId) byDrawing.set(ctx.draggable, (byId = new Map()));
-  if (!byId.has(id)) byId.set(id, getElementPositionCheap({ ...ctx, draggedId: id, draggedPath: id, anchorPos: Vec2(0, 0) }, state));
-  return byId.get(id)!;
+/** A state laid out on a W×H canvas, kept: the same state always lays out the same. */
+export function laidOut(state: MathState, W: number, H: number): RenderCtx {
+  const key = `${W}x${H}`;
+  let byCanvas = layouts.get(state);
+  if (!byCanvas) layouts.set(state, (byCanvas = new Map()));
+  let rc = byCanvas.get(key);
+  if (!rc) {
+    rc = { state };
+    renderState(rc, W, H);
+    byCanvas.set(key, rc);
+  }
+  return rc;
 }
-const origins = new WeakMap<MathState, WeakMap<object, Map<string, Vec2 | null>>>();
+const layouts = new WeakMap<MathState, Map<string, RenderCtx>>();
+
+/**
+ * Canvas position of node `id`'s origin (baseline-left) when `rc`'s canvas
+ * shows `state` (by default, its own): read off the layout (placesOf).
+ */
+export function originOf(rc: RenderCtx, id: string, state: MathState = rc.state): Vec2 | null {
+  const at = state === rc.state && rc.drawn ? rc : laidOut(state, rc.canvas!.W, rc.canvas!.H);
+  const p = placesOf(at).get(id);
+  return p ? Vec2(p.x, p.y) : null;
+}
 
 /** Where node `id` is on the canvas when it shows `rc.state` (laid out, so its size is known). */
-export function canvasBox(rc: RenderCtx, ctx: DragInitContext<MathState>, id: string): CanvasBox {
+export function canvasBox(rc: RenderCtx, id: string): CanvasBox {
   const size = rc.sizes?.get(id);
-  const origin = originOf(ctx, id, rc.state);
+  const origin = originOf(rc, id);
   if (!size || !origin) throw new Error(`canvasBox: node ${id} not laid out`);
   const midY = origin.y + (size.desc - size.asc) / 2;
   return {

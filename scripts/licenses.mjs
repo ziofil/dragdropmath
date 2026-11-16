@@ -24,7 +24,7 @@ for (const dir of [...new Set(dirs)].sort()) {
   parts.push(`${id} — ${pkg.license ?? "see below"}\n${pkg.homepage ?? ""}\n\n${text}`);
 }
 
-const header = `Math by Hand uses the following open-source software.
+const header = `DragDropMath uses the following open-source software.
 Each is the property of its authors and is used under the license shown.
 
 Fonts (loaded from Google Fonts): STIX Two Text, Space Grotesk and Manrope,

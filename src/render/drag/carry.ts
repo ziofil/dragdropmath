@@ -8,8 +8,8 @@ import type { MathState } from "../../expr/types";
 import { locate, nodeAt } from "../../expr/tree";
 import { dragCtx } from "../../rules/types";
 import { withoutMarks } from "../../rules";
-import { canvasBox, carriedCentre } from "../geometry";
-import { renderState, type RenderCtx } from "../typeset";
+import { canvasBox, carriedCentre, laidOut } from "../geometry";
+import type { RenderCtx } from "../typeset";
 import type { DragEnv } from "./env";
 
 /**
@@ -29,7 +29,7 @@ export function rowSlot(
   reorders: Map<number, MathState>,
 ): DragSpec<MathState> {
   return d.custom((ctx: DragInitContext<MathState>) => {
-    const boxes = (rowIds.length ? rowIds : [draggedId]).map((id) => canvasBox(rc, ctx, id));
+    const boxes = (rowIds.length ? rowIds : [draggedId]).map((id) => canvasBox(rc, id));
     const others = boxes.filter((_, k) => rowIds.length && k !== myIndex).map((b) => b.centre.x);
     const h = Math.max(...boxes.map((b) => b.h));
     const left = boxes[0].symLeft.x - 0.5 * h;
@@ -63,11 +63,11 @@ export function rowSlot(
 /** How the rest of the expression moves when the preview changes under a drag: a short slide. */
 export const SLIDE = { easing: "cubic-out", duration: 160 } as const;
 
-/** Distance from the carried symbol's centre to `aim` (computed once per drag). */
-function aimAt({ rc, d }: DragEnv, result: MathState, aim: (ctx: DragInitContext<MathState>) => Vec2): DragSpec<MathState> {
+/** Distance from the carried symbol's centre to `aim` (worked out once per drag). */
+function aimAt({ rc, d }: DragEnv, result: MathState, aim: () => Vec2): DragSpec<MathState> {
   return d.custom((ctx: DragInitContext<MathState>) => {
     const preview = lazily(() => renderStateReadOnly(ctx, result));
-    const target = aim(ctx);
+    const target = aim();
     return (frame) => ({ preview, dropState: result, gap: carriedCentre(rc, ctx, frame.pointer).dist(target) });
   });
 }
@@ -82,20 +82,7 @@ export function lazily<T>(make: () => T): () => T {
   return () => (made ??= { v: make() }).v;
 }
 
-/** A state laid out on a W×H canvas, kept: the same state always lays out the same. */
-export function laidOut(state: MathState, W: number, H: number): RenderCtx {
-  const key = `${W}x${H}`;
-  let byCanvas = layouts.get(state);
-  if (!byCanvas) layouts.set(state, (byCanvas = new Map()));
-  let rc = byCanvas.get(key);
-  if (!rc) {
-    rc = { state };
-    renderState(rc, W, H);
-    byCanvas.set(key, rc);
-  }
-  return rc;
-}
-const layouts = new WeakMap<MathState, Map<string, RenderCtx>>();
+export { laidOut } from "../geometry";
 
 /**
  * A move that leaves the row (across =, ...): aim for where the symbol itself
@@ -124,7 +111,7 @@ export function overOtherSide(env: DragEnv, draggedId: string, result: MathState
   return [
     d.custom((ctx: DragInitContext<MathState>) => {
       const preview = lazily(() => renderStateReadOnly(ctx, result));
-      const box = canvasBox(rc, ctx, side.id);
+      const box = canvasBox(rc, side.id);
       return (frame) => {
         const at = carriedCentre(rc, ctx, frame.pointer);
         // Only once it's over that side: short of it, the row's own slots (a swap with the last term) come first.
@@ -144,10 +131,10 @@ export function pullOut(env: DragEnv, draggedId: string, result: MathState): Dra
   return aimAt(env, result, AIMS["pull-out"](env.rc, draggedId, result));
 }
 
-export function pullOutAim(rc: RenderCtx, ctx: DragInitContext<MathState>, draggedId: string): Vec2 {
+export function pullOutAim(rc: RenderCtx, draggedId: string): Vec2 {
   const c = dragCtx(rc.state, draggedId)!;
   const containerId = dragCtx(rc.state, c.parent!.id)!.parent!.id;
-  const b = canvasBox(rc, ctx, containerId);
+  const b = canvasBox(rc, containerId);
   return c.index === 0 ? b.symLeft.sub(Vec2(0.6 * b.h, 0)) : b.symRight.add(Vec2(0.6 * b.h, 0));
 }
 
@@ -173,7 +160,7 @@ export function farEnd(env: DragEnv, draggedId: string, result: MathState): Drag
   return aimAt(env, result, AIMS["far-end"](env.rc, draggedId, result));
 }
 
-type Aim = (ctx: DragInitContext<MathState>) => Vec2;
+type Aim = () => Vec2;
 
 /**
  * Where the carried symbol's centre aims, for each way a move without a
@@ -182,11 +169,11 @@ type Aim = (ctx: DragInitContext<MathState>) => Vec2;
  */
 export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "far-end", (rc: RenderCtx, draggedId: string, result: MathState) => Aim> = {
   // Where the piece itself sits afterwards.
-  landing: (rc, id, result) => (ctx) => canvasBox(laidOut(result, rc.canvas!.W, rc.canvas!.H), ctx, id).centre,
-  "pull-out": (rc, id) => (ctx) => pullOutAim(rc, ctx, id),
+  landing: (rc, id, result) => () => canvasBox(laidOut(result, rc.canvas!.W, rc.canvas!.H), id).centre,
+  "pull-out": (rc, id) => () => pullOutAim(rc, id),
   // Straight below it, wherever the result then draws it.
-  below: (rc, id) => (ctx) => {
-    const b = canvasBox(rc, ctx, id);
+  below: (rc, id) => () => {
+    const b = canvasBox(rc, id);
     return b.centre.add(Vec2(0, 1.6 * b.h));
   },
   // Past the left end of the sum it's taken out of: the nearest one *around* it (a bracket being taken out is a sum itself).
@@ -196,8 +183,8 @@ export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "f
     let loc = at && up(at);
     while (loc && nodeAt(rc.state, loc).kind !== "sum") loc = up(loc);
     const first = loc && (nodeAt(rc.state, loc) as { terms: { id: string }[] }).terms[0].id;
-    return (ctx) => {
-      const b = canvasBox(rc, ctx, first ?? id);
+    return () => {
+      const b = canvasBox(rc, first ?? id);
       return b.symLeft.sub(Vec2(0.9 * b.h, 0));
     };
   },
@@ -205,8 +192,8 @@ export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "f
   "far-end": (rc, id) => {
     const at = locate(rc.state, id)!;
     const other = rc.state.sides[at.side ^ 1];
-    return (ctx) => {
-      const b = canvasBox(rc, ctx, other.id);
+    return () => {
+      const b = canvasBox(rc, other.id);
       return at.side % 2 === 1 ? b.symLeft : b.symRight;
     };
   },

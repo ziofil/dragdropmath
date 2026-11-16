@@ -112,8 +112,20 @@ function stripFactor(t: Expr, f: Expr, taken?: Taken): Expr | null {
   if (v.frac) return null;
   // The whole term carried out (ab + a → a(b + 1)): 1 is left.
   if (taken && "id" in taken && (taken.id === t.id || taken.id === v.body.id)) return rebuildTerm(v, [], []);
-  const top = divideOut(v.top, f, taken);
+  const top = divideOut(v.top, f, taken) ?? (taken ? null : divideNumber(v.top, f));
   return top && rebuildTerm(v, top, []);
+}
+
+/**
+ * A whole number out of a term's number that it divides, as by hand: 3 out of
+ * 9x leaves 3x, out of 3 leaves 1 (9x + 3y → 3(3x + y), no 9 = 3·3 first).
+ */
+function divideNumber(fs: Expr[], f: Expr): Expr[] | null {
+  if (f.kind !== "num" || !Number.isInteger(f.value) || f.value < 2) return null;
+  const i = fs.findIndex((x) => x.kind === "num" && Number.isInteger(x.value) && x.value % f.value === 0);
+  if (i < 0) return null;
+  const q = (fs[i] as Extract<Expr, { kind: "num" }>).value / f.value;
+  return q === 1 ? fs.filter((_, k) => k !== i) : fs.map((x, k) => (k === i ? num(q, x.id) : x));
 }
 
 /** The piece carried out of its term, and which copy of it that is (the x of x³: one copy of x). */

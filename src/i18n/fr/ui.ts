@@ -6,8 +6,8 @@ const s = (n: number) => (n > 1 ? "s" : "");
 
 export const fr: Translation = {
   htmlLang: "fr",
-  pageTitle: "Math by Hand",
-  logo: "math by hand",
+  pageTitle: "DragDropMath",
+  logo: "DragDropMath",
   language: "Langue",
 
   // Top bar

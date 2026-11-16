@@ -2,8 +2,8 @@ import type { Translation } from "../en";
 
 export const pl: Translation = {
   htmlLang: "pl",
-  pageTitle: "Math by Hand",
-  logo: "math by hand",
+  pageTitle: "DragDropMath",
+  logo: "DragDropMath",
   language: "Język",
 
   // Top bar

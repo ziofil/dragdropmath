@@ -5,7 +5,10 @@
  */
 
 /** What a backup file is: tagged, so loading something else is caught. */
-type Backup = { app: "math-by-hand"; version: 1; saved: string; data: Record<string, string> };
+type Backup = { app: typeof APP; version: 1; saved: string; data: Record<string, string> };
+const APP = "dragdropmath";
+/** The site's earlier name: its backups still load. */
+const APPS: string[] = [APP, "math-by-hand"];
 
 /** The app's own keys (older ones from when it had another name too); not the debug switch. */
 const OURS = (key: string) => (key.startsWith("mathbyhand.") || key.startsWith("graspable.")) && key !== "mathbyhand.debug";
@@ -22,7 +25,7 @@ export function backupText(now = new Date()): string {
   } catch {
     /* storage unavailable: an empty backup */
   }
-  const backup: Backup = { app: "math-by-hand", version: 1, saved: now.toISOString(), data };
+  const backup: Backup = { app: APP, version: 1, saved: now.toISOString(), data };
   return JSON.stringify(backup, null, 1);
 }
 
@@ -40,7 +43,7 @@ export function loadBackup(text: string): number | null {
   }
   const ok = (x: unknown): x is Backup => {
     const v = x as Backup;
-    return typeof v === "object" && v !== null && v.app === "math-by-hand" && v.version === 1 && typeof v.data === "object" && v.data !== null;
+    return typeof v === "object" && v !== null && APPS.includes(v.app) && v.version === 1 && typeof v.data === "object" && v.data !== null;
   };
   if (!ok(b)) return null;
   const entries = Object.entries(b.data).filter(([k, v]) => OURS(k) && typeof v === "string");

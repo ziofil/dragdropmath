@@ -53,6 +53,9 @@ describe("rules do what they say", () => {
     ["ab + ac", "factor-out", "a", ["a*(b + c)"]],
     ["xy + x", "factor-out", "x", ["x*(y + 1)"]],
     ["xy + z", "factor-out", "x", []],
+    ["9x + 3y", "factor-out", "3", ["3*(3*x + y)"]], // a number out of a number it divides, as by hand
+    ["6 + 3x", "factor-out", "3", ["3*(2 + x)"]],
+    ["5x + 3y", "factor-out", "3", []],
     ["x + 3 = 10", "move-term", "3", ["x = 10 - 3"]],
     ["x - 5 = 2", "move-term", "-5", ["x = 2 + 5"]],
     ["2x = 8", "move-factor", "2", ["x = 8/2"]],
@@ -400,7 +403,7 @@ describe("what a press picks up", () => {
     ["2x = 8", ALL_RULES, ["2*x", "2", "x", "8"], ["2*x", "2", "x", "8"]],
     ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x*2", "-2*x"], ["x*x", "x", "x", "x*2", "-2*x"]],
     // Set apart on screen, a piece is pressed directly: a fraction's bottom, an exponent.
-    ["2^((2x + 4)/2 - 5) = 2^4", ALL_RULES, ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"], ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"]],
+    ["2^((2x + 4)/2 - 5) = 2^4", ALL_RULES, ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"], ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "2", "4", "2", "-5", "2^4", "2", "4"]], // the 2 of 2x comes out of 2x + 4
     // An exponent written as a sum, with a move of its own, is pressed as a whole; its terms by holding.
     ["log_2(2^(x - 3)) = 4", ALL_RULES, ["log_2(2^(x - 3))", "2", "x - 3", "4"], ["log_2(2^(x - 3))", "2", "x - 3", "x", "-3", "4"]],
     // A common factor comes out of its term by holding it (b and c could only swap: nothing to hold them for).
