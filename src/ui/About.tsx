@@ -18,6 +18,7 @@ export function About() {
       <a className="button primary" href={href({ page: "home" })}>
         {t().learningPathButton}
       </a>
+      <p className="about-rights">{t().rightsReserved(new Date().getFullYear())}</p>
     </main>
   );
 }

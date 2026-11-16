@@ -7,6 +7,8 @@ import type { Expr, MathState } from "../../expr/types";
 import { frac, log, neg, num, prod, root, variable, pow } from "../../expr/build";
 import type { RuleId } from "../../rules";
 import { allNodes, children, mapTree } from "../../expr/tree";
+import { parseExpr } from "../../expr/parse";
+import { printState } from "../../expr/key";
 import { sumOf, termExpr, termOf, termsOf, type UnMove } from "./unmove";
 import { one, type Rng } from "./write";
 
@@ -313,3 +315,81 @@ export const splitFractionPower = (): UnMove => ({
       return replaced(s, p.id, prod([xp(p.base, w), part]));
     }),
 });
+
+// ---------- powers with letters in the exponent ----------
+
+/** Powers whose exponent has a letter in it (2ˣ, 3^(x + 1), a^(2n)), not inside a fraction when `outside`. */
+function letterExponents(s: MathState, outside = false): Pow[] {
+  const out: Pow[] = [];
+  const visit = (e: Expr, inFrac: boolean) => {
+    if (e.kind === "pow" && !e.radical && (e.base.kind === "num" || e.base.kind === "var") && allNodes(e.exp).some((x) => x.kind === "var") && !(outside && inFrac)) out.push(e);
+    for (const c of children(e)) visit(c, inFrac || e.kind === "frac");
+  };
+  s.sides.forEach((e) => visit(e, false));
+  return out;
+}
+
+/** A step back at a random power with a letter in its exponent. */
+const atLetterExponent = (rules: RuleId[], f: (p: Pow, r: Rng) => Expr | null, outside = false): UnMove => ({
+  rules,
+  trusted: true,
+  on: (s, r) =>
+    many(() => {
+      const ps = letterExponents(s, outside);
+      if (!ps.length) return null;
+      const p = one(r, ps);
+      const made = f(p, r);
+      return made && replaced(s, p.id, made);
+    }),
+});
+
+/** A fresh copy (new ids) of a piece, as written. */
+const same = (e: Expr): Expr => parseExpr(printState({ sides: [e] }));
+
+/** An exponent as two parts that add up to it: x + 3 → x and 3; 5x → 2x and 3x. Null if it won't split. */
+function twoParts(e: Expr, r: Rng): [Expr, Expr] | null {
+  if (e.kind === "sum" && e.terms.length >= 2) {
+    const k = r.int(1, e.terms.length - 1);
+    const ts = e.terms.map(same);
+    return [sumOf(ts.slice(0, k)), sumOf(ts.slice(k))];
+  }
+  const { k, m } = termOf(e);
+  if (m && k >= 2) {
+    const p = r.int(1, k - 1);
+    return [termExpr(p, same(m)), termExpr(k - p, same(m))];
+  }
+  return null;
+}
+
+/** 2^(x + 3) → 2ˣ·2³, 3^(5x) → 3^(2x)·3^(3x): a power as a product of powers of its base. Undone by merging them, then adding up the exponent. */
+export const splitLetterExponent = (): UnMove =>
+  atLetterExponent(["merge-powers", "combine"], (p, r) => {
+    const parts = twoParts(p.exp, r);
+    // a¹ is written a.
+    return parts && prod(parts.map((x) => (x.kind === "num" && x.value === 1 ? same(p.base) : pow(same(p.base), x))));
+  });
+
+/** 3^(2x) → (3ˣ)², 2^(3x) → (2³)ˣ: a power as a power of a power. Undone by the power of a power (then the numbers first). */
+export const nestLetterExponent = (): UnMove =>
+  atLetterExponent(["power-of-power", "numbers-first", "multiply-numbers"], (p, r) => {
+    const { k, m } = termOf(p.exp);
+    if (!m || k < 2 || k > 4) return null;
+    return r.next() < 0.6 ? pow(pow(same(p.base), same(m)), num(k)) : pow(pow(same(p.base), num(k)), same(m));
+  });
+
+/** 5^(x + 1) → 5^(x + 3)/5²: a power over a power of its base. Undone by dividing the powers, then working out the exponent. */
+export const overLetterExponent = (): UnMove =>
+  atLetterExponent(["divide-powers", "combine"], (p, r) => {
+    const k = r.int(1, 3);
+    const up = plusConstant(p.exp, k);
+    return frac(pow(same(p.base), up), k === 1 ? same(p.base) : pow(same(p.base), num(k)));
+  }, true);
+
+/** An exponent with a number added (x + 1, 3 → x + 4). */
+function plusConstant(e: Expr, k: number): Expr {
+  const ts = termsOf(e).map(same);
+  const i = ts.findIndex((t) => termOf(t).m === null);
+  if (i < 0) return sumOf([...ts, num(k)]);
+  const v = termOf(ts[i]).k + k;
+  return sumOf(v === 0 ? ts.filter((_, j) => j !== i) : ts.map((t, j) => (j === i ? termExpr(v, null) : t)));
+}

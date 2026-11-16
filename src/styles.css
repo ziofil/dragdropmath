@@ -1527,13 +1527,12 @@ div.predict-choice {
 .footer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 16px;
+  justify-content: center;
+  gap: 6px;
   margin-top: 48px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--ink-soft);
+  opacity: 0.75;
 }
 .footer a {
   color: inherit;
@@ -1553,4 +1552,9 @@ div.predict-choice {
 }
 .about .button {
   margin-top: 20px;
+}
+.about .about-rights {
+  margin-top: 32px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
 }

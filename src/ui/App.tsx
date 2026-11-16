@@ -101,7 +101,6 @@ export function App() {
       </nav>
       <Page route={route} />
       <footer className="footer">
-        <span>{t().copyright(new Date().getFullYear())}</span>
         <a href={href({ page: "about" })}>{t().aboutLink}</a>
       </footer>
     </div>

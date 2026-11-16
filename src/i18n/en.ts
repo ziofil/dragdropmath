@@ -46,7 +46,8 @@ export const en = {
   saveProgress: "Export progress to a file",
   loadProgress: "Load progress from a file",
   progressSaved: "Saved. Load that file here, or in any browser, to get your progress back.",
-  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. All rights reserved.`,
+  /** At the end of About (and only there). */
+  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. All rights reserved.`,
   aboutLink: "About",
   /** The About page: who made the site, why, and what happens to what learners do. */
   about: {

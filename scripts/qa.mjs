@@ -195,12 +195,12 @@ check("Settings holds the progress backup", !!(await p.$(".settings-panel .setti
 await p.keyboard.press("Escape");
 check("Escape closes Settings", !(await p.$(".settings-panel")));
 
-// The footer on every page, leading to About.
+// The footer on every page: a link to About, which says who owns it.
 await go("#/", 400);
-check("the footer says who owns it", (await p.textContent(".footer")).includes("All rights reserved"));
+check("the footer has no copyright, only About", !(await p.textContent(".footer")).includes("©"));
 await p.click(".footer a");
 await p.waitForTimeout(300);
-check("…and leads to About", (await p.textContent("h1")).includes("About"));
+check("…and leads to About, which says it in full", (await p.textContent("h1")).includes("About") && (await p.textContent(".about-rights")).includes("All rights reserved"));
 
 // Bug 9: every skin draws every framed box and every button the same way.
 for (const skin of ["modern", "codex", "paper", "blackboard"]) {
