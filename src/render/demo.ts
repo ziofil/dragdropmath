@@ -67,8 +67,9 @@ export function planDemo(
  * to work it out"), then a piece ("tap the fraction bar") — else a drag, a
  * quick press before one held. Null if none can be shown.
  */
-export function planStepTo(state: MathState, rules: readonly RuleId[], W: number, H: number, lands: (s: MathState) => boolean): Demo | null {
-  for (const id of handles(state)) {
+export function planStepTo(state: MathState, rules: readonly RuleId[], W: number, H: number, lands: (s: MathState) => boolean, opTaps = true): Demo | null {
+  // (`opTaps` false: not by tapping a +, − or ·, as where none is drawn: √x·x shows no ·.)
+  for (const id of opTaps ? handles(state) : []) {
     const next = operatorTap(state, id, rules);
     if (next && lands(next)) return { kind: "op-tap", id, next };
   }

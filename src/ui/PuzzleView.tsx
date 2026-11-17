@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { MathState } from "../expr/types";
 import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
@@ -9,7 +9,11 @@ import { answer, arrive, canSolve, cardOf, type Phase } from "../game/predict";
 import { rowsOf } from "../game/answers";
 import { Board } from "./Board";
 import { t } from "../i18n";
-import { StaticMath } from "./MathCanvas";
+import { StaticMath, type ShowMove } from "./MathCanvas";
+import { printState, stateKey } from "../expr/key";
+import { tidied } from "../game/tidy";
+import { nextStep as nextStepHere } from "../game/showWay";
+import { workerClient } from "../util/worker";
 import { useMoveHistory } from "./useMoveHistory";
 import { MathText } from "./MathText";
 
@@ -21,7 +25,8 @@ type Link = { href: string; text: string };
  * chapter's made-up ones (ui/Practice.tsx) or a set of one's own (ui/SetView.tsx).
  */
 export type Exercise = {
-  puzzle: { id: string; start: string; goal: string; hint?: string };
+  /** `via`: milestones of the way it was made (Next step heads through them). */
+  puzzle: { id: string; start: string; goal: string; hint?: string; via?: string[]; legs?: RuleId[][] };
   rules: readonly RuleId[];
   /** "Exercise <title>" in the heading, between the ‹ › arrows. */
   label: string;
@@ -74,6 +79,37 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
   }, [solved, puzzle.id, context]);
 
   const asking = phase.kind === "asking";
+
+  // Next step: for a learner who's stuck, the next move played on the board (and kept). Not where solving
+  // is what counts: a mind's-eye exercise with nothing to pick from scores when solved.
+  const showMove = useRef<ShowMove | null>(null);
+  const [stepping, setStepping] = useState<"idle" | "looking" | "none">("idle");
+  // The way being followed: the states still ahead, while the board is where the way says it is.
+  const plan = useRef<{ at: string; ahead: MathState[] } | null>(null);
+  const canStep = !asking && !solved && !(context.kind === "predict" && phase.kind === "none");
+  const nextStep = async () => {
+    const from = moves.current;
+    // The way is searched with terms in any order (as the board judges a solved equation): so are its steps matched.
+    const key = (s: MathState) => stateKey(s, false);
+    setStepping("looking");
+    try {
+      if (plan.current?.at !== key(from) || !plan.current.ahead.length) {
+        const found = await askNext({ from: printState(from), goal: puzzle.goal, via: puzzle.via ?? [], ...(puzzle.legs ? { legs: puzzle.legs } : {}), rules: [...rules], positive: !!ex.positiveLetters });
+        plan.current = found ? { at: key(from), ahead: found.map((x) => assuming(parseState(x), ex.positiveLetters)) } : null;
+      }
+      if (!plan.current) return setStepping("none");
+      const [next, ...rest] = plan.current.ahead;
+      // A step that only puts terms in order (the goal asks for one) is matched in that order.
+      const exact = (s: MathState) => stateKey(s, "exact");
+      const reorder = key(next) === key(from);
+      const dropped = await showMove.current?.({ to: (s) => (reorder ? exact(tidied(from, s)) === exact(next) : key(tidied(from, s)) === key(next)) });
+      // On the way: the next press goes on along it (once the board has settled where it said).
+      plan.current = dropped ? { at: key(next), ahead: rest } : null;
+      setStepping("idle");
+    } catch {
+      setStepping("none");
+    }
+  };
   // "Another one" has one place, the board's buttons, once the board is solved: an answer picked
   // is only half of an exercise (picking and moving on would score without doing any maths).
 
@@ -147,14 +183,24 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           <>
             <Said phase={phase} score={score} />
             {before.solved && !solved && <span className="puzzle-before">{t().solvedBefore}</span>}
+            {stepping === "none" && !solved && <span className="puzzle-before">{t().noNextStep}</span>}
           </>
         }
+        show={showMove}
+        busy={stepping === "looking"}
         before={
-          puzzle.hint && (
-            <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint} disabled={asking}>
-              {t().hint}
-            </button>
-          )
+          <>
+            {puzzle.hint && (
+              <button onClick={() => setShowHint((h) => !h)} aria-pressed={showHint} disabled={asking}>
+                {t().hint}
+              </button>
+            )}
+            {canStep && (
+              <button onClick={nextStep} disabled={stepping === "looking"}>
+                {t().nextStep}
+              </button>
+            )}
+          </>
         }
         after={
           asking ? (
@@ -229,3 +275,6 @@ function CardMaths({ text }: { text: string }) {
     </span>
   );
 }
+
+/** Next step's search, off the page's thread (one worker for every exercise); an answer that takes over 15 s is given up. */
+const askNext = workerClient(() => new Worker(new URL("../game/nextWorker.ts", import.meta.url), { type: "module" }), nextStepHere, 15_000);

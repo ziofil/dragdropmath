@@ -137,7 +137,9 @@ export function MathCanvas({
       const svg = box?.querySelector("svg");
       const { state: at0, rules: live0 } = now.current;
       const own = "rule" in step;
-      const plan = own ? planDemo(at0, live0, step.rule, width.value, height, step.good, step.prefer) : planStepTo(at0, live0, width.value, height, step.to);
+      let plan = own ? planDemo(at0, live0, step.rule, width.value, height, step.good, step.prefer) : planStepTo(at0, live0, width.value, height, step.to);
+      // A tap on a +, − or · that isn't drawn (√x·x has no ·): made another way.
+      if (plan?.kind === "op-tap" && !own && !svg?.querySelector(`[${OP_TAP}="${CSS.escape(plan.id)}"]`)) plan = planStepTo(at0, live0, width.value, height, step.to, false);
       if (!box || !svg || !plan) return null;
       if (own) step.planned?.(plan.next);
       // The steps after the lesson's own move go a little quicker.

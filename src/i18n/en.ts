@@ -213,6 +213,9 @@ export const en = {
   solveFor: (letters: string[]) => `Solve for ${letters.map((l) => `\`${l}\``).join(" and ")}.`,
   pickFirst: "Pick an answer above, then solve it here.",
   hint: "Hint",
+  /** Practice: the next move, played on the board for a learner who's stuck. */
+  nextStep: "Next step",
+  noNextStep: "No step found from here: try Undo, or Start over.",
   undo: "Undo",
   solvedBang: "Solved!",
   /** Before the conditions on the letters, under a board: "where x ≥ −1, x ≠ 2". */

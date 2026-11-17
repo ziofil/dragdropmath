@@ -11,6 +11,7 @@ import { matchesGoal, search, searchBest, stepDone } from "./solver";
 import { assuming } from "../expr/setting";
 import { parseState } from "../expr/parse";
 import { printState } from "../expr/key";
+import { verify } from "./generate/verify";
 
 /** A checkpoint is passed when the board shows it, in any order of terms. */
 const at = (s: MathState, stop: MathState) => matchesGoal(s, stop) || matchesGoal(s, stop, false);
@@ -51,4 +52,35 @@ export function wayFor({ start, from, stops, goals, rules, positive }: WayReques
   const wants = goals.map(read);
   const done = (s: MathState) => wants.some((w) => stepDone(begin, s, w));
   return wayOn(read(from), stops.map(read), done, rules)?.map(printState) ?? null;
+}
+
+/**
+ * Asked for an exercise's next step (practice's Next step): the board now, its goal, the milestones of the way
+ * it was made and (when known) the moves each stretch takes.
+ */
+export type NextRequest = { from: string; goal: string; via: string[]; legs?: RuleId[][]; rules: RuleId[]; positive: boolean };
+
+/**
+ * The way on for an exercise, from wherever the board is (each state as the
+ * board shows it, tidied), to its goal as the exercise judges it (task.ts):
+ * through the milestones not yet passed, checked as the exercise was when it
+ * was made (generate/verify.ts: a goal to match exactly ends with its terms
+ * put in order). Null when no way is within reach (a board led far off: Undo,
+ * or Start over). The whole way, not just its first step: searched again
+ * from each step, a way can wander back and forth, so Next step follows one
+ * way while the board stays on it.
+ *
+ * Quick first (each stretch with the moves it's known to take: milliseconds),
+ * then with all the chapter's moves on a budget (a board led off the way).
+ */
+export function nextStep({ from, goal, via, legs, rules, positive }: NextRequest): string[] | null {
+  const read = (s: string) => assuming(parseState(s), positive);
+  const at0 = read(from);
+  const passed = via.map(read).findLastIndex((s) => at(at0, s));
+  const d = { start: from, goal, via: via.slice(passed + 1), positive, ...(legs ? { legs: legs.slice(passed + 1) } : {}) };
+  for (const opts of [{ quick: true }, { leg: 4, states: 4_000 }, { leg: 5, states: 20_000 }]) {
+    const checked = verify(d, rules, opts);
+    if ("path" in checked && checked.path.length > 1) return checked.path.slice(1).map(printState);
+  }
+  return null;
 }
