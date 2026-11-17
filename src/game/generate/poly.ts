@@ -50,22 +50,30 @@ export const terms = (p: Poly) => [...p.values()];
  * given: P("3 - x") keeps the 3 first.
  */
 export function P(src: string): Poly {
+  const p = polyOf(parseState(src).sides[0]);
+  if (!p) throw new Error(`Not a polynomial: ${src}`);
+  return p;
+}
+
+/** The polynomial a tree is (sums and products of numbers and powers of letters), or null if it isn't one. */
+export function polyOf(e: Expr): Poly | null {
   let out: Poly = new Map();
-  const visit = (e: Expr, sign: number) => {
-    if (e.kind === "sum") return e.terms.forEach((t) => visit(t, sign));
+  const visit = (e: Expr, sign: number): boolean => {
+    if (e.kind === "sum") return e.terms.every((t) => visit(t, sign));
     if (e.kind === "neg") return visit(e.arg, -sign);
     let c = sign;
     const m: Mono = {};
     for (const f of e.kind === "prod" ? e.factors : [e]) {
       if (f.kind === "num") c *= f.value;
       else if (f.kind === "var") m[f.name] = (m[f.name] ?? 0) + 1;
-      else if (f.kind === "pow" && f.base.kind === "var" && f.exp.kind === "num") m[f.base.name] = (m[f.base.name] ?? 0) + f.exp.value;
-      else throw new Error(`Not a polynomial: ${src}`);
+      else if (f.kind === "pow" && f.base.kind === "var" && f.exp.kind === "num")
+        m[f.base.name] = (m[f.base.name] ?? 0) + f.exp.value;
+      else return false;
     }
     out = add(out, mono(c, m));
+    return true;
   };
-  visit(parseState(src).sides[0], 1);
-  return out;
+  return visit(e, 1) ? out : null;
 }
 
 /** a·x + n as a polynomial, the letter first (or the number, `numberFirst`): lin(2, -3) is 2x − 3. */

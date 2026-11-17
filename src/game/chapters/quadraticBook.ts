@@ -12,7 +12,10 @@
  *   carried across (x ≠ 2);
  * - a cubic in pairs: x³ + 2x² − 9x − 18 = 0, x²(x + 2) − 9(x + 2) = 0;
  * - a quadratic in x²: x⁴ − 5x² + 4 = 0 (four answers);
- * - a quadratic in √x: x − 9√x + 8 = 0.
+ * - a quadratic in √x: x − 9√x + 8 = 0;
+ * - bottoms that factor: 3/(x − 2) + 1/(x + 2) = (2x + 14)/(x² − 4), the last
+ *   bottom factored, each cleared (x ≠ 2, x ≠ −2); or the letter on top too,
+ *   x/(x − 2) − (x + 1)/(x + 2) = …/(x² − 4), the squares cancelling.
  */
 import { add, fromAnswers, fromCoefs, linear, mul, scale, written, type Poly } from "../generate/poly";
 import { routed } from "../generate/route";
@@ -34,6 +37,15 @@ const plus = (n: number) => (n < 0 ? ` - ${-n}` : ` + ${n}`);
 
 /** Every coefficient small enough to work with by hand. */
 const small = (p: Poly, most = 60) => [...p.values()].every((t) => Math.abs(t.c) <= most);
+
+/** (x + a) as written, in brackets. */
+const br = (x: string, a: number) => `(${written(linear(1, a, x))})`;
+
+/** "3", "", "-": a number in front of something (1 left out). */
+const times = (k: number) => (k === 1 ? "" : k === -1 ? "-" : String(k));
+
+/** " + 3·…", " - 3·…": a term written after something. */
+const then = (k: number, what: string) => `${k < 0 ? " - " : " + "}${times(Math.abs(k))}${what}`;
 
 const isSquare = (n: number) => Number.isInteger(Math.sqrt(n));
 
@@ -211,4 +223,42 @@ export const inRoots: Shape = {
   },
 };
 
-export const BOOK_SHAPES: Shape[] = [rootAndTerm, twoRoots, bottomPowers, inPairs, inSquares, inRoots];
+export const bottomsThatFactor: Shape = {
+  id: "bottoms-that-factor",
+  name: "bottoms that factor: the shared bottom factored, each bottom cleared",
+  make: (r): Draft | null => {
+    // a/(x − p) + b/(x + p) = (cx + d)/(x² − p²) where x ≠ ±p: x² − p² = (x − p)(x + p), times it: a(x + p) + b(x − p) = cx + d.
+    // Or the letter on top: x/(x − p) − (x + e)/(x + p): x(x + p) − (x + e)(x − p) = cx + d, the squares cancel.
+    const x = letter(r);
+    const [p, x0] = [r.int(1, 5), r.signed(1, 7)];
+    if (Math.abs(x0) === p) return null;
+    const onTop = r.next() < 0.5;
+    const [a, b, e] = [r.int(1, 5), r.signed(1, 4), r.signed(1, 5)];
+    // What's over the shared bottom once each top takes the other's bottom.
+    const left = onTop
+      ? add(mul(linear(1, 0, x), linear(1, p, x)), mul(linear(1, e, x), linear(1, -p, x)), -1)
+      : add(scale(linear(1, p, x), a), scale(linear(1, -p, x), b));
+    const lx = [...left.values()].find((t) => t.m[x] === 1)?.c ?? 0;
+    const l0 = [...left.values()].find((t) => !t.m[x])?.c ?? 0;
+    const alpha = r.signed(1, 3);
+    const [c, d] = [lx - alpha, alpha * x0 + l0];
+    if (c === 0 || d === 0 || Math.abs(c) > 9 || Math.abs(d) > 30 || (onTop && e === 0) || (onTop && e === -p)) return null;
+    const top = written(linear(c, d, x));
+    const tops = onTop ? `${x}/${br(x, -p)} - ${br(x, e)}/${br(x, p)}` : `${a}/${br(x, -p)}${b < 0 ? " - " : " + "}${Math.abs(b)}/${br(x, p)}`;
+    const start = `${tops} = (${top})/(${x}^2 - ${p * p})`;
+    const cleared = onTop ? `${x}${br(x, p)} - ${br(x, e)}${br(x, -p)}` : `${times(a)}${br(x, p)}${then(b, br(x, -p))}`;
+    return routed(
+      "bottoms-that-factor",
+      start,
+      [
+        ["factor", `${tops} = (${top})/(${br(x, -p)}${br(x, p)})`],
+        ["clear", `${cleared} = ${top}`],
+        ["expand", `${written(left)} = ${top}`],
+        ["gather", `${written(linear(alpha, 0, x))} = ${alpha * x0}`],
+      ],
+      `${x} = ${x0}`,
+    );
+  },
+};
+
+export const BOOK_SHAPES: Shape[] = [rootAndTerm, twoRoots, bottomPowers, inPairs, inSquares, inRoots, bottomsThatFactor];

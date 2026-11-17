@@ -4,7 +4,8 @@
  * all: most are composed (../generate/compose.ts), layers of fractions,
  * roots, squares, logs and powers around x with pieces disguised; the rest
  * are recipes a teacher would write (../generate/linear.ts, equations.ts): x
- * on both sides in brackets, x over two bottoms, answers with e and ln in them.
+ * on both sides in brackets, x over two bottoms, answers with e and ln in them;
+ * and the hardest as the book has them (balanceBook.ts).
  */
 import * as L from "../generate/linear";
 import * as E from "../generate/equations";
@@ -13,6 +14,8 @@ import { composed } from "../generate/compose";
 import { fractionCoefficient, rootCoefficient } from "../generate/coefficients";
 import { letter, type Level, type Shape, one as pick } from "../generate/write";
 import { d, carrying } from "../generate/drill";
+import { writesWay } from "../generate/way";
+import { BALANCE_BOOK } from "./balanceBook";
 
 const shape = (rc: L.Recipe) => L.shapeOf(rc, { letter: LETTERED.has(rc) ? letter : undefined });
 /** Mostly x; these now and then with another letter, as the hand-made ones were. */
@@ -29,8 +32,14 @@ const levels = (): Record<Level, Shape[]> => ({
     fractionCoefficient,
     composed("medium", () => rulesOf("balance"), false, 19),
   ],
-  // Brackets inside brackets, squares that cancel, logs of quotients.
-  hard: [...[L.nestedBrackets, L.bracketInFraction, L.squareExpand, L.bracketsSquare, E.logOfQuotient, E.powersInLogs].map(shape), rootCoefficient, composed("hard", () => rulesOf("balance"), false, 12)],
+  // As the book's hardest (balanceBook.ts): squares over numbers that cancel once the bottoms are cleared, a root squared
+  // whose squares cancel; and brackets inside brackets, a product against a square, layers to undo.
+  hard: [
+    ...BALANCE_BOOK.map((s) => ({ ...s, check: writesWay(() => rulesOf("balance")), pool: 4, weight: 6 })),
+    ...[L.nestedBrackets, L.bracketInFraction, L.bracketsSquare].map(shape),
+    rootCoefficient,
+    composed("hard", () => rulesOf("balance"), false, 12),
+  ],
 });
 
 export const balance: Chapter = {

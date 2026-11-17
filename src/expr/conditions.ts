@@ -71,7 +71,7 @@ export const breaksAt = (s: MathState, env: Record<string, number>) => !!s.condi
 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 
 /** e as a·x + b in its one letter x (whole a ≠ 0 and b), else null. */
-function linear(e: Expr): { x: string; a: number; b: number } | null {
+export function linear(e: Expr): { x: string; a: number; b: number } | null {
   const vs = variables(e);
   if (vs.length !== 1) return null;
   const x = vs[0];
@@ -88,7 +88,7 @@ function linear(e: Expr): { x: string; a: number; b: number } | null {
 }
 
 /** −b/a written as a number or a fraction (whole top and bottom). */
-function value(p: number, q: number): Expr {
+export function value(p: number, q: number): Expr {
   const g = gcd(p, q) * Math.sign(q);
   const [n, d] = [p / g, q / g];
   const top = num(Math.abs(n));

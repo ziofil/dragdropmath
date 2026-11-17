@@ -211,7 +211,7 @@ const levels = (): Record<Level, Shape[]> => ({
   easy: chosen("pure", "spurious", "factors-one"),
   medium: chosen("factors-a", "square-of-bracket", "expand-first", "pure-fraction", "root-cancels", "root-squared", "fraction-zero"),
   // As the book's hardest (quadraticBook.ts): long, a root or a bottom to clear first, or a letter that's x² or √x.
-  hard: chosen("root-and-term", "two-roots", "bottom-powers", "in-pairs", "in-squares", "in-roots"),
+  hard: chosen("root-and-term", "two-roots", "bottom-powers", "bottoms-that-factor", "in-pairs", "in-squares", "in-roots"),
 });
 
 /** A coefficient as it's written after another term: " + 3x", " - x", " - 6". */

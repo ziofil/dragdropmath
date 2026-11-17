@@ -18,7 +18,7 @@
 import type { MathState } from "../../expr/types";
 import type { RuleId } from "../../rules";
 import { parseState } from "../../expr/parse";
-import { printState, stateKey } from "../../expr/key";
+import { printState } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
 import { assuming } from "../../expr/setting";
 import { atCheckpoint, search, searchBest } from "../solver";
@@ -156,15 +156,16 @@ export function writeWay(d: Draft, rules: readonly RuleId[]): Draft | null {
   const legs: RuleId[][] = [];
   let leg = new Set<RuleId>();
   let since = 0;
-  const seen = new Set([stateKey(start, false)]);
+  // A checkpoint that's one already kept, the start or the goal (its terms or rows in another order: 4 = x for x = 4) is
+  // no checkpoint.
+  const kept: MathState[] = [start, goal];
   for (let i = 1; i < states.length; i++) {
     steps[i - 1].forEach((r) => leg.add(r));
     since++;
     const end = i === states.length - 1;
     if (end) break;
-    const k = stateKey(states[i], false);
-    if ((coarse.has(i) || since >= EVERY) && !seen.has(k)) {
-      seen.add(k);
+    if ((coarse.has(i) || since >= EVERY) && !kept.some((c) => atCheckpoint(states[i], c))) {
+      kept.push(states[i]);
       via.push(printState({ ...states[i], letters: undefined }));
       legs.push([...leg]);
       leg = new Set();
