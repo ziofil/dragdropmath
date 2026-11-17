@@ -27,7 +27,7 @@ type Link = { href: string; text: string };
  */
 export type Exercise = {
   /** `via`: milestones of the way it was made (Next step heads through them). */
-  puzzle: { id: string; start: string; goal: string; hint?: string; via?: string[]; legs?: RuleId[][]; ask?: { letter: string; using: string[] } };
+  puzzle: { id: string; start: string; goal: string; hint?: string; via?: string[]; legs?: RuleId[][]; ask?: { letter: string; using: string[] }; legend?: { letter: string; quantity: string; unit: string }[] };
   rules: readonly RuleId[];
   /** "Exercise <title>" in the heading, between the ‹ › arrows. */
   label: string;
@@ -175,6 +175,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           )}
         </section>
       )}
+      {puzzle.legend && <Legend items={puzzle.legend} />}
 
       <Board
         moves={moves}
@@ -288,4 +289,18 @@ function askOf(puzzle: Exercise["puzzle"], goal: MathState, letters: string[]): 
   if (puzzle.ask) return t().inTermsOf(puzzle.ask.letter, puzzle.ask.using);
   const formula = letters.length === 1 && goal.sides.length === 2 && variables(goal.sides[1]).length > 0;
   return formula ? t().makeSubject(letters[0]) : t().solveFor(letters);
+}
+
+/** What a physics formula's letters stand for: "F force (N) · m mass (kg) · a acceleration (m/s²)". */
+function Legend({ items }: { items: { letter: string; quantity: string; unit: string }[] }) {
+  const names = t().quantities as Record<string, string>;
+  return (
+    <p className="puzzle-legend">
+      {items.map(({ letter, quantity, unit }) => (
+        <span key={letter} className="legend-item">
+          <MathText text={`\`${letter}\``} /> {names[quantity] ?? quantity} <span className="legend-unit">({unit})</span>
+        </span>
+      ))}
+    </p>
+  );
 }

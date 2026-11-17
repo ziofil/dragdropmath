@@ -67,6 +67,8 @@ export type Draft = {
   proven?: boolean[];
   /** What it asks, when "Solve for …" isn't it: one quantity written in terms of others (two formulas combined). */
   ask?: { letter: string; using: string[] };
+  /** What its letters stand for (a physics formula: F force, in N): the quantity's name (i18n `quantities`) and unit. */
+  legend?: { letter: string; quantity: string; unit: string }[];
 };
 
 // ---------- writing maths as a person would ----------

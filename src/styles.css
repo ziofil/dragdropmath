@@ -1676,3 +1676,24 @@ div.predict-choice {
   color: var(--ink-soft);
   font-size: 1.15rem;
 }
+
+/* What a physics formula's letters stand for, under what the exercise asks. */
+.puzzle-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.legend-item {
+  white-space: nowrap;
+}
+/* The · after each but the last, so a line that wraps starts with a letter. */
+.legend-item:not(:last-child)::after {
+  content: "·";
+  margin-left: 10px;
+}
+.legend-unit {
+  opacity: 0.8;
+}

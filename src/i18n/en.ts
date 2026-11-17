@@ -212,6 +212,55 @@ export const en = {
   solvedBefore: "✓ You've solved this one before. You can solve it again.",
   makeItLookLike: "Make it look like",
   solveFor: (letters: string[]) => `Solve for ${letters.map((l) => `\`${l}\``).join(" and ")}.`,
+  /** What a physics formula's letters stand for (game/chapters/formulas.ts: UNITS has the same keys). */
+  quantities: {
+    force: "force",
+    mass: "mass",
+    acceleration: "acceleration",
+    momentum: "momentum",
+    velocity: "velocity",
+    speed: "speed",
+    voltage: "potential difference",
+    current: "current",
+    resistance: "resistance",
+    power: "power",
+    work: "work done",
+    distance: "distance",
+    charge: "charge",
+    time: "time",
+    waveSpeed: "wave speed",
+    frequency: "frequency",
+    wavelength: "wavelength",
+    density: "density",
+    volume: "volume",
+    pressure: "pressure",
+    area: "area",
+    period: "period",
+    gpe: "gravitational potential energy",
+    fieldStrength: "gravitational field strength",
+    height: "height",
+    heat: "energy transferred",
+    specificHeat: "specific heat capacity",
+    tempRise: "temperature rise",
+    energy: "energy",
+    lightSpeed: "speed of light",
+    finalVelocity: "final velocity",
+    initialVelocity: "initial velocity",
+    kineticEnergy: "kinetic energy",
+    displacement: "displacement",
+    emf: "e.m.f.",
+    externalResistance: "external resistance",
+    internalResistance: "internal resistance",
+    gravForce: "gravitational force",
+    gravConstant: "gravitational constant",
+    massOne: "mass of one body",
+    massOther: "mass of the other body",
+    separation: "distance between their centres",
+    trolleyMass: "mass of the moving trolley",
+    otherTrolleyMass: "mass of the trolley at rest",
+    velocityBefore: "velocity before",
+    velocityAfter: "velocity after, together",
+  },
   /** A formula rearranged: "Make `t` the subject." */
   makeSubject: (letter: string) => `Make \`${letter}\` the subject.`,
   /** Two formulas combined: "Write `P` in terms of `I` and `R`." */
@@ -347,7 +396,12 @@ export type Strings = typeof en;
  * strings are written in English only: a translation may lack them, and
  * English stands in.
  */
-export type Translation = Omit<Partial<Strings>, "drills" | "set" | "form"> & { drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>; set?: Partial<Strings["set"]>; form?: Partial<Strings["form"]> };
+export type Translation = Omit<Partial<Strings>, "drills" | "set" | "form" | "quantities"> & {
+  drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>;
+  set?: Partial<Strings["set"]>;
+  form?: Partial<Strings["form"]>;
+  quantities?: Partial<Strings["quantities"]>;
+};
 
 /** A move's words: its name, what to do on its board, why it works, and a common mistake. */
 export type MoveWords = { name: string; how: string; text: string[] };
