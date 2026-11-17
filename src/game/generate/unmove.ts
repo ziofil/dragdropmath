@@ -21,6 +21,7 @@ import type { Rng } from "./write";
 import type { Stage } from "./way";
 import { differ, envs } from "../answers";
 import { evaluate } from "../../expr/eval";
+import { rowAt, rowOf, rows, withRow, withRows, type Row } from "../../expr/rows";
 
 // ---------- terms: k·m, a number times what it's made of ----------
 
@@ -117,17 +118,14 @@ export type UnMove = {
   stage?: Stage;
 };
 
-/** Row `row` (sides 2row, 2row + 1) changed by f; the relation turned round when f says. */
+/** Row `row` changed by f; the relation turned round when f says. */
 function onRow(s: MathState, row: number, f: (l: Expr, r: Expr) => [Expr, Expr, boolean?] | null): MathState | null {
-  const [l, r] = [s.sides[2 * row], s.sides[2 * row + 1]];
+  const [l, r] = rowAt(s, row);
   if (!l || !r) return null;
   const out = f(l, r);
   if (!out) return null;
-  const sides = s.sides.slice();
-  sides[2 * row] = out[0];
-  sides[2 * row + 1] = out[1];
   const rel = out[2] && s.rel ? flipRel(s.rel) : s.rel;
-  return { ...s, sides, ...(rel ? { rel } : {}) };
+  return { ...withRow(s, row, [out[0], out[1]]), ...(rel ? { rel } : {}) };
 }
 
 const ARITH: RuleId[] = ["combine", "multiply-numbers", "evaluate-fraction", "divide-numbers"];
@@ -257,7 +255,7 @@ export const spread = (terms: Expr[], at = 0, { path = [] as number[], row = 0 }
 export const both = (left: Expr, right: Expr, row = 0): UnMove => ({
   rules: ["move-term", "move-factor", ...ARITH],
   on: (s) => {
-    const [X, V] = [s.sides[2 * row], s.sides[2 * row + 1]];
+    const [X, V] = rowAt(s, row);
     if (X?.kind !== "var") return null;
     const xk = (e: Expr) => termsOf(e).map(termOf).filter((t) => t.m && key(t.m) === key(X)).reduce((a, t) => a + t.k, 0);
     const rest = (e: Expr) => sumOf(termsOf(e).filter((t) => !(termOf(t).m && key(termOf(t).m!) === key(X))));
@@ -280,7 +278,7 @@ export const both = (left: Expr, right: Expr, row = 0): UnMove => ({
 export const lin = (minusOdds = 0.15, row = 0): UnMove => ({
   rules: [...new Set([...times(2).rules, ...plus(num(1)).rules, ...from(1).rules])],
   on: (s, r, need) => {
-    const [L, R] = s.sides.slice(2 * row);
+    const [L, R] = rowAt(s, row);
     for (let t = 0; t < 30; t++) {
       const a = r.next() < 0.3 ? 1 : r.int(2, 5);
       const b = r.int(-9, 9);
@@ -304,7 +302,7 @@ export const overSome = (row = 0): UnMove => ({
   rules: over(2).rules,
   wants: (v) => v !== 0 && Math.abs(v) <= 60 && [2, 3, 4, 5].some((a) => v % a === 0 && v !== a),
   on: (s, r, need) => {
-    const [L, R] = s.sides.slice(2 * row);
+    const [L, R] = rowAt(s, row);
     const as = [2, 3, 4, 5].filter((a) => valueOf(R) % a === 0 && need(valueOf(R) / a));
     if (!as.length || L.kind === "frac" || (L.kind === "prod" && L.factors[0].kind === "num")) return null;
     return over(as[r.int(0, as.length - 1)], 0, { row }).on(s, r, need);
@@ -316,7 +314,7 @@ export const xBoth = (x: string, row = 0): UnMove => ({
   rules: plus(num(1)).rules,
   on: (s, r) => {
     const X = variable(x);
-    const L = s.sides[2 * row];
+    const [L] = rowAt(s, row);
     if (L.kind !== "sum" || !termsOf(L).some((t) => termOf(t).m && key(termOf(t).m!) === key(X))) return null;
     return plus(termExpr(r.int(1, 4), X), r.next() < 0.5, row).on(s, r, () => true);
   },
@@ -327,8 +325,8 @@ export const xBoth = (x: string, row = 0): UnMove => ({
 /** What the rows that give a letter a number say (x = 3; y = 2 → {x: 3, y: 2}). */
 function known(s: MathState): Record<string, number> {
   const out: Record<string, number> = {};
-  for (let k = 0; k + 1 < s.sides.length; k += 2) {
-    const [l, v] = [s.sides[k], valueOf(s.sides[k + 1])];
+  for (const [l, r] of rows(s)) {
+    const v = valueOf(r);
     if (l.kind === "var" && Number.isFinite(v)) out[l.name] = v;
   }
   return out;
@@ -344,7 +342,7 @@ export const valueIn = (e: Expr, row: number): UnMove => ({
   on: (s) => {
     const env = known(s);
     try {
-      return Math.abs(evaluate(e, env) - valueOf(s.sides[2 * row + 1])) < 1e-9 ? onRow(s, row, (L) => [L, e]) : null;
+      return Math.abs(evaluate(e, env) - valueOf(rowAt(s, row)[1])) < 1e-9 ? onRow(s, row, (L) => [L, e]) : null;
     } catch {
       return null;
     }
@@ -359,8 +357,8 @@ export const valueIn = (e: Expr, row: number): UnMove => ({
 export const unsubstitute = (row: number, def: number, k: number, first = false): UnMove => ({
   rules: ["substitute", "distribute", "distribute-neg", ...ARITH],
   on: (s) => {
-    const [Y, F] = [s.sides[2 * def], s.sides[2 * def + 1]];
-    const L = s.sides[2 * row];
+    const [Y, F] = rowAt(s, def);
+    const [L] = rowAt(s, row);
     if (Y?.kind !== "var" || !L || k === 0) return null;
     let rest = L;
     for (const t of termsOf(F)) rest = plusTerm(rest, termExpr(-k * termOf(t).k, termOf(t).m));
@@ -382,9 +380,9 @@ export const swapRows = (a = 0, b = 1): UnMove => ({
   rules: [],
   quiet: true,
   on: (s) => {
-    const sides = s.sides.slice();
-    [sides[2 * a], sides[2 * a + 1], sides[2 * b], sides[2 * b + 1]] = [s.sides[2 * b], s.sides[2 * b + 1], s.sides[2 * a], s.sides[2 * a + 1]];
-    return { ...s, sides };
+    const rs = rows(s);
+    [rs[a], rs[b]] = [rs[b], rs[a]];
+    return withRows(s, rs);
   },
 });
 
@@ -606,7 +604,7 @@ export const disguise = (rules: ReadonlySet<RuleId>, done: Set<string> = new Set
     on: (s, r) => {
       const spots: { side: number; e: Expr; d: Disguise; parent: Expr | null }[] = [];
       s.sides.forEach((side, i) => {
-        if (row !== undefined && Math.floor(i / 2) !== row) return;
+        if (row !== undefined && rowOf(i) !== row) return;
         // Not a log's base, a root's or a square's exponent, nor the base of 2ˣ.
         const visit = (e: Expr, parent: Expr | null) => {
           if (done.has(key(e, "exact") + "@" + i)) return;
@@ -641,18 +639,15 @@ export function solved(x: string, value: number | Expr, rel: Rel = "="): MathSta
 // ---------- several answers: rows joined by "or" ----------
 
 /** The answers' rows: [letter, value] for each `x = v` (null if a row isn't one). */
-function answerRows(s: MathState): [Expr, Expr][] | null {
-  if (s.join !== "or" || s.sides.length < 4) return null;
-  const rows: [Expr, Expr][] = [];
-  for (let k = 0; k + 1 < s.sides.length; k += 2) rows.push([s.sides[k], s.sides[k + 1]]);
-  return rows;
+function answerRows(s: MathState): Row[] | null {
+  return s.join === "or" && rows(s).length >= 2 ? rows(s) : null;
 }
 
 /** One row, the "or" gone: the state written as `left = right`. */
 const oneRow = (s: MathState, left: Expr, right: Expr): MathState => {
   const { join: _j, ...rest } = s;
   void _j;
-  return { ...rest, sides: [left, right] };
+  return withRows(rest, [[left, right]]);
 };
 
 /** A number as p/q (q > 0), if it's a whole number or a fraction of two. */
@@ -722,14 +717,14 @@ export const rowsAs = (E: Expr): UnMove => ({
   on: (s) => {
     const rows = answerRows(s);
     if (!rows) return null;
-    const sides: Expr[] = [];
+    const made: Row[] = [];
     for (const [x, v] of rows) {
       if (x.kind !== "var") return null;
       const at = evaluate(E, { [x.name]: evaluate(v, {}) });
       if (!Number.isInteger(at)) return null;
-      sides.push(E, n(at));
+      made.push([E, n(at)]);
     }
-    return { ...s, sides };
+    return withRows(s, made);
   },
 });
 

@@ -20,6 +20,7 @@ import {
 } from "dragology";
 import type { MathState } from "../../expr/types";
 import { allNodes, locate, nodeAt } from "../../expr/tree";
+import { rowOf } from "../../expr/rows";
 import type { Candidate } from "../../rules";
 import { approach, canvasBox, carriedCentre, originOf } from "../geometry";
 import { PROBE, PROBE_SPAN, withProbe } from "../preview";
@@ -319,7 +320,7 @@ class MergeApproach extends Operator<MathState> {
       const b = locate(s, targetId);
       if (!a || !b) return 0;
       // Two whole sides of one equation: which is left of the other (a side swap reorders them).
-      if (a.path.length === 0 && b.path.length === 0 && a.side >> 1 === b.side >> 1) return Math.sign(a.side - b.side);
+      if (a.path.length === 0 && b.path.length === 0 && rowOf(a.side) === rowOf(b.side)) return Math.sign(a.side - b.side);
       if (a.side !== b.side || a.path.length !== b.path.length) return 0;
       if (a.path.slice(0, -1).join() !== b.path.slice(0, -1).join()) return 0;
       return Math.sign(a.path[a.path.length - 1] - b.path[b.path.length - 1]);

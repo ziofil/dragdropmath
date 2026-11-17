@@ -7,7 +7,8 @@ import { asPower, dropFactor, fractionPart, raise as raiseTo } from "./shapes";
 import { factorsOf, roleOf, viewTerm } from "./view";
 import { assumeOf, canBeNegative, isPositive, splitsOver } from "./signs";
 import { allNodes, nodeAt } from "../expr/tree";
-import { intoRows } from "./either";
+import { intoRows, isLeft, rowCount, rowOf } from "../expr/rows";
+import { conditionOn, withCondition } from "../expr/conditions";
 
 // ---------- helpers ----------
 
@@ -646,15 +647,21 @@ export const rootAcross: Rule = {
     const sides = state.sides.slice();
     const other = partner(c.loc.side);
     const n = rootOrder(c.node);
-    // Only when the other side can't be negative: √x = −3 has no solution,
-    // and squaring would invent one (x = 9). Or where the exercise gives its
-    // conditions from the start (x ≥ −1 for √(x + 7) = x + 1): a row squaring
-    // invents breaks one, and is crossed out (expr/conditions.ts).
-    if (n && (!canBeNegative(sides[other], assumeOf(state)) || !!state.conditions?.length)) {
+    if (n) {
+      // What an even root equals isn't negative. Where it could be (√(x + 7) = x + 1), squaring says so, as a
+      // teacher writes it beside the squared equation (where x ≥ −1): squared, the equation has the answers of
+      // √(…) = −(x + 1) too, and a row squaring invents breaks it and is crossed out (expr/conditions.ts).
+      // A negative number can't be (√x = −3 has no answer): no squaring then. Nor where the board's rows are
+      // answers joined by "or" (x = 9^(1/2) or x = −9^(1/2)): a condition is the whole board's, and would cross
+      // out the other rows' answers.
+      const what = sides[other];
+      const may = n % 2 === 0 && canBeNegative(what, assumeOf(state));
+      if (may && (isConstant(what) || (state.join === "or" && rowCount(state) > 1))) return [];
       // The carried √ itself turns into the ² (same identity).
       sides[c.loc.side] = P.base;
-      sides[other] = pow(sides[other], num(n, c.node.id));
-      return [{ rule: "root-across", state: setSides(sides) }];
+      sides[other] = pow(what, num(n, c.node.id));
+      const squared = { ...setSides(sides), conditions: state.conditions };
+      return [{ rule: "root-across", state: may ? withCondition(squared, conditionOn(what, "≥")) : squared }];
     }
     // x² = 9 when x could be negative: x = 3 or x = −3 (an even power has two roots); x³ = −8: x = ∛(−8), one.
     if (c.node.kind === "num" && c.node.value >= 2 && canBeNegative(P.base, assumeOf(state)) && (state.rel ?? "=") === "=" && state.join !== "and") {
@@ -667,8 +674,8 @@ export const rootAcross: Rule = {
       }
       // Even: what's on the other side mustn't be negative (x² = −4 has no answer).
       if (canBeNegative(k, assumeOf(state))) return [];
-      const base = (e: Expr): [Expr, Expr] => (c.loc.side % 2 === 0 ? [cloneFresh(P.base), e] : [e, cloneFresh(P.base)]);
-      const row = c.loc.side >> 1;
+      const base = (e: Expr): [Expr, Expr] => (isLeft(c.loc.side) ? [cloneFresh(P.base), e] : [e, cloneFresh(P.base)]);
+      const row = rowOf(c.loc.side);
       if (k.kind === "num" && k.value === 0) return [{ rule: "root-across", state: intoRows(state, row, [base(num(0))]) }];
       // The carried 2 becomes the first row's ½ (where the drag aims it).
       const r = (id?: string) => pow(cloneFresh(k), frac(num(1), num(n), id));

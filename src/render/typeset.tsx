@@ -7,6 +7,7 @@ import { allNodes } from "../expr/tree";
 import { textWidth } from "./measure";
 import { t } from "../i18n";
 import { breaks } from "../expr/conditions";
+import { isLeft, rowCount, rowOf, sidesOf } from "../expr/rows";
 
 /**
  * Math typesetting in plain SVG (Dragology needs real SVG elements it can
@@ -509,7 +510,7 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
   rc.fontSizes ??= new Map();
   rc.canvas = { W, H, ...(rc.pivot === undefined ? {} : { pivot: rc.pivot }) };
-  if (rc.state.sides.length > 2) return renderRows(rc, W, H);
+  if (rowCount(rc.state) > 1) return renderRows(rc, W, H);
   const build = (size: number) => {
     const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped }));
     const eqW = Math.max(textWidth("=", size), textWidth(relGlyph(relOf(rc.state)).text, size));
@@ -596,13 +597,13 @@ export function pivotOf(state: MathState, W: number): number | undefined {
  * gone) stays where it was, so a piece lands where it's carried.
  */
 function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
-  const n = rc.state.sides.length / 2;
+  const n = rowCount(rc.state);
   const build = (size: number) => ({ sides: rc.state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped })), size });
   const fit = (b: ReturnType<typeof build>) => {
     const eqW = textWidth("=", b.size);
     const space = 0.35 * b.size;
-    const left = Math.max(...b.sides.filter((_, i) => i % 2 === 0).map((s) => s.w));
-    const right = Math.max(...b.sides.filter((_, i) => i % 2 === 1).map((s) => s.w));
+    const left = Math.max(...b.sides.filter((_, i) => isLeft(i)).map((s) => s.w));
+    const right = Math.max(...b.sides.filter((_, i) => !isLeft(i)).map((s) => s.w));
     const rowH = Math.max(...b.sides.map((s) => s.asc + s.desc)) + 0.35 * b.size;
     // The = column stays put in the middle, as for one equation (so a term
     // carried across lands across, whatever the other rows look like).
@@ -621,26 +622,27 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
   const cx = W / 2;
   const gap = { left: cx - f.eqW / 2 - f.space, right: cx + f.eqW / 2 + f.space };
   const baselines = b.sides.map((_, k) => {
-    const [L, R] = [b.sides[k - (k % 2)], b.sides[k - (k % 2) + 1]];
-    return 8 + (Math.floor(k / 2) + 0.5) * slot + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
+    const [L, R] = sidesOf(rowOf(k)).map((j) => b.sides[j]);
+    return 8 + (rowOf(k) + 0.5) * slot + (Math.max(L.asc, R.asc) - Math.max(L.desc, R.desc)) / 2;
   });
-  const xs = b.sides.map((s, k) => (k % 2 === 0 ? gap.left - s.w : gap.right));
+  const xs = b.sides.map((s, k) => (isLeft(k) ? gap.left - s.w : gap.right));
   const pinned = pinShift(rc, b.sides, xs, baselines, W);
   const dxOf = (r: number) => (pinned && pinned.row === r ? pinned.dx : 0);
   const parts: Svgx[] = [];
   for (let r = 0; r < n; r++) {
     const dx = dxOf(r);
+    const [i, j] = sidesOf(r);
     const row = [
-      b.sides[2 * r].draw(xs[2 * r] + dx, baselines[2 * r]),
-      relation(rc.state, cx + dx, baselines[2 * r], size, 0, r === 0 ? REL : `${REL}${r}`),
-      b.sides[2 * r + 1].draw(xs[2 * r + 1] + dx, baselines[2 * r]),
+      b.sides[i].draw(xs[i] + dx, baselines[i]),
+      relation(rc.state, cx + dx, baselines[i], size, 0, r === 0 ? REL : `${REL}${r}`),
+      b.sides[j].draw(xs[j] + dx, baselines[i]),
     ];
     // An answer that breaks a condition (x = −3 where x ≥ −1): faded, and struck through.
     if (breaks(rc.state, r)) {
-      const [x0, x1] = [xs[2 * r] + dx, xs[2 * r + 1] + dx + b.sides[2 * r + 1].w];
-      const y = baselines[2 * r] - 0.3 * size;
+      const [x0, x1] = [xs[i] + dx, xs[j] + dx + b.sides[j].w];
+      const y = baselines[i] - 0.3 * size;
       // (Faded by a veil of the page's colour over it: the drawing is flattened into layers, so a group's opacity is lost.)
-      const top = baselines[2 * r] - ASC * size;
+      const top = baselines[i] - ASC * size;
       parts.push(
         ...row,
         <g id={`crossed${r}`} dragologyZIndex="/1">
@@ -654,7 +656,7 @@ function renderRows(rc: RenderCtx, W: number, H: number): Svgx {
     if (rc.state.join === "or" && r < n - 1) {
       const word = t().or;
       const small = 0.45 * size;
-      const y = (baselines[2 * r] + baselines[2 * r + 2]) / 2 - (ASC * size - small) / 2;
+      const y = (baselines[i] + baselines[sidesOf(r + 1)[0]]) / 2 - (ASC * size - small) / 2;
       parts.push(glyph(`or${r}`, word, cx - textWidth(word, small) / 2, y, small, "m-or"));
     }
   }
@@ -674,11 +676,11 @@ function pinShift(rc: RenderCtx, sides: Box[], xs: number[], baselines: number[]
   const at = originsOf(sides[k].draw(xs[k], baselines[k])).get(pin.id);
   if (!at) return null;
   const dx = pin.x - (at.x + (rc.sizes?.get(pin.id)?.lead ?? 0));
-  const row = sides.length === 1 ? [0] : [k - (k % 2), k - (k % 2) + 1];
+  const row = sides.length === 1 ? [0] : sidesOf(rowOf(k));
   const margin = 4;
   const left = Math.min(...row.map((j) => xs[j]));
   const right = Math.max(...row.map((j) => xs[j] + sides[j].w));
-  return { row: Math.floor(k / 2), dx: Math.min(Math.max(dx, margin - left), W - margin - right) };
+  return { row: rowOf(k), dx: Math.min(Math.max(dx, margin - left), W - margin - right) };
 }
 
 /** Canvas origin of every id'd element in a drawn tree (following the translates). */

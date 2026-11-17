@@ -16,68 +16,15 @@ import { build, draftOf, type Step } from "../generate/back";
 import { ex, overBottom, productIsZero, restate, rootBoth, rowsAs, squaredRows, writeAs } from "../generate/unmove";
 import { gcd, one, type Draft, type Level, type Rng, type Shape, letter as anyLetter } from "../generate/write";
 import { d } from "../generate/drill";
+import { answersText, fromAnswers, fromCoefs, linear, mul, teacherWrites, written, type Poly } from "../generate/poly";
 import { writesWay, type Stage } from "../generate/way";
 import { rulesOf } from "../puzzles";
+import { BOOK_SHAPES } from "./quadraticBook";
 
-/** a·x² + b·x + c as [a, b, c]. */
-type Q = [number, number, number];
-
-/** (p·x − q)·(s·x − t), multiplied out. */
-const times = ([p, q]: [number, number], [s, t]: [number, number]): Q => [p * s, -(p * t + q * s), q * t];
-
-/** One term as written: "3x^2", "-x", "7" (null for a 0). */
-const termOf = (c: number, pow: 0 | 1 | 2, x: string): string | null =>
-  c === 0 ? null : pow === 0 ? `${c}` : `${c === 1 ? "" : c === -1 ? "-" : c}${pow === 2 ? `${x}^2` : x}`;
-
-/** Terms written one after another, with their signs: ["3x^2", "-x", "7"] → "3x^2 - x + 7" ("0" if none). */
-function sumStr(ts: string[]): string {
-  if (!ts.length) return "0";
-  return ts.map((t, i) => (i === 0 ? t : t.startsWith("-") ? ` - ${t.slice(1)}` : ` + ${t}`)).join("");
-}
-
-/**
- * The equation a·x² + b·x + c = 0 as a teacher might write it: some terms
- * moved across (their signs turned), both sides multiplied by k, the sides
- * swapped. Every term stays a whole number.
- */
-function written(r: Rng, [a, b, c]: Q, x: string, { move = 0.5, k = 1 } = {}): string {
-  const left: string[] = [];
-  const right: string[] = [];
-  const put = (coef: number, pow: 0 | 1 | 2) => {
-    if (coef === 0) return;
-    const across = pow !== 2 && r.next() < move;
-    const t = termOf(across ? -coef * k : coef * k, pow, x)!;
-    (across ? right : left).push(t);
-  };
-  put(a, 2);
-  put(b, 1);
-  put(c, 0);
-  const [L, R] = [sumStr(left), sumStr(right)];
-  return r.next() < 0.2 && right.length ? `${R} = ${L}` : `${L} = ${R}`;
-}
-
-/** The answers, as written: "x = 3 or x = -2", a fraction as p/q. */
-function answers(x: string, ...vs: [number, number][]): string {
-  const v = ([p, q]: [number, number]) => {
-    const g = gcd(p, q) * Math.sign(q);
-    const [n, d] = [p / g, q / g];
-    return d === 1 ? `${n}` : `${n < 0 ? "-" : ""}${Math.abs(n)}/${d}`;
-  };
-  return vs.map((w) => `${x} = ${v(w)}`).join(" or ");
-}
-
-/** (x + d)² multiplied out: x² + 2dx + d². */
-function squareOut(x: string, d: number): string {
-  if (d === 0) return termOf(1, 2, x)!;
-  return sumStr([termOf(1, 2, x)!, termOf(2 * d, 1, x)!, `${d * d}`]);
-}
+/** (p·x − q)·(s·x − t)·…, multiplied out: the brackets whose answers are q/p, t/s, … */
+const times = (x: string, ...fs: [number, number][]): Poly => fromAnswers(x, ...fs.map(([p, q]) => [q, p] as [number, number]));
 
 const letter = (r: Rng) => (r.next() < 0.75 ? "x" : one(r, ["t", "y", "a"]));
-
-/** Everything on the left: "x^2 - 7x + 12". */
-const zeroSide = ([a, b, c]: Q, x: string) => sumStr([termOf(a, 2, x), termOf(b, 1, x), termOf(c, 0, x)].filter((t): t is string => t !== null));
-/** (p·x − q) as written: "x - 3", "2x + 1". */
-const factor = ([p, q]: [number, number], x: string) => `${p === 1 ? "" : p}${x} ${q < 0 ? "+" : "-"} ${Math.abs(q)}`;
 
 /**
  * A side written another way (equal to it), then the whole row as a teacher
@@ -97,7 +44,7 @@ function made(shape: string, answer: string, steps: Step[], r: Rng): Draft | nul
 }
 
 /** From the answers to the product of brackets, multiplied out (q[0]x² + q[1]x + q[2] = 0). */
-const factored = (q: Q, x: string): Step[] => [{ ...productIsZero(), stage: "split" }, side(zeroSide(q, x), "factor")];
+const factored = (q: Poly): Step[] => [{ ...productIsZero(), stage: "split" }, side(written(q), "factor")];
 
 /** The root of both sides (undone by squaring them), x² = 9 from x = ±3, the rows of a bracket's answers. */
 const rootedBoth = (): Step => ({ ...rootBoth(), stage: "square" });
@@ -114,7 +61,7 @@ const shapes: Shape[] = [
       const [p, q] = [r.int(1, 9), one(r, [1, 1, 1, 2, 3])];
       if (gcd(p, q) !== 1) return null;
       const k = one(r, [1, 1, 2, 3, 4]);
-      return made("pure", answers(x, [p, q], [-p, q]), [squared(), row(written(r, [q * q * k, 0, -p * p * k], x, { move: 0.6 }))], r);
+      return made("pure", answersText(x, [p, q], [-p, q]), [squared(), row(teacherWrites(r, fromCoefs([-p * p * k, 0, q * q * k], x), { move: 0.6 }))], r);
     },
   },
   {
@@ -126,7 +73,7 @@ const shapes: Shape[] = [
       const [a, q, n] = [r.int(1, 3), one(r, [2, 3, 4]), r.int(1, 6)];
       if (gcd(a, q) !== 1 || (a * n * n) % q !== 0) return null;
       const c = (a * n * n) / q;
-      return made("pure-fraction", answers(x, [n, 1], [-n, 1]), [squared(), row(r.next() < 0.5 ? `(${a}/${q})${x}^2 = ${c}` : `(${a}/${q})${x}^2 - ${c} = 0`)], r);
+      return made("pure-fraction", answersText(x, [n, 1], [-n, 1]), [squared(), row(r.next() < 0.5 ? `(${a}/${q})${x}^2 = ${c}` : `(${a}/${q})${x}^2 - ${c} = 0`)], r);
     },
   },
   {
@@ -136,7 +83,7 @@ const shapes: Shape[] = [
       // x² − 5 = 0 → x = √5 or x = −√5.
       const x = letter(r);
       const n = one(r, [2, 3, 5, 6, 7, 10]);
-      return made("pure-root", `${x} = √${n} or ${x} = -√${n}`, [squared(), row(written(r, [1, 0, -n], x, { move: 0.6 }))], r);
+      return made("pure-root", `${x} = √${n} or ${x} = -√${n}`, [squared(), row(teacherWrites(r, fromCoefs([-n, 0, 1], x), { move: 0.6 }))], r);
     },
   },
   {
@@ -149,7 +96,7 @@ const shapes: Shape[] = [
       if (gcd(p, q) !== 1) return null;
       const k = one(r, [1, 1, 2, 3]);
       const [a, b] = [q * k, -p * k];
-      return made("spurious", answers(x, [0, 1], [p, q]), [...factored([q, -p, 0], x), row(written(r, [a, b, 0], x))], r);
+      return made("spurious", answersText(x, [0, 1], [p, q]), [...factored(fromCoefs([0, -p, q], x)), row(teacherWrites(r, fromCoefs([0, b, a], x)))], r);
     },
   },
   {
@@ -159,8 +106,8 @@ const shapes: Shape[] = [
       const x = letter(r);
       const [u, v] = [r.signed(1, 9), r.signed(1, 9)];
       if (u === v || u === -v || u === 0 || v === 0) return null;
-      const q = times([1, u], [1, v]);
-      return made("factors-one", answers(x, [u, 1], [v, 1]), [...factored(q, x), row(written(r, q, x, { move: 0.3 }))], r);
+      const q = times(x, [1, u], [1, v]);
+      return made("factors-one", answersText(x, [u, 1], [v, 1]), [...factored(q), row(teacherWrites(r, q, { move: 0.3 }))], r);
     },
   },
   {
@@ -172,8 +119,8 @@ const shapes: Shape[] = [
       const [p, q, v] = [one(r, [2, 3, 4, 5]), r.signed(1, 7), r.signed(1, 6)];
       // Both pairs of the split middle term share a number of 2 or more (px(x − v) and −q(x − v)): a shared 1 can't be taken out by hand.
       if (gcd(p, q) !== 1 || q === p * v || Math.abs(q) < 2 || Math.abs(v) < 2) return null;
-      const Q3 = times([p, q], [1, v]);
-      return made("factors-a", answers(x, [q, p], [v, 1]), [...factored(Q3, x), row(written(r, Q3, x, { move: 0.3 }))], r);
+      const q3 = times(x, [p, q], [1, v]);
+      return made("factors-a", answersText(x, [q, p], [v, 1]), [...factored(q3), row(teacherWrites(r, q3, { move: 0.3 }))], r);
     },
   },
   {
@@ -188,7 +135,7 @@ const shapes: Shape[] = [
       const k = one(r, [1, 1, 1, 2, 3]);
       const left = `${k === 1 ? "" : k}(${br})^2`;
       // Each answer as the bracket equal to ±m, the bracket squared, then both sides times k.
-      return made("square-of-bracket", answers(x, [m - q, p], [-m - q, p]), [asRows(br), squared(), row(r.next() < 0.3 ? `${k * m * m} = ${left}` : `${left} = ${k * m * m}`)], r);
+      return made("square-of-bracket", answersText(x, [m - q, p], [-m - q, p]), [asRows(br), squared(), row(r.next() < 0.3 ? `${k * m * m} = ${left}` : `${left} = ${k * m * m}`)], r);
     },
   },
   {
@@ -203,14 +150,14 @@ const shapes: Shape[] = [
       const [b, c] = [u + v + r1 + r2, u * v - r1 * r2];
       if (b === 0 && c === 0) return null;
       const bracket = (w: number) => `(${x} ${w < 0 ? "-" : "+"} ${Math.abs(w)})`;
-      const right = sumStr([termOf(b, 1, x), termOf(c, 0, x)].filter((t): t is string => t !== null));
+      const right = written(fromCoefs([c, b], x));
       // Multiplied out, then collected (backwards: collected, multiplied out, one bracket in, both).
       const steps: Step[] = [
-        ...factored(times([1, r1], [1, r2]), x),
-        row(`${zeroSide([1, u + v, u * v], x)} = ${right}`),
+        ...factored(times(x, [1, r1], [1, r2])),
+        row(`${written(fromCoefs([u * v, u + v, 1], x))} = ${right}`),
         side(`${bracket(u)}${bracket(v)}`, "expand"),
       ];
-      return made("expand-first", answers(x, [r1, 1], [r2, 1]), steps, r);
+      return made("expand-first", answersText(x, [r1, 1], [r2, 1]), steps, r);
     },
   },
   {
@@ -222,7 +169,7 @@ const shapes: Shape[] = [
       const [d, x0] = [r.int(1, 4), r.int(-1, 6)];
       const k = 2 * d * x0 + d * d;
       if (k <= 0 || x0 < -d) return null;
-      const steps: Step[] = [row(`${x}^2 + ${k} = ${squareOut(x, d)}`), side(`(${x} + ${d})^2`, "expand", 1), rootedBoth()];
+      const steps: Step[] = [row(`${x}^2 + ${k} = ${written(mul(linear(1, d, x), linear(1, d, x)))}`), side(`(${x} + ${d})^2`, "expand", 1), rootedBoth()];
       return made("root-cancels", `${x} = ${x0}`, steps, r);
     },
   },
@@ -239,8 +186,8 @@ const shapes: Shape[] = [
       if (![r1, r2].some((v) => v >= -d)) return null;
       const inside = `${a === 1 ? "" : a}${x} ${b < 0 ? "-" : "+"} ${Math.abs(b)}`;
       const right = d === 0 ? x : `${x} ${d < 0 ? "-" : "+"} ${Math.abs(d)}`;
-      const steps: Step[] = [...factored(times([1, r1], [1, r2]), x), row(`${inside} = ${squareOut(x, d)}`), side(`(${right})^2`, "expand", 1), rootedBoth()];
-      return made("root-squared", answers(x, [r1, 1], [r2, 1]), steps, r);
+      const steps: Step[] = [...factored(times(x, [1, r1], [1, r2])), row(`${inside} = ${written(mul(linear(1, d, x), linear(1, d, x)))}`), side(`(${right})^2`, "expand", 1), rootedBoth()];
+      return made("root-squared", answersText(x, [r1, 1], [r2, 1]), steps, r);
     },
   },
   {
@@ -251,18 +198,20 @@ const shapes: Shape[] = [
       const x = letter(r);
       const [r1, r2] = [r.signed(1, 6), r.signed(1, 6)];
       if (r1 === r2 || r1 === -r2) return null;
-      return made("fraction-zero", answers(x, [r1, 1], [r2, 1]), [...factored(times([1, r1], [1, r2]), x), { ...overBottom(ex(factor([1, r1], x))), stage: "clear" }], r);
+      return made("fraction-zero", answersText(x, [r1, 1], [r2, 1]), [...factored(times(x, [1, r1], [1, r2])), { ...overBottom(ex(written(linear(1, -r1, x)))), stage: "clear" }], r);
     },
   },
 ];
 
 // Right by construction (built back from their answers); the tests solve every shape with the moves.
-const chosen = (...ids: string[]) => ids.map((id) => ({ ...shapes.find((s) => s.id === id)!, check: writesWay(() => rulesOf("quadratic")), pool: 4 }) as Shape);
+const chosen = (...ids: string[]) =>
+  ids.map((id) => ({ ...[...shapes, ...BOOK_SHAPES].find((s) => s.id === id)!, check: writesWay(() => rulesOf("quadratic")), pool: 4 }) as Shape);
 
 const levels = (): Record<Level, Shape[]> => ({
   easy: chosen("pure", "spurious", "factors-one"),
-  medium: chosen("pure-root", "factors-one", "square-of-bracket", "factors-a", "pure-fraction", "root-cancels"),
-  hard: chosen("factors-a", "square-of-bracket", "expand-first", "pure-root", "root-squared", "fraction-zero"),
+  medium: chosen("factors-a", "square-of-bracket", "expand-first", "pure-fraction", "root-cancels", "root-squared", "fraction-zero"),
+  // As the book's hardest (quadraticBook.ts): long, a root or a bottom to clear first, or a letter that's x² or √x.
+  hard: chosen("root-and-term", "two-roots", "bottom-powers", "bottoms-that-factor", "in-pairs", "in-squares", "in-roots"),
 });
 
 /** A coefficient as it's written after another term: " + 3x", " - x", " - 6". */

@@ -45,6 +45,8 @@ describe("rules do what they say", () => {
     ["x·x + 2x + 3x + 6", "factor-shared", "x", ["x*(x + 2) + 3*x + 6", "x*(x + 3) + 2*x + 6"]], // the first x, onto 2x or 3x
     ["x(x + 2) + 3x + 3·2", "factor-shared", "3", ["x*(x + 2) + 3*(x + 2)"]],
     ["x·x - 3x + 1", "factor-shared", "x", ["x*(x - 3) + 1"]],
+    ["x^2(x - 4) - x + 4", "factor-shared", "sign:-x", ["x^2*(x - 4) - (x - 4)"]], // the minus taken out of both: then (x − 4) is shared
+    ["x^2 - x - 4", "factor-shared", "sign:-x", ["x^2 - (x + 4)"]],
     ["2x + 6 + y", "split-number", "6", ["2*x + 2*3 + y"]],
     ["x - 6", "split-number", "6", ["x - 2*3"]],
     ["x = 6", "split-number", "6", []], // alone on a side: nothing to share it with
@@ -193,7 +195,9 @@ describe("rules do what they say", () => {
     ["(2^x)^2 = 16", "root-across", "2", ["2^x = 16^(1/2)"], 1], // 2ˣ is never negative: nothing lost (13.30)
     ["(x - 1)^2 = 16", "root-across", "2", ["x - 1 = 16^(1/2) or x - 1 = -16^(1/2)"]], // a whole bracket too
     ["√x = -3", "root-across", "1/2", []], // no solution: squaring would invent x = 9 (QA #4)
-    ["x^(1/2) = y", "root-across", "1/2", []], // y might be negative
+    ["x^(1/2) = y", "root-across", "1/2", ["x = y^2 where y ≥ 0"]], // y might be negative: squaring says it isn't
+    ["√(x + 7) = x + 1", "root-across", "1/2", ["x + 7 = (x + 1)^2 where x ≥ -1"]], // as a teacher writes it beside the squared equation
+    ["x = 9^(1/2) or x = -9^(1/2)", "root-across", "1/2", []], // x ≥ 0 would be the whole board's: it would cross out x = −3
     ["-x = 0", "move-sign", "sign:-x", ["x = 0"]], // the − is absorbed by the 0 (QA #5)
     ["ln(√x) (letters > 0)", "log-of-power", "1/2", ["(1/2)*ln(x)"]],
     ["ln(x^2) = 4", "log-of-power", "2", []], // would lose x = −e²
@@ -622,6 +626,8 @@ describe("tapping the +, − or · between two pieces", () => {
     expect(tap("x + 2", "2")).toBeNull();
     // What two terms share comes out, the highest power of it: x², not x.
     expect(tap("x^4 - x^2", "-x^2")).toBe("x^2*(x^2 - 1)");
+    // Nothing else shared: the minus comes out (as dropping it on the other term would).
+    expect(tap("x^2(x + 1) - x - 1", "-1")).toBe("x^2*(x + 1) - (x + 1)");
   });
   it("works a number times a fraction out as one fraction", () => {
     expect(tap("6·(1/12)", "1/12")).toBe("6/12");

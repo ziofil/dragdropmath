@@ -12,7 +12,7 @@ import { parseState } from "../../expr/parse";
 import { printState } from "../../expr/key";
 import type { MathState } from "../../expr/types";
 import type { RuleId } from "../../rules";
-import { matchesGoal, search, searchBest } from "../solver";
+import { atCheckpoint, matchesGoal, search, searchBest } from "../solver";
 import { isDone, taskOf } from "../task";
 
 export type Checkable = { start: string; goal: string; via: readonly string[]; positive?: boolean; legs?: readonly (readonly RuleId[])[]; proven?: readonly boolean[] };
@@ -68,7 +68,7 @@ export function verify(d: Checkable, rules: readonly RuleId[], { leg = LEG, stat
       const loose = find((s) => matchesGoal(s, goal, false), at, { ordered: false, maxDepth: leg, maxStates: states });
       const tight = loose && search(loose[loose.length - 1], (s) => isDone(goal, s), reorder, { ordered: "exact", maxDepth: leg, maxStates: states });
       way = loose && tight ? [...loose, ...tight.slice(1)] : find((s) => isDone(goal, s), at, { ordered: "exact", maxDepth: leg, maxStates: states });
-    } else way = find(last ? (s) => isDone(goal, s) : (s) => matchesGoal(s, target, false), at, { ordered: false, maxDepth: leg, maxStates: states });
+    } else way = find(last ? (s) => isDone(goal, s) : (s) => atCheckpoint(s, target), at, { ordered: false, maxDepth: leg, maxStates: states });
     if (!way) return { stuck: `${printState(at)} ⇢ ${printState(target)}` };
     path.push(...way.slice(1));
   }

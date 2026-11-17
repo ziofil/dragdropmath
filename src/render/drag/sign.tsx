@@ -21,6 +21,7 @@ import type { MathState } from "../../expr/types";
 import { allNodes, children } from "../../expr/tree";
 import { signId } from "../../rules";
 import { dragCtx } from "../../rules/types";
+import { isLeft } from "../../expr/rows";
 import { canvasBox, carriedCentre, clamp01 } from "../geometry";
 import { stateKey } from "../../expr/key";
 import { textWidth } from "../measure";
@@ -58,8 +59,7 @@ class FlipSign extends Modifier<MathState> {
     const c = dragCtx(rc.state, id)!;
     this.negative = c.node.kind === "neg";
     const eq = rc.eq!;
-    // Even sides are left sides (rows: 0 = 1, 2 = 3, …).
-    [this.from, this.to] = c.loc.side % 2 === 0 ? [eq.left, eq.right] : [eq.right, eq.left];
+    [this.from, this.to] = isLeft(c.loc.side) ? [eq.left, eq.right] : [eq.right, eq.left];
     const size = rc.fontSizes!.get(id)!;
     this.rowY = canvasBox(rc, id).centre.y;
     this.rowBand = 0.5 * size;
