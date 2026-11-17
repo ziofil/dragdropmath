@@ -40,7 +40,7 @@ export const frChapters: ChapterTexts = {
 
   formulas: {
     title: "Transformer une formule",
-    blurb: "Une formule est une équation avec plusieurs lettres. Avec les mêmes mouvements que pour x, tu peux en isoler une.",
+    blurb: "Les formules de la physique : isole n'importe quelle grandeur, et combine deux formules en une seule.",
   },
 
   inequalities: {

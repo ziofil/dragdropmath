@@ -281,18 +281,35 @@ export const tr: Translation = {
       text: ["Dört terim varsa ikişerli çalış. Önce ilk iki terimin ortak çarpanını dışarı al, sonra son iki terimin. İki parantez aynıysa o parantezi de dışarı al."],
     },
     "move-letter-factor": {
-      name: "Harfe böl",
-      how: "Çarpılan harflerden birini = işaretinin karşı tarafına sürükle. Öbür tarafı böler.",
+      name: "Bir büyüklüğü yalnız bırak",
+      how: "İstediğin büyüklükle çarpılan büyüklüğü = işaretinin karşı tarafına sürükle. Öbür tarafı böler.",
       text: [
-        "Formül, içinde birden çok harf olan bir denklemdir. Bir harfi yalnız bırakmaya, formülü o harfe göre düzenlemek denir. Bu, x için denklem çözmek gibidir: öbür harfleri sayıymış gibi düşün.",
-        "Bir tarafın tamamını çarpan harf karşı tarafa geçip öbür tarafı bölebilir: `F = ma` formülünden `F/m = a` elde edilir. (Yalnızca 0 olmayan bir harfe bölebiliriz: burada 0 olmadığını varsayıyoruz.)",
-        "İstediğin harf `ax + bx = c` gibi iki yerde geçiyorsa önce onu ortak çarpan olarak dışarı al: `x(a + b) = c`. Sonra parantezin tamamı karşıya geçebilir.",
+        "Formül, büyüklükleri birbirine bağlar: `F = ma`, kuvvetin kütle ile ivmenin çarpımı olduğunu söyler. Tek başına duran büyüklük, burada `F`, formülde yalnız bırakılmış olandır.",
+        "İvmeyi bulmak içinse formülü `a` yalnız kalacak şekilde düzenlersin. Bu, denklem çözmek gibidir: öbür büyüklükleri sayıymış gibi düşün. `m` ile `a` çarpılıyor; bu yüzden `m` karşıya geçip böler: `F/m = a`, yani `a = F/m`. (`m` ile bölmekte sakınca yok: kütle hiçbir zaman 0 olmaz.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Harfle çarp",
-      how: "Paydadaki harfi = işaretinin karşı tarafına sürükle. Öbür tarafla çarpılır.",
-      text: ["Bir tarafın tamamının paydasındaki harf karşı tarafa geçip öbür tarafla çarpılabilir: `P = F/A` formülünden `PA = F` elde edilir."],
+      name: "Paydadaki büyüklük",
+      how: "Kesrin paydasındaki büyüklüğü = işaretinin karşı tarafına sürükle. Öbür tarafla çarpılır.",
+      text: [
+        "`ρ = m/V` formülünde hacim (`V`) kütleyi böler. `m` yalnız kalsın diye `V` karşıya geçer ve öbür tarafla çarpılır: `ρV = m`. Yani kütle, özkütle ile hacmin çarpımıdır.",
+      ],
+    },
+    "letter-twice": {
+      name: "Aynı büyüklük iki yerde",
+      how: "Terimlerden birindeki v harfini basılı tut ve öne, sol ucun ötesine sürükle (ya da terimler arasındaki + işaretine dokun). Sonra parantezi = işaretinin karşı tarafına sürükle.",
+      text: [
+        "İki araba çarpışıp birbirine kenetleniyor. Momentum korunur: çarpışmadan önceki toplam momentum, sonrakine eşittir: `mu = mv + Mv`. Çarpışmadan sonraki hız (`v`) iki kez geçiyor.",
+        "Onu ortak çarpan olarak dışarı al: `mu = v(m + M)`. Artık `v` tek bir yerde; parantez karşıya geçip böler: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "İki formülü birleştir",
+      how: "`V = IR` formülündeki V'yi öbür formüldeki V'nin üstüne sürükle: IR'ye dönüşür. Sonra iki I arasındaki · işaretine dokun.",
+      text: [
+        "Aynı devreyle ilgili iki formül: elektriksel güç `P = IV` ve Ohm yasası `V = IR`. İkisi aynı anda doğrudur, tıpkı denklem sistemlerindeki gibi.",
+        "Birini öbüründe yerine koy: `V` yerine `IR` yaz, `P = I(IR) = I²R` olur. Bu, gücü yalnızca akım ve direnç cinsinden veren yeni bir formüldür.",
+      ],
     },
     "ineq-move-term": {
       name: "Terimi karşıya geçir",
@@ -541,6 +558,8 @@ export const tr: Translation = {
   solvedBefore: "✓ Bunu daha önce çözmüştün. İstersen yeniden çözebilirsin.",
   makeItLookLike: "Şuna dönüştür",
   solveFor: (letters: string[]) => `${letters.map((l) => `\`${l}\``).join(" ve ")} için çöz.`,
+  makeSubject: (letter: string) => `Formülü \`${letter}\` yalnız kalacak şekilde düzenle.`,
+  inTermsOf: (letter: string, using: string[]) => `\`${letter}\` büyüklüğünü ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " ve " : ", "}\`${l}\``).join("")} cinsinden yaz.`,
   pickFirst: "Yukarıdan bir cevap seç, sonra burada çöz.",
   hint: "İpucu",
   nextStep: "Sonraki adım",

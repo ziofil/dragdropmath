@@ -38,7 +38,7 @@ export const plChapters: ChapterTexts = {
 
   formulas: {
     title: "Przekształcanie wzorów",
-    blurb: "Wzór to równanie z kilkoma literami. Żeby wyznaczyć z niego jedną literę, użyj tych samych ruchów co przy x.",
+    blurb: "Wzory fizyczne, przekształcone: wyznacz z nich dowolną wielkość i połącz dwa wzory w jeden.",
   },
 
   inequalities: {

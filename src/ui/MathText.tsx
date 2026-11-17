@@ -81,6 +81,6 @@ function operand(s: string, i: number): [string, number] {
     }
     return [s.slice(i + 1, end), end + 1];
   }
-  const m = /^(-?\d+|[a-zA-Z])/.exec(s.slice(i));
+  const m = /^(-?\d+|[a-zA-Zλρ])/.exec(s.slice(i));
   return m ? [m[0], i + m[0].length] : ["", i];
 }

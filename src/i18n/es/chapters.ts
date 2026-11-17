@@ -38,7 +38,7 @@ export const esChapters: ChapterTexts = {
 
   formulas: {
     title: "Despejar en fórmulas",
-    blurb: "Una fórmula es una ecuación con varias letras. Para despejar una de ellas, usa los mismos movimientos que con la x.",
+    blurb: "Las fórmulas de la física: despeja cualquier magnitud y combina dos fórmulas en una sola.",
   },
 
   inequalities: {

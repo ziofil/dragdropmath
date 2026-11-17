@@ -38,7 +38,7 @@ export const trChapters: ChapterTexts = {
 
   formulas: {
     title: "Formülleri dönüştürme",
-    blurb: "Formül, içinde birden çok harf olan bir denklemdir. Bir harfi yalnız bırakmak için x'te kullandığın hamlelerin aynısını kullan.",
+    blurb: "Fizik formüllerini dönüştür: istediğin büyüklüğü yalnız bırak, iki formülü birleştirip tek bir formül elde et.",
   },
 
   inequalities: {

@@ -63,8 +63,8 @@ export const CHAPTERS: Chapter[] = [
   explog,
   balance,
   inequalities,
-  formulas,
   simultaneous,
+  formulas,
   quadratic,
 ];
 

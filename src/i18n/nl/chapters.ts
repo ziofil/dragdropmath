@@ -38,7 +38,7 @@ export const nlChapters: ChapterTexts = {
 
   formulas: {
     title: "Formules omwerken",
-    blurb: "Een formule is een vergelijking met meerdere letters. Met dezelfde zetten als bij x maak je één letter vrij.",
+    blurb: "De formules uit de natuurkunde, omgewerkt: maak elke grootheid vrij en combineer twee formules tot één.",
   },
 
   inequalities: {

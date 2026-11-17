@@ -40,7 +40,7 @@ export const deChapters: ChapterTexts = {
 
   formulas: {
     title: "Formeln umstellen",
-    blurb: "Eine Formel ist eine Gleichung mit mehreren Variablen. Mit denselben Schritten wie bei x stellst du sie nach einer Variablen um.",
+    blurb: "Die Formeln der Physik, umgestellt: nach jeder beliebigen Größe auflösen und zwei Formeln durch Einsetzen zu einer verbinden.",
   },
 
   inequalities: {

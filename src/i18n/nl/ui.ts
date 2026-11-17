@@ -309,18 +309,35 @@ export const nl: Translation = {
       text: ["Bij vier termen werk je per paar. Breng een gemeenschappelijke factor buiten haakjes bij de eerste twee termen, en daarna bij de laatste twee. Staat er twee keer hetzelfde tussen de haakjes, dan haal je ook die haakjes naar voren."],
     },
     "move-letter-factor": {
-      name: "Delen door een letter",
-      how: "Sleep een van de vermenigvuldigde letters naar de andere kant van het =. Daar ga je erdoor delen.",
+      name: "Een grootheid vrijmaken",
+      how: "Sleep de grootheid waarmee de gezochte wordt vermenigvuldigd naar de andere kant van het =. Daar deelt ze de andere kant.",
       text: [
-        "Een formule is een vergelijking met meerdere letters. Eén letter in zijn eentje aan een kant krijgen heet die letter vrijmaken. Het gaat net als x oplossen: je doet alsof de andere letters getallen zijn.",
-        "Een letter die een hele kant vermenigvuldigt, kan naar de overkant en deelt daar de andere kant: uit `F = ma` volgt `F/m = a`. (Dat mag alleen met een letter die niet 0 is: we gaan ervan uit dat dat hier zo is.)",
-        "Staat de letter die je zoekt op twee plaatsen, zoals in `ax + bx = c`, breng hem dan eerst buiten haakjes: `x(a + b) = c`. Daarna kan het hele stuk tussen haakjes naar de overkant (zolang `a + b` niet 0 is).",
+        "Een formule geeft het verband tussen grootheden: `F = ma` zegt dat een kracht gelijk is aan massa maal versnelling. De grootheid die alleen staat, hier `F`, is in deze formule vrijgemaakt.",
+        "Wil je juist de versnelling weten, dan schrijf je de formule om en maak je `a` vrij. Dat gaat net als een vergelijking oplossen: de andere grootheden behandel je als getallen. `m` vermenigvuldigt `a`, dus gaat naar de overkant en deelt daar: `F/m = a`, oftewel `a = F/m`. (Delen door `m` mag: een massa is nooit 0.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Vermenigvuldigen met een letter",
-      how: "Sleep de letter in de noemer naar de andere kant van het =. Daar vermenigvuldigt hij.",
-      text: ["Een letter in de noemer van een hele kant kan naar de overkant en vermenigvuldigt daar de andere kant: uit `P = F/A` volgt `PA = F`."],
+      name: "Een grootheid in de noemer",
+      how: "Sleep de grootheid in de noemer van de breuk naar de andere kant van het =. Daar vermenigvuldigt ze de andere kant.",
+      text: [
+        "In `ρ = m/V` wordt de massa gedeeld door het volume `V`. Om `m` vrij te maken, breng je `V` naar de overkant: daar vermenigvuldigt het de andere kant, `ρV = m`. Een massa is dus de dichtheid maal het volume.",
+      ],
+    },
+    "letter-twice": {
+      name: "De gezochte grootheid op twee plaatsen",
+      how: "Houd de v in een term ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde (of tik op de + tussen de termen). Sleep daarna de haakjes naar de andere kant van het =.",
+      text: [
+        "Twee karretjes botsen en blijven aan elkaar vastzitten. De impuls blijft behouden, dus de impuls vóór de botsing is gelijk aan de impuls erna: `mu = mv + Mv`. De snelheid na de botsing, `v`, staat er twee keer in.",
+        "Breng hem buiten haakjes: `mu = v(m + M)`. Nu staat `v` op één plaats, en de haakjes gaan naar de overkant en delen daar: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Twee formules combineren",
+      how: "Sleep de V van `V = IR` op de V in de andere formule: die wordt IR. Tik daarna op de · tussen de twee I's.",
+      text: [
+        "Twee formules over dezelfde stroomkring: het vermogen `P = IV` en de wet van Ohm `V = IR`. Ze kloppen allebei tegelijk, net als bij een stelsel van vergelijkingen.",
+        "Vul de ene in de andere in: `V` is `IR`, dus `P = I(IR) = I²R`. Dat is een nieuwe formule voor het vermogen, uitgedrukt in alleen de stroomsterkte en de weerstand.",
+      ],
     },
     "ineq-move-term": {
       name: "Term naar de overkant",
@@ -537,6 +554,9 @@ export const nl: Translation = {
   solvedBefore: "✓ Deze heb je al eens opgelost. Je mag hem nog een keer doen.",
   makeItLookLike: "Maak er dit van",
   solveFor: (letters: string[]) => `Los op naar ${letters.map((l) => `\`${l}\``).join(" en ")}.`,
+  makeSubject: (letter: string) => `Maak \`${letter}\` vrij.`,
+  inTermsOf: (letter: string, using: string[]) =>
+    `Druk \`${letter}\` uit in ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " en " : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Kies hierboven een antwoord en los het dan hier op.",
   hint: "Tip",
   nextStep: "Volgende stap",

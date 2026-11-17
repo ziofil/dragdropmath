@@ -309,18 +309,35 @@ export const de: Translation = {
       text: ["Bei vier Termen arbeitest du paarweise. Klammere aus den ersten beiden Termen einen gemeinsamen Faktor aus, dann aus den letzten beiden. Sind die beiden Klammern gleich, klammerst du auch die Klammer aus."],
     },
     "move-letter-factor": {
-      name: "Durch eine Variable teilen",
-      how: "Zieh eine der multiplizierten Variablen über das =. Jetzt teilt sie die andere Seite.",
+      name: "Nach einer Größe umstellen",
+      how: "Zieh die Größe, mit der die gesuchte multipliziert wird, über das =. Jetzt teilt sie die andere Seite.",
       text: [
-        "Eine Formel ist eine Gleichung mit mehreren Variablen. Bringst du eine Variable allein auf eine Seite, stellst du die Formel nach ihr um. Das geht wie das Auflösen nach x: Behandle die anderen Variablen wie Zahlen.",
-        "Eine Variable, die eine ganze Seite multipliziert, kann hinüberwandern und die andere Seite teilen: Aus `F = ma` wird `F/m = a`. (Das geht nur mit einer Variablen, die nicht 0 ist: Hier gehen wir davon aus, dass sie es nicht ist.)",
-        "Steht die gesuchte Variable an zwei Stellen, wie in `ax + bx = c`, klammerst du sie zuerst aus: `x(a + b) = c`. Dann kann die ganze Klammer hinüberwandern (sofern `a + b` nicht 0 ist).",
+        "Eine Formel verknüpft Größen: `F = ma` sagt, dass eine Kraft gleich Masse mal Beschleunigung ist. Die Größe, die allein steht, hier `F`, ist die, nach der die Formel aufgelöst ist.",
+        "Willst du stattdessen die Beschleunigung berechnen, stellst du die Formel nach `a` um. Das geht wie beim Lösen einer Gleichung: Die anderen Größen behandelst du wie Zahlen. `m` wird mit `a` multipliziert, wandert also hinüber und teilt: `F/m = a`, also `a = F/m`. (Durch `m` teilen ist erlaubt: Eine Masse ist nie 0.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Mit einer Variablen multiplizieren",
-      how: "Zieh die Variable im Nenner über das =. Jetzt multipliziert sie die andere Seite.",
-      text: ["Eine Variable im Nenner einer ganzen Seite kann hinüberwandern und die andere Seite multiplizieren: Aus `P = F/A` wird `PA = F`."],
+      name: "Eine Größe im Nenner",
+      how: "Zieh die Größe im Nenner des Bruchs über das =. Jetzt multipliziert sie die andere Seite.",
+      text: [
+        "In `ρ = m/V` wird die Masse durch das Volumen `V` geteilt. Um nach `m` umzustellen, bring `V` hinüber: Es multipliziert die andere Seite, `ρV = m`. Die Masse ist also Dichte mal Volumen.",
+      ],
+    },
+    "letter-twice": {
+      name: "Die gesuchte Größe an zwei Stellen",
+      how: "Halte das v in einem Term gedrückt und zieh es nach vorn, links über das Ende hinaus (oder tippe auf das + zwischen den Termen). Dann zieh die Klammer über das =.",
+      text: [
+        "Zwei Wagen stoßen zusammen und bleiben aneinander hängen. Der Impuls bleibt erhalten, also ist der Impuls vorher gleich dem Impuls nachher: `mu = mv + Mv`. Die Geschwindigkeit danach, `v`, kommt zweimal vor.",
+        "Klammere sie aus: `mu = v(m + M)`. Jetzt steht `v` nur an einer Stelle, und die Klammer wandert hinüber und teilt: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Zwei Formeln ineinander einsetzen",
+      how: "Zieh das V aus `V = IR` auf das V in der anderen Formel: Es wird zu IR. Dann tippe auf das · zwischen den beiden I.",
+      text: [
+        "Zwei Formeln für denselben Stromkreis: die Leistung `P = IV` und das ohmsche Gesetz `V = IR`. Beide gelten gleichzeitig, wie bei einem Gleichungssystem.",
+        "Setze die eine in die andere ein: `V` ist `IR`, also `P = I(IR) = I²R`. Das ist eine neue Formel für die Leistung, ausgedrückt nur durch die Stromstärke und den Widerstand.",
+      ],
     },
     "ineq-move-term": {
       name: "Term hinüberbringen",
@@ -536,6 +553,9 @@ export const de: Translation = {
   solvedBefore: "✓ Diese Aufgabe hast du schon gelöst. Du kannst sie noch einmal lösen.",
   makeItLookLike: "Mach daraus",
   solveFor: (letters: string[]) => `Löse nach ${letters.map((l) => `\`${l}\``).join(" und ")} auf.`,
+  makeSubject: (letter: string) => `Stelle die Formel nach \`${letter}\` um.`,
+  inTermsOf: (letter: string, using: string[]) =>
+    `Drücke \`${letter}\` durch ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " und " : ", "}\`${l}\``).join("")} aus.`,
   pickFirst: "Wähl oben eine Antwort, dann rechne hier.",
   hint: "Tipp",
   nextStep: "Nächster Schritt",

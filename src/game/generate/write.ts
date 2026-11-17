@@ -65,6 +65,8 @@ export type Draft = {
   legs?: RuleId[][];
   /** Stretches already proven one of those moves undoes (a walk checks each step as it takes it): serving needn't search them again. */
   proven?: boolean[];
+  /** What it asks, when "Solve for …" isn't it: one quantity written in terms of others (two formulas combined). */
+  ask?: { letter: string; using: string[] };
 };
 
 // ---------- writing maths as a person would ----------

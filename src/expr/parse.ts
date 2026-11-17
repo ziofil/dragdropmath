@@ -3,7 +3,7 @@ import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable 
 
 /**
  * Parses things like `3x + 2(x - 1) = 10`, `x^2/4`, `-a·b`.
- * Variables are single letters; juxtaposition means multiplication.
+ * Variables are single letters (Latin, and the Greek λ and ρ of physics formulas); juxtaposition means multiplication.
  *
  *   equation := expr (rel expr)?        rel := '=' | '<' | '>' | '<=' | '>=' | '≤' | '≥'
  *   expr     := ('-')? term (('+' | '-') term)*
@@ -60,7 +60,7 @@ class Parser {
   private i = 0;
 
   constructor(private src: string) {
-    this.tokens = src.match(/sqrt|root|ln|log|exp|\d+|[a-zA-Z]|<=|>=|[-+*·×/^()=<>≤≥_√]/g) ?? [];
+    this.tokens = src.match(/sqrt|root|ln|log|exp|\d+|[a-zA-Zλρ]|<=|>=|[-+*·×/^()=<>≤≥_√]/g) ?? [];
     if (this.tokens.join("") !== src.replace(/\s+/g, "")) {
       throw new Error(`Unexpected character in: ${src}`);
     }
@@ -111,7 +111,7 @@ class Parser {
         this.i++;
         const n = acc.length === 1 ? acc[0] : prod(acc);
         acc = [frac(n, this.unary())];
-      } else if (t !== undefined && (/^[a-zA-Z]+$/.test(t) || t === "(" || t === "√")) {
+      } else if (t !== undefined && (/^[a-zA-Zλρ]+$/.test(t) || t === "(" || t === "√")) {
         acc.push(this.unary());
       } else break;
     }
@@ -159,7 +159,7 @@ class Parser {
       if (n.kind !== "num") throw new Error(`root_ needs a number in: ${this.src}`);
       return root(this.bracketed(), n.value);
     }
-    if (/^[a-zA-Z]$/.test(t)) return variable(t);
+    if (/^[a-zA-Zλρ]$/.test(t)) return variable(t);
     throw new Error(`Unexpected '${t}' in: ${this.src}`);
   }
 }

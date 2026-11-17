@@ -39,7 +39,7 @@ export const itChapters: ChapterTexts = {
 
   formulas: {
     title: "Formule inverse",
-    blurb: "Una formula è un'equazione con più lettere. Per ricavarne una, usa le stesse mosse che usi con la x.",
+    blurb: "Le formule della fisica e le loro formule inverse: ricava una grandezza qualsiasi e combina due formule in una sola.",
   },
 
   inequalities: {

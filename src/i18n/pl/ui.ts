@@ -292,18 +292,35 @@ export const pl: Translation = {
       ],
     },
     "move-letter-factor": {
-      name: "Dzielenie przez literę",
-      how: "Przenieś jedną z mnożonych liter na drugą stronę =. Dzieli drugą stronę.",
+      name: "Wyznaczanie wielkości ze wzoru",
+      how: "Przenieś wielkość, która mnoży szukaną, na drugą stronę =. Dzieli drugą stronę.",
       text: [
-        "Wzór to równanie z kilkoma literami. Wyznaczanie jednej litery ze wzoru działa tak jak rozwiązywanie równania z x: pozostałe litery traktuj jak liczby.",
-        "Litera, która mnoży całą stronę, może przejść na drugą stronę i ją podzielić: z `F = ma` dostajemy `F/m = a`. (Dzielić wolno tylko przez literę różną od 0: tutaj zakładamy, że taka jest.)",
-        "Gdy szukana litera występuje w dwóch miejscach, jak w `ax + bx = c`, najpierw wyłącz ją przed nawias: `x(a + b) = c`. Wtedy cały nawias może przejść na drugą stronę (o ile `a + b` nie jest równe 0).",
+        "Wzór wiąże ze sobą wielkości fizyczne: `F = ma` mówi, że siła to masa razy przyspieszenie. Wielkość, która stoi sama po jednej stronie, tutaj `F`, jest już wyznaczona.",
+        "Żeby zamiast niej obliczyć przyspieszenie, wyznacz ze wzoru `a`. Robi się to tak jak przy rozwiązywaniu równania: pozostałe wielkości traktuj jak liczby. `m` mnoży `a`, więc przechodzi na drugą stronę i ją dzieli: `F/m = a`, czyli `a = F/m`. (Przez `m` wolno dzielić: masa nigdy nie jest równa 0.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Mnożenie przez literę",
-      how: "Przenieś literę z mianownika na drugą stronę =. Mnoży drugą stronę.",
-      text: ["Litera w mianowniku całej strony może przejść na drugą stronę i ją pomnożyć: z `P = F/A` dostajemy `PA = F`."],
+      name: "Wielkość w mianowniku",
+      how: "Przenieś wielkość z mianownika ułamka na drugą stronę =. Mnoży drugą stronę.",
+      text: [
+        "We wzorze `ρ = m/V` masa jest dzielona przez objętość `V`. Żeby wyznaczyć `m`, przenieś `V` na drugą stronę: mnoży ją, `ρV = m`. Masa to więc gęstość razy objętość.",
+      ],
+    },
+    "letter-twice": {
+      name: "Szukana wielkość w dwóch miejscach",
+      how: "Przytrzymaj v w jednym wyrazie i wyciągnij je na początek, za lewy koniec (albo dotknij + między wyrazami). Potem przenieś nawias na drugą stronę =.",
+      text: [
+        "Dwa wózki zderzają się, sczepiają i dalej jadą razem. Z zasady zachowania pędu pęd przed zderzeniem równa się pędowi po zderzeniu: `mu = mv + Mv`. Prędkość po zderzeniu, `v`, występuje dwa razy.",
+        "Wyłącz ją przed nawias: `mu = v(m + M)`. Teraz `v` jest w jednym miejscu, a nawias przechodzi na drugą stronę i ją dzieli: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Łączenie dwóch wzorów",
+      how: "Przeciągnij V ze wzoru `V = IR` na V w drugim wzorze: zamienia się w IR. Potem dotknij kropki · między dwoma I.",
+      text: [
+        "Dwa wzory dotyczące tego samego obwodu: moc `P = IV` i prawo Ohma `V = IR`. Oba są prawdziwe jednocześnie, jak w układzie równań.",
+        "Podstaw jeden do drugiego: `V` to `IR`, więc `P = I(IR) = I²R`. To nowy wzór na moc, wyrażony tylko przez natężenie prądu i opór.",
+      ],
     },
     "ineq-move-term": {
       name: "Przenoszenie wyrazu",
@@ -579,6 +596,9 @@ export const pl: Translation = {
   solvedBefore: "✓ To zadanie jest już rozwiązane. Możesz rozwiązać je jeszcze raz.",
   makeItLookLike: "Doprowadź do postaci",
   solveFor: (letters: string[]) => `Wyznacz ${letters.map((l) => `\`${l}\``).join(" i ")}.`,
+  makeSubject: (letter: string) => `Wyznacz \`${letter}\` ze wzoru.`,
+  inTermsOf: (letter: string, using: string[]) =>
+    `Wyraź \`${letter}\` za pomocą ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " i " : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Wybierz odpowiedź powyżej, a potem rozwiąż zadanie tutaj.",
   hint: "Podpowiedź",
   nextStep: "Następny krok",

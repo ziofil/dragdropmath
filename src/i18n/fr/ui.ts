@@ -283,18 +283,33 @@ export const fr: Translation = {
       text: ["Avec quatre termes, on procède deux par deux. Factorise les deux premiers termes par un facteur commun, puis les deux derniers. Si les deux parenthèses sont identiques, mets aussi la parenthèse en facteur."],
     },
     "move-letter-factor": {
-      name: "Diviser par une lettre",
-      how: "Fais passer de l'autre côté du = une des lettres multipliées. Elle divise l'autre membre.",
+      name: "Isoler une grandeur",
+      how: "Fais passer de l'autre côté du = la grandeur qui multiplie celle que tu cherches. Elle divise l'autre membre.",
       text: [
-        "Une formule est une équation avec plusieurs lettres. Isoler l'une d'elles, c'est l'exprimer en fonction des autres. On s'y prend comme pour trouver x : les autres lettres se traitent comme des nombres.",
-        "Une lettre qui multiplie tout un membre peut passer de l'autre côté et diviser l'autre membre : `F = ma` donne `F/m = a`. (À condition que cette lettre ne soit pas nulle : ici, on suppose qu'elle ne l'est pas.)",
-        "Quand la lettre cherchée apparaît à deux endroits, comme dans `ax + bx = c`, mets-la d'abord en facteur : `x(a + b) = c`. Ensuite, toute la parenthèse peut passer de l'autre côté.",
+        "Une formule relie des grandeurs : `F = ma` dit qu'une force est une masse multipliée par une accélération. La grandeur isolée, ici `F`, est exprimée en fonction des autres.",
+        "Pour trouver plutôt l'accélération, transforme la formule pour isoler `a`. On s'y prend comme pour résoudre une équation : les autres grandeurs se traitent comme des nombres. `m` multiplie `a`, donc elle passe de l'autre côté et divise : `F/m = a`, c'est-à-dire `a = F/m`. (On a le droit de diviser par `m` : une masse n'est jamais nulle.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Multiplier par une lettre",
-      how: "Fais passer la lettre du dénominateur de l'autre côté du =. Elle multiplie l'autre membre.",
-      text: ["Une lettre au dénominateur de tout un membre peut passer de l'autre côté et multiplier l'autre membre : `P = F/A` donne `PA = F`."],
+      name: "Une grandeur au dénominateur",
+      how: "Fais passer de l'autre côté du = la grandeur du dénominateur. Elle multiplie l'autre membre.",
+      text: ["Dans `ρ = m/V`, le volume `V` divise la masse. Pour isoler `m`, fais passer `V` de l'autre côté : il multiplie l'autre membre, `ρV = m`. La masse, c'est donc la masse volumique multipliée par le volume."],
+    },
+    "letter-twice": {
+      name: "La grandeur cherchée à deux endroits",
+      how: "Appuie longuement sur le v d'un terme, puis fais-le glisser devant, au-delà du bord gauche (ou appuie sur le + entre les termes). Ensuite, fais passer la parenthèse de l'autre côté du =.",
+      text: [
+        "Deux chariots se percutent et restent accrochés. La quantité de mouvement se conserve : celle d'avant le choc est égale à celle d'après, `mu = mv + Mv`. La vitesse après le choc, `v`, apparaît deux fois.",
+        "Mets-la en facteur : `mu = v(m + M)`. Maintenant `v` n'apparaît qu'une fois, et la parenthèse passe de l'autre côté et divise : `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Combiner deux formules",
+      how: "Fais glisser le V de `V = IR` sur le V de l'autre formule : il devient IR. Ensuite, appuie sur le · entre les deux I.",
+      text: [
+        "Deux formules sur le même circuit : la puissance `P = IV` et la loi d'Ohm `V = IR`. Elles sont vraies en même temps, comme dans un système d'équations.",
+        "Substitue l'une dans l'autre : `V` vaut `IR`, donc `P = I(IR) = I²R`. C'est une nouvelle formule pour la puissance, en fonction de l'intensité et de la résistance seulement.",
+      ],
     },
     "ineq-move-term": {
       name: "Faire passer un terme",
@@ -540,6 +555,8 @@ export const fr: Translation = {
   solvedBefore: "✓ Tu as déjà résolu cet exercice. Tu peux le refaire.",
   makeItLookLike: "Transforme-la en",
   solveFor: (letters: string[]) => `Trouve ${letters.map((l) => `\`${l}\``).join(" et ")}.`,
+  makeSubject: (letter: string) => `Isole \`${letter}\` dans la formule.`,
+  inTermsOf: (letter: string, using: string[]) => `Exprime \`${letter}\` en fonction de ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " et " : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Choisis une réponse ci-dessus, puis résous l'exercice ici.",
   hint: "Indice",
   nextStep: "Étape suivante",

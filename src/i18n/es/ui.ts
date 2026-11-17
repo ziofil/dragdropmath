@@ -279,18 +279,33 @@ export const es: Translation = {
       text: ["Con cuatro términos, se trabaja por parejas. Saca factor común en los dos primeros términos y luego en los dos últimos. Si los dos paréntesis coinciden, saca también el paréntesis como factor común."],
     },
     "move-letter-factor": {
-      name: "Dividir entre una letra",
-      how: "Arrastra una de las letras que se multiplican al otro lado del =. Pasa dividiendo.",
+      name: "Despejar una magnitud",
+      how: "Arrastra al otro lado del = la magnitud que multiplica a la que buscas. Pasa dividiendo.",
       text: [
-        "Una fórmula es una ecuación con varias letras. Dejar una letra sola en un miembro se llama despejarla. Se hace igual que cuando resuelves una ecuación en x: trata las demás letras como si fueran números.",
-        "Una letra que multiplica a todo un miembro puede pasar al otro lado dividiendo: `F = ma` da `F/m = a`. (Solo si esa letra no vale 0: aquí suponemos que no.)",
-        "Cuando la letra que quieres despejar está en dos sitios, como en `ax + bx = c`, primero sácala factor común: `x(a + b) = c`. Después, el paréntesis entero puede pasar al otro lado.",
+        "Una fórmula relaciona magnitudes: `F = ma` dice que una fuerza es una masa por una aceleración. La magnitud que está sola, aquí `F`, es la que está despejada.",
+        "Para hallar la aceleración, despeja `a` en la fórmula. Se hace igual que al resolver una ecuación: las demás magnitudes se tratan como números. `m` multiplica a `a`, así que pasa al otro lado dividiendo: `F/m = a`, es decir, `a = F/m`. (Se puede dividir entre `m`: una masa nunca vale 0.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Multiplicar por una letra",
-      how: "Arrastra la letra del denominador al otro lado del =. Pasa multiplicando.",
-      text: ["Una letra en el denominador de todo un miembro puede pasar al otro lado multiplicando: `P = F/A` da `PA = F`."],
+      name: "Una magnitud en el denominador",
+      how: "Arrastra al otro lado del = la magnitud del denominador. Pasa multiplicando.",
+      text: ["En `ρ = m/V` el volumen `V` divide a la masa. Para despejar `m`, pasa `V` al otro lado multiplicando: `ρV = m`. Es decir, la masa es la densidad por el volumen."],
+    },
+    "letter-twice": {
+      name: "La magnitud buscada en dos sitios",
+      how: "Mantén pulsada la v de un término y arrástrala hacia fuera, delante de todo, más allá del extremo izquierdo (o toca el + que hay entre los términos). Luego arrastra el paréntesis al otro lado del =.",
+      text: [
+        "Dos carritos chocan y quedan unidos. La cantidad de movimiento se conserva, así que la de antes del choque es igual a la de después: `mu = mv + Mv`. La velocidad final, `v`, aparece dos veces.",
+        "Sácala factor común: `mu = v(m + M)`. Ahora `v` está en un solo sitio, y el paréntesis pasa al otro lado dividiendo: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Combinar dos fórmulas",
+      how: "Arrastra la V de `V = IR` sobre la V de la otra fórmula: se cambia por IR. Luego toca el · que hay entre las dos I.",
+      text: [
+        "Dos fórmulas del mismo circuito: la potencia, `P = IV`, y la ley de Ohm, `V = IR`. Las dos se cumplen a la vez, como en un sistema de ecuaciones.",
+        "Sustituye una en la otra: `V` vale `IR`, así que `P = I(IR) = I²R`. Es una fórmula nueva para la potencia, en función solo de la intensidad y de la resistencia.",
+      ],
     },
     "ineq-move-term": {
       name: "Pasar un término al otro lado",
@@ -548,6 +563,9 @@ export const es: Translation = {
   solvedBefore: "✓ Ya resolviste este. Puedes volver a resolverlo.",
   makeItLookLike: "Transfórmalo en",
   solveFor: (letters: string[]) => `Halla el valor de ${letters.map((l) => `\`${l}\``).join(" y de ")}.`,
+  makeSubject: (letter: string) => `Despeja \`${letter}\` en la fórmula.`,
+  /** "y" becomes "e" before a word that starts with an i sound ("`V` e `I`"). */
+  inTermsOf: (letter: string, using: string[]) => `Expresa \`${letter}\` en función de ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? (/^[iIíÍ]/.test(l) ? " e " : " y ") : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Elige una respuesta arriba y luego resuélvelo aquí.",
   hint: "Pista",
   nextStep: "Siguiente paso",

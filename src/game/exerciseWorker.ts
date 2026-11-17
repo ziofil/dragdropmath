@@ -13,7 +13,7 @@ import type { RuleId } from "../rules";
 /** Practice's exercise at a seed, or the mind's eye's (another seed's, with its wrong answers). */
 export type MakeRequest = { mode: "practice" | "predict"; chapter: string; level: Level; seed: number };
 /** Null: no exercise there. `decoys`: the mind's eye's two wrong answers (fewer: none to offer). */
-export type Made = { start: string; goal: string; via: string[]; legs?: RuleId[][]; positive: boolean; decoys: string[] } | null;
+export type Made = { start: string; goal: string; via: string[]; legs?: RuleId[][]; ask?: { letter: string; using: string[] }; positive: boolean; decoys: string[] } | null;
 
 export function makeExercise({ mode, chapter, level, seed }: MakeRequest): Made {
   const d = practiceExercise(chapter, level, mode === "predict" ? predictSeed(seed) : seed);
@@ -25,7 +25,7 @@ export function makeExercise({ mode, chapter, level, seed }: MakeRequest): Made 
     } catch {
       /* no wrong answers to offer: straight to solving */
     }
-  return { start: d.start, goal: d.goal, via: d.via, ...(d.legs ? { legs: d.legs } : {}), positive: d.positive, decoys };
+  return { start: d.start, goal: d.goal, via: d.via, ...(d.legs ? { legs: d.legs } : {}), ...(d.ask ? { ask: d.ask } : {}), positive: d.positive, decoys };
 }
 
 serve(makeExercise);

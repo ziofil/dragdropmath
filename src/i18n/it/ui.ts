@@ -283,18 +283,33 @@ export const it: Translation = {
       text: ["Con quattro termini si lavora a coppie: è il raccoglimento parziale. Raccogli un fattore comune dai primi due termini, poi dagli ultimi due. Se le due parentesi sono uguali, raccogli anche la parentesi."],
     },
     "move-letter-factor": {
-      name: "Dividere per una lettera",
-      how: "Trascina una delle lettere moltiplicate dall'altra parte dell'=. Divide l'altro membro.",
+      name: "Ricavare una grandezza",
+      how: "Trascina dall'altra parte dell'= la grandezza che moltiplica quella che cerchi. Divide l'altro membro.",
       text: [
-        "Una formula è un'equazione con più lettere. Isolare una delle lettere si dice ricavarla dalla formula (la formula inversa). Si fa come quando si risolve un'equazione in x: le altre lettere si trattano come numeri.",
-        "Una lettera che moltiplica un intero membro può passare dall'altra parte e dividere l'altro membro: da `F = ma` si ottiene `F/m = a`. (Solo se la lettera è diversa da 0: qui supponiamo che lo sia.)",
-        "Quando la lettera che cerchi compare in due punti, come in `ax + bx = c`, prima raccoglila: `x(a + b) = c`. Poi tutta la parentesi può passare dall'altra parte.",
+        "Una formula lega tra loro delle grandezze: `F = ma` dice che una forza è una massa per un'accelerazione. La grandezza che sta da sola, qui `F`, è quella ricavata dalla formula.",
+        "Per trovare invece l'accelerazione, ricava `a`: è la formula inversa. Si fa come quando si risolve un'equazione: le altre grandezze si trattano come numeri. `m` moltiplica `a`, quindi passa dall'altra parte e divide: `F/m = a`, cioè `a = F/m`. (Dividere per `m` si può: una massa non è mai 0.)",
       ],
     },
     "move-letter-denominator": {
-      name: "Moltiplicare per una lettera",
-      how: "Trascina la lettera al denominatore dall'altra parte dell'=. Moltiplica l'altro membro.",
-      text: ["Una lettera al denominatore di un intero membro può passare dall'altra parte e moltiplicare l'altro membro: da `P = F/A` si ottiene `PA = F`."],
+      name: "Una grandezza al denominatore",
+      how: "Trascina dall'altra parte dell'= la grandezza al denominatore. Moltiplica l'altro membro.",
+      text: ["In `ρ = m/V` il volume `V` divide la massa. Per ricavare `m`, porta `V` dall'altra parte: moltiplica l'altro membro, `ρV = m`. Quindi la massa è la densità per il volume."],
+    },
+    "letter-twice": {
+      name: "La grandezza cercata in due punti",
+      how: "Tieni premuta la v in un termine e trascinala fuori, davanti a tutto, oltre l'estremità sinistra (oppure tocca il + tra i termini). Poi trascina la parentesi dall'altra parte dell'=.",
+      text: [
+        "Due carrelli si urtano e restano attaccati. La quantità di moto si conserva, quindi quella prima dell'urto è uguale a quella dopo: `mu = mv + Mv`. La velocità dopo l'urto, `v`, compare due volte.",
+        "Raccoglila: `mu = v(m + M)`. Ora `v` compare una volta sola, e la parentesi passa dall'altra parte e divide: `v = (mu)/(m + M)`.",
+      ],
+    },
+    "combine-formulas": {
+      name: "Combinare due formule",
+      how: "Trascina la V di `V = IR` sulla V dell'altra formula: diventa IR. Poi tocca il · tra le due I.",
+      text: [
+        "Due formule sullo stesso circuito: la potenza `P = IV` e la legge di Ohm `V = IR`. Valgono tutte e due insieme, come in un sistema.",
+        "Sostituisci l'una nell'altra: `V` è uguale a `IR`, quindi `P = I(IR) = I²R`. È una nuova formula per la potenza, espressa solo in funzione dell'intensità di corrente e della resistenza.",
+      ],
     },
     "ineq-move-term": {
       name: "Portare un termine dall'altra parte",
@@ -540,6 +555,8 @@ export const it: Translation = {
   solvedBefore: "✓ Questo l'hai già risolto. Puoi risolverlo di nuovo.",
   makeItLookLike: "Trasformalo in",
   solveFor: (letters: string[]) => `Ricava ${letters.map((l) => `\`${l}\``).join(" e ")}.`,
+  makeSubject: (letter: string) => `Ricava \`${letter}\` dalla formula.`,
+  inTermsOf: (letter: string, using: string[]) => `Esprimi \`${letter}\` in funzione di ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " e " : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Scegli una risposta qui sopra, poi risolvilo qui.",
   hint: "Suggerimento",
   nextStep: "Prossimo passo",

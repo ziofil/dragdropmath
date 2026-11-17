@@ -1,122 +1,132 @@
 /**
- * Rearranging formulas: one chapter, its lesson (a board per move) and its
- * practice — real formulas with a letter to make the subject picked at
- * random, and made-up equations solved for x in terms of another letter
- * (x = 5a).
+ * Rearranging formulas: real physics formulas, a quantity made the subject
+ * ("make a the subject of F = ma"), and two formulas combined into one by
+ * substituting (P = IV and V = IR give P = I²R). Every formula is one a
+ * student meets in physics, written with its usual letters (λ and ρ too);
+ * every quantity stands for a positive number (a mass, a time, a speed).
+ * After Simultaneous equations: combining formulas is its substitution.
  */
-import * as L from "../generate/linear";
-import * as E from "../generate/equations";
 import type { Chapter } from "../puzzles";
-import { one, type Level, type Rng, type Shape, one as pick } from "../generate/write";
-import { d } from "../generate/drill";
+import type { Draft, Level, Rng, Shape } from "../generate/write";
+import { carrying, d } from "../generate/drill";
 
-/** A formula and the subjects it can be rearranged for (each goal as the engine writes it). */
+/** A formula and the quantities it's rearranged for: each goal, with that quantity the subject. */
 type Formula = { start: string; goals: string[]; via?: Record<string, string[]> };
+/** Two formulas, and one quantity written in terms of others by substituting one into the other. */
+type Pair = { start: string; goal: string; letter: string; using: string[]; via?: string[] };
 
-const PRODUCTS: Formula[] = [
-  { start: "F = ma", goals: ["a = F/m", "m = F/a"] },
-  { start: "V = IR", goals: ["R = V/I", "I = V/R"] },
-  { start: "d = st", goals: ["t = d/s", "s = d/t"] },
-  { start: "p = mv", goals: ["v = p/m", "m = p/v"] },
-  { start: "W = Fd", goals: ["d = W/F", "F = W/d"] },
-  { start: "P = IV", goals: ["I = P/V", "V = P/I"] },
-  { start: "A = lw", goals: ["w = A/l", "l = A/w"] },
+/** One move: a quantity multiplied or divided by another. */
+const ONE_MOVE: Formula[] = [
+  { start: "F = ma", goals: ["a = F/m", "m = F/a"] }, // Newton's second law
+  { start: "p = mv", goals: ["v = p/m", "m = p/v"] }, // momentum
+  { start: "V = IR", goals: ["I = V/R", "R = V/I"] }, // Ohm's law
+  { start: "P = IV", goals: ["I = P/V", "V = P/I"] }, // electrical power
+  { start: "W = Fd", goals: ["F = W/d", "d = W/F"] }, // work done
+  { start: "Q = It", goals: ["I = Q/t", "t = Q/I"] }, // charge
+  { start: "v = fλ", goals: ["f = v/λ", "λ = v/f"] }, // the wave equation
+  { start: "ρ = m/V", goals: ["m = ρV"] }, // density
+  { start: "P = W/t", goals: ["W = Pt"] }, // power
+  { start: "v = s/t", goals: ["s = vt"] }, // speed
+  { start: "P = F/A", goals: ["F = PA"] }, // pressure
+];
+
+/** Two or three moves: a quantity on the bottom, a product of three, a sum. */
+const TWO_MOVES: Formula[] = [
+  { start: "ρ = m/V", goals: ["V = m/ρ"] },
+  { start: "P = W/t", goals: ["t = W/P"] },
+  { start: "v = s/t", goals: ["t = s/v"] },
+  { start: "P = F/A", goals: ["A = F/P"] },
+  { start: "f = 1/T", goals: ["T = 1/f"] }, // frequency and period
+  { start: "E = mgh", goals: ["h = E/(mg)", "m = E/(gh)"] }, // gravitational potential energy
+  { start: "Q = mcT", goals: ["c = Q/(mT)", "T = Q/(mc)"] }, // heating: T the temperature rise
   { start: "E = mc^2", goals: ["m = E/c^2"] },
-  { start: "P = F/A", goals: ["F = PA", "A = F/P"] },
-  { start: "s = d/t", goals: ["d = st", "t = d/s"] },
-  { start: "D = m/V", goals: ["m = DV", "V = m/D"] },
-];
-
-const SUMS: Formula[] = [
-  { start: "y = x + c", goals: ["x = y - c", "c = y - x"] },
-  { start: "a = b - c", goals: ["b = a + c", "c = b - a"] },
-  { start: "P = a + b + c", goals: ["a = P - b - c"] },
-  { start: "v = u + at", goals: ["t = (v - u)/a", "a = (v - u)/t", "u = v - at"] },
-  { start: "y = mx + c", goals: ["x = (y - c)/m", "m = (y - c)/x", "c = y - mx"] },
-  { start: "2a + b = c", goals: ["a = (c - b)/2", "b = c - 2a"] },
-  { start: "y = 3x + c", goals: ["x = (y - c)/3"] },
-];
-
-/** Two moves, or three: a fraction or a bracket to clear first, a letter in two places. */
-const TWO_STEP: Formula[] = [
-  { start: "A = (bh)/2", goals: ["h = (2A)/b", "b = (2A)/h"] },
-  { start: "a = (v - u)/t", goals: ["t = (v - u)/a", "u = v - at"] },
-  { start: "T = 2(a + b)", goals: ["a = T/2 - b", "b = T/2 - a"] },
-  { start: "P = 2(l + w)", goals: ["l = P/2 - w"] },
-  { start: "m(v - u) = I", goals: ["u = v - I/m"] },
+  { start: "v = u + at", goals: ["u = v - at", "a = (v - u)/t", "t = (v - u)/a"] }, // velocity after a steady acceleration
+  { start: "a = (v - u)/t", goals: ["v = u + at"] },
   { start: "P = V^2/R", goals: ["R = V^2/P"] },
-  { start: "V = lwh", goals: ["h = V/(lw)"] },
-  { start: "E = (mv^2)/2", goals: ["m = (2E)/v^2"] },
-  { start: "s = ((u + v)t)/2", goals: ["t = (2s)/(u + v)"] },
-  { start: "px + qx = r", goals: ["x = r/(p + q)"] },
-  { start: "A = P + Prt", goals: ["P = A/(1 + rt)"] },
-  { start: "F = (9C)/5 + 32", goals: ["C = (5(F - 32))/9"] },
-  { start: "C = (5(F - 32))/9", goals: ["F = (9C)/5 + 32"] },
-  { start: "v^2 = u^2 + 2as", goals: ["s = (v^2 - u^2)/(2a)", "a = (v^2 - u^2)/(2s)"] },
-  { start: "2x + a = x + b", goals: ["x = b - a"] },
+  { start: "E = (1/2)mv^2", goals: ["m = (2E)/v^2"] }, // kinetic energy
 ];
 
-/** Four or five moves: x on both sides, taken out as a factor. */
-const LONGER: Formula[] = [
-  { start: "3(x + y) = 2x + z", goals: ["x = z - 3y"] },
-  { start: "ax + b = cx + d", goals: ["x = (d - b)/(a - c)"] },
-  { start: "k(x - 1) = x", goals: ["x = k/(k - 1)"] },
-  { start: "a(x + 1) = 2x + b", goals: ["x = (b - a)/(a - 2)"], via: { "x = (b - a)/(a - 2)": ["ax + a = 2x + b", "ax - 2x = b - a"] } },
+/** Several moves: a square, a bracket, the quantity in two places. */
+const SEVERAL_MOVES: Formula[] = [
+  { start: "E = (1/2)mv^2", goals: ["v = √((2E)/m)"] },
+  { start: "v^2 = u^2 + 2as", goals: ["s = (v^2 - u^2)/(2a)", "a = (v^2 - u^2)/(2s)", "u = √(v^2 - 2as)"] },
+  { start: "s = ((u + v)t)/2", goals: ["t = (2s)/(u + v)", "v = (2s)/t - u"] },
+  { start: "s = ut + (1/2)at^2", goals: ["a = (2(s - ut))/t^2"] },
+  { start: "E = I(R + r)", goals: ["I = E/(R + r)", "R = E/I - r"] }, // e.m.f. and internal resistance
+  { start: "F = (GMm)/r^2", goals: ["r = √((GMm)/F)"] }, // gravitation
+  // A collision where the two stick together: momentum before = after, the speed after in two places.
+  { start: "mu = mv + Mv", goals: ["v = (mu)/(m + M)"], via: { "v = (mu)/(m + M)": ["mu = v(m + M)"] } },
 ];
 
-function fromBank(id: string, bank: Formula[]): Shape {
+/** Two formulas into one. */
+const PAIRS_MEDIUM: Pair[] = [
+  { start: "P = IV; V = IR", goal: "P = I^2R; V = IR", letter: "P", using: ["I", "R"] },
+  { start: "W = Fd; F = ma", goal: "W = mad; F = ma", letter: "W", using: ["m", "a", "d"] },
+  { start: "v = fλ; f = 1/T", goal: "v = λ/T; f = 1/T", letter: "v", using: ["λ", "T"] },
+  { start: "p = mv; v = s/t", goal: "p = (ms)/t; v = s/t", letter: "p", using: ["m", "s", "t"] },
+];
+const PAIRS_HARD: Pair[] = [
+  { start: "P = IV; I = V/R", goal: "P = V^2/R; I = V/R", letter: "P", using: ["V", "R"] },
+  { start: "F = ma; a = (v - u)/t", goal: "F = (m(v - u))/t; a = (v - u)/t", letter: "F", using: ["m", "u", "v", "t"] },
+  // Energy kept: what's lost in height is gained in speed.
+  { start: "E = mgh; E = (1/2)mv^2", goal: "E = mgh; v = √(2gh)", letter: "v", using: ["g", "h"], via: ["E = mgh; mgh = (1/2)mv^2"] },
+];
+
+/** Every formula and pair (for the tests: each one must be doable with the chapter's moves). */
+export const FORMULA_BANK = { formulas: [...ONE_MOVE, ...TWO_MOVES, ...SEVERAL_MOVES], pairs: [...PAIRS_MEDIUM, ...PAIRS_HARD] };
+
+const pick = <T,>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
+
+function formulaShape(id: string, bank: Formula[]): Shape {
   return {
     id,
-    name: "a formula, one letter to make the subject",
-    // Real formulas: the 32 of F = 9C/5 + 32 is what it is.
+    name: "a physics formula, a quantity to make the subject",
+    // Real formulas: written as physics writes them, not held to the made-up exercises' rules.
     curated: true,
-    make: (r) => {
-      const f = bank[r.int(0, bank.length - 1)];
-      const goal = f.goals[r.int(0, f.goals.length - 1)];
+    make: (r): Draft => {
+      const f = pick(r, bank);
+      const goal = pick(r, f.goals);
       return { shape: id, start: f.start, goal, via: f.via?.[goal] ?? [] };
     },
   };
 }
 
-/** x in two places and other letters around: factor x out at the end. */
-const FACTOR: Formula[] = [
-  { start: "a(x - b) = c(x + b)", goals: ["x = (ab + bc)/(a - c)"], via: { "x = (ab + bc)/(a - c)": ["ax - ab = cx + cb", "ax - cx = cb + ab", "x(a - c) = cb + ab"] } },
-  { start: "a(x + b) = c(x + d)", goals: ["x = (cd - ab)/(a - c)"], via: { "x = (cd - ab)/(a - c)": ["ax + ab = cx + cd", "ax - cx = cd - ab", "x(a - c) = cd - ab"] } },
-  { start: "p(x - q) = x + r", goals: ["x = (pq + r)/(p - 1)"], via: { "x = (pq + r)/(p - 1)": ["px - pq = x + r", "px - x = r + pq", "x(p - 1) = r + pq"] } },
-];
-
-// ---------- solving for x in terms of a letter: the equations' recipes, every number a multiple of a ----------
-
-/** How many a's x comes to: mostly small and positive, now and then negative. */
-const pickK = (r: Rng) => (r.next() < 0.15 ? -r.int(1, 3) : r.int(1, 6));
-const inLetters = (rc: L.Recipe, id: string) => L.shapeOf(rc, { id, unit: (r) => one(r, ["a", "b", "c"]), answer: pickK });
-
-const banks = { product: fromBank("product", PRODUCTS), sum: fromBank("sum", SUMS), twoStep: fromBank("two-step", TWO_STEP), formula: fromBank("formula", LONGER), factorTwice: fromBank("factor-twice", FACTOR) };
+function pairShape(id: string, bank: Pair[]): Shape {
+  return {
+    id,
+    name: "two physics formulas combined into one",
+    curated: true,
+    make: (r): Draft => {
+      const p = pick(r, bank);
+      return { shape: id, start: p.start, goal: p.goal, via: p.via ?? [], ask: { letter: p.letter, using: p.using } };
+    },
+  };
+}
 
 const levels = (): Record<Level, Shape[]> => ({
-  easy: [banks.product, banks.sum, banks.twoStep, banks.formula, inLetters(L.bothSides, "letters-both"), inLetters(L.bracketX, "bracket-letter"), inLetters(E.fractionEquals, "fraction-equal")],
-  medium: [inLetters(L.bracketsBoth, "two-brackets"), inLetters(L.twoFractions, "two-fractions"), inLetters(L.fraction, "fraction-letter"), inLetters(L.bracketPlusBoth, "bracket-and-letter"), banks.factorTwice],
-  // And a log or an exponential to undo, with x and y.
-  hard: [inLetters(L.fractionsMinus, "fractions-minus"), inLetters(L.twoBracketsMixed, "two-brackets-mixed"), L.shapeOf(E.expOfQuotient), L.shapeOf(E.logOfRootOfExp)],
+  easy: [formulaShape("one-move", ONE_MOVE), formulaShape("two-moves", TWO_MOVES)],
+  medium: [formulaShape("two-moves", TWO_MOVES), formulaShape("several-moves", SEVERAL_MOVES), pairShape("combine", PAIRS_MEDIUM)],
+  hard: [formulaShape("several-moves", SEVERAL_MOVES), { ...pairShape("combine", [...PAIRS_MEDIUM, ...PAIRS_HARD]), weight: 2 }],
 });
 
 export const formulas: Chapter = {
   id: "formulas",
   title: "Rearranging formulas",
-  blurb: "A formula is an equation with several letters. Use the same moves as for x to get one letter on its own.",
-  after: ["balance"],
+  blurb: "The formulas of physics, rearranged: make any quantity the subject, and combine two formulas into one.",
+  after: ["simultaneous"],
+  // Every quantity is a positive number (a mass, a time, a resistance): so a square root has one answer.
+  positive: true,
   unlocks: ["move-letter-factor", "move-letter-denominator"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
-    // Real formulas: a product of letters, then a letter on the bottom.
-    d("move-letter-factor", (r) => pick(r, ["F = ma", "V = IR", "d = st", "p = mv", "W = Fd", "P = IV", "A = lw"])),
-    d("move-letter-denominator", (r) => pick(r, ["P = F/A", "s = d/t", "D = m/V"])),
-    // Back to Factoring: the letter wanted in two places is taken out first, then its bracket moves across.
-    d("letter-twice", (r) => {
-      const [a, b] = pick(r, [["a", "b"], ["p", "q"], ["m", "n"]] as const);
-      const c = pick(r, ["c", "k"]);
-      return { start: `${a}x + ${b}x = ${c}`, via: [`x(${a} + ${b}) = ${c}`], goal: `x = ${c}/(${a} + ${b})` };
-    }, "factor-out"),
+    // A quantity multiplying the subject: it divides the other side (F = ma, for a).
+    d("move-letter-factor", (r) => pick(r, ["F = ma", "V = IR", "p = mv", "W = Fd", "P = IV", "Q = It", "v = fλ"])),
+    // A quantity on the bottom: it multiplies the other side (ρ = m/V, for m).
+    d("move-letter-denominator", (r) => pick(r, ["P = F/A", "ρ = m/V", "v = s/t", "P = W/t"])),
+    // The quantity wanted in two places (a collision, the trolleys stick together): take it out as a factor first.
+    d("letter-twice", () => ({ start: "mu = mv + Mv", via: ["mu = v(m + M)"], goal: "v = (mu)/(m + M)" }), "factor-out"),
+    // Two formulas about the same circuit: substitute one into the other.
+    carrying("alone", d("combine-formulas", () => ({ start: "P = IV; V = IR", goal: "P = I^2R; V = IR", via: ["P = I(IR); V = IR"] }), "substitute")),
   ],
   levels,
 };

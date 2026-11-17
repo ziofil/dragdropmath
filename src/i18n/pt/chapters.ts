@@ -39,7 +39,7 @@ export const ptChapters: ChapterTexts = {
 
   formulas: {
     title: "Isolando variáveis",
-    blurb: "Uma fórmula é uma equação com várias letras. Use os mesmos movimentos que você usa com o x para isolar uma delas.",
+    blurb: "As fórmulas da Física, reorganizadas: isole qualquer grandeza e junte duas fórmulas numa só.",
   },
 
   inequalities: {
