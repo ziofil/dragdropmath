@@ -7,9 +7,10 @@
  *
  * Row 0 is x's, row 1 is y's (swapped round now and then at the end).
  */
-import type { Expr, MathState } from "../../expr/types";
+import type { Expr } from "../../expr/types";
 import { children, mapTree } from "../../expr/tree";
 import { variable } from "../../expr/build";
+import { fromRows, rowAt, withRow } from "../../expr/rows";
 import type { RuleId } from "../../rules";
 import { build, draftOf } from "./back";
 import { bracket, n, plus, sumOf, swap, swapRows, termExpr, times, unsubstitute, valueIn, type UnMove } from "./unmove";
@@ -30,7 +31,7 @@ function system(id: string, name: string, make: (c: Ctx) => Made | null): Shape 
       const [x, y] = letterPair(r);
       const made = make({ r, X: (k) => termExpr(k, variable(x)), Y: (k) => termExpr(k, variable(y)) });
       if (!made) return null;
-      const b = build({ sides: [variable(x), n(made.x0), variable(y), n(made.y0)], join: "and" }, made.steps, r);
+      const b = build(fromRows([[variable(x), n(made.x0)], [variable(y), n(made.y0)]], "and"), made.steps, r);
       return b && draftOf(id, b);
     },
   };
@@ -190,7 +191,7 @@ function oneFirst(r: Rng, level: Level, rules: readonly RuleId[], needs: Needs |
     const b = one(r, [1, 1, 2, -1]);
     const c = a * x0 + b * y0;
     if (c <= 0 || c > 30 || x0 === y0) return null;
-    const start: MathState = { sides: [variable(x), n(x0), variable(y), n(y0)], join: "and" };
+    const start = fromRows([[variable(x), n(x0)], [variable(y), n(y0)]], "and");
     const built = build(start, [times(a, 0, 0), plus(n(b * y0), false, 0), unsubstitute(0, 1, b), ...composed.steps, r.next() < 0.6 && swapRows()], r);
     return built && draftOf("composed", built);
   };
@@ -218,7 +219,7 @@ function substituteIn(r: Rng, level: Level, rules: readonly RuleId[], needs: Nee
     });
     const d = def as { e: Expr; y0: number } | null;
     if (!composed || !d || c0(d.y0)) return null;
-    const start: MathState = { sides: [variable(x), n(composed.x0), variable(y), n(d.y0)], join: "and" };
+    const start = fromRows([[variable(x), n(composed.x0)], [variable(y), n(d.y0)]], "and");
     const built = build(start, [valueIn(d.e, 1), ...composed.steps, r.next() < 0.6 && swapRows()], r);
     return built && draftOf("composed", built);
   };
@@ -237,8 +238,9 @@ function putIn(x: string, y: string, m: number, c: number, r: Rng): UnMove {
         if (e.kind === "sum") sums.push(e);
         children(e).forEach(visit);
       };
-      visit(s.sides[0]);
-      visit(s.sides[1]);
+      const [left, right] = rowAt(s, 0);
+      visit(left);
+      visit(right);
       const spots = sums.flatMap((sum) => sum.terms.map((t, i) => ({ sum, i, a: coefOf(t, x) })).filter((p) => p.a !== null && p.a > 0 && (m < p.a || p.a % m === 0)));
       if (!spots.length) return null;
       const spot = one(r, spots);
@@ -254,7 +256,8 @@ function putIn(x: string, y: string, m: number, c: number, r: Rng): UnMove {
         else terms[j] = n(v);
       } else terms.push(n(-k * c));
       const made = sumOf(terms);
-      return { ...s, sides: [mapTree(s.sides[0], (e) => (e.id === spot.sum.id ? made : e)), mapTree(s.sides[1], (e) => (e.id === spot.sum.id ? made : e)), ...s.sides.slice(2)] };
+      const put = (e: Expr) => mapTree(e, (t) => (t.id === spot.sum.id ? made : t));
+      return withRow(s, 0, [put(left), put(right)]);
     },
   };
 }

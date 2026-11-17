@@ -3,6 +3,7 @@ import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
 import { stateKey, type Ordering } from "../expr/key";
 import { allNodes } from "../expr/tree";
+import { rowCount, rowsOf } from "../expr/rows";
 import { forgetMoves, stepsFrom, type RuleId } from "../rules";
 
 /**
@@ -14,17 +15,17 @@ import { forgetMoves, stepsFrom, type RuleId } from "../rules";
 export function matchesGoal(state: MathState, goal: MathState, ordered: Ordering = "exact"): boolean {
   if (stateKey(state, ordered) === stateKey(goal, ordered)) return true;
   // Several rows (x = 2; y = 3): the same rows, in any order, each either way round.
-  if (state.sides.length > 2 || goal.sides.length > 2) {
-    const rows = (s: MathState) => {
-      const out: string[] = [];
-      for (let k = 0; k < s.sides.length; k += 2) {
-        const row = { sides: s.sides.slice(k, k + 2), rel: s.rel };
-        const a = stateKey(row, ordered);
-        const b = stateKey(withFlippedRel({ sides: [row.sides[1], row.sides[0]] }, row), ordered);
-        out.push(a < b ? a : b);
-      }
-      return out.sort().join(" & ");
-    };
+  if (rowCount(state) > 1 || rowCount(goal) > 1) {
+    const rows = (s: MathState) =>
+      rowsOf(s)
+        .map(({ sides }) => {
+          const row = { sides, rel: s.rel };
+          const a = stateKey(row, ordered);
+          const b = stateKey(withFlippedRel({ sides: [row.sides[1], row.sides[0]] }, row), ordered);
+          return a < b ? a : b;
+        })
+        .sort()
+        .join(" & ");
     return (state.join ?? "and") === (goal.join ?? "and") && rows(state) === rows(goal);
   }
   if (state.sides.length === 2) {

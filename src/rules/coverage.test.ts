@@ -13,6 +13,7 @@ import { parseState } from "../expr/parse";
 import { print, printState } from "../expr/key";
 import { evaluate, isConstant } from "../expr/eval";
 import { relOf } from "../expr/build";
+import { isEquation } from "../expr/rows";
 import { corpus } from "../game/testing/corpus";
 import { allNodes, children } from "../expr/tree";
 import { ALL_RULES, candidatesFor, movesFor, signId, type RuleId } from ".";
@@ -46,7 +47,6 @@ const SHAPES = [
   "x + 1 = 5*(x/2)",
 ];
 
-const isEquation = (s: MathState) => s.sides.length >= 2 && s.sides.length % 2 === 0;
 const STATES: [string, MathState][] = [
   ...SHAPES.map((src): [string, MathState] => [src, parseState(src)]),
   ...corpus().map((c): [string, MathState] => [`${c.id}: ${c.start}`, parseState(c.start)]),

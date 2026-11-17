@@ -16,6 +16,7 @@ import { key, rootOrder } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
 import { evaluate, variables } from "../../expr/eval";
 import { canBeNegative } from "../../rules/signs";
+import { rows } from "../../expr/rows";
 
 const hasLetter = (e: Expr) => variables(e).length > 0;
 
@@ -80,8 +81,7 @@ export function domainOf(s: MathState): Condition[] {
     }
   }
   // What an even root equals (a whole side under a root): the other side isn't negative.
-  for (let k = 0; k + 1 < s.sides.length; k += 2) {
-    const [l, r] = [s.sides[k], s.sides[k + 1]];
+  for (const [l, r] of rows(s)) {
     if (evenRootOf(l)) add(r, "≥");
     if (evenRootOf(r)) add(l, "≥");
   }

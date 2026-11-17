@@ -11,14 +11,15 @@
  */
 import type { MathState } from "../expr/types";
 import { allNodes } from "../expr/tree";
-import { differ, isolated, rowsOf } from "./answers";
+import { differ, isolated } from "./answers";
+import { isEquation, rowsOf } from "../expr/rows";
 import { matchesGoal } from "./solver";
 import { standing } from "../expr/conditions";
 
 export type Task = { kind: "match" } | { kind: "solve"; letters: string[] };
 
 export function taskOf(goal: MathState): Task {
-  if (goal.sides.length < 2 || goal.sides.length % 2) return { kind: "match" };
+  if (!isEquation(goal)) return { kind: "match" };
   const letters: string[] = [];
   for (const row of rowsOf(goal)) {
     const x = isolated(row);

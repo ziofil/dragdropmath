@@ -8,6 +8,7 @@
 import type { Expr, MathState } from "../expr/types";
 import { evaluate, variables, type Env } from "../expr/eval";
 import { printState } from "../expr/key";
+import { rowsOf } from "../expr/rows";
 
 /**
  * Several random positive values for every letter in these expressions, at
@@ -40,14 +41,6 @@ export function hasValue(s: MathState): boolean {
 /** Differ in value somewhere. */
 export function differ(a: Expr, b: Expr): boolean {
   return envs([a, b]).some((env) => !close(evaluate(a, env), evaluate(b, env)));
-}
-
-/** Each row of a state (sides 2k and 2k + 1) as a state of its own; an expression is one row. */
-export function rowsOf(s: MathState): MathState[] {
-  if (s.sides.length <= 2) return [s];
-  const out: MathState[] = [];
-  for (let k = 0; k < s.sides.length; k += 2) out.push({ sides: s.sides.slice(k, k + 2), rel: s.rel });
-  return out;
 }
 
 /** The letter a row isolates on its left (`x = …`, `x < …`), if any. */

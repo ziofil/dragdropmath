@@ -12,7 +12,8 @@ import { evaluate, isConstant, variables } from "../expr/eval";
 import { rng, shuffled } from "./generate/write";
 import { children, withChildren } from "../expr/tree";
 import { printState } from "../expr/key";
-import { follows, isWrong, rowsOf, shapeMismatch } from "./answers";
+import { follows, isWrong, shapeMismatch } from "./answers";
+import { rowsOf, withRow } from "../expr/rows";
 import { breaks } from "../expr/conditions";
 
 /** `e` with the node `id` replaced. */
@@ -121,22 +122,16 @@ function candidates(start: MathState, goal: MathState): Map<string, MathState[]>
   const byKind = new Map<string, MathState[]>(KINDS.map((k) => [k, []]));
   if (rows.length === 1) byKind.get("moved")!.push(...movedSlips(start, goal));
   rows.forEach((row, r) => {
-    const withRow = (next: MathState): MathState => {
-      if (rows.length === 1) return next;
-      const sides = goal.sides.slice();
-      sides[2 * r] = next.sides[0];
-      sides[2 * r + 1] = next.sides[1];
-      return { ...goal, sides };
-    };
+    const inRow = (next: MathState): MathState => (rows.length === 1 ? next : withRow(goal, r, [next.sides[0], next.sides[1]]));
     // An inequality not turned round.
-    if (row.sides.length === 2 && (row.rel ?? "=") !== "=") byKind.get("relation")!.push(withRow({ ...row, rel: flipRel(row.rel!) }));
+    if (row.sides.length === 2 && (row.rel ?? "=") !== "=") byKind.get("relation")!.push(inRow({ ...row, rel: flipRel(row.rel!) }));
     // The answer part: what the letter is said to be, or the whole expression.
     const at = row.sides.length === 1 ? 0 : 1;
     for (const [kind, es] of Object.entries(slips(row.sides[at]))) {
       for (const e of es) {
         const sides = row.sides.slice();
         sides[at] = normalize(e);
-        byKind.get(kind)!.push(withRow({ ...row, sides }));
+        byKind.get(kind)!.push(inRow({ ...row, sides }));
       }
     }
   });

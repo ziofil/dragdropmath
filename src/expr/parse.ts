@@ -1,5 +1,6 @@
 import type { Condition, Expr, MathState, Rel } from "./types";
 import { econst, frac, log, neg, normalize, num, pow, prod, root, sum, variable } from "./build";
+import { fromRows, type Row } from "./rows";
 
 /**
  * Parses things like `3x + 2(x - 1) = 10`, `x^2/4`, `-a·b`.
@@ -22,9 +23,9 @@ export function parseState(src: string): MathState {
   if (where !== undefined) return { ...parseState(main), conditions: where.split(",").map(parseCondition) };
   // Rows: "x + y = 5; x - y = 1" (both at once), or "x = 2 or x = -3" (either).
   const rows = src.split(";");
-  if (rows.length > 1) return { sides: rows.flatMap((r) => parseRow(r).sides), join: "and" };
+  if (rows.length > 1) return fromRows(rows.map((r) => parseRow(r).sides as Row), "and");
   const either = src.split(/\s+or\s+/);
-  if (either.length > 1) return { sides: either.flatMap((r) => parseRow(r).sides), join: "or" };
+  if (either.length > 1) return fromRows(either.map((r) => parseRow(r).sides as Row), "or");
   return parseRow(src);
 }
 

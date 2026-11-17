@@ -188,11 +188,7 @@ export function replaceIn(state: MathState, loc: Loc, e: Expr): MathState {
   return { sides };
 }
 
-/** An equation (or several, in rows): an even number of sides. */
-export const isEquation = (state: MathState) => state.sides.length >= 2 && state.sides.length % 2 === 0;
-
-/** The other side of the same row (0 ↔ 1, 2 ↔ 3, …). */
-export const partner = (side: number) => side ^ 1;
+export { isEquation, partner } from "../expr/rows";
 
 export function setSides(sides: Expr[]): MathState {
   return { sides: sides.map(normalize) };

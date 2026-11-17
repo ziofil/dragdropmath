@@ -7,6 +7,7 @@ import { renderStateReadOnly, Vec2, type DragInitContext, type DragSpec } from "
 import type { MathState } from "../../expr/types";
 import { locate, nodeAt } from "../../expr/tree";
 import { dragCtx } from "../../rules/types";
+import { isLeft, partner } from "../../expr/rows";
 import { withoutCopies } from "../../expr/copies";
 import { canvasBox, carriedCentre, laidOut } from "../geometry";
 import type { RenderCtx } from "../typeset";
@@ -191,10 +192,10 @@ export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "f
   // At the far edge of the other side itself: past it, a long side would put the aim out of reach.
   "far-end": (rc, id) => {
     const at = locate(rc.state, id)!;
-    const other = rc.state.sides[at.side ^ 1];
+    const other = rc.state.sides[partner(at.side)];
     return () => {
       const b = canvasBox(rc, other.id);
-      return at.side % 2 === 1 ? b.symLeft : b.symRight;
+      return isLeft(at.side) ? b.symRight : b.symLeft;
     };
   },
 };

@@ -1,4 +1,5 @@
 import type { Expr, MathState } from "./types";
+import { rows } from "./rows";
 
 /**
  * How much order matters when comparing:
@@ -66,11 +67,9 @@ export function stateKey(s: MathState, ordered: Ordering = false, notation = ord
 
 /** Each row's sides with their relation, rows joined by ; (all at once) or "or" (either). */
 function joinRows(s: MathState, f: (e: Expr) => string): string {
-  const row = (k: number) => s.sides.slice(k, k + 2).map(f).join(` ${s.rel ?? "="} `);
-  if (s.sides.length <= 2) return row(0);
-  const rows = [];
-  for (let k = 0; k < s.sides.length; k += 2) rows.push(row(k));
-  return rows.join(s.join === "or" ? " or " : " ; ");
+  const row = (sides: Expr[]) => sides.map(f).join(` ${s.rel ?? "="} `);
+  if (s.sides.length <= 2) return row(s.sides);
+  return rows(s).map(row).join(s.join === "or" ? " or " : " ; ");
 }
 
 /** n if this exponent is 1/n (n ≥ 2): a power that can be written as a root. */

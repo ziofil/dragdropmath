@@ -7,7 +7,7 @@ import { asPower, dropFactor, fractionPart, raise as raiseTo } from "./shapes";
 import { factorsOf, roleOf, viewTerm } from "./view";
 import { assumeOf, canBeNegative, isPositive, splitsOver } from "./signs";
 import { allNodes, nodeAt } from "../expr/tree";
-import { intoRows } from "./either";
+import { intoRows, isLeft, rowOf } from "../expr/rows";
 
 // ---------- helpers ----------
 
@@ -667,8 +667,8 @@ export const rootAcross: Rule = {
       }
       // Even: what's on the other side mustn't be negative (x² = −4 has no answer).
       if (canBeNegative(k, assumeOf(state))) return [];
-      const base = (e: Expr): [Expr, Expr] => (c.loc.side % 2 === 0 ? [cloneFresh(P.base), e] : [e, cloneFresh(P.base)]);
-      const row = c.loc.side >> 1;
+      const base = (e: Expr): [Expr, Expr] => (isLeft(c.loc.side) ? [cloneFresh(P.base), e] : [e, cloneFresh(P.base)]);
+      const row = rowOf(c.loc.side);
       if (k.kind === "num" && k.value === 0) return [{ rule: "root-across", state: intoRows(state, row, [base(num(0))]) }];
       // The carried 2 becomes the first row's ½ (where the drag aims it).
       const r = (id?: string) => pow(cloneFresh(k), frac(num(1), num(n), id));

@@ -5,6 +5,7 @@
  */
 import type { Condition, Expr, MathState } from "./types";
 import { evaluate } from "./eval";
+import { rowAt, rowCount, rows, withRows } from "./rows";
 
 /** A condition holds at these values (one it can't decide holds). */
 function holds(c: Condition, env: Record<string, number>): boolean {
@@ -49,7 +50,7 @@ function answerOf(row: Expr[]): { letter: string; value: number } | null {
 /** Row `k` of the board is an answer that breaks a condition (x = −3 where x ≥ −1): not an answer at all. */
 export function breaks(s: MathState, k: number): boolean {
   if (!s.conditions?.length || s.sides.length < 2) return false;
-  const a = answerOf([s.sides[2 * k], s.sides[2 * k + 1]]);
+  const a = answerOf(rowAt(s, k));
   if (!a) return false;
   return s.conditions.some((c) => !holds(c, { [a.letter]: a.value }));
 }
@@ -57,9 +58,9 @@ export function breaks(s: MathState, k: number): boolean {
 /** The board without the rows that break a condition (all of them, if every one does). */
 export function standing(s: MathState): MathState {
   if (!s.conditions?.length || s.sides.length < 4) return s;
-  const rows = Array.from({ length: s.sides.length / 2 }, (_, k) => k).filter((k) => !breaks(s, k));
-  if (!rows.length || rows.length === s.sides.length / 2) return s;
-  return { ...s, sides: rows.flatMap((k) => [s.sides[2 * k], s.sides[2 * k + 1]]) };
+  const kept = rows(s).filter((_, k) => !breaks(s, k));
+  if (!kept.length || kept.length === rowCount(s)) return s;
+  return withRows(s, kept);
 }
 
 /** Do these values break a condition? */

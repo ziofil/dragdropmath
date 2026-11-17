@@ -6,7 +6,7 @@ import { isDone, taskOf } from "../game/task";
 import type { RuleId } from "../rules";
 import { record, seen, type Change, type Context } from "../game/scoring";
 import { answer, arrive, canSolve, cardOf, type Phase } from "../game/predict";
-import { rowsOf } from "../game/answers";
+import { rowsOf } from "../expr/rows";
 import { Board } from "./Board";
 import { t } from "../i18n";
 import { StaticMath, type ShowMove } from "./MathCanvas";
