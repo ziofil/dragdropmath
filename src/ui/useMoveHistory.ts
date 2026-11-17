@@ -52,6 +52,8 @@ export function useMoveHistory(start: MathState, stopAt?: (s: MathState) => bool
 
   return {
     current,
+    /** Every state the board has shown since its start (each move and its tidying), now last: what it has passed on its way. */
+    states: history.map((e) => e.state),
     onDrop,
     canUndo: history.length > 1,
     /** Takes back the last move, with the tidying after it. */

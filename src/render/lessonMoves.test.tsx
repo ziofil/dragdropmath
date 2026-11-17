@@ -110,15 +110,17 @@ describe("Show plays every lesson board to its end", () => {
       expect(first, `${ex.start}: the lesson's move`).not.toBeNull();
       let at = tidied(start, first!.next);
       const shown = [printState(at)];
+      const seenStates: MathState[] = [start];
       let way: MathState[] | null = null;
       while (!reached(at)) {
         if (way?.length && same(at, way[0])) way = way.slice(1);
-        else way = wayOn(at, stops, reached, rules);
+        else way = wayOn([...seenStates, at], stops, reached, rules);
         expect(way?.length, `${ex.start}: no way on from ${printState(at)} (shown: ${shown.join(" ; ")})`).toBeGreaterThan(0);
         const next = way![0];
         const from = at;
         const step = planStepTo(from, rules, 720, 160, (s) => same(tidied(from, s), next));
         expect(step, `${ex.start}: can't show ${printState(from)} → ${printState(next)}`).not.toBeNull();
+        seenStates.push(from);
         at = tidied(from, step!.next);
         shown.push(printState(at));
         expect(shown.length, `${ex.start}: ${shown.join(" ; ")}`).toBeLessThan(30);

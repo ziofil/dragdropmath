@@ -7,6 +7,14 @@ import { rowCount, rowsOf } from "../expr/rows";
 import { forgetMoves, stepsFrom, type RuleId } from "../rules";
 
 /**
+ * The board is at a checkpoint (a milestone of an exercise's way, a lesson's
+ * stop): it shows it with its terms in any order, and its rows in any order,
+ * each either way round. The one test of it: what makes and serves a way,
+ * checks it, and follows it (Show, Next step) agree on where a checkpoint is.
+ */
+export const atCheckpoint = (s: MathState, checkpoint: MathState): boolean => matchesGoal(s, checkpoint, false);
+
+/**
  * Has the learner reached the goal? "Make it look like" means it must look
  * like it: terms in the goal's order (7 + x is not x + 7), and factors too
  * (a·6b is not 6ab). An equation may be either way round (7 = x is x = 7),

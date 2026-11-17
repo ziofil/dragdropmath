@@ -21,7 +21,7 @@ import { parseState } from "../../expr/parse";
 import { printState, stateKey } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
 import { assuming } from "../../expr/setting";
-import { matchesGoal, search, searchBest } from "../solver";
+import { atCheckpoint, search, searchBest } from "../solver";
 import { isDone } from "../task";
 import { undoneBy } from "./back";
 import type { Draft } from "./write";
@@ -126,7 +126,7 @@ export function writeWay(d: Draft, rules: readonly RuleId[]): Draft | null {
   const coarse = new Set<number>();
   for (let i = 0; i <= stops.length; i++) {
     const last = i === stops.length;
-    const done = last ? (s: MathState) => isDone(goal, s) : (s: MathState) => matchesGoal(s, stops[i], false);
+    const done = last ? (s: MathState) => isDone(goal, s) : (s: MathState) => atCheckpoint(s, stops[i]);
     const at = states[states.length - 1];
     if (done(at)) continue;
     const stages = d.stages?.[i] ?? ["solve"];
@@ -173,5 +173,5 @@ export const writesWay = (rules: () => readonly RuleId[]) => (d: Draft) => write
 
 /** One stretch, as writeWay searches it: every state from `from` to one matching `to` (terms in any order), with `stage`'s moves. */
 export function wayThrough(from: MathState, to: MathState, stage: Stage, rules: readonly RuleId[]): MathState[] | null {
-  return stretch(from, (s) => matchesGoal(s, to, false), movesOf([stage], rules));
+  return stretch(from, (s) => atCheckpoint(s, to), movesOf([stage], rules));
 }

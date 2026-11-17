@@ -58,6 +58,9 @@ export function MoveBoard({
   // The board as it is now, for Show's steps (they run on across renders), and whether Stop was pressed.
   const latest = useRef(current);
   latest.current = current;
+  // (And the states it has shown: what it has passed on its way, for the way on.)
+  const seen = useRef(moves.states);
+  seen.current = moves.states;
   const stopped = useRef(false);
   // Resolves when Stop is pressed: a wait on a search (or anything) gives up then.
   const onStop = useRef<() => void>(() => {});
@@ -97,7 +100,8 @@ export function MoveBoard({
       // The lesson's own move, heading for the first checkpoint (or the end); the way on from where it
       // leads is searched (off the page's thread) while it's played.
       const toward = (s: MathState) => reached(s) || (stops.length > 0 && stepDone(start, tidied(start, s), stops[0]));
-      const ask = (from: MathState) => askWay({ start: startText, from: printState(from), stops: via ?? [], goals, rules: [...rules], positive: !!positive }).then((w) => (w ?? []).map((x) => assuming(parseState(x), positive)));
+      // The way on from `from` (the board now, or where the move being played will leave it), after the states the board has shown.
+      const ask = (from: MathState) => askWay({ start: startText, seen: [...seen.current, from].map(printState), stops: via ?? [], goals, rules: [...rules], positive: !!positive }).then((w) => (w ?? []).map((x) => assuming(parseState(x), positive)));
       // (Set by `planned`, while the move is played: written so, the checker doesn't take them for always null.)
       let expected = null as MathState | null;
       let pending = null as Promise<MathState[]> | null;

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { rulesOf } from "../../puzzles";
 import { assuming } from "../../../expr/setting";
 import { parseState } from "../../../expr/parse";
-import { stateKey } from "../../../expr/key";
+import { atCheckpoint } from "../../solver";
 import { follows } from "../../answers";
 import { exerciseOf, hasPractice, LEVELS, nicest, PRACTICE, practiceExercise } from "../practice";
 import { SLOW } from "../../testing/corpus";
@@ -40,8 +40,10 @@ export function practiceChecks(chapters: (id: string) => boolean) {
               const d = nicest(shape, rng(7919 * (k + 1)));
               expect(d, "makes nothing usable").not.toBeNull();
               // No milestone is the start, the goal, or the one before it (a − c = 1 once made x = 4 a milestone of x = 4).
-              const keys = [d!.start, ...d!.via, d!.goal].map((t) => stateKey(parseState(t)));
-              expect(keys.slice(1, -1).filter((k, i) => k === keys[i] || k === keys[0] || k === keys[keys.length - 1]), d!.start).toEqual([]);
+              // (As the board is at a checkpoint: terms and rows in any order.)
+              const all = [d!.start, ...d!.via, d!.goal].map((t) => parseState(t));
+              const at = (i: number, j: number) => atCheckpoint(all[i], all[j]);
+              expect(d!.via.filter((_, i) => at(i + 1, i) || at(i + 1, 0) || at(i + 1, all.length - 1)), d!.start).toEqual([]);
               // Built backwards: the stretches go with the moves they say (what practice checks before serving;
               // a walk's stretches proven as it walked are taken as done there, as here).
               if (d!.legs) expect(stuckOf(verify(d!, rules, { quick: true, trusting: true })), `${d!.start}, quickly`).toBe("");

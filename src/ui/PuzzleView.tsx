@@ -94,7 +94,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
     setStepping("looking");
     try {
       if (plan.current?.at !== key(from) || !plan.current.ahead.length) {
-        const found = await askNext({ from: printState(from), goal: puzzle.goal, via: puzzle.via ?? [], ...(puzzle.legs ? { legs: puzzle.legs } : {}), rules: [...rules], positive: !!ex.positiveLetters });
+        const found = await askNext({ seen: moves.states.map(printState), goal: puzzle.goal, via: puzzle.via ?? [], ...(puzzle.legs ? { legs: puzzle.legs } : {}), rules: [...rules], positive: !!ex.positiveLetters });
         plan.current = found ? { at: key(from), ahead: found.map((x) => assuming(parseState(x), ex.positiveLetters)) } : null;
       }
       if (!plan.current) return setStepping("none");
