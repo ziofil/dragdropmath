@@ -61,7 +61,9 @@ export function FeelWord({ word }: { word: string }) {
 
   return (
     <span ref={ref} className="feel-word" role="img" aria-label={word}>
+      {/* Keyed by the word: another language's word starts afresh, not with the old word's letters. */}
       <DraggableRenderer
+        key={word}
         draggable={draggable}
         initialState={{ order: Object.keys(LETTERS) }}
         width={total + 2 * pad}
