@@ -18,9 +18,10 @@ function served(s: Shape, chapterPositive: boolean): Shape {
     const keys = [d.start, ...d.via, d.goal].map((t) => stateKey(parseState(t)));
     const keep = d.via.map((_, i) => keys[i + 1] !== keys[i] && keys[i + 1] !== keys[0] && keys[i + 1] !== keys[keys.length - 1]);
     const legs = d.legs && joinLegs(d.legs, keep);
+    const stages = d.stages && joinLegs(d.stages, keep);
     // A stretch joined from several is proven only if each of them was.
     const proven = d.proven && joinLegs(d.proven.map((p) => (p ? [] : [false])), keep).map((x) => x.length === 0);
-    return { ...d, via: d.via.filter((_, i) => keep[i]), ...(legs ? { legs } : {}), ...(proven ? { proven } : {}), positive: d.positive ?? positive };
+    return { ...d, via: d.via.filter((_, i) => keep[i]), ...(legs ? { legs } : {}), ...(stages ? { stages } : {}), ...(proven ? { proven } : {}), positive: d.positive ?? positive };
   };
   return { ...s, positive, make };
 }

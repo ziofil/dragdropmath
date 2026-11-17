@@ -18,6 +18,7 @@ import { parseState } from "../../expr/parse";
 import { allNodes, children, mapTree, withChildren } from "../../expr/tree";
 import type { RuleId } from "../../rules";
 import type { Rng } from "./write";
+import type { Stage } from "./way";
 import { differ, envs } from "../answers";
 import { evaluate } from "../../expr/eval";
 
@@ -112,6 +113,8 @@ export type UnMove = {
   positive?: boolean;
   /** Its `rules` always undo what it makes, wherever it makes it: a walk needn't check (walk.ts; the tests still do). */
   trusted?: boolean;
+  /** What kind of work undoing it is (way.ts): a draft whose steps say has its way written by the moves. */
+  stage?: Stage;
 };
 
 /** Row `row` (sides 2row, 2row + 1) changed by f; the relation turned round when f says. */
@@ -736,7 +739,7 @@ export const rowsAs = (E: Expr): UnMove => ({
  * root across (squaring both sides).
  */
 export const rootBoth = (row = 0): UnMove => ({
-  rules: ["root-across", "power-of-power", "evaluate-power", "tap-power", ...ARITH],
+  rules: ["root-notation", "root-across", "power-of-power", "evaluate-power", "tap-power", ...ARITH],
   on: (s) =>
     onRow(s, row, (L, R) => {
       if (R.kind !== "pow" || R.exp.kind !== "num" || R.exp.value !== 2) return null;

@@ -8,19 +8,25 @@ import { parseState } from "../../expr/parse";
 import { build, draftOf } from "./back";
 import { ex, restate } from "./unmove";
 import { gcd, one, type Draft, type Rng, type Shape } from "./write";
+import { writesWay } from "./way";
+import { rulesOf } from "../puzzles";
 
 const plusMinus = (b: number) => (b < 0 ? ` - ${-b}` : ` + ${b}`);
 
-/** From `answer`: `term = value`, then the row as written. */
+/** From `answer`: `term = value`, then the row as written; the way between written by the moves (way.ts). */
 function made(shape: string, answer: string, term: string, value: string, row: string, r: Rng): Draft | null {
   const [l, rt] = parseState(row).sides;
-  const b = build(parseState(answer), [restate([], ex(term), ex(value)), restate([], l, rt)], r);
+  const b = build(parseState(answer), [{ ...restate([], ex(term), ex(value)), stage: "solve" }, { ...restate([], l, rt), stage: "gather" }], r);
   return b && { ...draftOf(shape, b), legs: undefined };
 }
+
+/** Its way written by the moves, as the balance chapter has them. */
+const check = writesWay(() => rulesOf("balance"));
 
 export const fractionCoefficient: Shape = {
   id: "fraction-coefficient",
   name: "a fraction in front of the letter",
+  check,
   make: (r) => {
     // (p/q)·x + b = c, x a multiple of q.
     const [p, q] = [r.int(1, 5), one(r, [2, 3, 4, 5])];
@@ -38,6 +44,7 @@ export const fractionCoefficient: Shape = {
 export const rootCoefficient: Shape = {
   id: "root-coefficient",
   name: "a root in front of the letter",
+  check,
   make: (r) => {
     // √m·x + b = c with x = k√m: √m·x = k·m, so x = km/√m, made whole underneath: k√m.
     const m = one(r, [2, 3, 5, 6, 7]);

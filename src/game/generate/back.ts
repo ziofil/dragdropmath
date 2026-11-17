@@ -28,6 +28,7 @@ import { RULES, stepsFrom, type RuleId } from "../../rules";
 import { tidied } from "../tidy";
 import { domainOf } from "./domain";
 import type { UnMove } from "./unmove";
+import type { Stage } from "./way";
 import { shuffled, type Draft, type Rng } from "./write";
 
 /** A step back taken by a wander: a move made forwards (undone by its `undoneBy`), or an un-move. */
@@ -55,6 +56,8 @@ export type Built = {
   wandered: number;
   /** For each step back (as `rules`), whether a move was found that undoes it, there and then (not just trusted to). */
   checked: boolean[];
+  /** For each step back (as `rules`), what kind of work undoing it is (way.ts; none said: []). */
+  stages: Stage[][];
 };
 
 /** What building needs to know for wandering: the chapter's moves, and what its letters stand for. */
@@ -73,7 +76,7 @@ const isWander = (s: UnMove | Wander): s is Wander => "wander" in s;
 export function build(answer: MathState, steps: readonly Step[], r: Rng, ctx: BuildCtx = {}): Built | null {
   const real = steps.filter((x): x is UnMove | Wander => !!x);
   let s = answer;
-  const out: Built = { path: [s], shown: [true], positive: false, rules: [], wandered: 0, checked: [] };
+  const out: Built = { path: [s], shown: [true], positive: false, rules: [], wandered: 0, checked: [], stages: [] };
   const seen = new Set([stateKey(s, "exact")]);
   for (const [i, step] of real.entries()) {
     if (isWander(step)) {
@@ -88,6 +91,7 @@ export function build(answer: MathState, steps: readonly Step[], r: Rng, ctx: Bu
         out.shown.push(true);
         out.rules.push(got.undo);
         out.checked.push(got.checked);
+        out.stages.push([]);
       }
       out.wandered += taken;
       if (taken < step.times[0]) return null;
@@ -107,6 +111,7 @@ export function build(answer: MathState, steps: readonly Step[], r: Rng, ctx: Bu
       out.shown.push(!step.quiet);
       out.rules.push(step.rules);
       out.checked.push(false);
+      out.stages.push(step.stage ? [step.stage] : []);
       seen.add(stateKey(s, "exact"));
     }
     out.positive ||= !!step.positive;
@@ -175,23 +180,30 @@ export type DraftOpts = {
  * writes a walk's).
  */
 export function draftOf(shape: string, b: Built, opts: DraftOpts = {}): Draft {
-  const { path, shown, rules } = b;
+  const { path, shown, rules, stages } = b;
   const positive = opts.positive ?? b.positive;
   const start = path[path.length - 1];
   const conditions = opts.conditions ? domainOf(start) : [];
   const where = (s: MathState) => printState({ ...s, letters: undefined, conditions: conditions.length ? conditions : undefined });
   const via: string[] = [];
   const legs: RuleId[][] = [];
+  const kinds: Stage[][] = [];
   let leg = new Set<RuleId>();
+  let kind = new Set<Stage>();
   for (let i = path.length - 1; i > 0; i--) {
     rules[i - 1].forEach((x) => leg.add(x));
+    stages[i - 1].forEach((x) => kind.add(x));
     if (i - 1 > 0 && !shown[i - 1]) continue;
     if (i - 1 > 0) via.push(where(path[i - 1]));
     legs.push([...leg]);
+    kinds.push([...kind]);
     leg = new Set();
+    kind = new Set();
   }
   // The answer, without the rows that break a condition (x = −3 where x ≥ −1 is no answer).
   const goal = printState({ ...standing({ ...path[0], conditions }), conditions: undefined, letters: undefined });
-  const draft: Draft = { shape, start: where(start), goal, via, ...(positive ? { positive } : {}), legs };
+  // Stages said for every stretch: the way is written by the moves (way.ts), its legs found then.
+  const staged = kinds.every((k) => k.length > 0);
+  const draft: Draft = { shape, start: where(start), goal, via, ...(positive ? { positive } : {}), legs, ...(staged ? { stages: kinds } : {}) };
   return b.wandered ? { ...draft, via: [], legs: undefined } : draft;
 }
