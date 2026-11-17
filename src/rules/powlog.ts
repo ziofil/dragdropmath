@@ -629,7 +629,7 @@ export const splitSquare: Rule = {
 };
 
 /**
- * √x = 3 → x = 3² (carry the √ across =; it lands as a square), and back:
+ * √x = 3, written x^(1/2) = 3 → x = 3² (carry the ½ across =; it lands as a square), and back:
  * x = 3² → x^(1/2) = 3 (carry the 2 across; it lands as a ½ exponent).
  * Backwards only when the squared thing is a positive number, so no solution
  * is lost (x² = 9 → x = 9^(1/2) would drop x = −3).
@@ -637,21 +637,10 @@ export const splitSquare: Rule = {
 export const rootAcross: Rule = {
   id: "root-across",
   name: "Undo a root (or square) across =",
-  gesture: "Drop a √ onto the other side of = — that side is squared. Carry the square back and it becomes ½ again.",
+  gesture: "Carry a root's ½ across = — it becomes a square on the other side. Carry the square back and it becomes ½ again.",
   apply(state, id) {
     if (!isEquation(state)) return [];
     const c = dragCtx(state, id);
-    // A whole root, alone on its side, carried across: as its ½ would be (√(x + 7) = x + 1 → x + 7 = (x + 1)²).
-    if (c && c.node.kind === "pow" && c.node.radical && c.loc.path.length === 0) {
-      const n = rootOrder(c.node.exp);
-      const sides = state.sides.slice();
-      const other = partner(c.loc.side);
-      if (!n || (canBeNegative(sides[other], assumeOf(state)) && !state.conditions?.length)) return [];
-      sides[c.loc.side] = c.node.base;
-      // The carried √ turns into the ² (it lands where the square is written, over the other side).
-      sides[other] = pow(sides[other], num(n, c.node.id));
-      return [{ rule: "root-across", state: setSides(sides), carry: "onto-side" }];
-    }
     const P = c && exponentOf(c);
     if (!c || !P || c.parentLoc!.path.length !== 0) return [];
     const sides = state.sides.slice();

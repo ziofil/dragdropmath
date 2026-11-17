@@ -55,7 +55,11 @@ export const shuffle: Chapter = {
     // Now and then with a minus: it goes along with its term (7 − x → −x + 7).
     d("commute", (r) => `${r.int(2, 9)} ${r.next() < 0.4 ? "-" : "+"} ${letter(r)}`),
     d("combine", (r) => `${r.int(2, 9)} + ${letter(r)} + ${r.int(2, 9)}`),
-    d("multiply-numbers", (r) => `${r.int(2, 5)}·${letter(r)}·${r.int(2, 5)}`),
+    // The number on the right carried onto the one on the left: numbers first (9n, not n·9).
+    d("multiply-numbers", (r) => {
+      const [a, x, b] = [r.int(2, 5), letter(r), r.int(2, 5)];
+      return { start: `${a}·${x}·${b}`, goal: `${a * b}${x}` };
+    }),
     d("numbers-first", (r) => `${letter(r)}·${r.int(2, 9)}`),
     d("multiply-out", (r) => `${r.int(2, 6)}·${r.int(2, 6)} + ${letter(r)}`),
   ],

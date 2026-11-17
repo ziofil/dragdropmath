@@ -97,7 +97,7 @@ export const es: Translation = {
     },
     "multiply-numbers": {
       name: "Multiplicar números",
-      how: "Suelta un número sobre el otro número por el que se multiplica.",
+      how: "Suelta el número de la derecha sobre el otro número por el que se multiplica.",
       text: ["Al multiplicar, el orden tampoco importa: `2·x·5` es `2·5·x`. Así que el 2 y el 5 se pueden multiplicar, y queda `10x`."],
     },
     "numbers-first": {
@@ -159,7 +159,7 @@ export const es: Translation = {
     },
     "power-to-product": {
       name: "Un cuadrado como producto",
-      how: "Toca el ² para escribir el paréntesis dos veces. Luego desarrolla el producto y agrupa los términos semejantes.",
+      how: "Toca el ² para escribir el paréntesis dos veces. Luego desarrolla el producto como en el ejemplo anterior (para llevar un factor solo, mantenlo pulsado: con una pulsación rápida te llevas el término entero) y agrupa los términos semejantes.",
       text: ["`(x + 1)²` es `(x + 1)(x + 1)`, así que se desarrolla de la misma manera."],
     },
     "move-term": {
@@ -202,7 +202,7 @@ export const es: Translation = {
     },
     "letter-in": {
       name: "Una letra por un paréntesis",
-      how: "Suelta la letra de delante sobre el paréntesis. Luego toca el · entre las dos letras: `x·x` es `x²`. (Para llevar una letra sola, mantenla pulsada: con una pulsación rápida te llevas el término entero.)",
+      how: "Suelta la letra de delante sobre el paréntesis. Luego mantén pulsada una de las dos letras que quedan juntas y suéltala sobre la otra: `x·x` es `x²`. (Con una pulsación rápida te llevarías el término entero.)",
       text: ["La letra multiplica a cada término de dentro, igual que un número: `x(x + 3) = x·x + x·3`. Y `x·x` es una potencia, `x²`, como en Potencias."],
     },
     "factor-then-cancel": {
@@ -254,7 +254,7 @@ export const es: Translation = {
     },
     "split-number": {
       name: "Descomponer un número",
-      how: "Toca el número para descomponerlo en dos factores. Luego arrastra el factor que tienen los dos términos hacia fuera, delante de todo, más allá del extremo izquierdo.",
+      how: "Toca el número que va delante de la letra para descomponerlo en dos factores. Toca también el otro número. Luego toca el + entre los dos términos: se saca factor común. (O mantén pulsado el factor común y arrástralo hacia fuera, delante de todo, más allá del extremo izquierdo.)",
       text: ["Para encontrar un factor común, descompón los números en factores. En `2x + 6`, el 6 es `2·3`, y ahora los dos términos tienen un 2."],
     },
     "split-term": {
@@ -358,12 +358,12 @@ export const es: Translation = {
     },
     "fraction-zero": {
       name: "Una fracción igual a 0",
-      how: "Arrastra el denominador de la fracción al otro lado del =. Multiplica al otro miembro, y 0 por cualquier número es 0. Después pasa el número al otro lado.",
+      how: "Arrastra el denominador de la fracción al otro lado del = (se arrastra desde su signo +). Multiplica al otro miembro: toca el 0 para calcularlo, porque 0 por cualquier número es 0. Después pasa el número al otro lado.",
       text: ["Una fracción vale 0 solo cuando su numerador es 0. El denominador nunca puede ser 0, y lo dice la condición escrita tras la ecuación: `x ≠ −2` asegura que `x + 2` no sea 0.", "Así que el denominador puede pasar al otro lado multiplicando: `(x − 3)/(x + 2) = 0` queda `x − 3 = 0·(x + 2)`, es decir, `x − 3 = 0`. Si una solución no cumple la condición, se descarta."],
     },
     "square-both-sides": {
       name: "Elevar al cuadrado los dos miembros",
-      how: "Arrastra la raíz al otro lado del =: el otro miembro queda elevado al cuadrado. Luego desarrolla y resuelve. Debajo están las condiciones: la solución que no cumpla alguna queda tachada.",
+      how: "Toca la raíz para escribirla como potencia de exponente ½ y arrastra el ½ al otro lado del =: el otro miembro queda elevado al cuadrado. Luego desarrolla y resuelve. Debajo están las condiciones: la solución que no cumpla alguna queda tachada.",
       text: [
         "Una raíz nunca es negativa, así que `√(x² + 5) = x + 1` solo se cumple donde `x + 1 ≥ 0`. Al elevar al cuadrado los dos miembros eso se pierde: `x² + 5 = (x + 1)²` se cumpliría también si `x + 1` fuera negativo. Por eso las condiciones se dan desde el principio, y se mantienen a lo largo de todo el ejercicio.",
       ],
@@ -431,7 +431,7 @@ export const es: Translation = {
     },
     "root-across": {
       name: "El exponente de una raíz al otro lado del =",
-      how: "Arrastra el ½ (o el ⅓, o el ¼) al otro lado del =. Allí se convierte en un cuadrado (o un cubo, o una cuarta potencia). Luego toca el exponente para calcularlo.",
+      how: "Toca la raíz para escribirla como potencia (de exponente ½, o ⅓, o ¼) y arrastra ese exponente al otro lado del =. Allí se convierte en un cuadrado (o un cubo, o una cuarta potencia). Luego toca el exponente para calcularlo.",
       text: ["Para resolver `√x = 3`, eleva al cuadrado los dos miembros. Escrita como potencia, `x^(1/2) = 3`, el ½ pasa al otro lado y se convierte en un cuadrado: `x = 3²`."],
     },
     "exp-of-log": {
@@ -496,7 +496,7 @@ export const es: Translation = {
     },
     "bracket-times-bracket": {
       name: "Paréntesis por paréntesis",
-      how: "Suelta un paréntesis sobre el otro: multiplica a los dos términos de dentro. Luego desarrolla cada paréntesis de la misma manera y agrupa los términos semejantes.",
+      how: "Suelta un paréntesis sobre el otro: multiplica a los dos términos de dentro. Luego desarrolla cada término nuevo de la misma manera: mantén pulsado uno de sus factores y suéltalo sobre el otro (con una pulsación rápida te llevas el término entero). Después mantén pulsada una x de `x·x`, suéltala sobre la otra y agrupa los términos semejantes.",
       text: [
         "En `(x + 1)(x + 2)`, el primer paréntesis es un solo factor: multiplica a todo el segundo, a la x y al 2. Después se desarrolla cada `(x + 1)`, uno tras otro.",
         "Dos términos por dos términos dan cuatro términos. Luego se agrupan los términos semejantes: `(x + 1)(x + 2) = x² + 3x + 2`.",

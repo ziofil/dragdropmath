@@ -342,6 +342,7 @@ export const quadratic: Chapter = {
       const where = ` where x ≥ ${-c}, x ≥ ${-dd}`;
       const [b, k] = [2 * dd - 1, dd * dd - c];
       const via = [
+        `(x + ${c})^(1/2) = x + ${dd}`,
         `x + ${c} = (x + ${dd})^2`,
         `x + ${c} = (x + ${dd})(x + ${dd})`,
         `x + ${c} = x^2 + ${2 * dd}x + ${dd * dd}`,
@@ -349,12 +350,13 @@ export const quadratic: Chapter = {
         ...factoredInPairs(b, k).map((f) => `0 = ${f.replace(" = 0", "")}`),
       ].map((v) => v + where);
       return { start: `√(x + ${c}) = x + ${dd}${where}`, via, goal: `x = ${p} or x = ${q}${where}` };
-    }, "root-across"),
+    }, "root-notation"),
     // A fraction equal to 0: its bottom (never 0, the condition says) carried across, 0 times it is 0.
     d("fraction-zero", (r) => {
       const [a, b] = [r.int(1, 6), r.int(1, 6)];
       const where = ` where x ≠ -${b}`;
-      return { start: `(x - ${a})/(x + ${b}) = 0${where}`, goal: `x = ${a}${where}` };
+      // 0 times the bottom worked out first (0 gets rid of what it multiplies), then the number moved across.
+      return { start: `(x - ${a})/(x + ${b}) = 0${where}`, via: [`x - ${a} = 0${where}`], goal: `x = ${a}${where}` };
     }, "move-letter-denominator"),
   ],
   levels,

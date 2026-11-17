@@ -279,7 +279,7 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
     return !row || Math.abs(ca!.index - cb!.index) === 1;
   };
   const drag = memo((id): Candidate[] => {
-    const mine = squaredAcross(own(id));
+    const mine = own(id);
     // A piece carried out in front (a factor, a bracket taken out) passes over its neighbours on
     // the way: the merges it only has the other way round would form there instead (the bracket of
     // x(x + 6) + 2(x + 6) multiplying into its x). They're its neighbours' to make.
@@ -326,13 +326,6 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   byRules.set(rulesKey, moves);
   return moves;
 }
-
-/**
- * A root alone on its side, carried onto the other, squares it (see
- * Feel "onto-side"): it doesn't also swap the sides there, which would take
- * the same place. The other side, carried, still swaps them.
- */
-const squaredAcross = (cs: Candidate[]): Candidate[] => (cs.some((c) => c.rule === "root-across" && c.carry === "onto-side") ? cs.filter((c) => c.rule !== "swap-sides") : cs);
 
 function collect(withMarks: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
   // Copies made by the previous move are ordinary pieces now.

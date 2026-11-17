@@ -100,7 +100,7 @@ export const pl: Translation = {
     },
     "multiply-numbers": {
       name: "Mnożenie liczb",
-      how: "Upuść liczbę na drugą liczbę, przez którą jest mnożona.",
+      how: "Upuść liczbę z prawej na drugą liczbę, przez którą jest mnożona.",
       text: ["Przy mnożeniu kolejność też nie ma znaczenia: `2·x·5` to `2·5·x`. Dlatego 2 i 5 można pomnożyć i wychodzi `10x`."],
     },
     "numbers-first": {
@@ -164,7 +164,7 @@ export const pl: Translation = {
     },
     "power-to-product": {
       name: "Kwadrat jako iloczyn",
-      how: "Dotknij ², żeby zapisać nawias dwa razy. Potem wymnóż nawiasy i zredukuj wyrazy podobne.",
+      how: "Dotknij ², żeby zapisać nawias dwa razy. Potem wymnóż nawiasy jak w poprzednim przykładzie (przytrzymaj czynnik, żeby przenieść go osobno: krótkie dotknięcie bierze cały wyraz) i zredukuj wyrazy podobne.",
       text: ["`(x + 1)²` to `(x + 1)(x + 1)`, więc wymnaża się go tak samo."],
     },
     "move-term": {
@@ -207,7 +207,7 @@ export const pl: Translation = {
     },
     "letter-in": {
       name: "Litera razy nawias",
-      how: "Upuść literę sprzed nawiasu na nawias. Potem połącz obie litery: `x·x` to `x²`.",
+      how: "Upuść literę sprzed nawiasu na nawias. Potem przytrzymaj jedną z dwóch liter stojących obok siebie i upuść ją na drugą: `x·x` to `x²`. (Krótkie dotknięcie wzięłoby cały wyraz.)",
       text: [
         "Litera mnoży każdy wyraz w nawiasie, tak samo jak liczba: `x(x + 3) = x·x + x·3`. A `x·x` to potęga, `x²`, jak w rozdziale „Potęgi”.",
       ],
@@ -265,7 +265,7 @@ export const pl: Translation = {
     },
     "split-number": {
       name: "Rozkład liczby",
-      how: "Dotknij liczby, żeby rozłożyć ją na dwa czynniki. Potem wyciągnij czynnik wspólny dla obu wyrazów na początek, za lewy koniec.",
+      how: "Dotknij liczby przed literą, żeby rozłożyć ją na dwa czynniki. Dotknij też drugiej liczby. Potem dotknij + między wyrazami: wspólny czynnik zostaje wyłączony przed nawias. (Albo przytrzymaj go i przeciągnij na początek, za lewy koniec.)",
       text: ["Żeby znaleźć wspólny czynnik, rozkładaj liczby na czynniki. W `2x + 6` liczba 6 to `2·3` i teraz oba wyrazy mają 2."],
     },
     "split-term": {
@@ -377,12 +377,12 @@ export const pl: Translation = {
     },
     "fraction-zero": {
       name: "Ułamek równy 0",
-      how: "Przeciągnij mianownik ułamka na drugą stronę =. Mnoży on drugą stronę, a 0 razy cokolwiek to 0. Potem przenieś liczbę na drugą stronę.",
+      how: "Przeciągnij mianownik ułamka na drugą stronę = (chwyć go za znak +). Mnoży on drugą stronę: dotknij 0, żeby to obliczyć, bo 0 razy cokolwiek to 0. Potem przenieś liczbę na drugą stronę.",
       text: ["Ułamek jest równy 0 tylko wtedy, gdy jego licznik jest równy 0. Mianownik nigdy nie może być zerem, i mówi o tym założenie zapisane po równaniu: `x ≠ −2` sprawia, że `x + 2` nie jest 0.", "Dlatego mianownik może przejść na drugą stronę i ją pomnożyć: z `(x − 3)/(x + 2) = 0` mamy `x − 3 = 0·(x + 2)`, czyli `x − 3 = 0`. Rozwiązanie, które nie spełnia założenia, odrzucamy."],
     },
     "square-both-sides": {
       name: "Podnoszenie obu stron do kwadratu",
-      how: "Przeciągnij pierwiastek na drugą stronę =: druga strona zostaje podniesiona do kwadratu. Potem wymnóż i rozwiąż. Pod spodem są założenia: rozwiązanie, które któregoś z nich nie spełnia, zostaje skreślone.",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę o wykładniku ½, i przeciągnij ½ na drugą stronę =: druga strona zostaje podniesiona do kwadratu. Potem wymnóż i rozwiąż. Pod spodem są założenia: rozwiązanie, które któregoś z nich nie spełnia, zostaje skreślone.",
       text: [
         "Pierwiastek nigdy nie jest ujemny, więc `√(x² + 5) = x + 1` może zachodzić tylko wtedy, gdy `x + 1 ≥ 0`. Po podniesieniu obu stron do kwadratu ta informacja ginie: `x² + 5 = (x + 1)²` byłoby prawdziwe także wtedy, gdyby `x + 1` było ujemne. Dlatego założenia podaje się na początku i obowiązują przez całe rozwiązanie.",
       ],
@@ -456,7 +456,7 @@ export const pl: Translation = {
     },
     "root-across": {
       name: "Potęga pierwiastka na drugą stronę =",
-      how: "Przenieś ½ (albo ⅓, albo ¼) na drugą stronę =. Tam zmienia się w kwadrat (albo sześcian, albo czwartą potęgę). Potem dotknij wykładnika, żeby obliczyć potęgę.",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę (o wykładniku ½, ⅓ albo ¼), i przenieś ten wykładnik na drugą stronę =. Tam zmienia się w kwadrat (albo sześcian, albo czwartą potęgę). Potem dotknij wykładnika, żeby obliczyć potęgę.",
       text: [
         "Żeby rozwiązać `√x = 3`, podnieś obie strony do kwadratu. Gdy zapiszesz to jako potęgę, `x^(1/2) = 3`, ½ przechodzi na drugą stronę i staje się kwadratem: `x = 3²`.",
       ],
@@ -523,7 +523,7 @@ export const pl: Translation = {
     },
     "bracket-times-bracket": {
       name: "Nawias razy nawias",
-      how: "Upuść jeden nawias na drugi: mnoży oba wyrazy w środku. Potem tak samo wymnóż każdy nawias i zredukuj wyrazy podobne.",
+      how: "Upuść jeden nawias na drugi: mnoży oba wyrazy w środku. Potem tak samo wymnóż każdy nowy wyraz: przytrzymaj jeden z jego czynników i upuść go na drugi (krótkie dotknięcie bierze cały wyraz). Następnie przytrzymaj jedno x z `x·x`, upuść je na drugie i zredukuj wyrazy podobne.",
       text: [
         "W `(x + 1)(x + 2)` pierwszy nawias jest jednym czynnikiem: mnoży cały drugi nawias, czyli i x, i 2. Potem po kolei wymnażamy każde `(x + 1)`.",
         "Dwa wyrazy razy dwa wyrazy dają cztery wyrazy. Na koniec redukujemy wyrazy podobne: `(x + 1)(x + 2) = x² + 3x + 2`.",

@@ -3,6 +3,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "math-by-hand",
   "compatibility_date": "2026-11-10",
+  // Served at dragdropmath.com (Cloudflare makes the DNS records and certificate); the workers.dev address still works.
+  "routes": [
+    { "pattern": "dragdropmath.com", "custom_domain": true },
+    { "pattern": "www.dragdropmath.com", "custom_domain": true }
+  ],
+  // Kept on: old links (and the progress saved under that address) still reach the app.
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"

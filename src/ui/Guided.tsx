@@ -59,6 +59,10 @@ export function MoveBoard({
   const latest = useRef(current);
   latest.current = current;
   const stopped = useRef(false);
+  // Resolves when Stop is pressed: a wait on a search (or anything) gives up then.
+  const onStop = useRef<() => void>(() => {});
+  const untilStop = <T,>(p: Promise<T>): Promise<T | null> => Promise.race([p, new Promise<null>((r) => (onStop.current = () => r(null)))]);
+  const isStopped = () => stopped.current;
   const done = reached(current) && !showing;
 
   /** Until the board shows `want` (the step and its tidying), or has stopped changing. */
@@ -79,6 +83,7 @@ export function MoveBoard({
   const show = async () => {
     if (showing) {
       stopped.current = true;
+      onStop.current();
       return;
     }
     stopped.current = false;
@@ -102,24 +107,25 @@ export function MoveBoard({
         expected = tidied(start, next);
         pending = ask(expected);
       };
-      let dropped = (await showMove.current?.({ rule, good: toward, prefer, planned })) ?? null;
+      let dropped = (await showMove.current?.({ rule, good: toward, prefer, planned, stopped: isStopped })) ?? null;
       // Then every step on to the end, along that way (searched again only if the board isn't where it said).
       for (let n = 0; dropped && n < 40; n++) {
         await settle(tidied(before, dropped));
         if (stopped.current || reached(latest.current)) break;
         if (pending) {
-          way = await pending;
+          way = (await untilStop(pending)) ?? [];
           pending = null;
         }
-        if (!expected || !same(latest.current, expected)) way = await ask(latest.current);
+        if (stopped.current) break;
+        if (!expected || !same(latest.current, expected)) way = (await untilStop(ask(latest.current))) ?? [];
         if (stopped.current || !way.length) break;
         before = latest.current;
         const next = way[0];
         way = way.slice(1);
         expected = next;
-        dropped = (await showMove.current?.({ to: (s) => same(tidied(before, s), next) })) ?? null;
+        dropped = (await showMove.current?.({ to: (s) => same(tidied(before, s), next), stopped: isStopped })) ?? null;
       }
-      if (!stopped.current) await wait(1300);
+      if (!stopped.current) await untilStop(wait(1300));
     } finally {
       reset();
       setShowing(false);

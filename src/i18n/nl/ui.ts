@@ -101,7 +101,7 @@ export const nl: Translation = {
     },
     "multiply-numbers": {
       name: "Getallen vermenigvuldigen",
-      how: "Sleep een getal op het getal waarmee het vermenigvuldigd wordt.",
+      how: "Sleep het getal rechts op het andere getal waarmee het vermenigvuldigd wordt.",
       text: ["Ook bij vermenigvuldigen maakt de volgorde niet uit: `2·x·5` is `2·5·x`. Je kunt de 2 en de 5 dus met elkaar vermenigvuldigen, en dan krijg je `10x`."],
     },
     "numbers-first": {
@@ -163,7 +163,7 @@ export const nl: Translation = {
     },
     "power-to-product": {
       name: "Een kwadraat als product",
-      how: "Tik op de ² om de haakjes twee keer op te schrijven. Werk ze daarna weg en neem gelijksoortige termen samen.",
+      how: "Tik op de ² om de haakjes twee keer op te schrijven. Werk ze daarna weg zoals bij het vorige voorbeeld (houd een factor ingedrukt om hem los te slepen: kort tikken pakt de hele term) en neem gelijksoortige termen samen.",
       text: ["`(x + 1)²` is `(x + 1)(x + 1)`, dus die werk je op dezelfde manier uit."],
     },
     "move-term": {
@@ -206,7 +206,7 @@ export const nl: Translation = {
     },
     "letter-in": {
       name: "Letter keer haakjes",
-      how: "Sleep de letter voor de haakjes op de haakjes. Sleep daarna de twee letters op elkaar: `x·x` is `x²`.",
+      how: "Sleep de letter voor de haakjes op de haakjes. Houd daarna een van de twee letters naast elkaar ingedrukt en sleep hem op de andere: `x·x` is `x²`. (Kort tikken zou de hele term pakken.)",
       text: ["De letter vermenigvuldigt elke term tussen de haakjes, net als een getal: `x(x + 3) = x·x + x·3`. En `x·x` is een macht, `x²`, zoals bij Machten."],
     },
     "factor-then-cancel": {
@@ -239,12 +239,12 @@ export const nl: Translation = {
     },
     "fraction-zero": {
       name: "Een breuk gelijk aan 0",
-      how: "Sleep de noemer van de breuk naar de andere kant van het =. Hij vermenigvuldigt de andere kant, en 0 keer iets is 0. Breng daarna het getal naar de andere kant.",
+      how: "Sleep de noemer van de breuk naar de andere kant van het = (pak hem bij de +). Hij vermenigvuldigt de andere kant: tik op de 0 om het uit te rekenen, want 0 keer iets is 0. Breng daarna het getal naar de andere kant.",
       text: ["Een breuk is alleen 0 als de teller 0 is. De noemer mag nooit 0 zijn, en dat zegt de voorwaarde achter de vergelijking: `x ≠ −2` zorgt dat `x + 2` niet 0 is.", "Dus mag de noemer naar de andere kant en vermenigvuldigt die: `(x − 3)/(x + 2) = 0` wordt `x − 3 = 0·(x + 2)`, dus `x − 3 = 0`. Voldoet een oplossing niet aan de voorwaarde, dan valt ze af."],
     },
     "square-both-sides": {
       name: "Beide kanten kwadrateren",
-      how: "Sleep de wortel over het =: de andere kant wordt gekwadrateerd. Werk daarna de haakjes uit en los op. Eronder staan de voorwaarden: een oplossing die daar niet aan voldoet, wordt doorgestreept.",
+      how: "Tik op de wortel om hem als macht met exponent ½ te schrijven, en sleep de ½ over het =: de andere kant wordt gekwadrateerd. Werk daarna de haakjes uit en los op. Eronder staan de voorwaarden: een oplossing die daar niet aan voldoet, wordt doorgestreept.",
       text: ["Een wortel is nooit negatief, dus `√(x² + 5) = x + 1` klopt alleen als `x + 1 ≥ 0`. Door beide kanten te kwadrateren raak je dat kwijt: `x² + 5 = (x + 1)²` zou ook kloppen als `x + 1` negatief was. Daarom staan de voorwaarden er vanaf het begin bij, en blijven ze de hele tijd gelden."],
     },
     "cancel-factor": {
@@ -289,7 +289,7 @@ export const nl: Translation = {
     },
     "split-number": {
       name: "Getal splitsen",
-      how: "Tik op het getal om het in twee factoren te splitsen. Sleep daarna de factor die beide termen hebben naar voren, voorbij het linkeruiteinde.",
+      how: "Tik op het getal voor de letter om het in twee factoren te splitsen. Tik ook op het andere getal. Tik daarna op de + tussen de termen: de gemeenschappelijke factor komt buiten haakjes. (Of houd hem ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde.)",
       text: ["Om een gemeenschappelijke factor te vinden, splits je getallen in factoren. In `2x + 6` is de 6 gelijk aan `2·3`, en nu hebben beide termen een 2."],
     },
     "split-term": {
@@ -421,7 +421,7 @@ export const nl: Translation = {
     },
     "root-across": {
       name: "Wortel als macht naar de overkant",
-      how: "Sleep de ½ (of ⅓, of ¼) naar de andere kant van het =. Daar wordt het een kwadraat (of een derde macht, of een vierde macht). Tik daarna op de exponent om het uit te rekenen.",
+      how: "Tik op de wortel om hem als macht te schrijven (met exponent ½, ⅓ of ¼), en sleep die exponent naar de andere kant van het =. Daar wordt het een kwadraat (of een derde macht, of een vierde macht). Tik daarna op de exponent om het uit te rekenen.",
       text: ["Om `√x = 3` op te lossen, kwadrateer je beide kanten. Schrijf je het als macht, `x^(1/2) = 3`, dan gaat de ½ naar de overkant en wordt daar een kwadraat: `x = 3²`."],
     },
     "exp-of-log": {
@@ -484,7 +484,7 @@ export const nl: Translation = {
     },
     "bracket-times-bracket": {
       name: "Haakjes keer haakjes",
-      how: "Sleep de ene haakjes op de andere: ze vermenigvuldigen beide termen ertussen. Werk daarna elk paar haakjes op dezelfde manier weg en neem gelijksoortige termen samen.",
+      how: "Sleep de ene haakjes op de andere: ze vermenigvuldigen beide termen ertussen. Werk daarna elke nieuwe term op dezelfde manier uit: houd een van de factoren ingedrukt en sleep hem op de andere (kort tikken pakt de hele term). Houd dan een x van `x·x` ingedrukt, sleep hem op de andere en neem gelijksoortige termen samen.",
       text: [
         "In `(x + 1)(x + 2)` is het eerste paar haakjes één factor: het vermenigvuldigt alles tussen de tweede haakjes, de x en de 2. Daarna werk je elke `(x + 1)` om de beurt weg.",
         "Twee termen keer twee termen geeft vier termen. Neem daarna gelijksoortige termen samen: `(x + 1)(x + 2) = x² + 3x + 2`.",

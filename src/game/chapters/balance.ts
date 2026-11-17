@@ -62,9 +62,9 @@ export const balance: Chapter = {
     d("swap-sides", (r) => `${r.int(2, 20)} = ${letter(r)}`),
     d("root-across", (r) => {
       const [x, n, b] = [letter(r), pick(r, [2, 2, 3, 4]), r.int(2, 4)];
-      // The root itself carried across (as x^(1/2) it's the ½: the words say so too).
-      return { start: `${n === 2 ? `√${x}` : `root_${n}(${x})`} = ${b}`, want: x, goal: `${x} = ${b ** n}` };
-    }),
+      // The root tapped into a power first, then its exponent carried across (the words say so too).
+      return { start: `${n === 2 ? `√${x}` : `root_${n}(${x})`} = ${b}`, via: [`${x}^(1/${n}) = ${b}`, `${x} = ${b}^${n}`], goal: `${x} = ${b ** n}` };
+    }, "root-notation"),
     d("exp-across", (r) => `${pick(r, ["e", "2", "3", "10"])}^${letter(r)} = ${r.int(5, 20)}`),
     // Both sides powers of the same base: the exponents balance like the sides do.
     d("move-exponent-term", (r) => {

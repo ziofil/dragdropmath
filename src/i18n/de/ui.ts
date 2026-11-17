@@ -101,7 +101,7 @@ export const de: Translation = {
     },
     "multiply-numbers": {
       name: "Zahlen multiplizieren",
-      how: "Zieh eine Zahl auf die Zahl, mit der sie multipliziert wird.",
+      how: "Zieh die Zahl rechts auf die andere Zahl, mit der sie multipliziert wird.",
       text: ["Auch beim Multiplizieren ist die Reihenfolge egal: `2·x·5` ist `2·5·x`. Also kannst du die 2 und die 5 multiplizieren und bekommst `10x`."],
     },
     "numbers-first": {
@@ -163,7 +163,7 @@ export const de: Translation = {
     },
     "power-to-product": {
       name: "Ein Quadrat als Produkt",
-      how: "Tippe auf das ², um die Klammer zweimal hinzuschreiben. Dann multipliziere aus und fasse gleichartige Terme zusammen.",
+      how: "Tippe auf das ², um die Klammer zweimal hinzuschreiben. Dann multipliziere aus wie im letzten Beispiel (halte einen Faktor gedrückt, um ihn allein zu ziehen: Kurz antippen nimmt den ganzen Term) und fasse gleichartige Terme zusammen.",
       text: ["`(x + 1)²` ist `(x + 1)(x + 1)`, also multiplizierst du es genauso aus."],
     },
     "move-term": {
@@ -206,7 +206,7 @@ export const de: Translation = {
     },
     "letter-in": {
       name: "Variable mal Klammer",
-      how: "Zieh die Variable vor der Klammer auf die Klammer. Dann zieh die beiden Variablen aufeinander: `x·x` ist `x²`.",
+      how: "Zieh die Variable vor der Klammer auf die Klammer. Dann halte eine der beiden nebeneinanderstehenden Variablen gedrückt und zieh sie auf die andere: `x·x` ist `x²`. (Kurz antippen würde den ganzen Term nehmen.)",
       text: ["Die Variable wird mit jedem Term in der Klammer multipliziert, genau wie eine Zahl: `x(x + 3) = x·x + x·3`. Und `x·x` ist eine Potenz, nämlich `x²`, wie im Kapitel Potenzen."],
     },
     "factor-then-cancel": {
@@ -239,12 +239,12 @@ export const de: Translation = {
     },
     "fraction-zero": {
       name: "Ein Bruch gleich 0",
-      how: "Zieh den Nenner des Bruchs über das =. Er multipliziert die andere Seite, und 0 mal irgendetwas ist 0. Dann bring die Zahl auf die andere Seite.",
+      how: "Zieh den Nenner des Bruchs über das = (fass ihn am + an). Er multipliziert die andere Seite: Tippe auf die 0, um auszurechnen, denn 0 mal irgendetwas ist 0. Dann bring die Zahl auf die andere Seite.",
       text: ["Ein Bruch ist nur dann 0, wenn sein Zähler 0 ist. Der Nenner darf nie 0 sein, und das sagt die Bedingung hinter der Gleichung: `x ≠ −2` sorgt dafür, dass `x + 2` nicht 0 ist.", "Also darf der Nenner auf die andere Seite und multipliziert sie: Aus `(x − 3)/(x + 2) = 0` wird `x − 3 = 0·(x + 2)`, also `x − 3 = 0`. Verletzt eine Lösung die Bedingung, wird sie gestrichen."],
     },
     "square-both-sides": {
       name: "Beide Seiten quadrieren",
-      how: "Zieh die Wurzel über das =: Die andere Seite wird quadriert. Dann multiplizierst du aus und löst. Darunter stehen die Bedingungen: Eine Lösung, die eine davon verletzt, wird durchgestrichen.",
+      how: "Tippe auf die Wurzel, um sie als Potenz mit dem Exponenten ½ zu schreiben, und zieh das ½ über das =: Die andere Seite wird quadriert. Anschließend multiplizierst du aus und löst. Darunter stehen die Bedingungen: Eine Lösung, die eine davon verletzt, wird durchgestrichen.",
       text: ["Eine Wurzel ist nie negativ, also gilt `√(x² + 5) = x + 1` nur, wenn `x + 1 ≥ 0` ist. Beim Quadrieren geht das verloren: `x² + 5 = (x + 1)²` würde auch gelten, wenn `x + 1` negativ wäre. Deshalb stehen die Bedingungen schon am Anfang da, und sie gelten die ganze Rechnung über."],
     },
     "cancel-factor": {
@@ -289,7 +289,7 @@ export const de: Translation = {
     },
     "split-number": {
       name: "Zahl zerlegen",
-      how: "Tippe auf die Zahl, um sie in zwei Faktoren zu zerlegen. Dann zieh den Faktor, den beide Terme gemeinsam haben, nach vorn, links über das Ende hinaus.",
+      how: "Tippe auf die Zahl vor der Variablen, um sie in zwei Faktoren zu zerlegen. Tippe auch auf die andere Zahl. Dann tippe auf das + zwischen den Termen: Der gemeinsame Faktor wird ausgeklammert. (Oder halte ihn gedrückt und zieh ihn nach vorn, links über das Ende hinaus.)",
       text: ["Um einen gemeinsamen Faktor zu finden, zerlegst du Zahlen in Faktoren. In `2x + 6` ist die 6 gleich `2·3`, und schon haben beide Terme eine 2."],
     },
     "split-term": {
@@ -421,7 +421,7 @@ export const de: Translation = {
     },
     "root-across": {
       name: "Wurzelexponent über das =",
-      how: "Zieh das ½ (oder ⅓ oder ¼) über das =. Auf der anderen Seite wird daraus ein Quadrat (oder hoch 3 oder hoch 4). Dann tippe auf den Exponenten, um es auszurechnen.",
+      how: "Tippe auf die Wurzel, um sie als Potenz zu schreiben (mit dem Exponenten ½, ⅓ oder ¼), und zieh diesen Exponenten über das =. Auf der anderen Seite wird daraus ein Quadrat (oder hoch 3 oder hoch 4). Zum Schluss tippe auf den Exponenten, um es auszurechnen.",
       text: ["Um `√x = 3` zu lösen, quadrierst du beide Seiten. Schreibst du es als Potenz, `x^(1/2) = 3`, wandert das ½ hinüber und wird zum Quadrat: `x = 3²`."],
     },
     "exp-of-log": {
@@ -484,7 +484,7 @@ export const de: Translation = {
     },
     "bracket-times-bracket": {
       name: "Klammer mal Klammer",
-      how: "Zieh eine Klammer auf die andere: Sie wird mit beiden Termen darin multipliziert. Dann multipliziere jede Klammer genauso aus und fasse gleichartige Terme zusammen.",
+      how: "Zieh eine Klammer auf die andere: Sie wird mit beiden Termen darin multipliziert. Dann multipliziere jeden neuen Term genauso aus: Halte einen seiner Faktoren gedrückt und zieh ihn auf den anderen (kurz antippen nimmt den ganzen Term). Danach halte ein x von `x·x` gedrückt, zieh es auf das andere und fasse gleichartige Terme zusammen.",
       text: [
         "In `(x + 1)(x + 2)` ist die erste Klammer ein Faktor: Sie wird mit der ganzen zweiten Klammer multipliziert, also mit dem x und mit der 2. Danach wird jedes `(x + 1)` der Reihe nach ausmultipliziert.",
         "Zwei Terme mal zwei Terme ergibt vier Terme. Dann fasst du gleichartige Terme zusammen: `(x + 1)(x + 2) = x² + 3x + 2`.",

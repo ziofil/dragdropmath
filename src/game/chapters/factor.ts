@@ -104,9 +104,10 @@ export const factor: Chapter = {
     // A common factor that doesn't show: 3 in 6x + 9. Splitting 6 (into its smallest prime, 2, and 3) shows it.
     d("split-number", (r) => {
       const [p, g] = pick(r, [[2, 3], [2, 5], [2, 7], [3, 5], [3, 7]] as const);
-      const c = pick(r, [2, 3, 4, 5].filter((n) => gcd(n, p) === 1));
+      // A prime c: tapped, g·c splits into g and c (the smaller prime first), so the factor both share shows.
+      const c = pick(r, [2, 3, 5, 7].filter((n) => gcd(n, p) === 1));
       const x = letter(r);
-      return { start: `${p * g}${x} + ${g * c}`, via: [`${p}*${g}*${x} + ${g * c}`], goal: `${g}(${p}${x} + ${c})` };
+      return { start: `${p * g}${x} + ${g * c}`, via: [`${p}*${g}*${x} + ${g * c}`, `${p}*${g}*${x} + ${g}*${c}`], goal: `${g}(${p}${x} + ${c})` };
     }),
     d("bracket-out", (r) => {
       const x = letter(r);

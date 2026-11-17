@@ -1,8 +1,9 @@
 import { Component, createElement, isValidElement, lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type MutableRefObject, type ReactNode, type RefObject } from "react";
 import { fontEpoch, subscribeFont } from "../render/measure";
 import { printState, stateKey } from "../expr/key";
-import { DraggableRenderer, type Draggable } from "dragology";
+import { DraggableRenderer, Vec2, type Draggable } from "dragology";
 import type { MathState } from "../expr/types";
+import { allNodes } from "../expr/tree";
 import { movesFor, operatorTap, type RuleId } from "../rules";
 import { OP_TAP, pivotOf, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
@@ -36,7 +37,7 @@ export type ShowStep =
   | { to: (s: MathState) => boolean };
 
 /** Plays one step on the board, as a hand would (see Demo): the state it gave, or null if it can't be shown. */
-export type ShowMove = (step: ShowStep) => Promise<MathState | null>;
+export type ShowMove = (step: ShowStep & { stopped?: () => boolean }) => Promise<MathState | null>;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
@@ -140,6 +141,12 @@ export function MathCanvas({
       const svg = box?.querySelector("svg");
       const { state: at0, rules: live0 } = now.current;
       const own = "rule" in step;
+      // Stop pressed: the step ends where it is, its finger gone.
+      const halt = () => step.stopped?.() ?? false;
+      const quit = () => {
+        setFinger(null);
+        return null;
+      };
       let plan = own ? planDemo(at0, live0, step.rule, width.value, height, step.good, step.prefer) : planStepTo(at0, live0, width.value, height, step.to);
       // A tap on a +, − or · that isn't drawn (√x·x has no ·): made another way.
       if (plan?.kind === "op-tap" && !own && !svg?.querySelector(`[${OP_TAP}="${CSS.escape(plan.id)}"]`)) plan = planStepTo(at0, live0, width.value, height, step.to, false);
@@ -155,19 +162,39 @@ export function MathCanvas({
         const el = plan.kind === "tap" ? svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`) : svg.querySelector(`[${OP_TAP}="${CSS.escape(plan.id)}"]`);
         const g = el?.getBoundingClientRect();
         if (!g) return null;
-        const at = { x: (g.left + g.width / 2 - r.left) / k, y: (g.top + g.height / 2 - r.top) / k };
+        // Where a hand's tap reaches it (√9's sign, not the 9 inside, whose tap splits it), on a glyph of its own if there is one.
+        const want = { op: plan.kind === "op-tap", id: plan.id };
+        const near = { x: g.left + g.width / 2, y: g.top + g.height / 2 };
+        const p = spotIn(el!, near, at0, (q) => {
+          const hit = tapHit(box, at0, live0, q.x, q.y);
+          return hit !== null && hit.op === want.op && hit.id === want.id;
+        }) ?? near;
+        const at = { x: (p.x - r.left) / k, y: (p.y - r.top) / k };
         setFinger({ ...at, down: false });
         await wait(pause);
+        if (halt()) return quit();
         setFinger({ ...at, down: true });
         await wait(250);
+        if (halt()) return quit();
         onDropRef.current(plan.next);
         setFinger({ ...at, down: false });
         await wait(400);
         setFinger(null);
         return plan.next;
       }
-      setFinger({ ...plan.from, down: false });
+      // The piece's own element is pressed (held first when a quick press would take its term, as useHold does).
+      const target = svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`);
+      if (!target) return null;
+      // The finger is drawn where a hand would press to pick the piece up: on a glyph of its own (the + of
+      // x + 4, not its x: pressing the x takes the x), where a held press reaches it. The drag itself is
+      // played from plan.from, as worked out; the finger keeps the same offset from it all along.
+      const from0 = client(plan.from);
+      const grip = spotIn(target, { x: from0.clientX, y: from0.clientY }, at0, (q) => !plan.hold || pieceAt(box, at0, live0, q.x, q.y) === target);
+      const shift = grip ? Vec2((grip.x - from0.clientX) / k, (grip.y - from0.clientY) / k) : Vec2(0, 0);
+      const drawn = (p: Vec2) => p.add(shift);
+      setFinger({ ...drawn(plan.from), down: false });
       await wait(pause);
+      if (halt()) return quit();
       const init = (p: { x: number; y: number }, buttons: number): PointerEventInit => ({
         ...client(p),
         bubbles: true,
@@ -178,16 +205,11 @@ export function MathCanvas({
         button: 0,
         buttons,
       });
-      // The piece's own element is pressed (held first when a quick press would take its term, as useHold does).
-      const target = svg.querySelector(`g[id="${CSS.escape(plan.id)}"]`);
-      if (!target) {
-        setFinger(null);
-        return null;
-      }
-      setFinger({ ...plan.from, down: true });
+      setFinger({ ...drawn(plan.from), down: true });
       if (plan.hold) {
         await wait(HOLD_MS + 150);
-        setHeldAt({ ...plan.from });
+        if (halt()) return quit();
+        setHeldAt({ ...drawn(plan.from) });
         setTimeout(() => setHeldAt(null), 450);
       }
       target.dispatchEvent(new PointerEvent("pointerdown", init(plan.from, 1)));
@@ -195,15 +217,21 @@ export function MathCanvas({
       const t0 = performance.now();
       for (;;) {
         await new Promise((res) => requestAnimationFrame(res));
+        // Stopped on the way: let go where it was picked up (no move), and the finger goes.
+        if (halt()) {
+          document.dispatchEvent(new PointerEvent("pointermove", init(plan.from, 1)));
+          document.dispatchEvent(new PointerEvent("pointerup", init(plan.from, 0)));
+          return quit();
+        }
         const t = Math.min(1, (performance.now() - t0) / ms);
         const p = plan.from.add(plan.to.sub(plan.from).mul(ease(t)));
-        setFinger({ x: p.x, y: p.y, down: true });
+        setFinger({ ...drawn(p), down: true });
         document.dispatchEvent(new PointerEvent("pointermove", init(p, 1)));
         if (t >= 1) break;
       }
       await wait(150);
       document.dispatchEvent(new PointerEvent("pointerup", init(plan.to, 0)));
-      setFinger({ ...plan.to, down: false });
+      setFinger({ ...drawn(plan.to), down: false });
       await wait(400);
       setFinger(null);
       return plan.next;
@@ -491,13 +519,20 @@ function pieceAt(canvas: HTMLElement, state: MathState, rules: readonly RuleId[]
  * box holds the point: 2·3 → 6, √9 → 3, 6 → 2·3), or null.
  */
 function tapAt(canvas: HTMLElement | null, state: MathState, rules: readonly RuleId[], x: number, y: number): MathState | null {
+  const hit = tapHit(canvas, state, rules, x, y);
+  if (!hit) return null;
+  return hit.op ? operatorTap(state, hit.id, rules) : (movesFor(state, rules).tap(hit.id)?.state ?? null);
+}
+
+/** What a tap at a point reaches (see tapAt): the +, − or · in front of piece `id` (`op`), or piece `id` itself. */
+function tapHit(canvas: HTMLElement | null, state: MathState, rules: readonly RuleId[], x: number, y: number): { op: boolean; id: string } | null {
   if (!canvas) return null;
   const inside = (el: Element) => {
     const r = el.getBoundingClientRect();
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom ? r.width * r.height : null;
   };
   for (const el of canvas.querySelectorAll(`svg [${OP_TAP}]`)) {
-    if (inside(el) !== null) return operatorTap(state, el.getAttribute(OP_TAP)!, rules);
+    if (inside(el) !== null) return { op: true, id: el.getAttribute(OP_TAP)! };
   }
   const moves = movesFor(state, rules);
   let best: { id: string; area: number } | null = null;
@@ -506,7 +541,35 @@ function tapAt(canvas: HTMLElement | null, state: MathState, rules: readonly Rul
     const area = inside(g);
     if (area !== null && (!best || area < best.area)) best = { id: g.id, area };
   }
-  return best ? (moves.tap(best.id)?.state ?? null) : null;
+  return best && { op: false, id: best.id };
+}
+
+/**
+ * Where a hand would put a finger on piece `el` (client coordinates), as near
+ * `near` as can be, where `ok` holds: best on a glyph of the piece's own (the
+ * √ of √9, the + of x + 4), else anywhere in its box. Null if nowhere.
+ */
+function spotIn(el: Element, near: { x: number; y: number }, state: MathState, ok: (p: { x: number; y: number }) => boolean) {
+  const g = el.getBoundingClientRect();
+  const N = 16;
+  const ids = new Set(state.sides.flatMap((e) => allNodes(e).map((n) => n.id)));
+  // The piece's own glyphs first (the √'s thin stroke is easily missed between grid points), then a grid over its box.
+  const glyphs = [...el.querySelectorAll("text, path, line, rect:not(.m-hit)")].filter((x) => owner0(x) === el);
+  const centres = glyphs.map((x) => x.getBoundingClientRect()).filter((b) => b.width > 0 || b.height > 0).map((b) => ({ x: b.left + b.width / 2, y: b.top + b.height / 2 }));
+  const points = [near, ...centres, ...Array.from({ length: N * N }, (_, i) => ({ x: g.left + (((i % N) + 0.5) / N) * g.width, y: g.top + ((Math.floor(i / N) + 0.5) / N) * g.height }))]
+    .filter((p) => p.x >= g.left && p.x <= g.right && p.y >= g.top && p.y <= g.bottom)
+    .sort((p, q) => Math.hypot(p.x - near.x, p.y - near.y) - Math.hypot(q.x - near.x, q.y - near.y));
+  const isOwn = (p: { x: number; y: number }) => {
+    const hit = document.elementFromPoint(p.x, p.y);
+    return hit !== null && owner0(hit) === el;
+  };
+  // On a glyph it draws itself (the √, the + of x + 4) first; else where a press is taken by it; else anywhere it works.
+  return points.find((p) => centres.includes(p) && ok(p)) ?? points.find((p) => isOwn(p) && ok(p)) ?? points.find(ok) ?? null;
+  function owner0(x: Element): Element | null {
+    let at = x.closest("g[id]");
+    while (at && !ids.has(at.id)) at = at.parentElement?.closest("g[id]") ?? null;
+    return at;
+  }
 }
 
 function useContainerWidth() {

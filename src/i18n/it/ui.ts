@@ -101,7 +101,7 @@ export const it: Translation = {
     },
     "multiply-numbers": {
       name: "Moltiplicare i numeri",
-      how: "Trascina un numero sull'altro numero che moltiplica.",
+      how: "Trascina il numero a destra sull'altro numero che moltiplica.",
       text: ["Anche nella moltiplicazione l'ordine non conta: `2·x·5` è `2·5·x`. Quindi il 2 e il 5 si possono moltiplicare tra loro, e si ottiene `10x`."],
     },
     "numbers-first": {
@@ -163,7 +163,7 @@ export const it: Translation = {
     },
     "power-to-product": {
       name: "Un quadrato come prodotto",
-      how: "Tocca il ² per scrivere la parentesi due volte. Poi sviluppa il prodotto e somma i termini simili.",
+      how: "Tocca il ² per scrivere la parentesi due volte. Poi sviluppa il prodotto come nell'esempio precedente (per spostare un fattore da solo, tienilo premuto: con un tocco rapido prendi tutto il termine) e somma i termini simili.",
       text: ["`(x + 1)²` è `(x + 1)(x + 1)`, quindi si sviluppa allo stesso modo."],
     },
     "move-term": {
@@ -206,7 +206,7 @@ export const it: Translation = {
     },
     "letter-in": {
       name: "Una lettera per una parentesi",
-      how: "Trascina la lettera davanti sulla parentesi. Poi tocca il · tra le due lettere: `x·x` è `x²`. (Per spostare una lettera da sola, tienila premuta: con un tocco rapido prendi tutto il termine.)",
+      how: "Trascina la lettera davanti sulla parentesi. Poi tieni premuta una delle due lettere vicine e lasciala sull'altra: `x·x` è `x²`. (Con un tocco rapido prenderesti tutto il termine.)",
       text: ["La lettera moltiplica ogni termine dentro la parentesi, proprio come farebbe un numero: `x(x + 3) = x·x + x·3`. E `x·x` è una potenza, `x²`, come hai visto nel capitolo Potenze."],
     },
     "factor-then-cancel": {
@@ -258,7 +258,7 @@ export const it: Translation = {
     },
     "split-number": {
       name: "Scomporre un numero",
-      how: "Tocca il numero per scomporlo in due fattori. Poi trascina il fattore comune ai due termini fuori, davanti a tutto, oltre l'estremità sinistra.",
+      how: "Tocca il numero davanti alla lettera per scomporlo in due fattori. Tocca anche l'altro numero. Poi tocca il + tra i due termini: il fattore comune viene raccolto. (Oppure tienilo premuto e trascinalo fuori, davanti a tutto, oltre l'estremità sinistra.)",
       text: ["Per trovare un fattore comune, scomponi i numeri in fattori. In `2x + 6`, il 6 è `2·3`, e adesso entrambi i termini hanno un 2."],
     },
     "split-term": {
@@ -385,7 +385,7 @@ export const it: Translation = {
     },
     "root-across": {
       name: "L'esponente della radice oltre l'=",
-      how: "Trascina il ½ (o ⅓, o ¼) dall'altra parte dell'=. Nell'altro membro diventa un quadrato (o un cubo, o una quarta potenza). Poi tocca l'esponente per calcolarla.",
+      how: "Tocca la radice per scriverla come potenza (con esponente ½, oppure ⅓ o ¼), poi trascina l'esponente dall'altra parte dell'=: nell'altro membro diventa un quadrato (o un cubo, o una quarta potenza). Poi tocca l'esponente per calcolarla.",
       text: ["Per risolvere `√x = 3`, eleva al quadrato entrambi i membri. Scritta come potenza, `x^(1/2) = 3`, il ½ passa dall'altra parte e diventa un quadrato: `x = 3²`."],
     },
     "exp-of-log": {
@@ -448,7 +448,7 @@ export const it: Translation = {
     },
     "bracket-times-bracket": {
       name: "Parentesi per parentesi",
-      how: "Trascina una parentesi sull'altra: moltiplica entrambi i termini al suo interno. Poi sviluppa allo stesso modo ciascuna parentesi e somma i termini simili.",
+      how: "Trascina una parentesi sull'altra: moltiplica entrambi i termini al suo interno. Poi sviluppa allo stesso modo ogni nuovo termine: tieni premuto uno dei suoi fattori e lascialo sull'altro (con un tocco rapido prendi tutto il termine). Infine tieni premuta una delle x di `x·x`, lasciala sull'altra e somma i termini simili.",
       text: [
         "In `(x + 1)(x + 2)`, la prima parentesi è un unico fattore: moltiplica tutta la seconda, sia la x sia il 2. Poi si sviluppa ogni `(x + 1)`, una alla volta.",
         "Due termini per due termini danno quattro termini. Poi si sommano i termini simili: `(x + 1)(x + 2) = x² + 3x + 2`.",
@@ -494,12 +494,12 @@ export const it: Translation = {
     },
     "fraction-zero": {
       name: "Una frazione uguale a 0",
-      how: "Trascina il denominatore della frazione oltre l'=. Moltiplica l'altro membro, e 0 per qualsiasi numero fa 0. Poi porta il numero dall'altra parte.",
+      how: "Trascina il denominatore della frazione oltre l'= (afferralo dal segno +). Moltiplica l'altro membro: tocca lo 0 per fare il calcolo, perché 0 per qualsiasi numero fa 0. Poi porta il numero dall'altra parte.",
       text: ["Una frazione vale 0 solo quando il suo numeratore è 0. Il denominatore non può mai essere 0, e lo dice la condizione scritta dopo l'equazione: `x ≠ −2` garantisce che `x + 2` non sia 0.", "Quindi il denominatore può passare dall'altra parte e moltiplicare l'altro membro: `(x − 3)/(x + 2) = 0` diventa `x − 3 = 0·(x + 2)`, cioè `x − 3 = 0`. Se una soluzione non rispetta la condizione, va scartata."],
     },
     "square-both-sides": {
       name: "Elevare al quadrato entrambi i membri",
-      how: "Trascina la radice dall'altra parte dell'=: l'altro membro viene elevato al quadrato. Poi svolgi i calcoli e risolvi. Sotto ci sono le condizioni: una soluzione che non le rispetta viene scartata.",
+      how: "Tocca la radice per scriverla come potenza con esponente ½, poi trascina l'esponente ½ dall'altra parte dell'=: l'altro membro viene elevato al quadrato. Poi svolgi i calcoli e risolvi. Sotto ci sono le condizioni: una soluzione che non le rispetta viene scartata.",
       text: ["Una radice non è mai negativa, quindi `√(x² + 5) = x + 1` vale solo dove `x + 1 ≥ 0`. Elevando al quadrato questa informazione si perde: `x² + 5 = (x + 1)²` varrebbe anche se `x + 1` fosse negativo. Per questo le condizioni si scrivono all'inizio, e restano valide fino alla fine."],
     },
   },

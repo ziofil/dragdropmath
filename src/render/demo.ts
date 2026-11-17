@@ -11,6 +11,7 @@
 import { Vec2 } from "dragology";
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
+import { allNodes } from "../expr/tree";
 import { handles, movesFor, operatorTap, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
 import { ANCHOR, Grip, harness } from "./headless";
 
@@ -76,7 +77,9 @@ export function planStepTo(state: MathState, rules: readonly RuleId[], W: number
   const ways = stepsFrom(state, rules)
     .filter((st) => lands(st.state))
     .flatMap((st) => st.ways);
-  const tap = ways.find((w) => w.tap);
+  // The smallest piece whose tap makes it, as a hand would tap it: the 0 of 0(x + 4), not the whole product.
+  const size = (id: string) => state.sides.map((e) => allNodes(e).find((n) => n.id === id)).find(Boolean);
+  const tap = ways.filter((w) => w.tap).sort((a, b) => allNodes(size(a.id)!).length - allNodes(size(b.id)!).length)[0];
   if (tap) return { kind: "tap", id: tap.id, next: tap.candidate.state };
   const moves = movesFor(state, rules);
   return dragOf(state, rules, W, H, [...ways.filter((w) => moves.pressable(w.id)), ...ways.filter((w) => !moves.pressable(w.id))]);

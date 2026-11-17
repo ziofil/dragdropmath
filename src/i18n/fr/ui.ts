@@ -103,7 +103,7 @@ export const fr: Translation = {
     },
     "multiply-numbers": {
       name: "Multiplier des nombres",
-      how: "Dépose un nombre sur l'autre nombre qu'il multiplie.",
+      how: "Dépose le nombre de droite sur l'autre nombre qu'il multiplie.",
       text: ["Pour la multiplication non plus, l'ordre ne compte pas : `2·x·5`, c'est `2·5·x`. On peut donc multiplier le 2 et le 5, ce qui donne `10x`."],
     },
     "numbers-first": {
@@ -165,7 +165,7 @@ export const fr: Translation = {
     },
     "power-to-product": {
       name: "Un carré comme produit",
-      how: "Appuie sur le ² pour écrire la parenthèse deux fois. Ensuite, développe et réduis.",
+      how: "Appuie sur le ² pour écrire la parenthèse deux fois. Ensuite, développe comme dans l'exemple précédent (pour déplacer un facteur seul, appuie longuement dessus : un appui bref prend tout le terme), et réduis.",
       text: ["`(x + 1)²`, c'est `(x + 1)(x + 1)` : on le développe donc de la même façon."],
     },
     "move-term": {
@@ -208,7 +208,7 @@ export const fr: Translation = {
     },
     "letter-in": {
       name: "Une lettre fois une parenthèse",
-      how: "Dépose la lettre devant sur la parenthèse. Ensuite, appuie sur le · entre les deux lettres : `x·x`, c'est `x²`. (Pour déplacer une lettre seule, appuie longuement dessus : un appui bref prend tout le terme.)",
+      how: "Dépose la lettre devant sur la parenthèse. Ensuite, appuie longuement sur l'une des deux lettres côte à côte et dépose-la sur l'autre : `x·x`, c'est `x²`. (Un appui bref prendrait tout le terme.)",
       text: ["La lettre multiplie chaque terme à l'intérieur, exactement comme un nombre : `x(x + 3) = x·x + x·3`. Et `x·x` est une puissance, `x²`, comme dans le chapitre Puissances."],
     },
     "factor-then-cancel": {
@@ -258,7 +258,7 @@ export const fr: Translation = {
     },
     "split-number": {
       name: "Décomposer un nombre",
-      how: "Appuie sur le nombre pour le décomposer en deux facteurs. Ensuite, fais glisser devant le facteur commun aux deux termes, au-delà du bord gauche.",
+      how: "Appuie sur le nombre devant la lettre pour le décomposer en deux facteurs. Appuie aussi sur l'autre nombre. Ensuite, appuie sur le + entre les deux termes : on factorise par le facteur commun. (Ou appuie longuement sur ce facteur et fais-le glisser devant, au-delà du bord gauche.)",
       text: ["Pour trouver un facteur commun, décompose les nombres en facteurs. Dans `2x + 6`, le 6, c'est `2·3` : maintenant, les deux termes ont un 2."],
     },
     "split-term": {
@@ -348,12 +348,12 @@ export const fr: Translation = {
     },
     "fraction-zero": {
       name: "Une fraction égale à 0",
-      how: "Fais glisser le dénominateur de la fraction de l'autre côté du =. Il multiplie l'autre membre, et 0 fois n'importe quoi fait 0. Puis fais passer le nombre de l'autre côté.",
+      how: "Fais glisser le dénominateur de la fraction de l'autre côté du = (attrape-le par son +). Il multiplie l'autre membre : appuie sur le 0 pour calculer, car 0 fois n'importe quoi fait 0. Puis fais passer le nombre de l'autre côté.",
       text: ["Une fraction est nulle seulement si son numérateur est nul. Son dénominateur ne peut jamais être nul, et la condition écrite après l'équation le dit : `x ≠ −2` garantit que `x + 2` n'est pas 0.", "Le dénominateur peut donc passer de l'autre côté en multipliant : `(x − 3)/(x + 2) = 0` devient `x − 3 = 0·(x + 2)`, c'est-à-dire `x − 3 = 0`. Si une solution ne respecte pas la condition, on l'élimine."],
     },
     "square-both-sides": {
       name: "Élever les deux membres au carré",
-      how: "Fais passer la racine de l'autre côté du = : l'autre membre est élevé au carré. Ensuite, développe et résous. En dessous, il y a les conditions : une solution qui n'en respecte pas une est barrée.",
+      how: "Appuie sur la racine pour l'écrire comme une puissance d'exposant ½, puis fais passer le ½ de l'autre côté du = : l'autre membre est élevé au carré. Ensuite, développe et résous. En dessous, il y a les conditions : une solution qui n'en respecte pas une est barrée.",
       text: ["Une racine n'est jamais négative, donc `√(x² + 5) = x + 1` n'est vraie que si `x + 1 ≥ 0`. En élevant les deux membres au carré, on perd cette information : `x² + 5 = (x + 1)²` serait vraie aussi si `x + 1` était négatif. C'est pour ça que les conditions sont données dès le départ, et restent vraies jusqu'au bout."],
     },
     "divide-by-fraction": {
@@ -423,7 +423,7 @@ export const fr: Translation = {
     },
     "root-across": {
       name: "L'exposant d'une racine de l'autre côté du =",
-      how: "Fais passer le ½ (ou le ⅓, ou le ¼) de l'autre côté du =. Là-bas, il devient un carré (ou un cube, ou une puissance 4). Ensuite, appuie sur l'exposant pour calculer.",
+      how: "Appuie sur la racine pour l'écrire comme une puissance (d'exposant ½, ou ⅓, ou ¼), puis fais passer cet exposant de l'autre côté du =. Là-bas, il devient un carré (ou un cube, ou une puissance 4). Ensuite, appuie sur l'exposant pour calculer.",
       text: ["Pour résoudre `√x = 3`, on élève les deux membres au carré. Écrit comme une puissance, `x^(1/2) = 3`, le ½ passe de l'autre côté et devient un carré : `x = 3²`."],
     },
     "exp-of-log": {
@@ -486,7 +486,7 @@ export const fr: Translation = {
     },
     "bracket-times-bracket": {
       name: "Une parenthèse fois une parenthèse",
-      how: "Dépose une parenthèse sur l'autre : elle multiplie les deux termes à l'intérieur. Ensuite, développe chaque parenthèse de la même façon, et réduis.",
+      how: "Dépose une parenthèse sur l'autre : elle multiplie les deux termes à l'intérieur. Ensuite, développe chaque nouveau terme de la même façon : appuie longuement sur l'un de ses facteurs et dépose-le sur l'autre (un appui bref prend tout le terme). Puis appuie longuement sur un x de `x·x`, dépose-le sur l'autre, et réduis.",
       text: [
         "Dans `(x + 1)(x + 2)`, la première parenthèse est un seul facteur : elle multiplie toute la seconde, le x et le 2. Ensuite, on développe chaque `(x + 1)` à son tour.",
         "Deux termes fois deux termes, ça donne quatre termes. Il ne reste plus qu'à réduire : `(x + 1)(x + 2) = x² + 3x + 2`.",

@@ -29,8 +29,9 @@ export function wayOn(from: MathState, stops: readonly MathState[], done: (s: Ma
   const out: MathState[] = [];
   let now = from;
   for (const stop of [...ahead, null]) {
-    // The goal may come on the way to a checkpoint (the goal says where the board ends): it ends there.
-    const end = (s: MathState) => done(s) || (stop !== null && at(s, stop));
+    // A checkpoint is passed on the way, even where the goal is nearer (they pin the way the words describe:
+    // 25 split into 5·5 before the factor comes out); after the last, the goal.
+    const end = (s: MathState) => (stop === null ? done(s) : at(s, stop));
     // The shortest way if it's near; else a good one, quickly (best-first: a long board branches a lot).
     // States that differ only in the order of terms are one (swapping terms is never a step worth showing).
     const leg = search(now, end, rules, { ordered: false, maxDepth: 4, maxStates: 1_500 }) ?? searchBest(now, end, rules, { ordered: false, maxStates: 6_000 });
