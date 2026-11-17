@@ -5,7 +5,7 @@ import { settleCopies, withoutCopies } from "../expr/copies";
 import { allNodes, locate, nodeAt, parentLoc } from "../expr/tree";
 import { dragCtx, handles, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { num } from "../expr/build";
-import { roleOf } from "./view";
+import { powerOf, roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
 import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
 import { differenceOfSquares, distribute, distributeNeg, factorOut, factorShared, splitTerm } from "./distribute";
@@ -191,9 +191,10 @@ function shareOut(state: MathState, terms: readonly MathState["sides"][number][]
   const moves = movesFor(state, enabled);
   const pair = terms.length === 2;
   const term = (id: string) => terms.find((t) => t.id === id)!;
+  // A bracket first, then a letter, then a number; of two powers of a letter, the higher (x² of x⁴ − x², not x).
   const rank = (id: string) => {
     const n = allNodes(term(a)).concat(allNodes(term(b))).find((x) => x.id === id);
-    return n?.kind === "sum" ? 0 : n?.kind === "num" ? 2 : 1;
+    return (n?.kind === "sum" ? 0 : n?.kind === "num" ? 2 : 1) * 100 - (n ? powerOf(n).n : 0);
   };
   const found: { c: Candidate; r: number }[] = [];
   for (const [from, onto] of [[a, b], [b, a]] as const) {

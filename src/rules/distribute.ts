@@ -2,7 +2,8 @@ import type { Expr } from "../expr/types";
 import { cloneFresh, frac, neg, negate, num, pow, prod, sum, variable } from "../expr/build";
 import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
 import { nodeAt, type Loc } from "../expr/tree";
-import { divideOut, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
+import { key } from "../expr/key";
+import { divideOut, powerOf, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
 import type { MathState } from "../expr/types";
 import { restKey, splitCoef } from "./monomial";
 import { visibleOne } from "./shapes";
@@ -195,22 +196,42 @@ export const factorShared: Rule = {
   },
 };
 
-/** A term as a whole number times a power of one letter: 3x² → (3, x, 2), −5x → (−5, x, 1), 6 → (6, null, 0). Null for anything else. */
-function monomial(t: Expr): { k: number; x: string | null; n: number } | null {
+/**
+ * A term as a whole number times a power of one base (read with powerOf):
+ * 3x² → (3, x, 2), −9√x → (−9, x, ½), 2x⁴ → (2, x, 4), 6 → (6, null, 0);
+ * `rest` is what isn't the number (x², √x). Null for anything else.
+ */
+function monomial(t: Expr): { k: number; base: Expr | null; n: number; rest: Expr[] } | null {
   const v = viewTerm(t);
   if (v.frac) return null;
   let k = v.negative ? -1 : 1;
-  let x: string | null = null;
+  let base: Expr | null = null;
   let n = 0;
+  const rest: Expr[] = [];
   for (const f of v.top) {
-    const p = wholePower(f);
-    if (f.kind === "num" && Number.isInteger(f.value)) k *= f.value;
-    else if (p.base.kind === "var" && (x === null || x === p.base.name)) {
-      x = p.base.name;
-      n += p.n;
-    } else return null;
+    if (f.kind === "num" && Number.isInteger(f.value)) {
+      k *= f.value;
+      continue;
+    }
+    const p = powerOf(f);
+    if (base !== null && key(base) !== key(p.base)) return null;
+    base = p.base;
+    n += p.n;
+    rest.push(f);
   }
-  return { k, x, n };
+  return { k, base, n, rest };
+}
+
+/** The letter of a monomial that is a power of one letter (x of 3x²), else null. */
+const letterOf = (m: { base: Expr | null }) => (m.base?.kind === "var" ? m.base.name : null);
+
+/** k times the factors `rest` (k·√x, −x², 8x), the first part keeping id `id`. */
+function timesRest(k: number, rest: Expr[], id?: string): Expr {
+  const m = Math.abs(k);
+  const body = m === 1 ? (rest.length === 1 ? rest[0] : prod(rest)) : prod([num(m), ...rest]);
+  if (k < 0) return id ? { ...neg(body), id } : neg(body);
+  // (A lone factor keeps its own id: it's the same piece, sliding to its place.)
+  return id && body !== rest[0] ? { ...body, id } : body;
 }
 
 /** The term k·xⁿ, written as a person writes it (with a fresh id unless given). */
@@ -239,17 +260,19 @@ export const splitTerm: Rule = {
     if (!r || r.part !== "term" || r.terms.length !== 3) return [];
     const ms = r.terms.map(monomial);
     if (ms.some((m) => m === null)) return [];
-    const sq = ms.find((m) => m!.n === 2);
-    const lin = ms.find((m) => m!.n === 1);
+    // The middle term is the one tapped; another is its square (twice its exponent, the same base: x² of x,
+    // x⁴ of x², x of √x), the third a number.
+    const lin = ms[r.index]!;
     const con = ms.find((m) => m!.n === 0);
-    if (!sq || !lin || !con || ms[r.index] !== lin || sq.x !== lin.x) return [];
-    const x = lin.x!;
+    const sq = ms.find((m, i) => i !== r.index && m!.n !== 0 && m!.n === 2 * lin.n && key(m!.base!) === key(lin.base!));
+    if (!sq || !con || lin.n === 0) return [];
     const target = sq.k * con.k;
     for (let p = -Math.abs(target); p <= Math.abs(target); p++) {
       if (p === 0 || target % p !== 0) continue;
       const q = target / p;
       if (p + q !== lin.k || q === 0 || Math.abs(p) > Math.abs(q)) continue;
-      const parts = [writeTerm(p, x, 1, r.node.id), writeTerm(q, x, 1)];
+      // Each part written as the middle term is: 2x and 3x, −√x and −8√x.
+      const parts = [timesRest(p, lin.rest, r.node.id), timesRest(q, lin.rest.map((e) => cloneFresh(e)))];
       const terms = r.terms.flatMap((t, i) => (i === r.index ? parts : [t]));
       return [{ rule: "split-term", state: replaceIn(state, r.holderLoc, sum(terms, nodeAt(state, r.holderLoc).id)) }];
     }
@@ -266,7 +289,7 @@ function termHolding(state: MathState, id: string): string {
 }
 
 /** √ of a term k·xⁿ, when it's a whole square (9 → 3, 4x² → 2x, x⁴ → x²). */
-function rootOf(m: { k: number; x: string | null; n: number }): { k: number; n: number } | null {
+function rootOf(m: { k: number; n: number }): { k: number; n: number } | null {
   const s = Math.round(Math.sqrt(m.k));
   return m.k > 0 && s * s === m.k && m.n % 2 === 0 ? { k: s, n: m.n / 2 } : null;
 }
@@ -283,12 +306,15 @@ export const differenceOfSquares: Rule = {
     if (!r || r.terms.length !== 2 || r.index !== 1 || r.node.kind !== "neg") return [];
     const [m1, m2] = r.terms.map(monomial);
     if (!m1 || !m2 || m1.k <= 0 || m2.k >= 0) return [];
+    // Powers of a letter only, whole ones (x − 9 isn't (√x − 3)(√x + 3) here).
+    if ([m1, m2].some((m) => (m.base !== null && m.base.kind !== "var") || !Number.isInteger(m.n))) return [];
     const a = rootOf(m1);
     const b = rootOf({ ...m2, k: -m2.k });
     // Letters in it somewhere (9 − 4 is worked out, not factored), and one letter at most.
-    if (!a || !b || (m1.x === null && m2.x === null) || (m1.x && m2.x && m1.x !== m2.x)) return [];
-    const A = writeTerm(a.k, m1.x ?? "", a.n);
-    const B = writeTerm(b.k, m2.x ?? "", b.n);
+    const [x1, x2] = [letterOf(m1), letterOf(m2)];
+    if (!a || !b || (x1 === null && x2 === null) || (x1 && x2 && x1 !== x2)) return [];
+    const A = writeTerm(a.k, x1 ?? "", a.n);
+    const B = writeTerm(b.k, x2 ?? "", b.n);
     const result = prod([sum([A, neg(B)]), sum([cloneFresh(A), cloneFresh(B)])]);
     return [{ rule: "difference-of-squares", state: replaceIn(state, r.holderLoc, result) }];
   },

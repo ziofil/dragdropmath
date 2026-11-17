@@ -17,7 +17,7 @@
  * just as much a term as one in a long sum.
  */
 import type { Expr, Frac, MathState } from "../expr/types";
-import { cloneFresh, frac, neg, num, pow, prod, sum } from "../expr/build";
+import { cloneFresh, frac, neg, num, pow, prod, root, sum } from "../expr/build";
 import { key } from "../expr/key";
 import { locate, nodeAt, parentLoc, type Loc } from "../expr/tree";
 import { without } from "../util/array";
@@ -183,9 +183,46 @@ export function fromTerms(terms: Expr[], was: Expr): Expr {
   return terms.length === 1 ? terms[0] : sum(terms, was.kind === "sum" ? was.id : undefined);
 }
 
-/** A factor as a whole power of its base: x³ → (x, 3); anything else is its own base, to the power 1. */
+/**
+ * A factor as whole copies of its base: x³ → (x, 3), the copies a drag can
+ * take one at a time (the x of x³); anything else is its own base, once.
+ */
 export function wholePower(e: Expr): { base: Expr; n: number } {
   return e.kind === "pow" && !e.radical && e.exp.kind === "num" && Number.isInteger(e.exp.value) && e.exp.value >= 1 ? { base: e.base, n: e.exp.value } : { base: e, n: 1 };
+}
+
+/** An exponent that is a number written as one: 3, ½, 3/2 (null for a letter, a sum, …). */
+function numberExp(e: Expr): number | null {
+  if (e.kind === "num") return e.value;
+  if (e.kind === "frac" && e.num.kind === "num" && e.den.kind === "num" && e.den.value !== 0) return e.num.value / e.den.value;
+  return null;
+}
+
+/**
+ * The one reading of a factor as a power of its base, for every move that
+ * compares powers (which divides which, which is the square of which):
+ * x³ → (x, 3), √x → (x, ½), √(x + 1) → (x + 1, ½), (x²)³ → (x, 6), anything
+ * else → (itself, 1). Exponents are whole numbers or halves (square roots are
+ * the roots the chapters take apart); a power of a power is read through only
+ * when the outer exponent is whole ((x²)^(1/2) is |x|, not x).
+ */
+export function powerOf(e: Expr): { base: Expr; n: number } {
+  if (e.kind !== "pow") return { base: e, n: 1 };
+  const n = numberExp(e.exp);
+  if (n === null || n <= 0 || !Number.isInteger(2 * n)) return { base: e, n: 1 };
+  if (Number.isInteger(n) && e.base.kind === "pow") {
+    const inner = powerOf(e.base);
+    if (inner.base !== e.base) return { base: inner.base, n: inner.n * n };
+  }
+  return { base: e.base, n };
+}
+
+/** base to the power n as a person writes it: base itself, √base, base³ (null for any other exponent). */
+function writtenPower(base: Expr, n: number, was: Expr): Expr | null {
+  if (n === 1) return base;
+  if (n === 0.5) return root(base, 2, was.id);
+  if (!Number.isInteger(n)) return null;
+  return pow(base, num(n, was.kind === "pow" && was.exp.kind === "num" ? was.exp.id : undefined), was.id);
 }
 
 /** Which copy of a factor comes out: the carried factor itself, or one copy of the base carried out of its power (the x of x³). */
@@ -218,9 +255,12 @@ export function divideOut(fs: Expr[], f: Expr, taken?: Taken): Expr[] | null {
   }
   const same = fs.findIndex((x) => key(x) === key(f));
   if (same >= 0) return without(fs, same);
-  const { base, n } = wholePower(f);
-  const higher = fs.findIndex((x) => key(wholePower(x).base) === key(base) && wholePower(x).n > n);
-  return higher < 0 ? null : lower(higher, n, false);
+  // A higher power of the same base: x² out of x⁵ leaves x³, √x out of x leaves √x (x is √x·√x).
+  const { base, n } = powerOf(f);
+  const higher = fs.findIndex((x) => key(powerOf(x).base) === key(base) && powerOf(x).n > n);
+  if (higher < 0) return null;
+  const rest = writtenPower(powerOf(fs[higher]).base, powerOf(fs[higher]).n - n, fs[higher]);
+  return rest && fs.map((x, k) => (k === higher ? rest : x));
 }
 
 /**

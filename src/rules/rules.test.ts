@@ -145,6 +145,14 @@ describe("rules do what they say", () => {
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
     ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // Whatever is squared: a quadratic in x² or in √x splits the same way (one reading of powers, rules/view.ts powerOf).
+    ["x^4 - 5x^2 + 4", "split-term", "-5*x^2", ["x^4 - x^2 - 4*x^2 + 4"]],
+    ["x - 9√x + 8", "split-term", "-9*√(x)", ["x - √(x) - 8*√(x) + 8"]],
+    ["x^3 - 5x + 4", "split-term", "-5*x", []], // x³ isn't the square of x
+    // √x comes out of x (x is √x·√x), x² out of x⁴.
+    ["x - √x", "factor-out", "√(x)", ["√(x)*(√(x) - 1)"]],
+    ["x^4 - x^2", "factor-out", "x^2", ["x^2*(x^2 - 1)"]],
+    ["x - √x - 8√x + 8", "factor-shared", "√(x)", ["√(x)*(√(x) - 1) - 8*√(x) + 8"]],
     // Its number tapped splits the whole term (not the 8 into 2·4).
     ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
     ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
@@ -230,6 +238,14 @@ describe("rules do what they say", () => {
     ["x^2 + 5x + 6", "split-term", "5*x", ["x^2 + 2*x + 3*x + 6"]],
     ["x^2 - x - 6", "split-term", "-x", ["x^2 + 2*x - 3*x - 6"]],
     ["x^2 + x + 1", "split-term", "x", []], // no whole numbers do it
+    // Whatever is squared: a quadratic in x² or in √x splits the same way (one reading of powers, rules/view.ts powerOf).
+    ["x^4 - 5x^2 + 4", "split-term", "-5*x^2", ["x^4 - x^2 - 4*x^2 + 4"]],
+    ["x - 9√x + 8", "split-term", "-9*√(x)", ["x - √(x) - 8*√(x) + 8"]],
+    ["x^3 - 5x + 4", "split-term", "-5*x", []], // x³ isn't the square of x
+    // √x comes out of x (x is √x·√x), x² out of x⁴.
+    ["x - √x", "factor-out", "√(x)", ["√(x)*(√(x) - 1)"]],
+    ["x^4 - x^2", "factor-out", "x^2", ["x^2*(x^2 - 1)"]],
+    ["x - √x - 8√x + 8", "factor-shared", "√(x)", ["√(x)*(√(x) - 1) - 8*√(x) + 8"]],
     // Its number tapped splits the whole term (not the 8 into 2·4).
     ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
     ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
@@ -281,6 +297,9 @@ describe("rules do what they say", () => {
 // Soundness: no rule may ever change what an expression means.
 const CORPUS = [
   "a + b + c",
+  "x^4 - 5x^2 + 4 = 0",
+  "x - 9√x + 8 = 0",
+  "x - √x - 8√x + 8",
   "x + 4 + x",
   "1/2 + 1/3 + 2",
   "1/5 - 2/5 + (x + 2)/2",
@@ -601,6 +620,8 @@ describe("tapping the +, − or · between two pieces", () => {
     expect(tap("2·3·x", "3")).toBe("6*x");
     expect(tap("x^2·x^3", "x^3")).toBe("x^(2 + 3)");
     expect(tap("x + 2", "2")).toBeNull();
+    // What two terms share comes out, the highest power of it: x², not x.
+    expect(tap("x^4 - x^2", "-x^2")).toBe("x^2*(x^2 - 1)");
   });
   it("works a number times a fraction out as one fraction", () => {
     expect(tap("6·(1/12)", "1/12")).toBe("6/12");
