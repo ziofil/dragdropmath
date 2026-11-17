@@ -35,6 +35,7 @@ export const it: Translation = {
   // Chapter page
   backToPath: "← Percorso",
   level: { easy: "Facile", medium: "Medio", hard: "Difficile" },
+  makingExercise: "Sto preparando un esercizio…",
   anotherOne: "Un altro →",
   progressHere:
     "I tuoi progressi sono salvati solo in questo browser. Salvali in un file per non perderli, o per portarli su un altro dispositivo.",
@@ -50,7 +51,7 @@ export const it: Translation = {
         heading: "Che cos'è",
         text: [
           "DragDropMath è algebra da fare con le mani. Trascini una parte qualsiasi di un'espressione o di un'equazione, e questa si sposta solo nei modi che la matematica permette. Una mossa sbagliata semplicemente non succede: così impari che cosa si può fare sentendolo, non imparando a memoria delle regole.",
-          "C'è un percorso che va dal riordinare i termini fino ai sistemi di equazioni. Ogni capitolo ha una lezione, esercizi su tre livelli e gli esercizi di «A mente», in cui prima immagini il risultato a mente e poi lo ricavi. Gli insegnanti possono scrivere le proprie serie di esercizi e condividerle con un link.",
+          "C'è un percorso che va dal riordinare i termini fino alle equazioni di secondo grado. Ogni capitolo ha una lezione, esercizi su tre livelli e gli esercizi di «A mente», in cui prima immagini il risultato a mente e poi lo ricavi. Gli insegnanti possono scrivere le proprie serie di esercizi e condividerle con un link.",
         ],
       },
       {
@@ -69,6 +70,13 @@ export const it: Translation = {
     ],
   },
   progressNotABackup: "Questo file non contiene progressi di DragDropMath.",
+  progressReplace: (saved: string) =>
+    `I tuoi progressi in questo browser verranno sostituiti con quelli del file${saved ? ` (salvato il ${saved})` : ""}. Vuoi caricarlo?`,
+  progressLoadIt: "Caricalo",
+  cancel: "Annulla",
+  progressNoRoom: "Il browser non è riuscito a salvarlo, quindi non è cambiato niente.",
+  progressBlocked:
+    "Questo browser non conserva niente per questo sito (una finestra in incognito, o il salvataggio dei dati disattivato), quindi non ci sono progressi da salvare.",
   showMove: "Mostra",
   lesson: "Lezione",
   practice: "Esercitati",
@@ -108,10 +116,10 @@ export const it: Translation = {
     },
     collect: {
       name: "Sommare i termini simili",
-      how: "Trascina un termine su un termine simile, cioè con la stessa lettera. Si sommano.",
+      how: "Trascina un termine su un termine simile, cioè con le stesse lettere con gli stessi esponenti. Si sommano.",
       text: [
         "`3x` vuol dire `x + x + x`. Quindi `3x + 2x` sono tre x più due x: `5x`.",
-        "Si sommano solo i termini simili, cioè quelli con esattamente le stesse lettere. `3x + 2` non può diventare `5x`, e i termini in x restano separati da quelli in y.",
+        "Si sommano solo i termini simili, cioè quelli con esattamente le stesse lettere, con gli stessi esponenti. `3x + 2` non può diventare `5x`, i termini in x restano separati da quelli in y, e lo stesso vale per `x²` e `3x`.",
       ],
     },
     "collect-cancel": {
@@ -198,7 +206,7 @@ export const it: Translation = {
     },
     "letter-in": {
       name: "Una lettera per una parentesi",
-      how: "Trascina la lettera davanti sulla parentesi. Poi trascina una x sull'altra: `x·x` è `x²`.",
+      how: "Trascina la lettera davanti sulla parentesi. Poi tocca il · tra le due lettere: `x·x` è `x²`. (Per spostare una lettera da sola, tienila premuta: con un tocco rapido prendi tutto il termine.)",
       text: ["La lettera moltiplica ogni termine dentro la parentesi, proprio come farebbe un numero: `x(x + 3) = x·x + x·3`. E `x·x` è una potenza, `x²`, come hai visto nel capitolo Potenze."],
     },
     "factor-then-cancel": {
@@ -211,7 +219,7 @@ export const it: Translation = {
     "cancel-factor": {
       name: "Semplificare un fattore comune",
       how: "Tocca la linea di frazione. Ciò che numeratore e denominatore hanno in comune si semplifica.",
-      text: ["Lo stesso numero al numeratore e al denominatore si semplifica: `(3x)/3` è `x`."],
+      text: ["Un numero che moltiplica tutto il numeratore e tutto il denominatore si semplifica: `(3x)/3` è `x`. In `(3x + 1)/3` invece no: il 3 moltiplica solo una parte del numeratore."],
     },
     "power-of-power": {
       name: "Potenza di una potenza",
@@ -236,7 +244,7 @@ export const it: Translation = {
     "zero-power": {
       name: "Esponente 0",
       how: "Tieni premuto l'esponente 0, poi trascinalo sulla sua base. Poi tocca il + per fare la somma.",
-      text: ["`x³/x³` fa 1, ma è anche `x^(3 − 3) = x⁰`. Quindi qualsiasi cosa elevata alla 0 fa 1."],
+      text: ["`x³/x³` fa 1 (se x non è 0), ma è anche `x^(3 − 3) = x⁰`. Quindi qualsiasi numero diverso da 0, elevato alla 0, fa 1."],
     },
     "tap-power": {
       name: "Calcolare una potenza",
@@ -264,11 +272,14 @@ export const it: Translation = {
     "difference-of-squares": {
       name: "Differenza di due quadrati",
       how: "Tocca il meno tra i due quadrati.",
-      text: ["Un quadrato meno un quadrato si scompone sempre allo stesso modo: `a² − b² = (a − b)(a + b)`. Per verificarlo, sviluppa il prodotto: i termini di mezzo si annullano."],
+      text: [
+        "Un quadrato meno un quadrato si scompone sempre allo stesso modo: `a² − b² = (a − b)(a + b)`. Per verificarlo, sviluppa il prodotto: i termini di mezzo si annullano.",
+        "Funziona solo con una differenza, un quadrato meno un quadrato. Una somma di due quadrati, come `x² + 9`, non si scompone affatto. Un quadrato meno un numero che non è un quadrato perfetto, come `x² − 7`, invece sì, ma con le radici: `(x − √7)(x + √7)`.",
+      ],
     },
     "factor-shared": {
       name: "Mettere in comune un fattore",
-      how: "Tieni premuta la `x` di un termine, poi trascinala su un altro termine con la `x`: diventa comune a tutti e due. Fai lo stesso con gli ultimi due termini, poi raccogli la parentesi che hanno in comune.",
+      how: "Tieni premuta la `x` di un termine, poi trascinala su un altro termine con la `x`: diventa comune a tutti e due. (Oppure tocca il segno tra due termini: si raccoglie ciò che hanno in comune.) Poi raccogli ciò che hanno in comune gli ultimi due termini (spesso un numero), e infine la parentesi comune ai due prodotti.",
       text: ["Con quattro termini si lavora a coppie: è il raccoglimento parziale. Raccogli un fattore comune dai primi due termini, poi dagli ultimi due. Se le due parentesi sono uguali, raccogli anche la parentesi."],
     },
     "move-letter-factor": {
@@ -276,7 +287,7 @@ export const it: Translation = {
       how: "Trascina una delle lettere moltiplicate dall'altra parte dell'=. Divide l'altro membro.",
       text: [
         "Una formula è un'equazione con più lettere. Isolare una delle lettere si dice ricavarla dalla formula (la formula inversa). Si fa come quando si risolve un'equazione in x: le altre lettere si trattano come numeri.",
-        "Una lettera che moltiplica un intero membro può passare dall'altra parte e dividere l'altro membro: da `F = ma` si ottiene `F/m = a`. (Solo se la lettera è diversa da 0. In queste formule non lo è mai.)",
+        "Una lettera che moltiplica un intero membro può passare dall'altra parte e dividere l'altro membro: da `F = ma` si ottiene `F/m = a`. (Solo se la lettera è diversa da 0: qui supponiamo che lo sia.)",
         "Quando la lettera che cerchi compare in due punti, come in `ax + bx = c`, prima raccoglila: `x(a + b) = c`. Poi tutta la parentesi può passare dall'altra parte.",
       ],
     },
@@ -351,7 +362,7 @@ export const it: Translation = {
     "evaluate-root": {
       name: "Calcolare una radice",
       how: "Tocca la radice per calcolarla.",
-      text: ["`√9` è il numero che, moltiplicato per se stesso, dà 9: cioè 3, perché `3·3 = 9`. Allo stesso modo `∛8 = 2`, perché `2·2·2 = 8`."],
+      text: ["`√9` è il numero positivo che, moltiplicato per se stesso, dà 9: cioè 3, perché `3·3 = 9` (anche −3 lo dà, ma √ indica quello positivo). Allo stesso modo `∛8 = 2`, perché `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Scomporre sotto radice",
@@ -362,7 +373,7 @@ export const it: Translation = {
       name: "Unire le radici",
       how: "Trascina una radice sull'altra. Finiscono sotto un'unica radice.",
       text: [
-        "Il quadrato di `√2·√3` è `2·3`, quindi `√2·√3` è il numero il cui quadrato è 6: `√(2·3) = √6`. Due radici con lo stesso indice si uniscono sotto un'unica radice.",
+        "Il quadrato di `√2·√3` è `2·3`, quindi `√2·√3` è il numero positivo il cui quadrato è 6: `√(2·3) = √6`. Due radici con lo stesso indice si uniscono sotto un'unica radice.",
         "Lo stesso vale per qualsiasi esponente in comune: `x³y³` è xxx·yyy, cioè xy·xy·xy, quindi `(xy)³`.",
       ],
     },
@@ -383,7 +394,7 @@ export const it: Translation = {
     },
     "fraction-power": {
       name: "Radici e potenze insieme",
-      how: "Trascina la radice sulla potenza: gli esponenti si sommano. Poi somma le frazioni all'esponente.",
+      how: "Trascina la radice sulla potenza: gli esponenti si sommano. Poi scrivi il numero intero come frazione con denominatore 2: trascina il denominatore di ½ sul numero, e tocca il · per fare il calcolo. Poi somma le frazioni, e tocca il + al numeratore.",
       text: ["`√x` è `x^(1/2)`, quindi `√x·x² = x^(1/2 + 2) = x^(5/2)`. Un esponente frazionario funziona come tutti gli altri: per moltiplicare potenze con la stessa base, si sommano gli esponenti."],
     },
     "root-across": {
@@ -399,7 +410,7 @@ export const it: Translation = {
     "evaluate-log": {
       name: "Logaritmi da sapere",
       how: "Tocca il logaritmo per calcolarlo: `ln(e) = 1`, e il logaritmo di 1 è 0.",
-      text: ["`ln(e) = 1`, perché `e¹ = e`. E il logaritmo di 1 è 0, perché qualsiasi cosa elevata alla 0 fa 1."],
+      text: ["`ln(e) = 1`, perché `e¹ = e`. E il logaritmo di 1 è 0, perché `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Come potenza della base",
@@ -486,8 +497,8 @@ export const it: Translation = {
       text: ["`3² = 9`, ma anche `(−3)² = 9`. Quindi `x² = 9` vuol dire `x = 3` oppure `x = −3`. Se ti dimentichi il meno, perdi una soluzione."],
     },
     "take-out-then-split": {
-      name: "Raccogliere la x, poi separare",
-      how: "Tieni premuta la x in un termine e trascinala fuori, davanti a tutto, oltre l'estremità sinistra. Poi trascinala in giù, fuori dal prodotto.",
+      name: "Raccogliere la lettera, poi separare",
+      how: "Tieni premuta la lettera in un termine e trascinala fuori, davanti a tutto, oltre l'estremità sinistra (oppure tocca il segno tra i termini). Poi trascina la lettera in giù, fuori dal prodotto, e risolvi quello che resta.",
       text: ["Se manca il termine noto, ogni termine ha una x: raccoglila, `x² − 3x = x(x − 3)`. Ora è un prodotto uguale a 0, quindi `x = 0` oppure `x − 3 = 0`."],
     },
     "split-middle": {
@@ -531,11 +542,15 @@ export const it: Translation = {
   solveFor: (letters: string[]) => `Ricava ${letters.map((l) => `\`${l}\``).join(" e ")}.`,
   pickFirst: "Scegli una risposta qui sopra, poi risolvilo qui.",
   hint: "Suggerimento",
+  nextStep: "Prossimo passo",
+  noNextStep: "Da qui non trovo nessun passo: prova Annulla, oppure Ricomincia.",
   undo: "Annulla",
   solvedBang: "Risolto!",
   where: "con",
   moveCrashed: "Qualcosa è andato storto con questa mossa.",
-  moveCrashedDetails: "I dettagli sono nella console del browser.",
+  moveCrashedDetails: "Riprova, oppure ricomincia questo esercizio da capo.",
+  pageCrashed: "Qualcosa è andato storto in questa pagina.",
+  pageCrashedDetails: "Riprova, oppure torna al percorso. I tuoi progressi sono al sicuro.",
   tryAgain: "Riprova",
 
   // Making a set
@@ -545,6 +560,26 @@ export const it: Translation = {
   upload: "Carica un file .yaml",
   startFromExample: "Parti dall'esempio",
   yamlLabel: "La serie di esercizi, in YAML",
+  form: {
+    asForm: "Modulo",
+    asYaml: "YAML",
+    viewLabel: "Scrivi la serie come",
+    title: "Titolo",
+    moves: "Mosse consentite",
+    allMoves: "Tutte le mosse",
+    upTo: (n: number, title: string) => `Fino a ${n}. ${title}`,
+    start: (n: number) => `Esercizio ${n}: partenza`,
+    goal: (n: number) => `Esercizio ${n}: obiettivo`,
+    remove: (n: number) => `Rimuovi l'esercizio ${n}`,
+    addOne: "Aggiungi un esercizio",
+    fromChapter: "Aggiungi esercizi presi da un capitolo",
+    chapter: "Capitolo",
+    level: "Livello",
+    howMany: "Quanti",
+    addMade: (n: number) => `Aggiungine ${n}`,
+    making: "Li sto preparando…",
+    cantRead: "Lo YAML di questa serie contiene un errore, quindi il modulo non può mostrarla. Correggilo nella vista YAML, oppure parti dall'esempio.",
+  },
   check: "Controlla",
   checking: "Controllo che si possa risolvere con queste mosse…",
   unsolvable:
@@ -611,6 +646,7 @@ exercises:
     cantReadStart: (err: string) => `Non riesco a leggere il punto di partenza: ${err}`,
     cantReadGoal: (err: string) => `Non riesco a leggere l'obiettivo: ${err}`,
     doesntFollow: "Dal punto di partenza non si arriva all'obiettivo (controlla che non ci siano errori di battitura).",
+    noValue: "Il punto di partenza non ha un valore per nessun numero (c'è una divisione per 0?).",
     twoWrong: "`wrong:` deve contenere due risposte sbagliate.",
     cantReadWrong: (w: string, err: string) => `Non riesco a leggere la risposta sbagliata "${w}": ${err}`,
     wrongShape: (w: string, why: string) => `La risposta sbagliata "${w}" non ha la stessa forma dell'obiettivo: ${why}.`,

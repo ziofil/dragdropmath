@@ -38,6 +38,7 @@ export const tr: Translation = {
   // Chapter page
   backToPath: "← Öğrenme yolu",
   level: { easy: "Kolay", medium: "Orta", hard: "Zor" },
+  makingExercise: "Alıştırma hazırlanıyor…",
   anotherOne: "Bir tane daha →",
   progressHere:
     "İlerlemen yalnızca bu tarayıcıda saklanır. Güvende tutmak ya da başka bir cihaza taşımak için onu bir dosyaya kaydet.",
@@ -53,7 +54,7 @@ export const tr: Translation = {
         heading: "Nedir?",
         text: [
           "DragDropMath, ellerinle yaptığın cebirdir. Bir ifadenin ya da denklemin istediğin parçasını sürüklersin ve o parça yalnızca matematiğin izin verdiği şekilde hareket eder. Yanlış bir hamle hiç gerçekleşmez; böylece neyin yapılabileceğini kuralları ezberleyerek değil, hissederek öğrenirsin.",
-          "Terimleri düzenlemekten denklem sistemlerine uzanan bir öğrenme yolu var. Her bölümde bir konu anlatımı, üç düzeyde alıştırma ve cevabı çözmeden önce zihninde canlandırdığın “Zihinden” soruları bulunur. Öğretmenler kendi alıştırma setlerini yazıp bağlantı olarak paylaşabilir.",
+          "Terimleri düzenlemekten ikinci dereceden denklemlere uzanan bir öğrenme yolu var. Her bölümde bir konu anlatımı, üç düzeyde alıştırma ve cevabı çözmeden önce zihninde canlandırdığın “Zihinden” soruları bulunur. Öğretmenler kendi alıştırma setlerini yazıp bağlantı olarak paylaşabilir.",
         ],
       },
       {
@@ -72,6 +73,11 @@ export const tr: Translation = {
     ],
   },
   progressNotABackup: "Bu dosya bir DragDropMath ilerleme dosyası değil.",
+  progressReplace: (saved: string) => `Bu işlem, bu tarayıcıdaki ilerlemenin yerine dosyadakini koyar${saved ? ` (${saved} tarihinde kaydedilmiş)` : ""}. Yüklensin mi?`,
+  progressLoadIt: "Yükle",
+  cancel: "Vazgeç",
+  progressNoRoom: "Tarayıcın onu saklayamadı, bu yüzden hiçbir şey değişmedi.",
+  progressBlocked: "Bu tarayıcı bu site için hiçbir şey saklamıyor (gizli pencere ya da depolama kapalı), bu yüzden kaydedilecek bir ilerleme yok.",
   showMove: "Göster",
   lesson: "Konu anlatımı",
   practice: "Alıştırma yap",
@@ -111,10 +117,10 @@ export const tr: Translation = {
     },
     collect: {
       name: "Benzer terimleri topla",
-      how: "Bir terimi, harfi aynı olan benzer bir terimin üstüne bırak. Toplanırlar.",
+      how: "Bir terimi, harfleri ve üsleri aynı olan benzer bir terimin üstüne bırak. Toplanırlar.",
       text: [
         "`3x`, `x + x + x` demektir. Yani `3x + 2x`, üç x ile iki x'in toplamıdır: `5x`.",
-        "Yalnızca benzer terimler, yani harfleri tıpatıp aynı olan terimler toplanabilir. `3x + 2`, `5x` olamaz; x'li terimlerle y'li terimler de ayrı kalır.",
+        "Yalnızca benzer terimler, yani harfleri de bu harflerin üsleri de tıpatıp aynı olan terimler toplanabilir. `3x + 2`, `5x` olamaz; x'li terimlerle y'li terimler ayrı kalır, `x²` ile `3x` de öyle.",
       ],
     },
     "collect-cancel": {
@@ -201,7 +207,7 @@ export const tr: Translation = {
     },
     "letter-in": {
       name: "Harfle parantezi çarp",
-      how: "Öndeki harfi parantezin üstüne bırak. Sonra iki x'i birbirinin üstüne bırak: `x·x`, `x²` demektir.",
+      how: "Öndeki harfi parantezin üstüne bırak. Sonra iki harfi birbirinin üstüne bırak: `x·x`, `x²` demektir.",
       text: ["Harf de tıpkı bir sayı gibi içerideki her terimle çarpılır: `x(x + 3) = x·x + x·3`. `x·x` de bir kuvvettir: Üslü ifadeler bölümündeki gibi `x²`."],
     },
     "factor-then-cancel": {
@@ -214,7 +220,7 @@ export const tr: Translation = {
     "cancel-factor": {
       name: "Ortak çarpanı sadeleştir",
       how: "Kesir çizgisine dokun. Pay ile paydanın ortak çarpanı sadeleşir.",
-      text: ["Pay ile paydadaki aynı sayı birbirini götürür: `(3x)/3`, `x` olur."],
+      text: ["Payın tamamını ve paydanın tamamını çarpan bir sayı sadeleşir: `(3x)/3`, `x` olur. `(3x + 1)/3` ifadesinde sadeleşmez: 3, payın yalnızca bir kısmını çarpıyor."],
     },
     "power-of-power": {
       name: "Üssün üssü",
@@ -239,7 +245,7 @@ export const tr: Translation = {
     "zero-power": {
       name: "Sıfırıncı kuvvet",
       how: "0 üssünü basılı tut, sonra tabanının üstüne bırak. Ardından toplamak için + işaretine dokun.",
-      text: ["`x³/x³` 1'e eşittir, ama aynı zamanda `x^(3 − 3) = x⁰` demektir. Demek ki her şeyin sıfırıncı kuvveti 1'dir."],
+      text: ["`x³/x³` 1'e eşittir (x, 0 değilse), ama aynı zamanda `x^(3 − 3) = x⁰` demektir. Demek ki 0 dışındaki her sayının sıfırıncı kuvveti 1'dir."],
     },
     "tap-power": {
       name: "Kuvveti hesapla",
@@ -271,7 +277,7 @@ export const tr: Translation = {
     },
     "factor-shared": {
       name: "Ortak çarpan bul",
-      how: "Bir terimdeki `x` harfini basılı tut, sonra içinde `x` olan başka bir terimin üstüne bırak: iki terim onu ortak çarpan olarak paylaşır. Son iki terimle de aynısını yap, sonra ikisinde de bulunan parantezi dışarı al.",
+      how: "Bir terimdeki `x` harfini basılı tut, sonra içinde `x` olan başka bir terimin üstüne bırak: iki terim onu ortak çarpan olarak paylaşır. Sonra son iki terimin ortak çarpanını (çoğu zaman bir sayı), ardından iki çarpımda da bulunan parantezi dışarı al.",
       text: ["Dört terim varsa ikişerli çalış. Önce ilk iki terimin ortak çarpanını dışarı al, sonra son iki terimin. İki parantez aynıysa o parantezi de dışarı al."],
     },
     "move-letter-factor": {
@@ -279,7 +285,7 @@ export const tr: Translation = {
       how: "Çarpılan harflerden birini = işaretinin karşı tarafına sürükle. Öbür tarafı böler.",
       text: [
         "Formül, içinde birden çok harf olan bir denklemdir. Bir harfi yalnız bırakmaya, formülü o harfe göre düzenlemek denir. Bu, x için denklem çözmek gibidir: öbür harfleri sayıymış gibi düşün.",
-        "Bir tarafın tamamını çarpan harf karşı tarafa geçip öbür tarafı bölebilir: `F = ma` formülünden `F/m = a` elde edilir. (Yalnızca 0 olmayan bir harfe bölebiliriz. Bu formüllerde hiçbiri 0 değildir.)",
+        "Bir tarafın tamamını çarpan harf karşı tarafa geçip öbür tarafı bölebilir: `F = ma` formülünden `F/m = a` elde edilir. (Yalnızca 0 olmayan bir harfe bölebiliriz: burada 0 olmadığını varsayıyoruz.)",
         "İstediğin harf `ax + bx = c` gibi iki yerde geçiyorsa önce onu ortak çarpan olarak dışarı al: `x(a + b) = c`. Sonra parantezin tamamı karşıya geçebilir.",
       ],
     },
@@ -354,7 +360,7 @@ export const tr: Translation = {
     "evaluate-root": {
       name: "Kökü hesapla",
       how: "Hesaplamak için köke dokun.",
-      text: ["`√9`, kendisiyle çarpılınca 9 eden sayıdır: 3, çünkü `3·3 = 9`. Aynı şekilde `∛8 = 2`, çünkü `2·2·2 = 8`."],
+      text: ["`√9`, kendisiyle çarpılınca 9 eden pozitif sayıdır: 3, çünkü `3·3 = 9` (−3 için de bu doğru, ama √ pozitif olanı gösterir). Aynı şekilde `∛8 = 2`, çünkü `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Kökün içini ayır",
@@ -365,7 +371,7 @@ export const tr: Translation = {
       name: "Kökleri birleştir",
       how: "Bir kökü öbürünün üstüne bırak. Tek bir kök işaretinin altında birleşirler.",
       text: [
-        "`√2·√3` sayısının karesi `2·3` eder; yani `√2·√3`, karesi 6 olan sayıdır: `√(2·3) = √6`. Aynı türden iki kök tek bir kökte birleşir.",
+        "`√2·√3` sayısının karesi `2·3` eder; yani `√2·√3`, karesi 6 olan pozitif sayıdır: `√(2·3) = √6`. Aynı türden iki kök tek bir kökte birleşir.",
         "Ortak olan her üs için de aynısı geçerlidir: `x³y³`, xxx·yyy demektir; bu da xy·xy·xy, yani `(xy)³` eder.",
       ],
     },
@@ -406,7 +412,7 @@ export const tr: Translation = {
     "evaluate-log": {
       name: "Bilinen logaritmalar",
       how: "Hesaplamak için logaritmaya dokun: `ln(e) = 1`, 1'in logaritması da 0'dır.",
-      text: ["`ln(e) = 1`, çünkü `e¹ = e`. 1'in logaritması da 0'dır, çünkü her şeyin sıfırıncı kuvveti 1'dir."],
+      text: ["`ln(e) = 1`, çünkü `e¹ = e`. 1'in logaritması da 0'dır, çünkü `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Tabanın kuvveti olarak yaz",
@@ -493,8 +499,8 @@ export const tr: Translation = {
       text: ["`3² = 9`, ama `(−3)² = 9` de doğru. Yani `x² = 9` ise `x = 3` ya da `x = −3` olur. Eksiyi unutursan bir kökü kaybedersin."],
     },
     "take-out-then-split": {
-      name: "x'i dışarı al, sonra ayır",
-      how: "Terimlerden birindeki x'i basılı tut ve en soldan dışarı, öne sürükle. Sonra onu aşağı, çarpımın dışına çek.",
+      name: "Harfi dışarı al, sonra ayır",
+      how: "Terimlerden birindeki harfi basılı tut ve en soldan dışarı, öne sürükle. Sonra onu aşağı, çarpımın dışına çek.",
       text: ["Sabit terim yoksa her terimde bir x vardır: onu ortak paranteze al, `x² − 3x = x(x − 3)`. Artık sıfıra eşit bir çarpım var; yani `x = 0` ya da `x − 3 = 0`."],
     },
     "split-middle": {
@@ -537,11 +543,15 @@ export const tr: Translation = {
   solveFor: (letters: string[]) => `${letters.map((l) => `\`${l}\``).join(" ve ")} için çöz.`,
   pickFirst: "Yukarıdan bir cevap seç, sonra burada çöz.",
   hint: "İpucu",
+  nextStep: "Sonraki adım",
+  noNextStep: "Buradan sonrası için bir adım bulunamadı: Geri al ya da Baştan başla.",
   undo: "Geri al",
   solvedBang: "Çözdün!",
   where: "öyle ki",
   moveCrashed: "Bu hamlede bir şeyler ters gitti.",
-  moveCrashedDetails: "Ayrıntılar tarayıcı konsolunda.",
+  moveCrashedDetails: "Yeniden dene ya da bu alıştırmaya baştan başla.",
+  pageCrashed: "Bu sayfada bir şeyler ters gitti.",
+  pageCrashedDetails: "Yeniden dene ya da öğrenme yoluna geri dön. İlerlemen güvende.",
   tryAgain: "Yeniden dene",
 
   // Making a set
@@ -551,6 +561,26 @@ export const tr: Translation = {
   upload: ".yaml dosyası yükle",
   startFromExample: "Örnekten başla",
   yamlLabel: "YAML biçiminde alıştırma seti",
+  form: {
+    asForm: "Form",
+    asYaml: "YAML",
+    viewLabel: "Seti şu biçimde yaz",
+    title: "Başlık",
+    moves: "İzin verilen hamleler",
+    allMoves: "Tüm hamleler",
+    upTo: (n: number, title: string) => `${n}. bölüme kadar: ${title}`,
+    start: (n: number) => `Alıştırma ${n}: başlangıç`,
+    goal: (n: number) => `Alıştırma ${n}: hedef`,
+    remove: (n: number) => `${n}. alıştırmayı kaldır`,
+    addOne: "Alıştırma ekle",
+    fromChapter: "Bir bölümün alıştırmalarından ekle",
+    chapter: "Bölüm",
+    level: "Düzey",
+    howMany: "Kaç tane",
+    addMade: (n: number) => `${n} tane ekle`,
+    making: "Hazırlanıyor…",
+    cantRead: "Bu setin YAML'ında bir hata var, bu yüzden form onu gösteremiyor. Hatayı YAML görünümünde düzelt ya da örnekten başla.",
+  },
   check: "Kontrol et",
   checking: "Bu hamlelerle çözülebiliyor mu diye bakılıyor…",
   unsolvable: "Bu hamlelerle 10 adımda çözülemedi. Daha sonraki bir bölümün hamleleri gerekebilir (`moves:`).",
@@ -615,6 +645,7 @@ exercises:
     cantReadStart: (err: string) => `Başlangıç okunamadı: ${err}`,
     cantReadGoal: (err: string) => `Hedef okunamadı: ${err}`,
     doesntFollow: "Hedef, başlangıçtan elde edilemiyor (yazım hatası olabilir).",
+    noValue: "Başlangıç hiçbir sayı için tanımlı değil (0'a bölme mi var?).",
     twoWrong: "`wrong:` altında iki yanlış cevap olmalı.",
     cantReadWrong: (w: string, err: string) => `"${w}" yanlış cevabı okunamadı: ${err}`,
     wrongShape: (w: string, why: string) => `"${w}" yanlış cevabı hedefe benzemiyor: ${why}.`,

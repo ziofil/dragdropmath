@@ -35,6 +35,7 @@ export const de: Translation = {
   // Chapter page
   backToPath: "← Lernpfad",
   level: { easy: "Leicht", medium: "Mittel", hard: "Schwer" },
+  makingExercise: "Aufgabe wird erstellt …",
   anotherOne: "Noch eine →",
   progressHere:
     "Dein Fortschritt wird nur in diesem Browser gespeichert. Sichere ihn in einer Datei, damit er nicht verloren geht oder damit du ihn auf ein anderes Gerät mitnehmen kannst.",
@@ -50,7 +51,7 @@ export const de: Translation = {
         heading: "Worum es geht",
         text: [
           "Mit DragDropMath machst du Algebra mit den Händen. Du ziehst an einem beliebigen Teil eines Terms oder einer Gleichung, und er bewegt sich nur so, wie es die Mathematik erlaubt. Ein falscher Schritt passiert einfach nicht. So lernst du, was erlaubt ist, indem du es spürst, und nicht, indem du Regeln auswendig lernst.",
-          "Ein Lernpfad führt vom Ordnen von Termen bis zu Gleichungssystemen. Jedes Kapitel hat eine Lektion, Übungen in drei Schwierigkeitsstufen und „Im Kopf“: Dort stellst du dir das Ergebnis zuerst im Kopf vor, bevor du es ausrechnest. Lehrkräfte können eigene Aufgabenreihen schreiben und als Link teilen.",
+          "Ein Lernpfad führt vom Ordnen von Termen bis zu quadratischen Gleichungen. Jedes Kapitel hat eine Lektion, Übungen in drei Schwierigkeitsstufen und „Im Kopf“: Dort stellst du dir das Ergebnis zuerst im Kopf vor, bevor du es ausrechnest. Lehrkräfte können eigene Aufgabenreihen schreiben und als Link teilen.",
         ],
       },
       {
@@ -69,6 +70,13 @@ export const de: Translation = {
     ],
   },
   progressNotABackup: "Das ist keine Fortschrittsdatei von DragDropMath.",
+  progressReplace: (saved: string) =>
+    `Damit wird dein Fortschritt in diesem Browser durch den aus der Datei ersetzt${saved ? ` (gespeichert am ${saved})` : ""}. Laden?`,
+  progressLoadIt: "Laden",
+  cancel: "Abbrechen",
+  progressNoRoom: "Dein Browser konnte ihn nicht speichern, deshalb wurde nichts geändert.",
+  progressBlocked:
+    "Dieser Browser speichert für diese Seite nichts (ein privates Fenster oder der Speicher ist ausgeschaltet), also gibt es keinen Fortschritt, den du sichern könntest.",
   showMove: "Zeigen",
   lesson: "Lektion",
   practice: "Üben",
@@ -108,10 +116,10 @@ export const de: Translation = {
     },
     collect: {
       name: "Gleichartige Terme zusammenfassen",
-      how: "Zieh einen Term auf einen gleichartigen, also einen mit derselben Variablen. Die beiden werden addiert.",
+      how: "Zieh einen Term auf einen gleichartigen, also einen mit denselben Variablen mit denselben Exponenten. Die beiden werden addiert.",
       text: [
         "`3x` bedeutet `x + x + x`. Also ist `3x + 2x` drei x plus zwei x, zusammen `5x`.",
-        "Addieren kannst du nur gleichartige Terme, also Terme mit genau denselben Variablen. Aus `3x + 2` wird nicht `5x`, und x-Terme und y-Terme bleiben getrennt.",
+        "Addieren kannst du nur gleichartige Terme, also Terme mit genau denselben Variablen mit denselben Exponenten. Aus `3x + 2` wird nicht `5x`, x-Terme und y-Terme bleiben getrennt, und ebenso `x²` und `3x`.",
       ],
     },
     "collect-cancel": {
@@ -198,7 +206,7 @@ export const de: Translation = {
     },
     "letter-in": {
       name: "Variable mal Klammer",
-      how: "Zieh die Variable vor der Klammer auf die Klammer. Dann zieh die beiden x aufeinander: `x·x` ist `x²`.",
+      how: "Zieh die Variable vor der Klammer auf die Klammer. Dann zieh die beiden Variablen aufeinander: `x·x` ist `x²`.",
       text: ["Die Variable wird mit jedem Term in der Klammer multipliziert, genau wie eine Zahl: `x(x + 3) = x·x + x·3`. Und `x·x` ist eine Potenz, nämlich `x²`, wie im Kapitel Potenzen."],
     },
     "factor-then-cancel": {
@@ -220,8 +228,8 @@ export const de: Translation = {
       text: ["`3² = 9`, aber auch `(−3)² = 9`. Also heißt `x² = 9`: `x = 3` oder `x = −3`. Vergisst du das Minus, fehlt dir eine Lösung."],
     },
     "take-out-then-split": {
-      name: "x ausklammern, dann aufteilen",
-      how: "Halte das x in einem Term gedrückt und zieh es nach vorn, links über das Ende hinaus. Dann zieh es nach unten aus dem Produkt heraus.",
+      name: "Variable ausklammern, dann aufteilen",
+      how: "Halte die Variable in einem Term gedrückt und zieh sie nach vorn, links über das Ende hinaus. Dann zieh sie nach unten aus dem Produkt heraus.",
       text: ["Steht keine Zahl allein da, steckt in jedem Term ein x: Klammere es aus, `x² − 3x = x(x − 3)`. Jetzt ist es ein Produkt gleich 0, also `x = 0` oder `x − 3 = 0`."],
     },
     "split-middle": {
@@ -237,7 +245,7 @@ export const de: Translation = {
     "cancel-factor": {
       name: "Gemeinsamen Faktor kürzen",
       how: "Tippe auf den Bruchstrich. Was Zähler und Nenner gemeinsam haben, kürzt sich weg.",
-      text: ["Dieselbe Zahl im Zähler und im Nenner kürzt sich weg: `(3x)/3` ist `x`."],
+      text: ["Eine Zahl, die Faktor des ganzen Zählers und des ganzen Nenners ist, kürzt sich weg: `(3x)/3` ist `x`. In `(3x + 1)/3` geht das nicht: Dort multipliziert die 3 nur einen Teil des Zählers."],
     },
     "power-of-power": {
       name: "Potenzen potenzieren",
@@ -262,7 +270,7 @@ export const de: Translation = {
     "zero-power": {
       name: "Hoch 0",
       how: "Halte den Exponenten 0 gedrückt und zieh ihn auf seine Basis. Dann tippe auf das +, um zu addieren.",
-      text: ["`x³/x³` ist 1, und gleichzeitig ist es `x^(3 − 3) = x⁰`. Also ist alles hoch 0 gleich 1."],
+      text: ["`x³/x³` ist 1 (wenn x nicht 0 ist), und gleichzeitig ist es `x^(3 − 3) = x⁰`. Also ist jede Zahl außer 0 hoch 0 gleich 1."],
     },
     "tap-power": {
       name: "Potenz ausrechnen",
@@ -290,11 +298,14 @@ export const de: Translation = {
     "difference-of-squares": {
       name: "Dritte binomische Formel",
       how: "Tippe auf das Minus zwischen den beiden Quadraten.",
-      text: ["Ein Quadrat minus ein Quadrat lässt sich immer auf dieselbe Weise faktorisieren: `a² − b² = (a − b)(a + b)`. Multiplizier zur Probe aus: Die mittleren Terme heben sich auf."],
+      text: [
+        "Ein Quadrat minus ein Quadrat lässt sich immer auf dieselbe Weise faktorisieren: `a² − b² = (a − b)(a + b)`. Multiplizier zur Probe aus: Die mittleren Terme heben sich auf.",
+        "Das klappt nur bei einer Differenz, also einem Quadrat minus einem Quadrat. Eine Summe aus zwei Quadraten wie `x² + 9` lässt sich gar nicht faktorisieren. Ein Quadrat minus eine Zahl, die keine Quadratzahl ist, wie `x² − 7`, dagegen schon, aber mit Wurzeln: `(x − √7)(x + √7)`.",
+      ],
     },
     "factor-shared": {
       name: "Paarweise ausklammern",
-      how: "Halte das `x` eines Terms gedrückt und zieh es auf einen anderen Term mit `x`: Es wird aus beiden ausgeklammert. Mach dasselbe mit den letzten beiden Termen und klammere dann die Klammer aus, die beide gemeinsam haben.",
+      how: "Halte das `x` eines Terms gedrückt und zieh es auf einen anderen Term mit `x`: Es wird aus beiden ausgeklammert. Dann klammere aus, was die letzten beiden Terme gemeinsam haben (oft eine Zahl), und danach die Klammer, die beide Produkte gemeinsam haben.",
       text: ["Bei vier Termen arbeitest du paarweise. Klammere aus den ersten beiden Termen einen gemeinsamen Faktor aus, dann aus den letzten beiden. Sind die beiden Klammern gleich, klammerst du auch die Klammer aus."],
     },
     "move-letter-factor": {
@@ -302,8 +313,8 @@ export const de: Translation = {
       how: "Zieh eine der multiplizierten Variablen über das =. Jetzt teilt sie die andere Seite.",
       text: [
         "Eine Formel ist eine Gleichung mit mehreren Variablen. Bringst du eine Variable allein auf eine Seite, stellst du die Formel nach ihr um. Das geht wie das Auflösen nach x: Behandle die anderen Variablen wie Zahlen.",
-        "Eine Variable, die eine ganze Seite multipliziert, kann hinüberwandern und die andere Seite teilen: Aus `F = ma` wird `F/m = a`. (Das geht nur mit einer Variablen, die nicht 0 ist. In diesen Formeln ist sie das nie.)",
-        "Steht die gesuchte Variable an zwei Stellen, wie in `ax + bx = c`, klammerst du sie zuerst aus: `x(a + b) = c`. Dann kann die ganze Klammer hinüberwandern.",
+        "Eine Variable, die eine ganze Seite multipliziert, kann hinüberwandern und die andere Seite teilen: Aus `F = ma` wird `F/m = a`. (Das geht nur mit einer Variablen, die nicht 0 ist: Hier gehen wir davon aus, dass sie es nicht ist.)",
+        "Steht die gesuchte Variable an zwei Stellen, wie in `ax + bx = c`, klammerst du sie zuerst aus: `x(a + b) = c`. Dann kann die ganze Klammer hinüberwandern (sofern `a + b` nicht 0 ist).",
       ],
     },
     "move-letter-denominator": {
@@ -382,7 +393,7 @@ export const de: Translation = {
     "evaluate-root": {
       name: "Wurzel ausrechnen",
       how: "Tippe auf die Wurzel, um sie auszurechnen.",
-      text: ["`√9` ist die Zahl, die mit sich selbst multipliziert 9 ergibt: 3, denn `3·3 = 9`. Genauso ist `∛8 = 2`, denn `2·2·2 = 8`."],
+      text: ["`√9` ist die positive Zahl, die mit sich selbst multipliziert 9 ergibt: 3, denn `3·3 = 9` (−3 ergibt das auch, aber mit √ ist immer die positive gemeint). Genauso ist `∛8 = 2`, denn `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Unter der Wurzel zerlegen",
@@ -393,7 +404,7 @@ export const de: Translation = {
       name: "Wurzeln zusammenfassen",
       how: "Zieh eine Wurzel auf die andere. Sie kommen unter ein gemeinsames Wurzelzeichen.",
       text: [
-        "`√2·√3` zum Quadrat ist `2·3`, also ist `√2·√3` die Zahl, deren Quadrat 6 ist: `√(2·3) = √6`. Zwei Wurzeln derselben Art lassen sich unter einer zusammenfassen.",
+        "`√2·√3` zum Quadrat ist `2·3`, also ist `√2·√3` die positive Zahl, deren Quadrat 6 ist: `√(2·3) = √6`. Zwei Wurzeln derselben Art lassen sich unter einer zusammenfassen.",
         "Dasselbe gilt für jeden gemeinsamen Exponenten: `x³y³` ist xxx·yyy, also xy·xy·xy, und das ist `(xy)³`.",
       ],
     },
@@ -414,7 +425,7 @@ export const de: Translation = {
     },
     "fraction-power": {
       name: "Wurzeln und Potenzen zusammen",
-      how: "Zieh die Wurzel auf die Potenz: Die Exponenten werden addiert. Dann addiere die Brüche im Exponenten.",
+      how: "Zieh die Wurzel auf die Potenz: Die Exponenten werden addiert. Dann schreib die ganze Zahl in Halben: Zieh den Nenner des ½ auf sie und tippe auf das ·, um es auszurechnen. Dann addiere die Brüche und tippe auf das + im Zähler.",
       text: ["`√x` ist `x^(1/2)`, also ist `√x·x² = x^(1/2 + 2) = x^(5/2)`. Ein Bruch im Exponenten funktioniert wie jeder andere Exponent: Multiplizierst du Potenzen, addierst du die Exponenten."],
     },
     "root-across": {
@@ -430,7 +441,7 @@ export const de: Translation = {
     "evaluate-log": {
       name: "Bekannte Logarithmen",
       how: "Tippe auf den Logarithmus, um ihn auszurechnen: `ln(e) = 1`, und der Logarithmus von 1 ist 0.",
-      text: ["`ln(e) = 1`, denn `e¹ = e`. Und der Logarithmus von 1 ist 0, denn alles hoch 0 ist 1."],
+      text: ["`ln(e) = 1`, denn `e¹ = e`. Und der Logarithmus von 1 ist 0, denn `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Als Potenz der Basis",
@@ -527,11 +538,15 @@ export const de: Translation = {
   solveFor: (letters: string[]) => `Löse nach ${letters.map((l) => `\`${l}\``).join(" und ")} auf.`,
   pickFirst: "Wähl oben eine Antwort, dann rechne hier.",
   hint: "Tipp",
+  nextStep: "Nächster Schritt",
+  noNextStep: "Von hier aus findet sich kein Schritt: Probier „Rückgängig“ oder „Von vorn“.",
   undo: "Rückgängig",
   solvedBang: "Gelöst!",
   where: "wobei",
   moveCrashed: "Bei diesem Schritt ist etwas schiefgegangen.",
-  moveCrashedDetails: "Details stehen in der Browser-Konsole.",
+  moveCrashedDetails: "Versuch es noch einmal oder fang diese Aufgabe von vorn an.",
+  pageCrashed: "Auf dieser Seite ist etwas schiefgegangen.",
+  pageCrashedDetails: "Versuch es noch einmal oder geh zurück zum Lernpfad. Dein Fortschritt ist sicher.",
   tryAgain: "Nochmal versuchen",
 
   // Making a set
@@ -541,6 +556,27 @@ export const de: Translation = {
   upload: "Eine .yaml-Datei hochladen",
   startFromExample: "Mit dem Beispiel anfangen",
   yamlLabel: "Die Aufgabenreihe als YAML",
+  form: {
+    asForm: "Formular",
+    asYaml: "YAML",
+    viewLabel: "Aufgabenreihe schreiben als",
+    title: "Titel",
+    moves: "Erlaubte Schritte",
+    allMoves: "Alle Schritte",
+    upTo: (n: number, title: string) => `Bis ${n}. ${title}`,
+    start: (n: number) => `Aufgabe ${n}: Start`,
+    goal: (n: number) => `Aufgabe ${n}: Ziel`,
+    remove: (n: number) => `Aufgabe ${n} entfernen`,
+    addOne: "Aufgabe hinzufügen",
+    fromChapter: "Aufgaben aus den Übungen eines Kapitels hinzufügen",
+    chapter: "Kapitel",
+    level: "Stufe",
+    howMany: "Wie viele",
+    addMade: (n: number) => `${n} hinzufügen`,
+    making: "Werden erstellt …",
+    cantRead:
+      "Im YAML dieser Reihe steckt ein Fehler, deshalb kann das Formular sie nicht anzeigen. Korrigiere ihn in der YAML-Ansicht oder fang mit dem Beispiel an.",
+  },
   check: "Prüfen",
   checking: "Prüfe, ob es sich mit diesen Schritten lösen lässt …",
   unsolvable:
@@ -607,6 +643,7 @@ exercises:
     cantReadStart: (err: string) => `Der Start lässt sich nicht lesen: ${err}`,
     cantReadGoal: (err: string) => `Das Ziel lässt sich nicht lesen: ${err}`,
     doesntFollow: "Das Ziel folgt nicht aus dem Start (vielleicht ein Tippfehler?).",
+    noValue: "Der Start hat für keine Zahl einen Wert (eine Division durch 0?).",
     twoWrong: "Unter `wrong:` sollten zwei falsche Antworten stehen.",
     cantReadWrong: (w: string, err: string) => `Die falsche Antwort „${w}“ lässt sich nicht lesen: ${err}`,
     wrongShape: (w: string, why: string) => `Die falsche Antwort „${w}“ sieht nicht aus wie das Ziel: ${why}.`,

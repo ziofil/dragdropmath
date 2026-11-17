@@ -34,6 +34,7 @@ export const pl: Translation = {
   // Chapter page
   backToPath: "← Ścieżka nauki",
   level: { easy: "Łatwe", medium: "Średnie", hard: "Trudne" },
+  makingExercise: "Tworzę zadanie…",
   anotherOne: "Jeszcze jedno →",
   progressHere:
     "Twoje postępy są zapisane tylko w tej przeglądarce. Zapisz je do pliku, żeby ich nie stracić albo przenieść je na inne urządzenie.",
@@ -49,7 +50,7 @@ export const pl: Translation = {
         heading: "Co to jest",
         text: [
           "DragDropMath to algebra, którą robisz rękami. Przeciągasz dowolną część wyrażenia albo równania, a da się ją przesunąć tylko tak, jak pozwala matematyka. Błędny ruch po prostu się nie wykona, więc uczysz się, co wolno, czując to, a nie wkuwając reguły na pamięć.",
-          "Ścieżka nauki prowadzi od porządkowania wyrazów aż do układów równań. Każdy rozdział ma lekcję, ćwiczenia na trzech poziomach i zadania „W myślach”, w których najpierw wyobrażasz sobie wynik, a dopiero potem go wyliczasz. Nauczyciele mogą układać własne zestawy zadań i udostępniać je jako link.",
+          "Ścieżka nauki prowadzi od porządkowania wyrazów aż do równań kwadratowych. Każdy rozdział ma lekcję, ćwiczenia na trzech poziomach i zadania „W myślach”, w których najpierw wyobrażasz sobie wynik, a dopiero potem go wyliczasz. Nauczyciele mogą układać własne zestawy zadań i udostępniać je jako link.",
         ],
       },
       {
@@ -68,6 +69,13 @@ export const pl: Translation = {
     ],
   },
   progressNotABackup: "To nie jest plik z postępami DragDropMath.",
+  progressReplace: (saved: string) =>
+    `Postępy zapisane w tej przeglądarce zostaną zastąpione postępami z pliku${saved ? ` (zapisanego ${saved})` : ""}. Wczytać?`,
+  progressLoadIt: "Wczytaj",
+  cancel: "Anuluj",
+  progressNoRoom: "Przeglądarka nie zdołała ich zapisać, więc nic się nie zmieniło.",
+  progressBlocked:
+    "Ta przeglądarka nic nie zapisuje dla tej strony (okno prywatne albo wyłączona pamięć), więc nie ma postępów do zapisania.",
   showMove: "Pokaż",
   lesson: "Lekcja",
   practice: "Ćwiczenia",
@@ -107,10 +115,10 @@ export const pl: Translation = {
     },
     collect: {
       name: "Redukcja wyrazów podobnych",
-      how: "Upuść wyraz na wyraz podobny, czyli z tą samą literą. Dodają się.",
+      how: "Upuść wyraz na wyraz podobny, czyli z tymi samymi literami w tych samych potęgach. Dodają się.",
       text: [
         "`3x` oznacza `x + x + x`. Zatem `3x + 2x` to trzy iksy plus dwa iksy, czyli `5x`.",
-        "Dodawać można tylko wyrazy podobne, czyli takie, które mają dokładnie te same litery. `3x + 2` nie zamieni się w `5x`, a wyrazy z x i wyrazy z y zostają osobno.",
+        "Dodawać można tylko wyrazy podobne, czyli takie, które mają dokładnie te same litery w tych samych potęgach. `3x + 2` nie zamieni się w `5x`, wyrazy z x i wyrazy z y zostają osobno, tak samo jak `x²` i `3x`.",
       ],
     },
     "collect-cancel": {
@@ -199,7 +207,7 @@ export const pl: Translation = {
     },
     "letter-in": {
       name: "Litera razy nawias",
-      how: "Upuść literę sprzed nawiasu na nawias. Potem połącz oba iksy: `x·x` to `x²`.",
+      how: "Upuść literę sprzed nawiasu na nawias. Potem połącz obie litery: `x·x` to `x²`.",
       text: [
         "Litera mnoży każdy wyraz w nawiasie, tak samo jak liczba: `x(x + 3) = x·x + x·3`. A `x·x` to potęga, `x²`, jak w rozdziale „Potęgi”.",
       ],
@@ -214,7 +222,7 @@ export const pl: Translation = {
     "cancel-factor": {
       name: "Skracanie wspólnego czynnika",
       how: "Dotknij kreski ułamkowej. To, co licznik i mianownik mają wspólne, się skraca.",
-      text: ["Ta sama liczba w liczniku i w mianowniku się skraca: `(3x)/3` to `x`."],
+      text: ["Liczba, która mnoży cały licznik i cały mianownik, się skraca: `(3x)/3` to `x`. W `(3x + 1)/3` już nie: tam 3 mnoży tylko część licznika."],
     },
     "power-of-power": {
       name: "Potęga potęgi",
@@ -243,7 +251,7 @@ export const pl: Translation = {
     "zero-power": {
       name: "Wykładnik 0",
       how: "Naciśnij i przytrzymaj wykładnik 0, a potem upuść go na jego podstawę. Potem dotknij +, żeby dodać.",
-      text: ["`x³/x³` to 1, ale to także `x^(3 − 3) = x⁰`. Dlatego każda liczba (różna od zera) do potęgi 0 daje 1."],
+      text: ["`x³/x³` to 1 (gdy x jest różne od 0), ale to także `x^(3 − 3) = x⁰`. Dlatego każda liczba (różna od zera) do potęgi 0 daje 1."],
     },
     "tap-power": {
       name: "Obliczanie potęgi",
@@ -273,11 +281,12 @@ export const pl: Translation = {
       how: "Dotknij minusa między dwoma kwadratami.",
       text: [
         "Kwadrat minus kwadrat zawsze rozkłada się tak samo: `a² − b² = (a − b)(a + b)`. Wymnóż, żeby sprawdzić: środkowe wyrazy się redukują.",
+        "Działa to tylko dla różnicy: kwadrat minus kwadrat. Sumy dwóch kwadratów, jak `x² + 9`, w ogóle nie da się rozłożyć na czynniki. Kwadrat minus liczba, która nie jest kwadratem liczby całkowitej, jak `x² − 7`, rozkłada się, ale z pierwiastkami: `(x − √7)(x + √7)`.",
       ],
     },
     "factor-shared": {
       name: "Grupowanie wyrazów",
-      how: "Naciśnij i przytrzymaj `x` jednego wyrazu, a potem upuść go na inny wyraz z `x`: wychodzi przed nawias z obu naraz. To samo zrób z dwoma ostatnimi wyrazami, a potem wyłącz nawias, który mają wspólny.",
+      how: "Naciśnij i przytrzymaj `x` jednego wyrazu, a potem upuść go na inny wyraz z `x`: wychodzi przed nawias z obu naraz. Potem wyłącz to, co mają wspólne dwa ostatnie wyrazy (często liczbę), a na koniec nawias wspólny dla obu iloczynów.",
       text: [
         "Gdy są cztery wyrazy, pracuj parami. Wyłącz wspólny czynnik z dwóch pierwszych wyrazów, a potem z dwóch ostatnich. Jeśli nawiasy wyjdą takie same, wyłącz przed nawias również ten nawias.",
       ],
@@ -287,8 +296,8 @@ export const pl: Translation = {
       how: "Przenieś jedną z mnożonych liter na drugą stronę =. Dzieli drugą stronę.",
       text: [
         "Wzór to równanie z kilkoma literami. Wyznaczanie jednej litery ze wzoru działa tak jak rozwiązywanie równania z x: pozostałe litery traktuj jak liczby.",
-        "Litera, która mnoży całą stronę, może przejść na drugą stronę i ją podzielić: z `F = ma` dostajemy `F/m = a`. (Dzielić wolno tylko przez literę różną od 0. W tych wzorach zawsze taka jest.)",
-        "Gdy szukana litera występuje w dwóch miejscach, jak w `ax + bx = c`, najpierw wyłącz ją przed nawias: `x(a + b) = c`. Wtedy cały nawias może przejść na drugą stronę.",
+        "Litera, która mnoży całą stronę, może przejść na drugą stronę i ją podzielić: z `F = ma` dostajemy `F/m = a`. (Dzielić wolno tylko przez literę różną od 0: tutaj zakładamy, że taka jest.)",
+        "Gdy szukana litera występuje w dwóch miejscach, jak w `ax + bx = c`, najpierw wyłącz ją przed nawias: `x(a + b) = c`. Wtedy cały nawias może przejść na drugą stronę (o ile `a + b` nie jest równe 0).",
       ],
     },
     "move-letter-denominator": {
@@ -367,8 +376,8 @@ export const pl: Translation = {
       ],
     },
     "take-out-then-split": {
-      name: "Wyłącz x, a potem rozbij",
-      how: "Przytrzymaj x w jednym wyrazie i wyciągnij je na początek, za lewy koniec. Potem ściągnij je w dół, poza iloczyn.",
+      name: "Wyłącz literę, a potem rozbij",
+      how: "Przytrzymaj literę w jednym wyrazie i wyciągnij ją na początek, za lewy koniec. Potem ściągnij ją w dół, poza iloczyn.",
       text: [
         "Gdy nie ma wyrazu wolnego, w każdym wyrazie jest x: wyłącz je przed nawias, `x² − 3x = x(x − 3)`. Teraz to iloczyn równy 0, więc `x = 0` lub `x − 3 = 0`.",
       ],
@@ -411,7 +420,7 @@ export const pl: Translation = {
     "evaluate-root": {
       name: "Obliczanie pierwiastka",
       how: "Dotknij pierwiastka, żeby go obliczyć.",
-      text: ["`√9` to liczba, która pomnożona przez siebie daje 9: to 3, bo `3·3 = 9`. Tak samo `∛8 = 2`, bo `2·2·2 = 8`."],
+      text: ["`√9` to liczba dodatnia, która pomnożona przez siebie daje 9: to 3, bo `3·3 = 9` (−3 też, ale √ oznacza tę dodatnią). Tak samo `∛8 = 2`, bo `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Rozkład pod pierwiastkiem",
@@ -424,7 +433,7 @@ export const pl: Translation = {
       name: "Łączenie pierwiastków",
       how: "Upuść jeden pierwiastek na drugi. Trafiają pod jeden znak pierwiastka.",
       text: [
-        "`√2·√3` podniesione do kwadratu daje `2·3`, więc `√2·√3` to liczba, której kwadrat wynosi 6: `√(2·3) = √6`. Dwa pierwiastki tego samego stopnia łączą się pod jednym.",
+        "`√2·√3` podniesione do kwadratu daje `2·3`, więc `√2·√3` to liczba dodatnia, której kwadrat wynosi 6: `√(2·3) = √6`. Dwa pierwiastki tego samego stopnia łączą się pod jednym.",
         "Tak samo jest z każdym wspólnym wykładnikiem: `x³y³` to xxx·yyy, czyli xy·xy·xy, a więc `(xy)³`.",
       ],
     },
@@ -449,7 +458,7 @@ export const pl: Translation = {
     },
     "fraction-power": {
       name: "Pierwiastki i potęgi razem",
-      how: "Upuść pierwiastek na potęgę: wykładniki się dodają. Potem dodaj ułamki w wykładniku.",
+      how: "Upuść pierwiastek na potęgę: wykładniki się dodają. Potem zamień liczbę całkowitą na połówki: upuść na nią mianownik ułamka ½ i dotknij ·, żeby to obliczyć. Następnie dodaj ułamki i dotknij + w liczniku.",
       text: [
         "`√x` to `x^(1/2)`, więc `√x·x² = x^(1/2 + 2) = x^(5/2)`. Wykładnik ułamkowy działa jak każdy inny: przy mnożeniu potęg wykładniki się dodaje.",
       ],
@@ -471,7 +480,7 @@ export const pl: Translation = {
     "evaluate-log": {
       name: "Znane logarytmy",
       how: "Dotknij logarytmu, żeby go obliczyć: `ln(e) = 1`, a logarytm z 1 to 0.",
-      text: ["`ln(e) = 1`, bo `e¹ = e`. A logarytm z 1 to 0, bo każda liczba (różna od zera) do potęgi 0 daje 1."],
+      text: ["`ln(e) = 1`, bo `e¹ = e`. A logarytm z 1 to 0, bo `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Potęga podstawy",
@@ -572,11 +581,15 @@ export const pl: Translation = {
   solveFor: (letters: string[]) => `Wyznacz ${letters.map((l) => `\`${l}\``).join(" i ")}.`,
   pickFirst: "Wybierz odpowiedź powyżej, a potem rozwiąż zadanie tutaj.",
   hint: "Podpowiedź",
+  nextStep: "Następny krok",
+  noNextStep: "Nie udało się stąd znaleźć kroku: spróbuj „Cofnij” albo „Od początku”.",
   undo: "Cofnij",
   solvedBang: "Rozwiązane!",
   where: "dla",
   moveCrashed: "Coś poszło nie tak przy tym ruchu.",
-  moveCrashedDetails: "Szczegóły są w konsoli przeglądarki.",
+  moveCrashedDetails: "Spróbuj jeszcze raz albo zacznij to zadanie od początku.",
+  pageCrashed: "Coś poszło nie tak na tej stronie.",
+  pageCrashedDetails: "Spróbuj jeszcze raz albo wróć do ścieżki nauki. Twoje postępy są bezpieczne.",
   tryAgain: "Spróbuj jeszcze raz",
 
   // Making a set
@@ -586,6 +599,27 @@ export const pl: Translation = {
   upload: "Wczytaj plik .yaml",
   startFromExample: "Zacznij od przykładu",
   yamlLabel: "Zestaw zadań w formacie YAML",
+  form: {
+    asForm: "Formularz",
+    asYaml: "YAML",
+    viewLabel: "Zapisz zestaw jako",
+    title: "Tytuł",
+    moves: "Dozwolone ruchy",
+    allMoves: "Wszystkie ruchy",
+    upTo: (n: number, title: string) => `Do rozdziału ${n}. ${title}`,
+    start: (n: number) => `Zadanie ${n}: punkt wyjścia`,
+    goal: (n: number) => `Zadanie ${n}: cel`,
+    remove: (n: number) => `Usuń zadanie ${n}`,
+    addOne: "Dodaj zadanie",
+    fromChapter: "Dodaj zadania z ćwiczeń do rozdziału",
+    chapter: "Rozdział",
+    level: "Poziom",
+    howMany: "Ile",
+    addMade: (n: number) => `Dodaj ${n}`,
+    making: "Tworzę je…",
+    cantRead:
+      "W YAML-u tego zestawu jest błąd, więc formularz nie może go pokazać. Popraw go w widoku YAML albo zacznij od przykładu.",
+  },
   check: "Sprawdź",
   checking: "Sprawdzam, czy da się to rozwiązać tymi ruchami…",
   unsolvable: "Nie udało się tego rozwiązać tymi ruchami w 10 krokach. Może potrzeba ruchów z dalszego rozdziału (`moves:`).",
@@ -650,6 +684,7 @@ exercises:
     cantReadStart: (err: string) => `Nie da się odczytać punktu wyjścia: ${err}`,
     cantReadGoal: (err: string) => `Nie da się odczytać celu: ${err}`,
     doesntFollow: "Cel nie wynika z punktu wyjścia (sprawdź, czy nie ma literówki).",
+    noValue: "Punkt wyjścia nie ma wartości dla żadnej liczby (dzielenie przez 0?).",
     twoWrong: "W `wrong:` powinny być dwie błędne odpowiedzi.",
     cantReadWrong: (w: string, err: string) => `Nie da się odczytać błędnej odpowiedzi „${w}”: ${err}`,
     wrongShape: (w: string, why: string) => `Błędna odpowiedź „${w}” nie ma postaci celu: ${why}.`,

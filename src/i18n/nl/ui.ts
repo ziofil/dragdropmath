@@ -35,6 +35,7 @@ export const nl: Translation = {
   // Chapter page
   backToPath: "← Leerpad",
   level: { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" },
+  makingExercise: "Oefening wordt gemaakt…",
   anotherOne: "Nog een →",
   progressHere:
     "Je voortgang wordt alleen in deze browser bewaard. Sla hem op in een bestand, zodat je hem niet kwijtraakt of op een ander apparaat verder kunt.",
@@ -50,7 +51,7 @@ export const nl: Translation = {
         heading: "Wat het is",
         text: [
           "Met DragDropMath doe je algebra met je handen. Je sleept elk stukje van een uitdrukking of vergelijking, en het kan alleen bewegen zoals de wiskunde het toestaat. Een foute zet gebeurt gewoon niet. Zo leer je wat mag door het te voelen, niet door regels uit je hoofd te leren.",
-          "Er is een leerpad van termen ordenen tot stelsels van vergelijkingen. Elk hoofdstuk heeft een les, oefeningen op drie niveaus en ‘Uit het hoofd’-opgaven, waarbij je het antwoord eerst in gedachten voor je ziet en het daarna uitwerkt. Docenten kunnen zelf reeksen oefeningen maken en die als link delen.",
+          "Er is een leerpad van termen ordenen tot kwadratische vergelijkingen. Elk hoofdstuk heeft een les, oefeningen op drie niveaus en ‘Uit het hoofd’-opgaven, waarbij je het antwoord eerst in gedachten voor je ziet en het daarna uitwerkt. Docenten kunnen zelf reeksen oefeningen maken en die als link delen.",
         ],
       },
       {
@@ -69,6 +70,13 @@ export const nl: Translation = {
     ],
   },
   progressNotABackup: "Dit is geen voortgangsbestand van DragDropMath.",
+  progressReplace: (saved: string) =>
+    `Hiermee vervang je je voortgang in deze browser door die uit het bestand${saved ? ` (opgeslagen op ${saved})` : ""}. Laden?`,
+  progressLoadIt: "Laden",
+  cancel: "Annuleren",
+  progressNoRoom: "Je browser kon hem niet opslaan, dus er is niets veranderd.",
+  progressBlocked:
+    "Deze browser bewaart niets voor deze site (een privévenster, of opslag staat uit), dus er is geen voortgang om op te slaan.",
   showMove: "Voordoen",
   lesson: "Les",
   practice: "Oefenen",
@@ -108,10 +116,10 @@ export const nl: Translation = {
     },
     collect: {
       name: "Gelijksoortige termen samennemen",
-      how: "Sleep een term op een gelijksoortige term, dus een met dezelfde letter. Ze worden opgeteld.",
+      how: "Sleep een term op een gelijksoortige term, dus een met dezelfde letters met dezelfde exponenten. Ze worden opgeteld.",
       text: [
         "`3x` betekent `x + x + x`. Dus `3x + 2x` is drie x'en plus twee x'en: `5x`.",
-        "Alleen gelijksoortige termen kun je optellen: termen met precies dezelfde letters. Van `3x + 2` kun je geen `5x` maken, en termen met x en termen met y blijven apart.",
+        "Alleen gelijksoortige termen kun je optellen: termen met precies dezelfde letters, met dezelfde exponenten. Van `3x + 2` kun je geen `5x` maken, termen met x en termen met y blijven apart, en `x²` en `3x` ook.",
       ],
     },
     "collect-cancel": {
@@ -198,7 +206,7 @@ export const nl: Translation = {
     },
     "letter-in": {
       name: "Letter keer haakjes",
-      how: "Sleep de letter voor de haakjes op de haakjes. Sleep daarna de twee x'en op elkaar: `x·x` is `x²`.",
+      how: "Sleep de letter voor de haakjes op de haakjes. Sleep daarna de twee letters op elkaar: `x·x` is `x²`.",
       text: ["De letter vermenigvuldigt elke term tussen de haakjes, net als een getal: `x(x + 3) = x·x + x·3`. En `x·x` is een macht, `x²`, zoals bij Machten."],
     },
     "factor-then-cancel": {
@@ -220,8 +228,8 @@ export const nl: Translation = {
       text: ["`3² = 9`, maar ook `(−3)² = 9`. Dus `x² = 9` betekent `x = 3` of `x = −3`. Vergeet je het minteken, dan raak je een oplossing kwijt."],
     },
     "take-out-then-split": {
-      name: "x buiten haakjes, dan splitsen",
-      how: "Houd de x in een term ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde. Trek hem daarna omlaag, los van het product.",
+      name: "Letter buiten haakjes, dan splitsen",
+      how: "Houd de letter in een term ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde. Trek hem daarna omlaag, los van het product.",
       text: ["Staat er geen los getal, dan zit in elke term een x: haal die buiten haakjes, `x² − 3x = x(x − 3)`. Nu heb je een product gelijk aan 0, dus `x = 0` of `x − 3 = 0`."],
     },
     "split-middle": {
@@ -237,7 +245,7 @@ export const nl: Translation = {
     "cancel-factor": {
       name: "Gemeenschappelijke factor wegdelen",
       how: "Tik op de breukstreep. Wat teller en noemer gemeen hebben, valt tegen elkaar weg.",
-      text: ["Hetzelfde getal in de teller en in de noemer valt tegen elkaar weg: `(3x)/3` is `x`."],
+      text: ["Een getal dat de hele teller en de hele noemer vermenigvuldigt, valt tegen elkaar weg: `(3x)/3` is `x`. Bij `(3x + 1)/3` niet: daar vermenigvuldigt de 3 maar een deel van de teller."],
     },
     "power-of-power": {
       name: "Macht van een macht",
@@ -262,7 +270,7 @@ export const nl: Translation = {
     "zero-power": {
       name: "Tot de macht 0",
       how: "Houd de exponent 0 ingedrukt en sleep hem op zijn grondtal. Tik daarna op de + om op te tellen.",
-      text: ["`x³/x³` is 1, en het is ook `x^(3 − 3) = x⁰`. Alles tot de macht 0 is dus 1."],
+      text: ["`x³/x³` is 1 (als x niet 0 is), en het is ook `x^(3 − 3) = x⁰`. Elk getal behalve 0 tot de macht 0 is dus 1."],
     },
     "tap-power": {
       name: "Macht uitrekenen",
@@ -290,11 +298,14 @@ export const nl: Translation = {
     "difference-of-squares": {
       name: "Verschil van twee kwadraten",
       how: "Tik op het minteken tussen de twee kwadraten.",
-      text: ["Een kwadraat min een kwadraat ontbind je altijd op dezelfde manier: `a² − b² = (a − b)(a + b)`. Werk de haakjes weg om het te controleren: de middelste termen vallen tegen elkaar weg."],
+      text: [
+        "Een kwadraat min een kwadraat ontbind je altijd op dezelfde manier: `a² − b² = (a − b)(a + b)`. Werk de haakjes weg om het te controleren: de middelste termen vallen tegen elkaar weg.",
+        "Het werkt alleen bij een verschil, een kwadraat min een kwadraat. Een som van twee kwadraten, zoals `x² + 9`, kun je helemaal niet ontbinden. Een kwadraat min een getal dat geen kwadraat is, zoals `x² − 7`, wel, maar dan met wortels: `(x − √7)(x + √7)`.",
+      ],
     },
     "factor-shared": {
       name: "Samen buiten haakjes",
-      how: "Houd de `x` van een term ingedrukt en sleep hem op een andere term met een `x`: die twee brengen hem samen buiten haakjes. Doe hetzelfde met de laatste twee termen, en haal daarna de haakjes die ze gemeen hebben naar voren.",
+      how: "Houd de `x` van een term ingedrukt en sleep hem op een andere term met een `x`: die twee brengen hem samen buiten haakjes. Haal daarna buiten haakjes wat de laatste twee termen gemeen hebben (vaak een getal), en dan de haakjes die de twee producten gemeen hebben.",
       text: ["Bij vier termen werk je per paar. Breng een gemeenschappelijke factor buiten haakjes bij de eerste twee termen, en daarna bij de laatste twee. Staat er twee keer hetzelfde tussen de haakjes, dan haal je ook die haakjes naar voren."],
     },
     "move-letter-factor": {
@@ -302,8 +313,8 @@ export const nl: Translation = {
       how: "Sleep een van de vermenigvuldigde letters naar de andere kant van het =. Daar ga je erdoor delen.",
       text: [
         "Een formule is een vergelijking met meerdere letters. Eén letter in zijn eentje aan een kant krijgen heet die letter vrijmaken. Het gaat net als x oplossen: je doet alsof de andere letters getallen zijn.",
-        "Een letter die een hele kant vermenigvuldigt, kan naar de overkant en deelt daar de andere kant: uit `F = ma` volgt `F/m = a`. (Dat mag alleen met een letter die niet 0 is. In deze formules is dat nooit zo.)",
-        "Staat de letter die je zoekt op twee plaatsen, zoals in `ax + bx = c`, breng hem dan eerst buiten haakjes: `x(a + b) = c`. Daarna kan het hele stuk tussen haakjes naar de overkant.",
+        "Een letter die een hele kant vermenigvuldigt, kan naar de overkant en deelt daar de andere kant: uit `F = ma` volgt `F/m = a`. (Dat mag alleen met een letter die niet 0 is: we gaan ervan uit dat dat hier zo is.)",
+        "Staat de letter die je zoekt op twee plaatsen, zoals in `ax + bx = c`, breng hem dan eerst buiten haakjes: `x(a + b) = c`. Daarna kan het hele stuk tussen haakjes naar de overkant (zolang `a + b` niet 0 is).",
       ],
     },
     "move-letter-denominator": {
@@ -382,7 +393,7 @@ export const nl: Translation = {
     "evaluate-root": {
       name: "Wortel uitrekenen",
       how: "Tik op de wortel om hem uit te rekenen.",
-      text: ["`√9` is het getal dat 9 oplevert als je het met zichzelf vermenigvuldigt: 3, want `3·3 = 9`. Zo is ook `∛8 = 2`, want `2·2·2 = 8`."],
+      text: ["`√9` is het positieve getal dat 9 oplevert als je het met zichzelf vermenigvuldigt: 3, want `3·3 = 9` (−3 ook, maar met √ bedoel je altijd het positieve getal). Zo is ook `∛8 = 2`, want `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Splitsen onder de wortel",
@@ -393,7 +404,7 @@ export const nl: Translation = {
       name: "Wortels samenvoegen",
       how: "Sleep de ene wortel op de andere. Ze komen samen onder één wortelteken.",
       text: [
-        "Het kwadraat van `√2·√3` is `2·3`, dus `√2·√3` is het getal waarvan het kwadraat 6 is: `√(2·3) = √6`. Twee wortels van dezelfde soort kun je onder één wortel samenvoegen.",
+        "Het kwadraat van `√2·√3` is `2·3`, dus `√2·√3` is het positieve getal waarvan het kwadraat 6 is: `√(2·3) = √6`. Twee wortels van dezelfde soort kun je onder één wortel samenvoegen.",
         "Dat geldt voor elke exponent die ze gemeen hebben: `x³y³` is xxx·yyy, en dat is xy·xy·xy, dus `(xy)³`.",
       ],
     },
@@ -414,7 +425,7 @@ export const nl: Translation = {
     },
     "fraction-power": {
       name: "Wortels en machten samen",
-      how: "Sleep de wortel op de macht: de exponenten worden opgeteld. Tel daarna de breuken in de exponent op.",
+      how: "Sleep de wortel op de macht: de exponenten worden opgeteld. Schrijf daarna het hele getal als halven: sleep de noemer van de ½ erop en tik op de · om het uit te rekenen. Tel dan de breuken op en tik op de + in de teller.",
       text: ["`√x` is `x^(1/2)`, dus `√x·x² = x^(1/2 + 2) = x^(5/2)`. Een breuk als exponent werkt net als elke andere exponent: vermenigvuldig je machten, dan tel je de exponenten op."],
     },
     "root-across": {
@@ -430,7 +441,7 @@ export const nl: Translation = {
     "evaluate-log": {
       name: "Bekende logaritmen",
       how: "Tik op de logaritme om hem uit te rekenen: `ln(e) = 1`, en de logaritme van 1 is 0.",
-      text: ["`ln(e) = 1`, want `e¹ = e`. En de logaritme van 1 is 0, want alles tot de macht 0 is 1."],
+      text: ["`ln(e) = 1`, want `e¹ = e`. En de logaritme van 1 is 0, want `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Als macht van het grondtal",
@@ -528,11 +539,15 @@ export const nl: Translation = {
   solveFor: (letters: string[]) => `Los op naar ${letters.map((l) => `\`${l}\``).join(" en ")}.`,
   pickFirst: "Kies hierboven een antwoord en los het dan hier op.",
   hint: "Tip",
+  nextStep: "Volgende stap",
+  noNextStep: "Vanaf hier is geen stap te vinden: probeer ‘Ongedaan maken’ of ‘Opnieuw beginnen’.",
   undo: "Ongedaan maken",
   solvedBang: "Opgelost!",
   where: "waarbij",
   moveCrashed: "Er ging iets mis bij die zet.",
-  moveCrashedDetails: "Details staan in de console van de browser.",
+  moveCrashedDetails: "Probeer het nog eens, of begin deze oefening opnieuw.",
+  pageCrashed: "Er ging iets mis op deze pagina.",
+  pageCrashedDetails: "Probeer het nog eens, of ga terug naar het leerpad. Je voortgang is veilig.",
   tryAgain: "Probeer opnieuw",
 
   // Making a set
@@ -542,6 +557,27 @@ export const nl: Translation = {
   upload: "Upload een .yaml-bestand",
   startFromExample: "Begin met het voorbeeld",
   yamlLabel: "De oefenreeks, in YAML",
+  form: {
+    asForm: "Formulier",
+    asYaml: "YAML",
+    viewLabel: "Schrijf de reeks als",
+    title: "Titel",
+    moves: "Toegestane zetten",
+    allMoves: "Alle zetten",
+    upTo: (n: number, title: string) => `Tot en met ${n}. ${title}`,
+    start: (n: number) => `Oefening ${n}: start`,
+    goal: (n: number) => `Oefening ${n}: doel`,
+    remove: (n: number) => `Oefening ${n} verwijderen`,
+    addOne: "Oefening toevoegen",
+    fromChapter: "Oefeningen toevoegen uit ‘Oefenen’ bij een hoofdstuk",
+    chapter: "Hoofdstuk",
+    level: "Niveau",
+    howMany: "Hoeveel",
+    addMade: (n: number) => `${n} toevoegen`,
+    making: "Ze worden gemaakt…",
+    cantRead:
+      "In de YAML van deze reeks zit een fout, dus het formulier kan hem niet tonen. Verbeter hem in de YAML-weergave, of begin met het voorbeeld.",
+  },
   check: "Controleren",
   checking: "We kijken of het met deze zetten op te lossen is…",
   unsolvable: "Lukte niet in 10 stappen met deze zetten. Misschien zijn er zetten uit een later hoofdstuk nodig (`moves:`).",
@@ -607,6 +643,7 @@ exercises:
     cantReadStart: (err: string) => `De start is niet te lezen: ${err}`,
     cantReadGoal: (err: string) => `Het doel is niet te lezen: ${err}`,
     doesntFollow: "Het doel volgt niet uit de start (kijk even of er een typfout in zit).",
+    noValue: "De start heeft voor geen enkel getal een waarde (een deling door 0?).",
     twoWrong: "Bij `wrong:` horen twee foute antwoorden.",
     cantReadWrong: (w: string, err: string) => `Het foute antwoord "${w}" is niet te lezen: ${err}`,
     wrongShape: (w: string, why: string) => `Het foute antwoord "${w}" lijkt niet op het doel: ${why}.`,

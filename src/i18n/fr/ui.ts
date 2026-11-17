@@ -37,6 +37,7 @@ export const fr: Translation = {
   // Chapter page
   backToPath: "← Parcours",
   level: { easy: "Facile", medium: "Moyen", hard: "Difficile" },
+  makingExercise: "Création d'un exercice…",
   anotherOne: "Un autre →",
   progressHere:
     "Ta progression est enregistrée uniquement dans ce navigateur. Exporte-la dans un fichier pour la mettre à l'abri, ou pour la retrouver sur un autre appareil.",
@@ -52,7 +53,7 @@ export const fr: Translation = {
         heading: "Qu'est-ce que c'est ?",
         text: [
           "DragDropMath, c'est de l'algèbre qu'on fait avec les mains. Tu fais glisser n'importe quelle partie d'une expression ou d'une équation, et elle ne peut bouger que comme les maths le permettent. Un mouvement interdit ne se produit tout simplement pas : tu comprends ce qui est permis en le sentant, pas en apprenant des règles par cœur.",
-          "Un parcours te mène de l'ordre des termes jusqu'aux systèmes d'équations. Chaque chapitre propose un cours, de l'entraînement sur trois niveaux et des exercices « De tête », où tu te représentes la réponse dans ta tête avant de faire le calcul. Les enseignants peuvent écrire leurs propres séries d'exercices et les partager sous forme de lien.",
+          "Un parcours te mène de l'ordre des termes jusqu'aux équations du second degré. Chaque chapitre propose un cours, de l'entraînement sur trois niveaux et des exercices « De tête », où tu te représentes la réponse dans ta tête avant de faire le calcul. Les enseignants peuvent écrire leurs propres séries d'exercices et les partager sous forme de lien.",
         ],
       },
       {
@@ -71,6 +72,13 @@ export const fr: Translation = {
     ],
   },
   progressNotABackup: "Ce fichier n'est pas un fichier de progression DragDropMath.",
+  progressReplace: (saved: string) =>
+    `Ta progression dans ce navigateur sera remplacée par celle du fichier${saved ? ` (enregistré le ${saved})` : ""}. Le charger ?`,
+  progressLoadIt: "Le charger",
+  cancel: "Annuler",
+  progressNoRoom: "Ton navigateur n'a pas pu l'enregistrer, donc rien n'a changé.",
+  progressBlocked:
+    "Ce navigateur ne conserve rien pour ce site (navigation privée, ou stockage désactivé), donc il n'y a pas de progression à enregistrer.",
   showMove: "Montrer",
   lesson: "Cours",
   practice: "Entraîne-toi",
@@ -110,10 +118,10 @@ export const fr: Translation = {
     },
     collect: {
       name: "Réduire les termes semblables",
-      how: "Dépose un terme sur un terme semblable, c'est-à-dire avec la même lettre. Ils s'additionnent.",
+      how: "Dépose un terme sur un terme semblable, c'est-à-dire avec les mêmes lettres aux mêmes puissances. Ils s'additionnent.",
       text: [
         "`3x` veut dire `x + x + x`. Donc `3x + 2x`, c'est trois x plus deux x : `5x`.",
-        "On n'additionne que des termes semblables, c'est-à-dire avec exactement les mêmes lettres. `3x + 2` ne peut pas devenir `5x`, et les termes en x restent séparés des termes en y.",
+        "On n'additionne que des termes semblables, c'est-à-dire avec exactement les mêmes lettres, aux mêmes puissances. `3x + 2` ne peut pas devenir `5x`, les termes en x restent séparés des termes en y, et `x²` et `3x` aussi.",
       ],
     },
     "collect-cancel": {
@@ -200,7 +208,7 @@ export const fr: Translation = {
     },
     "letter-in": {
       name: "Une lettre fois une parenthèse",
-      how: "Dépose la lettre devant sur la parenthèse. Ensuite, dépose un x sur l'autre : `x·x`, c'est `x²`.",
+      how: "Dépose la lettre devant sur la parenthèse. Ensuite, appuie sur le · entre les deux lettres : `x·x`, c'est `x²`. (Pour déplacer une lettre seule, appuie longuement dessus : un appui bref prend tout le terme.)",
       text: ["La lettre multiplie chaque terme à l'intérieur, exactement comme un nombre : `x(x + 3) = x·x + x·3`. Et `x·x` est une puissance, `x²`, comme dans le chapitre Puissances."],
     },
     "factor-then-cancel": {
@@ -211,7 +219,7 @@ export const fr: Translation = {
     "cancel-factor": {
       name: "Simplifier par un facteur commun",
       how: "Appuie sur la barre de fraction. Ce que le numérateur et le dénominateur ont en commun se simplifie.",
-      text: ["Un même nombre au numérateur et au dénominateur se simplifie : `(3x)/3`, c'est `x`."],
+      text: ["Un nombre qui multiplie tout le numérateur et tout le dénominateur se simplifie : `(3x)/3`, c'est `x`. Dans `(3x + 1)/3`, non : le 3 ne multiplie qu'une partie du numérateur."],
     },
     "power-of-power": {
       name: "Puissance d'une puissance",
@@ -236,7 +244,7 @@ export const fr: Translation = {
     "zero-power": {
       name: "Exposant 0",
       how: "Appuie longuement sur l'exposant 0, puis dépose-le sur sa base. Ensuite, appuie sur le + pour additionner.",
-      text: ["`x³/x³` vaut 1, et c'est aussi `x^(3 − 3) = x⁰`. Donc tout nombre à la puissance 0 vaut 1."],
+      text: ["`x³/x³` vaut 1 (si x n'est pas nul), et c'est aussi `x^(3 − 3) = x⁰`. Donc tout nombre non nul à la puissance 0 vaut 1."],
     },
     "tap-power": {
       name: "Calculer une puissance",
@@ -264,11 +272,14 @@ export const fr: Translation = {
     "difference-of-squares": {
       name: "Différence de deux carrés",
       how: "Appuie sur le moins entre les deux carrés.",
-      text: ["Un carré moins un carré se factorise toujours de la même façon (c'est une identité remarquable) : `a² − b² = (a − b)(a + b)`. Développe pour vérifier : les termes du milieu s'annulent."],
+      text: [
+        "Un carré moins un carré se factorise toujours de la même façon (c'est une identité remarquable) : `a² − b² = (a − b)(a + b)`. Développe pour vérifier : les termes du milieu s'annulent.",
+        "Ça ne marche que pour une différence, un carré moins un carré. Une somme de deux carrés, comme `x² + 9`, ne se factorise pas du tout. Un carré moins un nombre qui n'est pas un carré parfait, comme `x² − 7`, se factorise, mais avec des racines : `(x − √7)(x + √7)`.",
+      ],
     },
     "factor-shared": {
       name: "Mettre un facteur en commun",
-      how: "Appuie longuement sur le `x` d'un terme, puis dépose-le sur un autre terme qui a un `x` : il devient leur facteur commun. Fais de même avec les deux derniers termes, puis mets en facteur la parenthèse qu'ils ont en commun.",
+      how: "Appuie longuement sur le `x` d'un terme, puis dépose-le sur un autre terme qui a un `x` : il devient leur facteur commun. (Ou appuie sur le signe entre deux termes : ce qu'ils ont en commun est mis en facteur.) Ensuite, mets en facteur ce que les deux derniers termes ont en commun (souvent un nombre), puis la parenthèse commune aux deux produits.",
       text: ["Avec quatre termes, on procède deux par deux. Factorise les deux premiers termes par un facteur commun, puis les deux derniers. Si les deux parenthèses sont identiques, mets aussi la parenthèse en facteur."],
     },
     "move-letter-factor": {
@@ -276,7 +287,7 @@ export const fr: Translation = {
       how: "Fais passer de l'autre côté du = une des lettres multipliées. Elle divise l'autre membre.",
       text: [
         "Une formule est une équation avec plusieurs lettres. Isoler l'une d'elles, c'est l'exprimer en fonction des autres. On s'y prend comme pour trouver x : les autres lettres se traitent comme des nombres.",
-        "Une lettre qui multiplie tout un membre peut passer de l'autre côté et diviser l'autre membre : `F = ma` donne `F/m = a`. (À condition que cette lettre ne soit pas nulle, ce qui n'arrive jamais dans ces formules.)",
+        "Une lettre qui multiplie tout un membre peut passer de l'autre côté et diviser l'autre membre : `F = ma` donne `F/m = a`. (À condition que cette lettre ne soit pas nulle : ici, on suppose qu'elle ne l'est pas.)",
         "Quand la lettre cherchée apparaît à deux endroits, comme dans `ax + bx = c`, mets-la d'abord en facteur : `x(a + b) = c`. Ensuite, toute la parenthèse peut passer de l'autre côté.",
       ],
     },
@@ -340,8 +351,8 @@ export const fr: Translation = {
       text: ["`3² = 9`, et `(−3)² = 9` aussi. Donc `x² = 9` veut dire `x = 3` ou `x = −3`. Si tu oublies le moins, tu perds une solution."],
     },
     "take-out-then-split": {
-      name: "Factoriser par x, puis séparer",
-      how: "Appuie longuement sur le x d'un terme, puis fais-le glisser devant, au-delà du bord gauche. Ensuite, fais-le descendre hors du produit.",
+      name: "Factoriser par la lettre, puis séparer",
+      how: "Appuie longuement sur la lettre d'un terme, puis fais-la glisser devant, au-delà du bord gauche (ou appuie sur le signe entre les termes). Ensuite, fais descendre la lettre hors du produit, et résous ce qui reste.",
       text: ["Quand il n'y a pas de nombre tout seul, chaque terme contient un x : mets-le en facteur, `x² − 3x = x(x − 3)`. C'est maintenant un produit nul, donc `x = 0` ou `x − 3 = 0`."],
     },
     "split-middle": {
@@ -384,7 +395,7 @@ export const fr: Translation = {
     "evaluate-root": {
       name: "Calculer une racine",
       how: "Appuie sur la racine pour la calculer.",
-      text: ["`√9`, c'est le nombre qui, multiplié par lui-même, donne 9 : c'est 3, car `3·3 = 9`. De même, `∛8 = 2`, car `2·2·2 = 8`."],
+      text: ["`√9`, c'est le nombre positif qui, multiplié par lui-même, donne 9 : c'est 3, car `3·3 = 9` (−3 aussi, mais √ désigne le positif). De même, `∛8 = 2`, car `2·2·2 = 8`."],
     },
     "split-square": {
       name: "Décomposer sous la racine",
@@ -395,7 +406,7 @@ export const fr: Translation = {
       name: "Regrouper des racines",
       how: "Dépose une racine sur l'autre. Elles se retrouvent sous un seul radical.",
       text: [
-        "Le carré de `√2·√3`, c'est `2·3` : `√2·√3` est donc le nombre dont le carré vaut 6, `√(2·3) = √6`. Deux racines de même type se regroupent sous une seule.",
+        "Le carré de `√2·√3`, c'est `2·3` : `√2·√3` est donc le nombre positif dont le carré vaut 6, `√(2·3) = √6`. Deux racines de même type se regroupent sous une seule.",
         "C'est pareil pour n'importe quel exposant commun : `x³y³`, c'est xxx·yyy, c'est-à-dire xy·xy·xy, donc `(xy)³`.",
       ],
     },
@@ -416,7 +427,7 @@ export const fr: Translation = {
     },
     "fraction-power": {
       name: "Racines et puissances ensemble",
-      how: "Dépose la racine sur la puissance : les exposants s'additionnent. Ensuite, additionne les fractions dans l'exposant.",
+      how: "Dépose la racine sur la puissance : les exposants s'additionnent. Ensuite, écris le nombre entier sous forme de fraction de dénominateur 2 : dépose le dénominateur du ½ dessus, et appuie sur le · pour le calculer. Puis additionne les fractions, et appuie sur le + au numérateur.",
       text: ["`√x`, c'est `x^(1/2)`, donc `√x·x² = x^(1/2 + 2) = x^(5/2)`. Un exposant fractionnaire se comporte comme n'importe quel autre : pour multiplier des puissances, on additionne les exposants."],
     },
     "root-across": {
@@ -432,7 +443,7 @@ export const fr: Translation = {
     "evaluate-log": {
       name: "Logarithmes à connaître",
       how: "Appuie sur le logarithme pour le calculer : `ln(e) = 1`, et le logarithme de 1 vaut 0.",
-      text: ["`ln(e) = 1`, car `e¹ = e`. Et le logarithme de 1 vaut 0, car tout nombre à la puissance 0 vaut 1."],
+      text: ["`ln(e) = 1`, car `e¹ = e`. Et le logarithme de 1 vaut 0, car `e⁰ = 1`."],
     },
     "power-of-base": {
       name: "Comme puissance de la base",
@@ -531,11 +542,15 @@ export const fr: Translation = {
   solveFor: (letters: string[]) => `Trouve ${letters.map((l) => `\`${l}\``).join(" et ")}.`,
   pickFirst: "Choisis une réponse ci-dessus, puis résous l'exercice ici.",
   hint: "Indice",
+  nextStep: "Étape suivante",
+  noNextStep: "Aucune étape trouvée à partir d'ici : essaie Annuler, ou Recommencer.",
   undo: "Annuler",
   solvedBang: "Résolu !",
   where: "où",
   moveCrashed: "Ce mouvement a provoqué une erreur.",
-  moveCrashedDetails: "Les détails sont dans la console du navigateur.",
+  moveCrashedDetails: "Réessaie, ou recommence cet exercice.",
+  pageCrashed: "Un problème est survenu sur cette page.",
+  pageCrashedDetails: "Réessaie, ou retourne au parcours. Ta progression ne risque rien.",
   tryAgain: "Réessayer",
 
   // Making a set
@@ -545,6 +560,26 @@ export const fr: Translation = {
   upload: "Importer un fichier .yaml",
   startFromExample: "Partir de l'exemple",
   yamlLabel: "La série d'exercices, en YAML",
+  form: {
+    asForm: "Formulaire",
+    asYaml: "YAML",
+    viewLabel: "Écrire la série sous forme de",
+    title: "Titre",
+    moves: "Mouvements autorisés",
+    allMoves: "Tous les mouvements",
+    upTo: (n: number, title: string) => `Jusqu'à ${n}. ${title}`,
+    start: (n: number) => `Exercice ${n} : départ`,
+    goal: (n: number) => `Exercice ${n} : objectif`,
+    remove: (n: number) => `Supprimer l'exercice ${n}`,
+    addOne: "Ajouter un exercice",
+    fromChapter: "Ajouter des exercices d'entraînement d'un chapitre",
+    chapter: "Chapitre",
+    level: "Niveau",
+    howMany: "Combien",
+    addMade: (n: number) => `Ajouter ${n}`,
+    making: "Création en cours…",
+    cantRead: "Le YAML de cette série contient une erreur, donc le formulaire ne peut pas l'afficher. Corrige-le dans la vue YAML, ou pars de l'exemple.",
+  },
   check: "Vérifier",
   checking: "On vérifie qu'il se résout avec ces mouvements…",
   unsolvable:
@@ -611,6 +646,7 @@ exercises:
     cantReadStart: (err: string) => `Impossible de lire le départ : ${err}`,
     cantReadGoal: (err: string) => `Impossible de lire l'objectif : ${err}`,
     doesntFollow: "On ne peut pas passer du départ à l'objectif (vérifie qu'il n'y a pas de faute de frappe).",
+    noValue: "Le départ n'a de valeur pour aucun nombre (une division par 0 ?).",
     twoWrong: "`wrong:` doit contenir deux réponses fausses.",
     cantReadWrong: (w: string, err: string) => `Impossible de lire la réponse fausse « ${w} » : ${err}`,
     wrongShape: (w: string, why: string) => `La réponse fausse « ${w} » n'a pas la même forme que l'objectif : ${why}.`,
