@@ -191,7 +191,7 @@ type Aim = () => Vec2;
  */
 export const AIMS: Record<"landing" | "pull-out" | "below" | "out-in-front" | "far-end" | "onto-side", (rc: RenderCtx, draggedId: string, result: MathState) => Aim> = {
   // Where the piece itself sits afterwards.
-  landing: (rc, id, result) => () => canvasBox(laidOut(result, rc.canvas!.W, rc.canvas!.H), id).centre,
+  landing: (rc, id, result) => () => canvasBox(laidOut(result, rc.canvas!.W, rc.canvas!.H, rc.canvas!.pivot), id).centre,
   "pull-out": (rc, id) => () => pullOutAim(rc, id),
   // Straight below it, wherever the result then draws it.
   below: (rc, id) => () => {

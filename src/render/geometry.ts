@@ -11,13 +11,13 @@ import { placesOf, renderState, type RenderCtx } from "./typeset";
 export type CanvasBox = { symLeft: Vec2; symRight: Vec2; centre: Vec2; w: number; h: number };
 
 /** A state laid out on a W×H canvas, kept: the same state always lays out the same. */
-export function laidOut(state: MathState, W: number, H: number): RenderCtx {
-  const key = `${W}x${H}`;
+export function laidOut(state: MathState, W: number, H: number, pivot?: number): RenderCtx {
+  const key = `${W}x${H}@${pivot ?? "mid"}`;
   let byCanvas = layouts.get(state);
   if (!byCanvas) layouts.set(state, (byCanvas = new Map()));
   let rc = byCanvas.get(key);
   if (!rc) {
-    rc = { state };
+    rc = { state, ...(pivot === undefined ? {} : { pivot }) };
     renderState(rc, W, H);
     byCanvas.set(key, rc);
   }
@@ -30,7 +30,7 @@ const layouts = new WeakMap<MathState, Map<string, RenderCtx>>();
  * shows `state` (by default, its own): read off the layout (placesOf).
  */
 export function originOf(rc: RenderCtx, id: string, state: MathState = rc.state): Vec2 | null {
-  const at = state === rc.state && rc.drawn ? rc : laidOut(state, rc.canvas!.W, rc.canvas!.H);
+  const at = state === rc.state && rc.drawn ? rc : laidOut(state, rc.canvas!.W, rc.canvas!.H, rc.canvas!.pivot);
   const p = placesOf(at).get(id);
   return p ? Vec2(p.x, p.y) : null;
 }

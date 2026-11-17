@@ -37,8 +37,14 @@ export type RenderCtx = {
   sizes?: Map<string, Size>;
   /** Filled in by layout: each node's font size. */
   fontSizes?: Map<string, number>;
-  /** Filled in by layout: the canvas size it was laid out for. */
-  canvas?: { W: number; H: number };
+  /**
+   * Where an equation's = sits on the canvas (x), when not in the middle: set from the board as it is
+   * (pivotOf), and kept for every state a drag passes through, so a piece carried across still lands
+   * across. Absent: the middle.
+   */
+  pivot?: number;
+  /** Filled in by layout: the canvas it was laid out for (its size, and where its = sits). */
+  canvas?: { W: number; H: number; pivot?: number };
   /** Filled in by layout: the drawing itself (where each piece is: see placesOf). */
   drawn?: Svgx;
   /** Each id'd piece's origin on the canvas, read off the drawing once (placesOf). */
@@ -502,7 +508,7 @@ export function placesOf(rc: RenderCtx): Map<string, { x: number; y: number }> {
 function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   rc.sizes ??= new Map();
   rc.fontSizes ??= new Map();
-  rc.canvas = { W, H };
+  rc.canvas = { W, H, ...(rc.pivot === undefined ? {} : { pivot: rc.pivot }) };
   if (rc.state.sides.length > 2) return renderRows(rc, W, H);
   const build = (size: number) => {
     const sides = rc.state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped }));
@@ -517,7 +523,10 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   const maxHalf = W / 2 - 16;
   // Too wide or too tall (a fraction of fractions): drawn smaller, to fit.
   const tall = (s: typeof sides) => Math.max(...s.map((x) => x.asc)) + Math.max(...s.map((x) => x.desc));
-  const scale = Math.min(1, maxHalf / halfWidth(sides), (H - 16) / tall(sides));
+  const pivot = sides.length === 2 ? rc.pivot : undefined;
+  // With the = moved over (pivot), each side has the room on its own side of it.
+  const wide = pivot === undefined ? maxHalf / halfWidth(sides) : Math.min((pivot - 16) / (sides[0].w + space + eqW / 2), (W - 16 - pivot) / (sides[1].w + space + eqW / 2));
+  const scale = Math.min(1, wide, (H - 16) / tall(sides));
   if (scale < 1) {
     size *= scale;
     ({ sides, eqW, space } = build(size));
@@ -526,7 +535,7 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   const asc = Math.max(...sides.map((s) => s.asc));
   const desc = Math.max(...sides.map((s) => s.desc));
   const baseline = H / 2 + (asc - desc) / 2;
-  const cx = W / 2;
+  const cx = pivot ?? W / 2;
   const xs = sides.length === 1 ? [cx - sides[0].w / 2] : [cx - eqW / 2 - space - sides[0].w, cx + eqW / 2 + space];
 
   const dx = pinShift(rc, sides, xs, [baseline, baseline], W)?.dx ?? 0;
@@ -545,6 +554,33 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
       {sides[1].draw(xs[1], baseline)}
     </g>
   );
+}
+
+/**
+ * Where the = of a board showing `state` goes (see RenderCtx.pivot): in the
+ * middle, like the pivot of a balance (undefined), unless a long side and a
+ * short one would then be shrunk to fit half the canvas each, where moving
+ * the = over lets the equation use the whole width (on a phone, a long side
+ * stays big enough to grab). Read off the board before a move; kept while
+ * the move is made.
+ */
+export function pivotOf(state: MathState, W: number): number | undefined {
+  if (state.sides.length !== 2) return undefined;
+  const rc: RenderCtx = { state, sizes: new Map(), fontSizes: new Map() };
+  const at = (size: number) => {
+    const sides = state.sides.map((s) => layoutNode(s, rc, size, null, { parens: s.kind === "sum" && !!s.grouped }));
+    const eqW = Math.max(textWidth("=", size), textWidth(relGlyph(relOf(state)).text, size));
+    return { sides, eqW, space: 0.35 * size };
+  };
+  const b = at(BASE_SIZE);
+  const half = Math.max(b.sides[0].w, b.sides[1].w) + b.space + b.eqW / 2;
+  const row = b.sides[0].w + b.sides[1].w + 2 * b.space + b.eqW;
+  const centred = Math.min(1, (W / 2 - 16) / half);
+  const free = Math.min(1, (W - 32) / row);
+  if (free <= centred * 1.05) return undefined;
+  // The row at the size it then has, centred on the canvas: the = where that puts it.
+  const k = free;
+  return (W - row * k) / 2 + (b.sides[0].w + b.space + b.eqW / 2) * k;
 }
 
 /**

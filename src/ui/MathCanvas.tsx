@@ -4,7 +4,7 @@ import { printState, stateKey } from "../expr/key";
 import { DraggableRenderer, type Draggable } from "dragology";
 import type { MathState } from "../expr/types";
 import { movesFor, operatorTap, type RuleId } from "../rules";
-import { OP_TAP, renderState } from "../render/typeset";
+import { OP_TAP, pivotOf, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
 import { thumbLift } from "../render/drag/lift";
 import { planDemo, planStepTo } from "../render/demo";
@@ -67,6 +67,8 @@ export function MathCanvas({
   const onDropRef = useRef(onDrop);
   onDropRef.current = onDrop;
   const debug = useSettings().debug;
+  // Where the = sits: read off the board as it is, and kept for everything a drag passes through.
+  const pivot = useMemo(() => pivotOf(state, width.value), [state, width.value, font]); // eslint-disable-line react-hooks/exhaustive-deps
   const draggable = useMemo<Draggable<MathState>>(
     () =>
       ({ state, d, draggedId }) =>
@@ -82,11 +84,12 @@ export function MathCanvas({
               const seen = import.meta.env.DEV && debug ? spec.with(recorded(live, width.value, height, (rec) => void import("./debug").then((m) => m.noteRecording(rec)))) : spec;
               return seen.with(thumbLift());
             },
+            pivot,
           }),
           width.value,
           height,
         ),
-    [live, width.value, height, debug, font],
+    [live, width.value, height, debug, font, pivot],
   );
   // Taps go by position (see useTaps).
   const now = useRef({ state, rules: live });

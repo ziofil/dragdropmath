@@ -26,7 +26,7 @@ import { interactive } from "./drag";
 import { mergePlan } from "./drag/merge";
 import { canvasBox, originOf } from "./geometry";
 import { probeBlend } from "./preview";
-import { renderState, type RenderCtx, type Size } from "./typeset";
+import { pivotOf, renderState, type RenderCtx, type Size } from "./typeset";
 import type { Recording } from "./testing/recording";
 
 /** A point near the start of a glyph's baseline: inside any node's hit box. */
@@ -163,10 +163,12 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
   const state = typeof src === "string" ? parseState(src) : src;
   // A state from elsewhere (a recording): new pieces must not reuse its ids.
   state.sides.forEach(reserveIds);
+  // Where the = sits, read off the board as it starts, as the app's canvas does (MathCanvas).
+  const pivot = pivotOf(state, W);
   let builder: DragSpecBuilder<MathState> | null = null;
   const draggable: Draggable<MathState> = ({ state: s, d, draggedId }) => {
     if (s === state) builder = d; // capture the library's own spec builder
-    return renderState(interactive({ state: s, d, rules, draggedId }), W, H);
+    return renderState(interactive({ state: s, d, rules, draggedId, pivot }), W, H);
   };
   const ctxFor = (id: string, anchor = ANCHOR): DragInitContext<MathState> => ({
     draggable,
@@ -180,7 +182,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
   /** The canvas laid out for `s` (static: sizes and positions only). */
   const laidOut = (s: MathState) => {
     if (!sizes.has(s)) {
-      const rc: RenderCtx = { state: s };
+      const rc: RenderCtx = { state: s, ...(pivot === undefined ? {} : { pivot }) };
       renderState(rc, W, H);
       sizes.set(s, rc);
     }
@@ -204,7 +206,7 @@ export function harness(src: string | MathState, rules: readonly RuleId[] = ALL_
     /** The interactive canvas, as it is while dragging `id`. */
     rc(id: string | null = null): RenderCtx {
       if (!builder) renderStateReadOnly(ctxFor(id ?? ""), state);
-      const rc = interactive({ state, d: builder!, rules, draggedId: id });
+      const rc = interactive({ state, d: builder!, rules, draggedId: id, pivot });
       renderState(rc, W, H);
       return rc;
     },

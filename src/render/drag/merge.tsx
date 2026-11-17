@@ -145,6 +145,11 @@ function mergePlanUnclamped(
   // Absorbed: the target stays put (or, if it's replaced, the part of it that stays: the 2 of √2·√2 → 2).
   if (!survivor) return { aim: target.centre, pinned: true, shown: inResult.has(targetId) || !stays || !inResult.has(stays) ? pinAt(targetId) : pinAt(stays) };
   const shown = stays && inResult.has(stays) ? pinAt(stays) : result;
+  // The piece itself stays where it is and only a copy of it goes to the target (a bottom dropped onto a term
+  // multiplies it top and bottom): aim at the target. (How far the piece itself moves is only the rest of its
+  // side relaid out, the same whichever target: it can't tell two neighbouring targets apart.)
+  if (survivor === draggedId && Object.values(result.copies ?? {}).includes(draggedId) && parentOf(rc.state, draggedId) === parentOf(result, draggedId))
+    return { aim: target.centre, pinned: false, shown };
   const before = originOf(rc, survivor);
   const after = originOf(rc, survivor, shown);
   if (!before || !after) return { aim: target.centre, pinned: false, shown };
@@ -160,6 +165,13 @@ function mergePlanUnclamped(
     return { aim: Vec2(edge, s.centre.y), pinned: false, shown };
   }
   return { aim: target.centre, pinned: false, shown };
+}
+
+/** The id of the node piece `id` is part of (null: a side itself). */
+function parentOf(state: MathState, id: string): string | null {
+  const loc = locate(state, id);
+  if (!loc || !loc.path.length) return null;
+  return nodeAt(state, { ...loc, path: loc.path.slice(0, -1) }).id;
 }
 
 /** `result` with piece `id` pinned at `x`: one state per pin, so what's worked out about it (its layout) is kept. */

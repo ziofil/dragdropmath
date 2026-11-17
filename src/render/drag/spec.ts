@@ -24,12 +24,15 @@ export function interactive(opts: {
   onTap?: (next: MathState) => void;
   /** Wraps every drag spec (debug mode uses it to record drags). */
   wrap?: (spec: DragSpec<MathState>) => DragSpec<MathState>;
+  /** Where the = sits, when not in the middle (RenderCtx.pivot: read off the board before the move). */
+  pivot?: number;
 }): RenderCtx {
-  const { state, d, rules, draggedId, onTap, wrap } = opts;
+  const { state, d, rules, draggedId, onTap, wrap, pivot } = opts;
   const moves = movesFor(state, rules);
   const rc: RenderCtx = {
     state,
     draggedId,
+    ...(pivot === undefined ? {} : { pivot }),
     interact: {
       grabbable: moves.grabbable,
       pressable: moves.pressable,
