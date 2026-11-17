@@ -1,8 +1,9 @@
 /**
  * Settings, from the top bar: the theme, the language, numbers in colour,
- * debug mode, and saving progress to a file (and loading it back). A panel
+ * debug mode (on the dev server only), and saving progress to a file (and loading it back). A panel
  * over the page, so what's on the page stays as it is while one is changed.
  */
+import { TOOLS } from "./tools";
 import { useEffect, useRef, useState } from "react";
 import { setDebug, setLang, setNumbers, setSkin, SKINS, useSettings, type SkinId } from "./settings";
 import { LANGS, t, type Lang } from "../i18n";
@@ -49,10 +50,13 @@ function SettingsPanel() {
         <span>{t().numbersInColour}</span>
         <input type="checkbox" className="settings-numbers" checked={numbers} onChange={(e) => setNumbers(e.target.checked)} />
       </label>
-      <label className="settings-row">
-        <span>{t().debugMode}</span>
-        <input type="checkbox" className="settings-debug" checked={debug} onChange={(e) => setDebug(e.target.checked)} />
-      </label>
+      {/* A tool for working on the app: on the dev server only (tools.ts). */}
+      {TOOLS && (
+        <label className="settings-row">
+          <span>{t().debugMode}</span>
+          <input type="checkbox" className="settings-debug" checked={debug} onChange={(e) => setDebug(e.target.checked)} />
+        </label>
+      )}
       <ProgressBackup />
     </section>
   );

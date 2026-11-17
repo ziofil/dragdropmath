@@ -1,4 +1,4 @@
-import { Component, createElement, isValidElement, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type MutableRefObject, type ReactNode, type RefObject } from "react";
+import { Component, createElement, isValidElement, lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type MutableRefObject, type ReactNode, type RefObject } from "react";
 import { fontEpoch, subscribeFont } from "../render/measure";
 import { printState, stateKey } from "../expr/key";
 import { DraggableRenderer, type Draggable } from "dragology";
@@ -8,7 +8,7 @@ import { OP_TAP, renderState } from "../render/typeset";
 import { interactive, recorded } from "../render/drag";
 import { thumbLift } from "../render/drag/lift";
 import { planDemo, planStepTo } from "../render/demo";
-import { DebugPanel, noteRecording, useDebug } from "./debug";
+import { useSettings } from "./settings";
 import { t } from "../i18n";
 
 const NO_RULES: readonly RuleId[] = [];
@@ -66,7 +66,7 @@ export function MathCanvas({
   // Taps apply like drops; a ref keeps the draggable stable across renders.
   const onDropRef = useRef(onDrop);
   onDropRef.current = onDrop;
-  const debug = useDebug();
+  const debug = useSettings().debug;
   const draggable = useMemo<Draggable<MathState>>(
     () =>
       ({ state, d, draggedId }) =>
@@ -79,7 +79,7 @@ export function MathCanvas({
             onTap: (next) => onDropRef.current(next),
             // Touch drags ride above the finger. Debug mode also records every drag, to replay as a test.
             wrap: (spec) => {
-              const seen = debug ? spec.with(recorded(live, width.value, height, noteRecording)) : spec;
+              const seen = import.meta.env.DEV && debug ? spec.with(recorded(live, width.value, height, (rec) => void import("./debug").then((m) => m.noteRecording(rec)))) : spec;
               return seen.with(thumbLift());
             },
           }),
@@ -222,7 +222,11 @@ export function MathCanvas({
           />
         </CanvasErrorBoundary>
       </div>
-      {debug && <DebugPanel state={state} rules={rules} />}
+      {debug && DebugPanel && (
+        <Suspense fallback={null}>
+          <DebugPanel state={state} rules={rules} />
+        </Suspense>
+      )}
     </>
   );
 }
@@ -274,6 +278,10 @@ function plain(n: ReactNode, at = "0"): ReactNode {
   return createElement(n.type, { ...kept, key: n.key ?? (typeof props.id === "string" ? props.id : at) }, plain(children, at));
 }
 
+
+/** Debug mode's panel (move details, the last drag's recording): on the dev server only (tools.ts). */
+// (import.meta.env.DEV written out, not TOOLS: so a build drops the import, and the file with it.)
+const DebugPanel = import.meta.env.DEV ? lazy(() => import("./debug").then((m) => ({ default: m.DebugPanel }))) : null;
 
 /** A non-interactive rendering, e.g. for showing the goal. */
 /**

@@ -3,7 +3,6 @@ import { chapterById } from "../game/puzzles";
 import { ChapterView } from "./ChapterView";
 import { Home } from "./Home";
 import { SetRoute } from "./SetView";
-import { Sandbox } from "./Sandbox";
 import { ExerciseRoute } from "./Practice";
 import { NotFound } from "./NotFound";
 import { About } from "./About";
@@ -13,6 +12,9 @@ import { anchorOf, href, parse, type Route } from "./routes";
 import { t } from "../i18n";
 
 /** The set maker, loaded when opened: it brings the YAML library, which no other page needs. */
+/** The sandbox, on the dev server only: a build for the site leaves it out. */
+// (import.meta.env.DEV written out, not TOOLS: so a build drops the import, and the file with it.)
+const Sandbox = import.meta.env.DEV ? lazy(() => import("./Sandbox").then((m) => ({ default: m.Sandbox }))) : null;
 const SetMaker = lazy(() => import("./SetMaker").then((m) => ({ default: m.SetMaker })));
 
 const subscribeHash = (f: () => void) => {
@@ -71,7 +73,14 @@ function Page({ route }: { route: Route }) {
         </Suspense>
       );
     case "sandbox":
-      return <Sandbox />;
+      // A tool for working on the app: on the dev server only (tools.ts).
+      return Sandbox ? (
+        <Suspense fallback={<main className="page" aria-busy="true" />}>
+          <Sandbox />
+        </Suspense>
+      ) : (
+        <NotFound />
+      );
     case "about":
       return <About />;
     case "missing":
@@ -91,13 +100,13 @@ export function App() {
           <span>.</span>
         </a>
         <span className="topbar-links">
-          {debug && (
+          {import.meta.env.DEV && debug && (
             <button className="bare topbar-debug" onClick={() => setDebug(false)} title={t().debugOn}>
               debug ✕
             </button>
           )}
           {/* A tool for chasing moves: shown in debug mode only. Its name is the same in every language. */}
-          {debug && (
+          {import.meta.env.DEV && debug && (
             <a href={href({ page: "sandbox" })} className="button quiet" aria-current={route.page === "sandbox" ? "page" : undefined}>
               Sandbox
             </a>

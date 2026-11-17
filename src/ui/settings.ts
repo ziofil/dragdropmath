@@ -8,6 +8,7 @@
  * measures (render/measure.ts): the new font is fetched first, then
  * everything switches at once and the boards lay themselves out again.
  */
+import { TOOLS } from "./tools";
 import { clearTextWidths, setMathFamily } from "../render/measure";
 import { createStore } from "../util/store";
 import { readJson, writeJson } from "../util/storage";
@@ -38,7 +39,8 @@ function initial(): Settings {
     lang: initialLang(),
     skin: readJson<SkinId>(KEYS.skin, "modern", isSkin),
     numbers: readJson<number>(KEYS.numbers, 0, isFlag) === 1,
-    debug: debugParam || readJson<number>(KEYS.debug, 0, isFlag) === 1,
+    // Debug mode is a tool for working on the app (tools.ts): never on the site itself.
+    debug: TOOLS && (debugParam || readJson<number>(KEYS.debug, 0, isFlag) === 1),
   };
 }
 
@@ -126,6 +128,7 @@ export function setNumbers(on: boolean): void {
 }
 
 export function setDebug(on: boolean): void {
+  if (!TOOLS) return;
   writeJson(KEYS.debug, on ? 1 : 0);
   update({ debug: on });
 }
