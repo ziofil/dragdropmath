@@ -36,10 +36,6 @@ export const nlChapters: ChapterTexts = {
     blurb: "Ontbinden in factoren is een som schrijven als een product. Een factor die in elke term zit, zet je één keer voor de haakjes: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Formules omwerken",
-    blurb: "De formules uit de natuurkunde, omgewerkt: maak elke grootheid vrij en combineer twee formules tot één.",
-  },
 
   inequalities: {
     title: "Ongelijkheden",

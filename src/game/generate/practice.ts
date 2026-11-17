@@ -66,7 +66,7 @@ export function nicest(s: Shape, r: Rng): Draft | null {
     for (; found.length < (s.pool ?? POOL) && tries < 500; tries++) {
       const d = s.make(r);
       if (!d) continue;
-      const v = s.curated ? { ok: true, score: 0 } : judge(d);
+      const v = judge(d);
       if (!v.ok || !predictable(d)) continue;
       found.push({ d, score: v.score });
     }

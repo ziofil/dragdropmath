@@ -305,8 +305,8 @@ export const quadratic: Chapter = {
   id: "quadratic",
   title: "Quadratic equations",
   blurb: "An equation with x² can have two answers. Make one side 0 and write the other as a product: a product is 0 only when one of its factors is. Or get the square on its own: x² = 9 means x = 3 or x = −3.",
-  after: ["formulas"],
-  unlocks: ["zero-product"],
+  after: ["simultaneous"],
+  unlocks: ["zero-product", "move-letter-denominator"],
   // x² = 9: x may be −3 as well (unlike the chapters where letters stand for positive numbers).
   positive: false,
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
@@ -350,6 +350,12 @@ export const quadratic: Chapter = {
       ].map((v) => v + where);
       return { start: `√(x + ${c}) = x + ${dd}${where}`, via, goal: `x = ${p} or x = ${q}${where}` };
     }, "root-across"),
+    // A fraction equal to 0: its bottom (never 0, the condition says) carried across, 0 times it is 0.
+    d("fraction-zero", (r) => {
+      const [a, b] = [r.int(1, 6), r.int(1, 6)];
+      const where = ` where x ≠ -${b}`;
+      return { start: `(x - ${a})/(x + ${b}) = 0${where}`, goal: `x = ${a}${where}` };
+    }, "move-letter-denominator"),
   ],
   levels,
 };

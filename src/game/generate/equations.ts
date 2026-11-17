@@ -6,7 +6,7 @@
  * it is the same for every value of the letters.
  */
 import type { RuleId } from "../../rules";
-import { ex, expBoth, from, logBoth, over, plus, rootOf, spread, termExpr, times, timesBy, writeAs } from "./unmove";
+import { ex, expBoth, from, logBoth, over, plus, rootOf, spread, termExpr, times, writeAs } from "./unmove";
 import { pickAnswer, type Recipe } from "./linear";
 import { gcd, one } from "./write";
 
@@ -254,35 +254,6 @@ export const logOfQuotient: Recipe = {
       value: ex(`${2 ** m}`),
       steps: [logBoth(2), times(e), writeAs(LOGS, ex(`log_2(x^${e})`)), writeAs(["divide-powers", "power-one", "zero-power", "cancel-factor", "flip-across-bar"], ex(`log_2((${pw("x", c + e)}·${pw("y", b)})/(${pw("x", c)}·${pw("y", b)}))`))],
     };
-  },
-};
-
-// ---------- formulas: x in terms of y ----------
-
-export const expOfQuotient: Recipe = {
-  id: "exp-of-quotient",
-  name: "e to a quotient of powers of x and y, to get on its own and undo",
-  positive: true,
-  steps: ({ r }) => {
-    // c·e^((xᵃyᵇ)/(x^(a−1)y^(b−1))) + d = ck + d → x = ln(k)/y
-    const [a, b, c, k, d] = [r.int(2, 4), r.int(2, 3), r.int(2, 3), r.int(2, 7), r.signed(1, 5)];
-    if (c * k + d <= 0 || k === c) return null;
-    const pw = (v: string, n: number) => (n === 1 ? v : `${v}^${n}`);
-    return {
-      value: ex(`ln(${k})/y`),
-      steps: [timesBy(ex("y")), expBoth("e"), times(c), plus(ex(`${d}`)), writeAs(["divide-powers", "power-one", "cancel-factor", "flip-across-bar"], ex(`(${pw("x", a)}·${pw("y", b)})/(${pw("x", a - 1)}·${pw("y", b - 1)})`), 0, { path: [0, 1, 1] })],
-    };
-  },
-};
-
-export const logOfRootOfExp: Recipe = {
-  id: "log-of-root-of-exp",
-  name: "the log of a root of a power of e",
-  positive: true,
-  steps: ({ r }) => {
-    // ln(√(e^(2k·xy))) = k·v → x = v/y
-    const [k, v] = [r.int(2, 3), r.int(2, 5)];
-    return { value: ex(`${v}/y`), steps: [timesBy(ex("y")), times(k), writeAs(LOGS, ex(`ln(e^(${k}x·y))`)), writeAs([...ROOTS, ...LOGS], ex(`ln(√(e^(${2 * k}x·y)))`))] };
   },
 };
 

@@ -38,10 +38,6 @@ export const deChapters: ChapterTexts = {
     blurb: "Faktorisieren heißt, eine Summe als Produkt zu schreiben. Einen Faktor, den jeder Term hat, schreibst du nur einmal, vor eine Klammer: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Formeln umstellen",
-    blurb: "Die Formeln der Physik, umgestellt: nach jeder beliebigen Größe auflösen und zwei Formeln durch Einsetzen zu einer verbinden.",
-  },
 
   inequalities: {
     title: "Ungleichungen",

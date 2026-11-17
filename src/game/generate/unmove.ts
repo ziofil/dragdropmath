@@ -385,16 +385,6 @@ export const swapRows = (a = 0, b = 1): UnMove => ({
   },
 });
 
-/** Both sides times a letter: x = 5/y → x·y = 5 (the y cancelling on the right). */
-export const timesBy = (e: Expr, row = 0): UnMove => ({
-  rules: ["move-letter-factor", "move-letter-denominator", "cancel-factor", ...ARITH],
-  on: (s) =>
-    onRow(s, row, (L, R) => {
-      if (R.kind !== "frac" || key(R.den) !== key(e)) return null;
-      return [prod([...(L.kind === "prod" ? L.factors : [L]), e]), R.num];
-    }),
-});
-
 // ---------- functions around the letter's side: roots, squares, logs, powers ----------
 
 const isSquare = (v: number) => v > 0 && Number.isInteger(Math.sqrt(v));

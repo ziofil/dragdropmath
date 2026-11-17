@@ -36,10 +36,6 @@ export const plChapters: ChapterTexts = {
     blurb: "Rozkład na czynniki to zapisanie sumy w postaci iloczynu. Czynnik, który ma każdy wyraz, wystarczy zapisać raz, przed nawiasem: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Przekształcanie wzorów",
-    blurb: "Wzory fizyczne, przekształcone: wyznacz z nich dowolną wielkość i połącz dwa wzory w jeden.",
-  },
 
   inequalities: {
     title: "Nierówności",

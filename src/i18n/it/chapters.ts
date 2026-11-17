@@ -37,10 +37,6 @@ export const itChapters: ChapterTexts = {
     blurb: "Scomporre vuol dire scrivere una somma come prodotto. Un fattore che compare in tutti i termini si può scrivere una volta sola, davanti a una parentesi: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Formule inverse",
-    blurb: "Le formule della fisica e le loro formule inverse: ricava una grandezza qualsiasi e combina due formule in una sola.",
-  },
 
   inequalities: {
     title: "Disequazioni",

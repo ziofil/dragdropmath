@@ -71,7 +71,6 @@ const withEnglish = (l: Translation): Strings =>
     ...l,
     set: { ...en.set, ...l.set },
     form: { ...en.form, ...l.form },
-    quantities: { ...en.quantities, ...l.quantities },
     drills: Object.fromEntries(Object.entries(en.drills).map(([k, w]) => [k, { ...w, ...l.drills?.[k as keyof Strings["drills"]] }])),
   }) as Strings;
 

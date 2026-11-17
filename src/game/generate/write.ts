@@ -65,10 +65,6 @@ export type Draft = {
   legs?: RuleId[][];
   /** Stretches already proven one of those moves undoes (a walk checks each step as it takes it): serving needn't search them again. */
   proven?: boolean[];
-  /** What it asks, when "Solve for …" isn't it: one quantity written in terms of others (two formulas combined). */
-  ask?: { letter: string; using: string[] };
-  /** What its letters stand for (a physics formula: F force, in N): the quantity's name (i18n `quantities`) and unit. */
-  legend?: { letter: string; quantity: string; unit: string }[];
 };
 
 // ---------- writing maths as a person would ----------
@@ -99,8 +95,6 @@ export type Shape = {
   weight?: number;
   /** Its letters stand for positive numbers (when its drafts don't say; else its chapter's). */
   positive?: boolean;
-  /** Written by hand, numbers and all (real formulas): not held to the beauty rules (beauty.ts). */
-  curated?: boolean;
   /** A last check, on the draft picked only (a search: too slow for every try): the draft as it passed (it may add what it found), or null to pick another. */
   check?: (d: Draft) => Draft | null;
   /** How many drafts to make and pick the nicest from (default practice.ts POOL): fewer for a shape whose drafts cost a search each. */

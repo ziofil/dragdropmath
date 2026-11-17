@@ -36,10 +36,6 @@ export const esChapters: ChapterTexts = {
     blurb: "Factorizar es escribir una suma como un producto. Un factor que tienen todos los términos se puede escribir una sola vez, delante de un paréntesis: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Despejar en fórmulas",
-    blurb: "Las fórmulas de la física: despeja cualquier magnitud y combina dos fórmulas en una sola.",
-  },
 
   inequalities: {
     title: "Inecuaciones",

@@ -7,7 +7,6 @@ import type { RuleId } from "../rules";
 import { record, seen, type Change, type Context } from "../game/scoring";
 import { answer, arrive, canSolve, cardOf, type Phase } from "../game/predict";
 import { rowsOf } from "../game/answers";
-import { variables } from "../expr/eval";
 import { Board } from "./Board";
 import { t } from "../i18n";
 import { StaticMath, type ShowMove } from "./MathCanvas";
@@ -27,7 +26,7 @@ type Link = { href: string; text: string };
  */
 export type Exercise = {
   /** `via`: milestones of the way it was made (Next step heads through them). */
-  puzzle: { id: string; start: string; goal: string; hint?: string; via?: string[]; legs?: RuleId[][]; ask?: { letter: string; using: string[] }; legend?: { letter: string; quantity: string; unit: string }[] };
+  puzzle: { id: string; start: string; goal: string; hint?: string; via?: string[]; legs?: RuleId[][] };
   rules: readonly RuleId[];
   /** "Exercise <title>" in the heading, between the ‹ › arrows. */
   label: string;
@@ -166,7 +165,7 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           {/* An equation's answer stays hidden: finding it is the exercise. */}
           {task.kind === "solve" ? (
             <p className="puzzle-task">
-              <MathText text={askOf(puzzle, goal, task.letters)} />
+              <MathText text={t().solveFor(task.letters)} />
             </p>
           ) : (
             <p className="puzzle-task">
@@ -175,7 +174,6 @@ export function PuzzleView({ exercise: ex }: { exercise: Exercise }) {
           )}
         </section>
       )}
-      {puzzle.legend && <Legend items={puzzle.legend} />}
 
       <Board
         moves={moves}
@@ -281,26 +279,3 @@ function CardMaths({ text }: { text: string }) {
 /** Next step's search, off the page's thread (one worker for every exercise); an answer that takes over 15 s is given up. */
 const askNext = workerClient(() => new Worker(new URL("../game/nextWorker.ts", import.meta.url), { type: "module" }), nextStepHere, 15_000);
 
-/**
- * What a "solve" exercise asks, in words: one quantity in terms of others (two formulas combined); a quantity
- * made the subject (a formula: its answer has letters in it, t = (v − u)/a); else solve for the letters.
- */
-function askOf(puzzle: Exercise["puzzle"], goal: MathState, letters: string[]): string {
-  if (puzzle.ask) return t().inTermsOf(puzzle.ask.letter, puzzle.ask.using);
-  const formula = letters.length === 1 && goal.sides.length === 2 && variables(goal.sides[1]).length > 0;
-  return formula ? t().makeSubject(letters[0]) : t().solveFor(letters);
-}
-
-/** What a physics formula's letters stand for: "F force (N) · m mass (kg) · a acceleration (m/s²)". */
-function Legend({ items }: { items: { letter: string; quantity: string; unit: string }[] }) {
-  const names = t().quantities as Record<string, string>;
-  return (
-    <p className="puzzle-legend">
-      {items.map(({ letter, quantity, unit }) => (
-        <span key={letter} className="legend-item">
-          <MathText text={`\`${letter}\``} /> {names[quantity] ?? quantity} <span className="legend-unit">({unit})</span>
-        </span>
-      ))}
-    </p>
-  );
-}

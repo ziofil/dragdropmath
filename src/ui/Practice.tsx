@@ -69,7 +69,7 @@ function exerciseOf(mode: Mode, chapter: Chapter, level: Level, seed: number, d:
   // Predicting first: the wrong answers are the usual slips.
   const choices = mode === "predict" ? choicesFor({ id, goal: d.goal }, d.decoys) : null;
   return {
-    puzzle: { id, start: d.start, goal: d.goal, via: d.via, ...(d.legs ? { legs: d.legs } : {}), ...(d.ask ? { ask: d.ask } : {}), ...(d.legend ? { legend: d.legend } : {}) },
+    puzzle: { id, start: d.start, goal: d.goal, via: d.via, ...(d.legs ? { legs: d.legs } : {}) },
     rules: rulesOf(chapter.id),
     label: `${modeName(mode)} · ${t().level[level]}`,
     choices,

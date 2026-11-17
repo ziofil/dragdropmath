@@ -130,6 +130,7 @@ export const en = {
     "take-out-then-split": { name: "Take the letter out, then split", how: "Press and hold the letter in one term and drag it out in front, past the left end (or tap the sign between the terms). Then pull the letter down, off the product, and solve what's left.", text: ["With no number on its own, every term has an x: take it out, `x² − 3x = x(x − 3)`. Now it's a product equal to 0, so `x = 0` or `x − 3 = 0`."] },
     "split-middle": { name: "Factor, then split", how: "Tap the middle term: it splits in two. Tap the sign between the first two terms, then between the last two: what each pair shares comes out. Tap the sign between the two products: the bracket they share comes out. Then pull a bracket down, off the product.", text: ["`x² + x − 6` is a product of two brackets: `(x + 3)(x − 2)`. The two numbers multiply to `−6` and add up to `1`, the number in front of x. Once it's a product equal to 0, each bracket gives an answer."] },
     "square-both-sides": { name: "Square both sides", how: "Drag the root onto the other side: that side is squared. Multiply it out, bring everything to one side, factor and split, as in the last board. The answer that breaks a condition is crossed out.", text: ["A root is never negative, so `√(x + 7) = x + 1` only holds where `x + 1 ≥ 0`, that is `x ≥ −1`. (And what's under the root can't be negative either: `x ≥ −7`.) These are the conditions, given at the start: they stay true all along.", "Squaring both sides loses them: `x + 7 = (x + 1)²` also holds at `x = −3`, where `x + 1` is negative. So the squared equation gives `x = 2` or `x = −3`, and −3 breaks a condition: it's crossed out. The only answer is `x = 2`."] },
+    "fraction-zero": { name: "A fraction equal to 0", how: "Drag the bottom of the fraction across the =. It multiplies the other side, and 0 times anything is 0. Then move the number across.", text: ["A fraction is 0 only when its top is 0. Its bottom can never be 0, and the condition after the equation says so: `x ≠ −2` keeps `x + 2` from being 0.", "So the bottom can move across and multiply the other side: `(x − 3)/(x + 2) = 0` gives `x − 3 = 0·(x + 2)`, which is `x − 3 = 0`. If an answer breaks the condition, it's crossed out."] },
     "cancel-factor": { name: "Cancel a common factor", how: "Tap the fraction bar. What the top and bottom share cancels.", text: ["A number that multiplies the whole top and the whole bottom cancels: `(3x)/3` is `x`. In `(3x + 1)/3` it doesn't: the 3 multiplies only part of the top."] },
     "power-of-power": { name: "Power of a power", how: "Drop the outer exponent onto the inner one. They multiply: tap the · to work it out.", text: ["`(x²)³` is `x²·x²·x²`. That's 2 + 2 + 2 = 6 x's, so the exponents multiply."] },
     "divide-powers": { name: "Same base: subtract exponents", how: "Tap the fraction bar. Powers of the same base merge and their exponents subtract: tap the − to work it out.", text: ["`x⁵/x²` has five x's on top and two on the bottom. Two cancel from each, leaving three on top: dividing subtracts the exponents."] },
@@ -142,10 +143,6 @@ export const en = {
     "split-term": { name: "Split the middle term", how: "Tap the middle term: it splits in two. Then factor in pairs, as in the last board: tap the + between the first two terms, then between the last two, then between the two products.", text: ["To factor `x² + 5x + 6`, look for two numbers that add up to 5 and multiply to 6: 2 and 3. Write `5x` as `2x + 3x`.", "Now there are four terms, and they factor in pairs: `x(x + 2) + 3(x + 2)`, then `(x + 2)(x + 3)`."] },
     "difference-of-squares": { name: "Difference of two squares", how: "Both terms are squares, and one is taken away from the other: tap the minus between them.", text: ["A square minus a square always factors the same way: `a² − b² = (a − b)(a + b)`. Multiply it out to check: the middle terms cancel.", "It works only for a difference, a square minus a square. A sum of two squares, like `x² + 9`, doesn't factor at all. A square minus a number that isn't a whole square, like `x² − 7`, does, but with roots: `(x − √7)(x + √7)`."] },
     "factor-shared": { name: "Share a factor", how: "Press and hold the `x` of one term, then drop it onto another term with an `x`: the two share it. (Or tap the sign between two terms: what they share comes out.) Then take out what the last two terms share (often a number), and then the bracket the two products share.", text: ["With four terms, work in pairs. Take a common factor out of the first two terms, then out of the last two. If the two brackets match, take the bracket out as well."] },
-    "move-letter-factor": { name: "Make a quantity the subject", how: "Drag the quantity that multiplies the one you want across the =. It divides the other side.", text: ["A formula links quantities: `F = ma` says a force is a mass times an acceleration. The quantity on its own, here `F`, is the formula's subject.", "To find the acceleration instead, rearrange the formula to make `a` the subject. It works like solving an equation: the other quantities are treated as numbers. `m` multiplies `a`, so it moves across and divides: `F/m = a`, which is `a = F/m`. (Dividing by `m` is fine: a mass is never 0.)"] },
-    "move-letter-denominator": { name: "A quantity on the bottom", how: "Drag the quantity on the bottom of the fraction across the =. It multiplies the other side.", text: ["In `ρ = m/V` the volume `V` divides the mass. To make `m` the subject, carry `V` across: it multiplies the other side, `ρV = m`. So a mass is its density times its volume."] },
-    "letter-twice": { name: "The subject in two places", how: "Press and hold the v in one term and drag it out in front, past the left end (or tap the + between the terms). Then drag the bracket across the =.", text: ["Two trolleys collide and stick together. Momentum is conserved, so the momentum before equals the momentum after: `mu = mv + Mv`. The speed afterwards, `v`, appears twice.", "Take it out as a common factor: `mu = v(m + M)`. Now `v` is in one place, and the bracket moves across and divides: `v = (mu)/(m + M)`."] },
-    "combine-formulas": { name: "Combine two formulas", how: "Drag the V of `V = IR` onto the V in the other formula: it becomes IR. Then tap the · between the two I's.", text: ["Two formulas about the same circuit: the power `P = IV`, and Ohm's law `V = IR`. Both are true at once, as in simultaneous equations.", "Substitute one into the other: `V` is `IR`, so `P = I(IR) = I²R`. That's a new formula for the power, in terms of the current and the resistance only."] },
     "ineq-move-term": { name: "Move a term across", how: "Drag the number across the inequality sign. Its sign changes, and the inequality sign stays as it is. Then tap the − to work it out.", text: ["`x < 7` says x is less than 7. The open side of the sign faces the bigger number.", "Adding or taking away the same on both sides keeps the sign as it is. So a term moves across just as in an equation."] },
     "ineq-swap": { name: "Swap the sides", how: "Drag one side across the sign and past the far end. The sides change places, and the inequality sign turns round with them.", text: ["`3 > x` and `x < 3` say the same thing: x is less than 3. So the sides can swap, as long as the sign turns round with them."] },
     "ineq-sign": { name: "Move a minus across", how: "Drag just the minus across. The inequality sign turns round.", text: ["Multiplying by −1 reverses the order: `2 < 3`, but `−2 > −3`. So when a minus moves across, the sign turns round."] },
@@ -212,59 +209,6 @@ export const en = {
   solvedBefore: "✓ You've solved this one before. You can solve it again.",
   makeItLookLike: "Make it look like",
   solveFor: (letters: string[]) => `Solve for ${letters.map((l) => `\`${l}\``).join(" and ")}.`,
-  /** What a physics formula's letters stand for (game/chapters/formulas.ts: UNITS has the same keys). */
-  quantities: {
-    force: "force",
-    mass: "mass",
-    acceleration: "acceleration",
-    momentum: "momentum",
-    velocity: "velocity",
-    speed: "speed",
-    voltage: "potential difference",
-    current: "current",
-    resistance: "resistance",
-    power: "power",
-    work: "work done",
-    distance: "distance",
-    charge: "charge",
-    time: "time",
-    waveSpeed: "wave speed",
-    frequency: "frequency",
-    wavelength: "wavelength",
-    density: "density",
-    volume: "volume",
-    pressure: "pressure",
-    area: "area",
-    period: "period",
-    gpe: "gravitational potential energy",
-    fieldStrength: "gravitational field strength",
-    height: "height",
-    heat: "energy transferred",
-    specificHeat: "specific heat capacity",
-    tempRise: "temperature rise",
-    energy: "energy",
-    lightSpeed: "speed of light",
-    finalVelocity: "final velocity",
-    initialVelocity: "initial velocity",
-    kineticEnergy: "kinetic energy",
-    displacement: "displacement",
-    emf: "e.m.f.",
-    externalResistance: "external resistance",
-    internalResistance: "internal resistance",
-    gravForce: "gravitational force",
-    gravConstant: "gravitational constant",
-    massOne: "mass of one body",
-    massOther: "mass of the other body",
-    separation: "distance between their centres",
-    trolleyMass: "mass of the moving trolley",
-    otherTrolleyMass: "mass of the trolley at rest",
-    velocityBefore: "velocity before",
-    velocityAfter: "velocity after, together",
-  },
-  /** A formula rearranged: "Make `t` the subject." */
-  makeSubject: (letter: string) => `Make \`${letter}\` the subject.`,
-  /** Two formulas combined: "Write `P` in terms of `I` and `R`." */
-  inTermsOf: (letter: string, using: string[]) => `Write \`${letter}\` in terms of ${using.map((l, i) => `${i === 0 ? "" : i === using.length - 1 ? " and " : ", "}\`${l}\``).join("")}.`,
   pickFirst: "Pick an answer above, then solve it here.",
   hint: "Hint",
   /** Practice: the next move, played on the board for a learner who's stuck. */
@@ -396,11 +340,10 @@ export type Strings = typeof en;
  * strings are written in English only: a translation may lack them, and
  * English stands in.
  */
-export type Translation = Omit<Partial<Strings>, "drills" | "set" | "form" | "quantities"> & {
+export type Translation = Omit<Partial<Strings>, "drills" | "set" | "form"> & {
   drills?: Partial<Record<keyof Strings["drills"], Partial<MoveWords>>>;
   set?: Partial<Strings["set"]>;
   form?: Partial<Strings["form"]>;
-  quantities?: Partial<Strings["quantities"]>;
 };
 
 /** A move's words: its name, what to do on its board, why it works, and a common mistake. */

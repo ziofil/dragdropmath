@@ -36,10 +36,6 @@ export const trChapters: ChapterTexts = {
     blurb: "Çarpanlara ayırmak, bir toplamı çarpım olarak yazmaktır. Her terimde bulunan bir çarpan, parantezin önüne bir kez yazılabilir: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Formülleri dönüştürme",
-    blurb: "Fizik formüllerini dönüştür: istediğin büyüklüğü yalnız bırak, iki formülü birleştirip tek bir formül elde et.",
-  },
 
   inequalities: {
     title: "Eşitsizlikler",

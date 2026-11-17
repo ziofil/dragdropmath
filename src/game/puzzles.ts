@@ -14,7 +14,6 @@ import { factor } from "./chapters/factor";
 import { quadratic } from "./chapters/quadratic";
 import { balance } from "./chapters/balance";
 import { inequalities } from "./chapters/inequalities";
-import { formulas } from "./chapters/formulas";
 import { simultaneous } from "./chapters/simultaneous";
 import { fractions } from "./chapters/fractions";
 import { powers } from "./chapters/powers";
@@ -64,7 +63,6 @@ export const CHAPTERS: Chapter[] = [
   balance,
   inequalities,
   simultaneous,
-  formulas,
   quadratic,
 ];
 

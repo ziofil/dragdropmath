@@ -38,10 +38,6 @@ export const frChapters: ChapterTexts = {
     blurb: "Factoriser, c'est développer à l'envers. Trouve un facteur commun à tous les termes et mets-le devant une parenthèse.",
   },
 
-  formulas: {
-    title: "Transformer une formule",
-    blurb: "Les formules de la physique : isole n'importe quelle grandeur, et combine deux formules en une seule.",
-  },
 
   inequalities: {
     title: "Inéquations",

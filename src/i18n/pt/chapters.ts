@@ -37,10 +37,6 @@ export const ptChapters: ChapterTexts = {
     blurb: "Fatorar é escrever uma soma como um produto. Um fator que está em todos os termos pode aparecer uma vez só, na frente dos parênteses: 3x + 3y = 3(x + y).",
   },
 
-  formulas: {
-    title: "Isolando variáveis",
-    blurb: "As fórmulas da Física, reorganizadas: isole qualquer grandeza e junte duas fórmulas numa só.",
-  },
 
   inequalities: {
     title: "Inequações",
