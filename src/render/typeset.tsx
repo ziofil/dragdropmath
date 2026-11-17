@@ -525,9 +525,14 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   const tall = (s: typeof sides) => Math.max(...s.map((x) => x.asc)) + Math.max(...s.map((x) => x.desc));
   const pivot = sides.length === 2 ? rc.pivot : undefined;
   // With the = moved over (pivot), each side has the room on its own side of it.
-  const wide = pivot === undefined ? maxHalf / halfWidth(sides) : Math.min((pivot - 16) / (sides[0].w + space + eqW / 2), (W - 16 - pivot) / (sides[1].w + space + eqW / 2));
-  const scale = Math.min(1, wide, (H - 16) / tall(sides));
-  if (scale < 1) {
+  const fits = (b: { sides: typeof sides; eqW: number; space: number }) =>
+    Math.min(
+      1,
+      pivot === undefined ? maxHalf / halfWidth(b.sides) : Math.min((pivot - 16) / (b.sides[0].w + b.space + b.eqW / 2), (W - 16 - pivot) / (b.sides[1].w + b.space + b.eqW / 2)),
+      (H - 16) / tall(b.sides),
+    );
+  // Smaller maths isn't exactly in proportion (a subscript has a smallest size): fitted again, until it fits.
+  for (let pass = 0, scale = fits({ sides, eqW, space }); pass < 3 && scale < 0.995; pass++, scale = fits({ sides, eqW, space })) {
     size *= scale;
     ({ sides, eqW, space } = build(size));
   }
