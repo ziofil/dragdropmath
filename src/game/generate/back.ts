@@ -23,7 +23,7 @@ import { assuming } from "../../expr/setting";
 import { parseState } from "../../expr/parse";
 import { printState, stateKey } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
-import { standing } from "../../expr/conditions";
+import { answersOf } from "../answers";
 import { RULES, stepsFrom, type RuleId } from "../../rules";
 import { tidied } from "../tidy";
 import { domainOf } from "./domain";
@@ -200,8 +200,8 @@ export function draftOf(shape: string, b: Built, opts: DraftOpts = {}): Draft {
     leg = new Set();
     kind = new Set();
   }
-  // The answer, without the rows that break a condition (x = −3 where x ≥ −1 is no answer).
-  const goal = printState({ ...standing({ ...path[0], conditions }), conditions: undefined, letters: undefined });
+  // The answer: the rows that make the start true (x = −3 is no answer of √(x + 7) = x + 1, though squaring finds it).
+  const goal = printState({ ...answersOf({ ...start, conditions }, path[0]), conditions: undefined, letters: undefined });
   // Stages said for every stretch: the way is written by the moves (way.ts), its legs found then.
   const staged = kinds.every((k) => k.length > 0);
   const draft: Draft = { shape, start: where(start), goal, via, ...(positive ? { positive } : {}), legs, ...(staged ? { stages: kinds } : {}) };

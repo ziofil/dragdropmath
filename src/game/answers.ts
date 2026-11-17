@@ -8,7 +8,8 @@
 import type { Expr, MathState } from "../expr/types";
 import { evaluate, variables, type Env } from "../expr/eval";
 import { printState } from "../expr/key";
-import { rowsOf } from "../expr/rows";
+import { rowCount, rowsOf, withRows, rows } from "../expr/rows";
+import { breaksAt } from "../expr/conditions";
 
 /**
  * Several random positive values for every letter in these expressions, at
@@ -193,4 +194,29 @@ function solutions(s: MathState, x: string): number[] {
     if (Math.abs(f(v)) < 1e-6 * Math.max(1, Math.abs(fa), Math.abs(fb))) out.push(v);
   }
   return out;
+}
+
+/**
+ * The rows of `s` (x = 3 or x = −2) that are answers of `start`: each, put
+ * into it, makes it true (its conditions too, and every side has a value: no
+ * bottom 0, no root of a negative). What squaring invents (√(x + 7) = x + 1
+ * squared has x = −3 as well) isn't, however the start is written. `s` as it
+ * is unless its rows are letters equal to numbers, joined by "or", and some
+ * but not all of them are answers.
+ */
+export function answersOf(start: MathState, s: MathState): MathState {
+  if (s.join !== "or" || rowCount(s) < 2) return s;
+  const said = rowsOf(s).map(isolated);
+  if (said.some((x) => x === null)) return s;
+  const startRows = rowsOf(start);
+  const answers = rows(s).filter(([, v], k) => {
+    try {
+      const value = evaluate(v, {});
+      const env = { [said[k]!]: value };
+      return Number.isFinite(value) && !breaksAt(start, env) && startRows.every((row) => holds(row, env));
+    } catch {
+      return true; // (not a number: kept, as it is)
+    }
+  });
+  return answers.length && answers.length < rowCount(s) ? withRows(s, answers) : s;
 }

@@ -3,7 +3,7 @@ import { stateKey } from "../expr/key";
 import { inSetting } from "../expr/setting";
 import { settleCopies, withoutCopies } from "../expr/copies";
 import { allNodes, locate, nodeAt, parentLoc } from "../expr/tree";
-import { dragCtx, handles, replaceIn, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
+import { dragCtx, handles, replaceIn, signId, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
 import { num } from "../expr/build";
 import { powerOf, roleOf } from "./view";
 export { handles, signId, signOwner } from "./types";
@@ -191,18 +191,22 @@ function shareOut(state: MathState, terms: readonly MathState["sides"][number][]
   const moves = movesFor(state, enabled);
   const pair = terms.length === 2;
   const term = (id: string) => terms.find((t) => t.id === id)!;
-  // A bracket first, then a letter, then a number; of two powers of a letter, the higher (x² of x⁴ − x², not x).
+  // A bracket first, then a letter, then a number; of two powers of a letter, the higher (x² of x⁴ − x², not x);
+  // a minus last, when nothing else is shared (−x + 4 → −(x − 4)).
   const rank = (id: string) => {
+    if (signOwner(id)) return 300;
     const n = allNodes(term(a)).concat(allNodes(term(b))).find((x) => x.id === id);
     return (n?.kind === "sum" ? 0 : n?.kind === "num" ? 2 : 1) * 100 - (n ? powerOf(n).n : 0);
   };
   const found: { c: Candidate; r: number }[] = [];
   for (const [from, onto] of [[a, b], [b, a]] as const) {
-    for (const n of allNodes(term(from))) {
-      if (n.id === from && !pair) continue;
-      for (const c of moves.drag(n.id)) {
+    const t = term(from);
+    // The term's pieces, and its minus (a handle of its own) when it's written with one.
+    for (const id of [...allNodes(t).map((n) => n.id), ...(t.kind === "neg" && !pair ? [signId(t.id)] : [])]) {
+      if (id === from && !pair) continue;
+      for (const c of moves.drag(id)) {
         const shares = pair ? c.rule === "factor-out" : c.rule === "factor-shared" && c.targetId === onto;
-        if (shares) found.push({ c, r: rank(n.id) });
+        if (shares) found.push({ c, r: rank(id) });
       }
     }
   }

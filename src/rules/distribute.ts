@@ -173,6 +173,8 @@ export const factorShared: Rule = {
   name: "Share a factor",
   gesture: "Drop a factor onto another term that has it too — the two terms share it: x·x + 2x → x(x + 2).",
   apply(state, id) {
+    const owner = signOwner(id);
+    if (owner) return shareMinus(state, owner);
     const m = carried(state, id);
     if (!m || m.at.s.terms.length < 3) return []; // two terms: that's factoring out the whole thing
     const { f, at, taken } = m;
@@ -195,6 +197,29 @@ export const factorShared: Rule = {
     });
   },
 };
+
+/**
+ * −x + 4 → −(x − 4): a term's minus dropped onto another term of its sum, the
+ * two sharing it (the minus taken out of both, the other's sign flipped), as
+ * by hand when nothing else is shared: x²(x − 4) − x + 4 → x²(x − 4) − (x − 4).
+ * Onto a term after it; the pair sits where the minus was.
+ * (The way back is dropping the minus onto its brackets: distribute-neg.)
+ */
+function shareMinus(state: MathState, negId: string): Candidate[] {
+  const c = dragCtx(state, negId);
+  if (c?.node.kind !== "neg" || c.parent?.kind !== "sum" || c.parent.terms.length < 3 || !c.parentLoc) return [];
+  const minus = c.node;
+  const terms = c.parent.terms;
+  const sumId = c.parent.id;
+  const sumLoc = c.parentLoc;
+  return terms.flatMap((t, j): Candidate[] => {
+    // Onto a term after it (a minus is taken out of what follows it: x² − x − 4 → x² − (x + 4), not −(x − x²) − 4).
+    if (j <= c.index || restKey(splitCoef(terms[c.index])) === restKey(splitCoef(t))) return []; // like terms combine instead
+    const shared = { ...neg(sum([minus.arg, negate(t)])), id: minus.id };
+    const newTerms = terms.map((x, k) => (k === c.index ? shared : x)).filter((_, k) => k !== j);
+    return [{ rule: "factor-shared", state: replaceIn(state, sumLoc, sum(newTerms, sumId)), targetId: t.id }];
+  });
+}
 
 /**
  * A term as a whole number times a power of one base (read with powerOf):

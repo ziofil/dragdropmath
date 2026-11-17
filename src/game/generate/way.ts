@@ -49,10 +49,12 @@ export const STAGES: Record<Stage, readonly RuleId[]> = {
   split: [...ARITH, "zero-product", "move-term", "move-factor", "move-sign", "cancel-factor", "swap-sides"],
   // A root on its own carried across (squared), and the square worked out.
   square: [...ARITH, "root-notation", "root-across", "power-of-power", "split-square"],
-  // A root (or the piece wanted) got on its own on one side.
-  isolate: [...ARITH, "move-term", "move-factor", "move-sign", "swap-sides", "commute"],
-  // Bottoms carried across (each multiplying the other side), and what cancels cancelled.
-  clear: [...ARITH, "move-denominator", "move-letter-denominator", "cancel-factor", "divide-powers", "split-fraction", "distribute", "merge-powers"],
+  // A root (or the piece wanted) got on its own on one side: what's beside it carried across, and what that leaves
+  // worked out ((6x + 6)/6 = x + 1, once 6√(…) = 6x + 6 is divided by 6).
+  isolate: [...ARITH, "move-term", "move-factor", "move-sign", "swap-sides", "commute", "split-fraction", "cancel-factor"],
+  // Bottoms carried across (each multiplying the other side), and what cancels cancelled; terms moved across first
+  // where that lets a bottom go with them (5/(x − 2) + 6/(x − 2)² = −1).
+  clear: [...ARITH, "move-denominator", "move-letter-denominator", "cancel-factor", "divide-powers", "split-fraction", "distribute", "merge-powers", "move-term"],
   // Anything the chapter has (the last stretch to the answer).
   solve: [],
 };
@@ -63,6 +65,13 @@ function movesOf(stages: readonly Stage[], rules: readonly RuleId[]): RuleId[] {
   const want = new Set(stages.flatMap((s) => STAGES[s]));
   return rules.filter((r) => want.has(r));
 }
+
+/**
+ * Moves that only change how a piece is written (√9 or 9^(1/2)): a checkpoint
+ * is passed in either notation (atCheckpoint), so a stretch from it may start
+ * in the other one, and needs the move between them whatever its own moves.
+ */
+const NOTATION: RuleId[] = ["root-notation"];
 
 /** Moves played between two checkpoints, at most (a longer stretch gets checkpoints in it). */
 const EVERY = 3;
@@ -163,15 +172,16 @@ export function writeWay(d: Draft, rules: readonly RuleId[]): Draft | null {
     }
   }
   legs.push([...leg]);
+  const notation = NOTATION.filter((r) => rules.includes(r));
   const { stages: _s, ...rest } = d;
   void _s;
-  return { ...rest, via, legs, proven: undefined };
+  return { ...rest, via, legs: legs.map((l) => [...new Set([...l, ...notation])]), proven: undefined };
 }
 
 /** A shape's last check that writes its way (Shape.check): its stretches searched with their stages' moves. */
 export const writesWay = (rules: () => readonly RuleId[]) => (d: Draft) => writeWay(d, rules());
 
-/** One stretch, as writeWay searches it: every state from `from` to one matching `to` (terms in any order), with `stage`'s moves. */
-export function wayThrough(from: MathState, to: MathState, stage: Stage, rules: readonly RuleId[]): MathState[] | null {
-  return stretch(from, (s) => atCheckpoint(s, to), movesOf([stage], rules));
+/** One stretch, as writeWay searches it: every state from `from` to one matching `to` (terms in any order), with its stages' moves. */
+export function wayThrough(from: MathState, to: MathState, stages: Stage | readonly Stage[], rules: readonly RuleId[]): MathState[] | null {
+  return stretch(from, (s) => atCheckpoint(s, to), movesOf(typeof stages === "string" ? [stages] : stages, rules));
 }

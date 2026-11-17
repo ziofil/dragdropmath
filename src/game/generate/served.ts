@@ -20,7 +20,8 @@ function served(s: Shape, chapterPositive: boolean): Shape {
     const same = (i: number, j: number) => atCheckpoint(states[i], states[j]);
     const keep = d.via.map((_, i) => !same(i + 1, i) && !same(i + 1, 0) && !same(i + 1, states.length - 1));
     const legs = d.legs && joinLegs(d.legs, keep);
-    const stages = d.stages && joinLegs(d.stages, keep);
+    // A stretch to a milestone the board is already at does no work: its kind of work doesn't widen the next one's.
+    const stages = d.stages && joinLegs(d.stages.map((st, i) => (i < d.via.length && same(i + 1, i) ? [] : st)), keep);
     // A stretch joined from several is proven only if each of them was.
     const proven = d.proven && joinLegs(d.proven.map((p) => (p ? [] : [false])), keep).map((x) => x.length === 0);
     return { ...d, via: d.via.filter((_, i) => keep[i]), ...(legs ? { legs } : {}), ...(stages ? { stages } : {}), ...(proven ? { proven } : {}), positive: d.positive ?? positive };

@@ -19,6 +19,7 @@ import { d } from "../generate/drill";
 import { answersText, fromAnswers, fromCoefs, linear, mul, teacherWrites, written, type Poly } from "../generate/poly";
 import { writesWay, type Stage } from "../generate/way";
 import { rulesOf } from "../puzzles";
+import { BOOK_SHAPES } from "./quadraticBook";
 
 /** (p·x − q)·(s·x − t)·…, multiplied out: the brackets whose answers are q/p, t/s, … */
 const times = (x: string, ...fs: [number, number][]): Poly => fromAnswers(x, ...fs.map(([p, q]) => [q, p] as [number, number]));
@@ -203,12 +204,14 @@ const shapes: Shape[] = [
 ];
 
 // Right by construction (built back from their answers); the tests solve every shape with the moves.
-const chosen = (...ids: string[]) => ids.map((id) => ({ ...shapes.find((s) => s.id === id)!, check: writesWay(() => rulesOf("quadratic")), pool: 4 }) as Shape);
+const chosen = (...ids: string[]) =>
+  ids.map((id) => ({ ...[...shapes, ...BOOK_SHAPES].find((s) => s.id === id)!, check: writesWay(() => rulesOf("quadratic")), pool: 4 }) as Shape);
 
 const levels = (): Record<Level, Shape[]> => ({
   easy: chosen("pure", "spurious", "factors-one"),
-  medium: chosen("pure-root", "factors-one", "square-of-bracket", "factors-a", "pure-fraction", "root-cancels"),
-  hard: chosen("factors-a", "square-of-bracket", "expand-first", "pure-root", "root-squared", "fraction-zero"),
+  medium: chosen("factors-a", "square-of-bracket", "expand-first", "pure-fraction", "root-cancels", "root-squared", "fraction-zero"),
+  // As the book's hardest (quadraticBook.ts): long, a root or a bottom to clear first, or a letter that's x² or √x.
+  hard: chosen("root-and-term", "two-roots", "bottom-powers", "in-pairs", "in-squares", "in-roots"),
 });
 
 /** A coefficient as it's written after another term: " + 3x", " - x", " - 6". */
