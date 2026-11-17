@@ -517,7 +517,13 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   const maxHalf = W / 2 - 16;
   // Too wide or too tall (a fraction of fractions): drawn smaller, to fit.
   const tall = (s: typeof sides) => Math.max(...s.map((x) => x.asc)) + Math.max(...s.map((x) => x.desc));
-  const scale = Math.min(1, maxHalf / halfWidth(sides), (H - 16) / tall(sides));
+  const rowWidth = (s: typeof sides) => s[0].w + s[1].w + 2 * space + eqW;
+  const centred = Math.min(1, maxHalf / halfWidth(sides));
+  // A long side and a short one (on a phone, say): rather than shrink both to keep the = in the middle,
+  // the = moves over and the row uses the whole width, so the maths stays big enough to grab.
+  const free = sides.length === 2 ? Math.min(1, (W - 32) / rowWidth(sides)) : centred;
+  const offCentre = free > centred * 1.05;
+  const scale = Math.min(offCentre ? free : centred, (H - 16) / tall(sides));
   if (scale < 1) {
     size *= scale;
     ({ sides, eqW, space } = build(size));
@@ -526,7 +532,7 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   const asc = Math.max(...sides.map((s) => s.asc));
   const desc = Math.max(...sides.map((s) => s.desc));
   const baseline = H / 2 + (asc - desc) / 2;
-  const cx = W / 2;
+  const cx = offCentre ? (W - rowWidth(sides)) / 2 + sides[0].w + space + eqW / 2 : W / 2;
   const xs = sides.length === 1 ? [cx - sides[0].w / 2] : [cx - eqW / 2 - space - sides[0].w, cx + eqW / 2 + space];
 
   const dx = pinShift(rc, sides, xs, [baseline, baseline], W)?.dx ?? 0;
@@ -535,7 +541,8 @@ function layoutCanvas(rc: RenderCtx, W: number, H: number): Svgx {
   if (sides.length === 1) {
     return <g>{sides[0].draw(xs[0], baseline)}</g>;
   }
-  // The = sign stays put in the middle, like the pivot of a balance (unless a pinned piece moves its whole row).
+  // The = sign stays put in the middle, like the pivot of a balance (unless a pinned piece moves its whole row,
+  // or the row only fits at a good size with the = off-centre).
   const mid = cx + dx;
   rc.eq = { left: mid - eqW / 2, right: mid + eqW / 2, centre: mid, baseline, size };
   return (
