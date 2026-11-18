@@ -3,16 +3,27 @@
  * a drill, the helpers chapters write theirs with, and which piece a drill's
  * words say to carry. Imports nothing that imports the chapters.
  */
-import type { RuleId } from "../../rules";
+import { opOwner, type RuleId } from "../../rules";
 import type { MathState } from "../../expr/types";
 import { locate, nodeAt } from "../../expr/tree";
 import { letter, type Rng } from "./write";
+
+/**
+ * A way of using the board that isn't a move of its own, which some lesson
+ * board teaches (docs/move-system.md): tapping a +, − or · to work out its two
+ * sides, holding a press to take a piece out of its term, carrying a minus by
+ * itself, picking a sum up by its + or −.
+ */
+export type Gesture = "operator-tap" | "hold" | "minus-alone" | "operator-grab";
+export const GESTURES: readonly Gesture[] = ["operator-tap", "hold", "minus-alone", "operator-grab"];
 
 export type Drill = {
   /** Its words (i18n `drills`) and its link. */
   id: string;
   /** The move it teaches. */
   rule: RuleId;
+  /** The gestures its words teach (its first step is made that way). */
+  shows?: readonly Gesture[];
   /**
    * The start; `want`, if given, is the first term the move's result must have on the left (when it
    * could be made in more than one place). `goal`, if given, is where the
@@ -30,13 +41,18 @@ export type Drill = {
  * bottom; the 5 of 4/(3/5) up, not the 3; the y of y = 2x onto the other y,
  * not that one onto it): Show carries that one, so it does what the words say.
  */
-export type Carry = "bottom" | "lower-bottom" | "exponent" | "outer-exponent" | "number" | "alone";
+export type Carry = "bottom" | "lower-bottom" | "exponent" | "outer-exponent" | "number" | "alone" | "operator";
+
+/** A drill whose words teach a gesture too (see Gesture). */
+export const showing = (shows: readonly Gesture[], drill: Drill): Drill => ({ ...drill, shows });
 
 /** A drill whose words name the piece to carry. */
 export const carrying = (carries: Carry, drill: Drill): Drill => ({ ...drill, carries });
 
 /** Whether piece `id` is the kind `carry` names. */
 export function carries(state: MathState, id: string, carry: Carry): boolean {
+  // The +, − or · between two pieces (tapped: see rules/types.ts opId).
+  if (carry === "operator") return opOwner(id) !== null;
   const loc = locate(state, id);
   if (!loc) return false;
   const node = nodeAt(state, loc);

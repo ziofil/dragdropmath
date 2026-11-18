@@ -176,6 +176,7 @@ const KNOWN: Record<string, { reach?: string; animate?: string }> = {
   "powers/easy/walk-number-and-letter": { reach: "x³ carried up onto x⁶ in −3·x⁶/x³ (a fraction inside a product): flipping it over the bar previews first and slides x⁶ behind the piece" },
   "powers/medium/walk-cube-number": { reach: "the same inside a power, (x⁴/x)²: the flip over the bar previews first and slides x⁴ behind the piece" },
   "powers/hard/walk-number-letters": { reach: "in (x⁶·x)/x³, x³ carried up onto the lone x lands on x⁶ beside it: the x is too small a target next to x⁶" },
+  "powers/easy/walk-one-letter": { reach: "in a⁷/(a²·a), a⁷ carried down onto the lone a lands on a² beside it: the a is too small a target next to a²" },
   "roots/medium/walk-root-and-letter": { reach: "between two like terms (6√18 − 3√18), the slot that reorders a third one in between is covered by the merges with both" },
 };
 

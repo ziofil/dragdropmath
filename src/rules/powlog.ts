@@ -9,6 +9,7 @@ import { assumeOf, canBeNegative, isPositive, splitsOver } from "./signs";
 import { allNodes, nodeAt } from "../expr/tree";
 import { intoRows, isLeft, rowCount, rowOf } from "../expr/rows";
 import { conditionOn, withCondition } from "../expr/conditions";
+import { gcd } from "./numbers";
 
 // ---------- helpers ----------
 
@@ -44,11 +45,6 @@ function exponentOf(c: DragCtx): Pow | null {
 /** Remove the factor with this id (leaving 1 if it was the whole thing). */
 const removeFactor = (e: Expr, id: string): Expr => dropFactor(e, (f) => f.id === id) ?? e;
 
-function replaceFactor(e: Expr, id: string, by: Expr): Expr {
-  if (e.id === id) return by;
-  return e.kind === "prod" ? prod(e.factors.map((f) => (f.id === id ? by : f)), e.id) : e;
-}
-
 // ---------- powers ----------
 
 /** (x²)³ → x⁶ (drop the outer exponent onto the inner one). */
@@ -75,7 +71,6 @@ export const powerOne: Rule = {
   id: "power-one",
   tidy: true,
   either: true,
-  tapsToo: true,
   name: "Power of one",
   gesture: "Tap an exponent of 1, or drop it onto its base — x¹ is just x.",
   apply(state, id) {
@@ -90,7 +85,6 @@ export const powerOne: Rule = {
 export const zeroPower: Rule = {
   id: "zero-power",
   either: true,
-  tapsToo: true,
   name: "Power of zero",
   gesture: "Tap an exponent of 0, or drop it onto its base — anything to the power 0 is 1.",
   apply(state, id) {
@@ -103,7 +97,7 @@ export const zeroPower: Rule = {
 };
 
 /**
- * x² → x·x, (x + 2)² → (x + 2)(x + 2) (tap a small whole-number exponent).
+ * x² → x·x, (x + 2)² → (x + 2)(x + 2), 4³ → 4·4·4 (tap a small whole-number exponent).
  * A power is just repeated multiplication; written out, its pieces can be
  * distributed, shared and factored like any others. The copies fly out of
  * the base.
@@ -111,13 +105,13 @@ export const zeroPower: Rule = {
 export const powerToProduct: Rule = {
   id: "power-to-product",
   name: "Write a power out",
-  gesture: "Tap a small exponent to write the power out as a product: x² → x·x.",
+  gesture: "Tap a small exponent to write the power out as a product: x² → x·x, 4³ → 4·4·4.",
   tap: true,
   apply(state, id) {
     const c = dragCtx(state, id);
     const P = c && exponentOf(c);
-    // Numbers have their own move (2³ → 8); roots are fractions of a power.
-    if (!c || !P || P.radical || P.base.kind === "num" || c.node.kind !== "num") return [];
+    // Roots are fractions of a power.
+    if (!c || !P || P.radical || c.node.kind !== "num") return [];
     const n = c.node.value;
     if (!Number.isInteger(n) || n < 2 || n > 4) return [];
     // The base n times: the first is the base itself, the others copies of it (expr/copies.ts).
@@ -125,38 +119,44 @@ export const powerToProduct: Rule = {
   },
 };
 
-/** 2³ → 8 (drop the exponent onto a number base). */
+/**
+ * 2³ → 8, 2⁻⁶ → 1/64, 9^(1/2) → 3, 8^(2/3) → 4, (1/4)^(1/2) → 1/2 (drop the
+ * exponent onto its number, or its fraction of numbers). One way only: the
+ * exponent is carried onto the number. Only when it comes out whole (or a
+ * fraction of whole numbers).
+ */
 export const evaluatePower: Rule = {
   id: "evaluate-power",
-  either: true,
   name: "Work out a power",
-  gesture: "Drop a whole-number exponent onto a number to work it out.",
-  apply: (state, id) => workOutPower(state, id, "evaluate-power"),
+  gesture: "Drop the exponent onto its number to work the power out: 2³ → 8, 9^(1/2) → 3.",
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    const P = c && exponentOf(c);
+    if (!c || !P || P.radical) return [];
+    // The exponent as p/q (a whole number, its negative, or a fraction of whole numbers).
+    const whole = (e: Expr): number | null => (e.kind === "num" && Number.isInteger(e.value) ? e.value : e.kind === "neg" && e.arg.kind === "num" && Number.isInteger(e.arg.value) ? -e.arg.value : null);
+    const e = c.node;
+    const [p, q] = e.kind === "frac" ? [whole(e.num), whole(e.den)] : [whole(e), 1];
+    if (p === null || q === null || q < 1) return [];
+    // b^(p/q), worked out: the q-th root, whole, to the power |p|.
+    const power = (b: number): number | null => {
+      const r = q === 1 ? b : Math.round(Math.abs(b) ** (1 / q)) * (b < 0 && q % 2 === 1 ? -1 : 1);
+      if (r ** q !== b || (b < 0 && q % 2 === 0)) return null;
+      const v = r ** Math.abs(p);
+      return Number.isSafeInteger(v) && Math.abs(v) <= 100_000 ? v : null;
+    };
+    const B = P.base;
+    // The base: a number, or a fraction of positive whole numbers in lowest terms (top and bottom each worked
+    // out; 6/2 is made 3 first).
+    const [a, b] = B.kind === "num" ? [B.value, 1] : B.kind === "frac" && B.num.kind === "num" && B.den.kind === "num" ? [B.num.value, B.den.value] : [0, 0];
+    const lowest = B.kind === "num" || (a > 0 && b > 1 && gcd(a, b) === 1);
+    const [top, bottom] = lowest && b ? [power(a), b === 1 ? 1 : power(b)] : [null, null];
+    if (top === null || bottom === null) return [];
+    const [n, d] = p < 0 ? [bottom, top] : [top, bottom];
+    const result = d === 1 ? num(n, B.id) : frac(num(n), num(d), B.id);
+    return [{ rule: "evaluate-power", state: replaceIn(state, c.parentLoc!, result), targetId: B.id }];
+  },
 };
-
-/** 2³ → 8 by tapping the exponent: the same as dropping it on the base. */
-export const tapPower: Rule = {
-  id: "tap-power",
-  name: "Work out a power",
-  gesture: "Tap a whole-number exponent on a number to work it out: 2³ → 8.",
-  tap: true,
-  apply: (state, id) => workOutPower(state, id, "tap-power"),
-};
-
-/** 2³ → 8, the exponent `id` dropped on its base or tapped. */
-function workOutPower(state: MathState, id: string, rule: "evaluate-power" | "tap-power"): Candidate[] {
-  const c = dragCtx(state, id);
-  const P = c && exponentOf(c);
-  // Whole-number exponents only: √9 is worked out step by step (√(3·3) → √3·√3 → …), not in one jump.
-  // A whole negative exponent works out to one over the power: 2⁻⁶ → 1/64.
-  const negative = c?.node.kind === "neg" && c.node.arg.kind === "num";
-  const n = c?.node.kind === "num" ? c.node.value : negative ? (c!.node as { arg: { value: number } }).arg.value : NaN;
-  if (!c || !P || P.base.kind !== "num" || !Number.isInteger(n) || n < 0) return [];
-  const v = P.base.value ** n;
-  if (!Number.isSafeInteger(v) || v > 100_000) return [];
-  const state2 = replaceIn(state, c.parentLoc!, negative ? frac(num(1), num(v, P.base.id)) : num(v, P.base.id));
-  return [rule === "evaluate-power" ? { rule, state: state2, targetId: P.base.id } : { rule, state: state2 }];
-}
 
 /**
  * √2·√3 → √(2·3), x³·y³ → (x·y)³ (drop a power onto another with the same
@@ -184,42 +184,7 @@ export const joinPowers: Rule = {
   },
 };
 
-/** x⁵/x² → x³ (drop a power on the bottom onto one with the same base on top). */
-export const dividePowers: Rule = {
-  id: "divide-powers",
-  name: "Same base: subtract exponents",
-  gesture: "Tap the fraction bar: powers of the same base on top and bottom merge, their exponents subtracted.",
-  tap: true,
-  tapOrder: 0.3,
-  apply(state, id) {
-    const c = dragCtx(state, id);
-    if (c?.node.kind !== "frac") return [];
-    const F = c.node;
-    let top = F.num;
-    let bottom: Expr | null = F.den;
-    let any = false;
-    for (const d of factorsOf(F.den)) {
-      const mine = asPower(d);
-      const t = factorsOf(top).find((t) => {
-        const theirs = asPower(t);
-        // Same base; at least one a power (y/y and 6/2 cancel or divide instead), and not the very same power (it cancels).
-        return key(theirs.base) === key(mine.base) && (t.kind === "pow" || d.kind === "pow") && key(t) !== key(d);
-      });
-      if (!t || !bottom) continue;
-      // Show the operation: x⁵/x² → x^(5−2); the learner subtracts themselves.
-      const theirs = asPower(t);
-      const exp = sum([theirs.exp, negate(mine.exp)]);
-      const merged = t.kind === "pow" ? pow(t.base, exp, t.id) : pow(t, exp);
-      top = replaceFactor(top, t.id, merged);
-      bottom = factorsOf(bottom).length === 1 ? null : removeFactor(bottom, d.id);
-      any = true;
-    }
-    if (!any) return [];
-    return [{ rule: "divide-powers", state: replaceIn(state, c.loc, bottom ? frac(top, bottom, F.id) : top) }];
-  },
-};
-
-/** 1/x³ → x⁻³ and x⁻²/y → 1/(x²y) (carry a factor across the fraction bar; its exponent flips sign). */
+/** 1/x³ → x⁻³, x²/y → 1/(x⁻²y) and x⁻²/y → 1/(x²y) (carry a factor across the fraction bar, either way; its exponent flips sign). */
 export const flipAcrossBar: Rule = {
   id: "flip-across-bar",
   name: "Across the fraction bar",
@@ -241,9 +206,11 @@ export const flipAcrossBar: Rule = {
       return [{ rule: "flip-across-bar", state: replaceIn(state, c.loc, frac(num(1), under)), carry: "below" }];
     }
     const { F, fracLoc, inDen } = fc;
-    // Top → bottom only for negative exponents (x⁻² up top is really "x² underneath").
-    if (!inDen && !(f.kind === "pow" && f.exp.kind === "neg")) return [];
     if (f.kind === "num") return []; // numbers don't flip into 2⁻¹
+    if (f.kind === "sum") return []; // nor a bracket into (x + 1)⁻¹: a power, a letter or a root flips
+    // Across the bar a factor of the same base: dropped on it, they merge (cancel-factor, divide-powers); that's the move.
+    const across = factorsOf(inDen ? F.num : F.den);
+    if (across.some((g) => key(asPower(g).base) === key(asPower(f).base))) return [];
     if (f.kind === "frac") return []; // a fraction underneath is divided by (divide-by-fraction), not flipped into (2/6)⁻¹
     // The dragged node itself crosses over (x becomes the base of x⁻¹).
     // Written as a power from now on (1/√x → x^(−1/2)): the √ sign can't show a negative exponent.
@@ -557,30 +524,6 @@ export const logAcross: Rule = {
 };
 
 // ---------- roots ----------
-
-/**
- * √9 → 3, ∛8 → 2 (tap the root): a root of a number that comes out whole is
- * worked out, as tapping 2·3 multiplies it out. One that doesn't (√12) is left
- * for splitting: tapping it shows it as a power instead.
- */
-export const evaluateRoot: Rule = {
-  id: "evaluate-root",
-  // Before root ↔ power, which a tap on any root would otherwise do.
-  tapOrder: -1,
-  name: "Work out a root",
-  gesture: "Tap a root of a number, like √9, to work it out (when it comes out whole).",
-  tap: true,
-  apply(state, id) {
-    const c = dragCtx(state, id);
-    if (c?.node.kind !== "pow" || !c.node.radical || !isConstant(c.node.base)) return [];
-    const n = rootOrder(c.node.exp);
-    const v = evaluate(c.node.base, {});
-    if (!n || !Number.isInteger(v) || v < 0) return [];
-    const r = Math.round(v ** (1 / n));
-    if (r ** n !== v) return [];
-    return [{ rule: "evaluate-root", state: replaceIn(state, c.loc, num(r, c.node.id)) }];
-  },
-};
 
 /** √x ↔ x^(1/2) (tap to switch notation). */
 export const rootNotation: Rule = {

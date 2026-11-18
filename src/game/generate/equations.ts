@@ -11,9 +11,9 @@ import { pickAnswer, type Recipe } from "./linear";
 import { gcd, one } from "./write";
 
 
-const FRACTIONS: RuleId[] = ["add-fractions", "expand-fraction", "split-fraction", "times-one", "multiply-numbers", "evaluate-fraction", "cancel-factor", "divide-numbers"];
+const FRACTIONS: RuleId[] = ["add-fractions", "expand-fraction", "split-fraction", "times-one", "multiply-numbers", "split-number", "cancel-factor"];
 const LOGS: RuleId[] = ["log-of-product", "log-of-power", "power-into-log", "combine-logs", "evaluate-log", "power-of-base", "exp-of-log"];
-const ROOTS: RuleId[] = ["pull-out-of-power", "split-square", "evaluate-root", "root-notation", "power-of-product", "power-of-power", "power-to-product", "merge-powers", "evaluate-power", "tap-power"];
+const ROOTS: RuleId[] = ["pull-out-of-power", "split-square", "root-notation", "power-of-product", "power-of-power", "power-to-product", "merge-powers", "evaluate-power"];
 
 export const fractionEquals: Recipe = {
   id: "fraction-equals",

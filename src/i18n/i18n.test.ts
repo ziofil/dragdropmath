@@ -36,6 +36,19 @@ describe.each(OTHERS)("%s", (lang) => {
     report.push(`  ${lang}: ${Math.round((100 * done) / keys.length)}% of strings, ${drillsDone}/${drills.length} moves${off ? `, ${off} chapter blurbs with other maths than the English` : ""}`);
   });
 
+  // Every language is on the site (the picker in Settings): a lesson board left in English is a gap a learner sees.
+  it("has every lesson board, with the English's maths", async () => {
+    const tr = await TRANSLATIONS[lang]();
+    const gaps: string[] = [];
+    for (const [id, english] of Object.entries(en.drills)) {
+      const words = tr.drills?.[id as keyof typeof en.drills];
+      if (!words?.name || !words.how || !words.text?.length) gaps.push(`${id}: not translated`);
+      else if (words.text.length !== english.text.length) gaps.push(`${id}: ${words.text.length} paragraphs, English has ${english.text.length}`);
+      else if (maths([words.how, ...words.text].join(" ")).sort().join() !== maths([english.how, ...english.text].join(" ")).sort().join()) gaps.push(`${id}: other maths than the English`);
+    }
+    expect(gaps).toEqual([]);
+  });
+
   it("names every chapter", () => {
     for (const c of CHAPTERS) {
       const words = chapterText(c, lang);

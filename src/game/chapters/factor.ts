@@ -11,7 +11,7 @@ import { printState } from "../../expr/key";
 import { type Walk, walked } from "../generate/walk";
 import { written } from "../generate/backs";
 import { gcd, lin, one, type Rng, type Level, type Shape, letter, one as pick, term } from "../generate/write";
-import { d, letters2 } from "../generate/drill";
+import { d, letters2, showing } from "../generate/drill";
 
 const FACTORING = ["factor-out", "factor-shared"] as const;
 /** Multiplying out, the step back; the numbers worked out after. */
@@ -96,11 +96,11 @@ export const factor: Chapter = {
   unlocks: ["factor-out", "split-number", "factor-shared", "split-term", "difference-of-squares"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
-    d("factor-out", (r) => {
+    showing(["hold"], d("factor-out", (r) => {
       const [x, y] = letters2(r);
       const a = r.int(2, 7);
       return `${a}${x} + ${a}${y}`;
-    }),
+    })),
     // A common factor that doesn't show: 3 in 6x + 9. Splitting 6 (into its smallest prime, 2, and 3) shows it.
     d("split-number", (r) => {
       const [p, g] = pick(r, [[2, 3], [2, 5], [2, 7], [3, 5], [3, 7]] as const);

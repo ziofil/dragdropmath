@@ -12,15 +12,18 @@ import { Vec2 } from "dragology";
 import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { allNodes } from "../expr/tree";
-import { handles, movesFor, operatorTap, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
+import { opOwner, RULES, stepsFrom, type RuleId, type Step, type Way } from "../rules";
 import { ANCHOR, Grip, harness } from "./headless";
+import { boardFor, type Point } from "./press";
 
 export type Demo =
-  | { kind: "tap"; id: string; next: MathState }
-  /** The +, − or · in front of piece `id` tapped (operatorTap). */
-  | { kind: "op-tap"; id: string; next: MathState }
-  /** Press at `from` (held first, when a quick press would take its term), let go at `to` (canvas coordinates). */
-  | { kind: "drag"; id: string; from: Vec2; to: Vec2; next: MathState; hold: boolean };
+  /** Tap handle `id` (a piece, or a +, − or ·) at `at`. */
+  | { kind: "tap"; id: string; at: Point; next: MathState }
+  /**
+   * Pick piece `id` up (the drag engine holding it at `from`), carry it to `to`, let go (canvas
+   * coordinates). The finger goes down at `grip`, where a press takes that piece, held first if `hold`.
+   */
+  | { kind: "drag"; id: string; from: Vec2; to: Vec2; grip: Point; next: MathState; hold: boolean };
 
 const ROW = Array.from({ length: 181 }, (_, i) => Vec2(i * 8 - 720, 0)).sort((p, q) => p.len() - q.len());
 const AROUND = Array.from({ length: 21 * 11 }, (_, i) => Vec2((i % 21) * 16 - 160, Math.floor(i / 21) * 16 - 80))
@@ -53,12 +56,22 @@ export function planDemo(
     .flatMap((st) => st.ways.map((w) => ({ w, r: rank(st, w) })))
     .sort((a, b) => a.r - b.r)
     .map((x) => x.w);
-  // A tap is shown as a tap (its rule is one), never as some drag that happens to give the same.
-  if (RULES[rule].tap || RULES[rule].tapsToo) {
-    const t = ways.find((w) => w.tap);
-    return t ? { kind: "tap", id: t.id, next: t.candidate.state } : null;
-  }
+  // A tap is shown as a tap (its rule is one, or the words name a piece whose step is a tap: the 0 of x⁰, the + of 3 + 4),
+  // never as some drag that happens to give the same.
+  if (RULES[rule].tap) return tapOf(state, rules, W, H, ways.filter((w) => w.tap));
+  const named = ways.filter((w) => w.tap && prefer(state, w.id));
+  if (named.length) return tapOf(state, rules, W, H, named);
   return dragOf(state, rules, W, H, ways);
+}
+
+/** The first of `ways` (taps) a hand can make: where on the board a tap gives it. */
+function tapOf(state: MathState, rules: readonly RuleId[], W: number, H: number, ways: readonly Way[]): Demo | null {
+  const board = boardFor(state, rules, W, H);
+  for (const w of ways) {
+    const at = board.tapSpotFor(w.id, (s) => same(s, w.candidate.state));
+    if (at) return { kind: "tap", id: w.id, at, next: w.candidate.state };
+  }
+  return null;
 }
 
 /**
@@ -68,35 +81,36 @@ export function planDemo(
  * to work it out"), then a piece ("tap the fraction bar") — else a drag, a
  * quick press before one held. Null if none can be shown.
  */
-export function planStepTo(state: MathState, rules: readonly RuleId[], W: number, H: number, lands: (s: MathState) => boolean, opTaps = true): Demo | null {
-  // (`opTaps` false: not by tapping a +, − or ·, as where none is drawn: √x·x shows no ·.)
-  for (const id of opTaps ? handles(state) : []) {
-    const next = operatorTap(state, id, rules);
-    if (next && lands(next)) return { kind: "op-tap", id, next };
-  }
+export function planStepTo(state: MathState, rules: readonly RuleId[], W: number, H: number, lands: (s: MathState) => boolean): Demo | null {
   const ways = stepsFrom(state, rules)
     .filter((st) => lands(st.state))
     .flatMap((st) => st.ways);
-  // The smallest piece whose tap makes it, as a hand would tap it: the 0 of 0(x + 4), not the whole product.
-  const size = (id: string) => state.sides.map((e) => allNodes(e).find((n) => n.id === id)).find(Boolean);
-  const tap = ways.filter((w) => w.tap).sort((a, b) => allNodes(size(a.id)!).length - allNodes(size(b.id)!).length)[0];
-  if (tap) return { kind: "tap", id: tap.id, next: tap.candidate.state };
-  const moves = movesFor(state, rules);
-  return dragOf(state, rules, W, H, [...ways.filter((w) => moves.pressable(w.id)), ...ways.filter((w) => !moves.pressable(w.id))]);
+  // Taps: an operator's first, then the smallest piece whose tap makes it, as a hand would tap it (the 0 of 0(x + 4), not the whole product).
+  const size = (id: string) => (opOwner(id) ? 0 : allNodes(state.sides.map((e) => allNodes(e).find((n) => n.id === id)).find(Boolean)!).length);
+  const tap = tapOf(state, rules, W, H, ways.filter((w) => w.tap).sort((a, b) => size(a.id) - size(b.id)));
+  if (tap) return tap;
+  // Drags: by a quick press before a held one.
+  const board = boardFor(state, rules, W, H);
+  const held = (w: Way) => (board.spotFor(w.id)?.hold ? 1 : 0);
+  return dragOf(state, rules, W, H, [...ways].sort((a, b) => held(a) - held(b)));
 }
 
 /** The first of `ways` (in order) a hand can make by dragging: where to press, and where to let go. */
 function dragOf(state: MathState, rules: readonly RuleId[], W: number, H: number, ways: readonly Way[]): Demo | null {
-  const moves = movesFor(state, rules);
+  const board = boardFor(state, rules, W, H);
   const h = harness(state, rules, W, H);
   for (const { id, tap, candidate: c } of ways) {
     if (tap) continue;
+    // Where a finger picks it up (render/press.ts): nowhere, and it can't be shown.
+    const spot = board.spotFor(id);
     const origin = h.originOf(id);
-    if (!origin) continue;
+    if (!spot || !origin) continue;
+    const grip = spot.at;
+    const hold = spot.hold;
     if (c.targetId) {
-      const grip = h.grab(id);
-      const to = grip.start.add(h.endsUpOffset(id, c.targetId, c.rule));
-      if (same(grip.at(to).state, c.state)) return { kind: "drag", id, from: grip.start, to, next: c.state, hold: !moves.pressable(id) };
+      const g = h.grab(id);
+      const to = g.start.add(h.endsUpOffset(id, c.targetId, c.rule));
+      if (same(g.at(to).state, c.state)) return { kind: "drag", id, from: g.start, to, grip, next: c.state, hold };
       continue;
     }
     const from = origin.add(ANCHOR);
@@ -105,7 +119,7 @@ function dragOf(state: MathState, rules: readonly RuleId[], W: number, H: number
     // Where the drag itself aims this move (its layout, as the drag reads it); only failing that, a search.
     const aim = h.aimOf(id, c).sub(h.centreOf(id));
     const o = [aim].find(gives) ?? ROW.find(gives) ?? AROUND.find(gives);
-    if (o) return { kind: "drag", id, from, to: from.add(o), next: c.state, hold: !moves.pressable(id) };
+    if (o) return { kind: "drag", id, from, to: from.add(o), grip, next: c.state, hold };
   }
   return null;
 }

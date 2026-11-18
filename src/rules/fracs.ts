@@ -5,6 +5,7 @@ import { dropFactor } from "./shapes";
 import { key } from "../expr/key";
 import { allNodes, nodeAt } from "../expr/tree";
 import { roleOf, viewTerm } from "./view";
+import { sharedFactor } from "./numbers";
 import { dragCtx, mergeInto, replaceIn, without, type Candidate, type Rule } from "./types";
 import { fractionPart, timesVisible } from "./shapes";
 
@@ -35,9 +36,12 @@ function ownFraction(state: MathState, f: Expr, part: { F: Extract<Expr, { kind:
 // ---------- rules ----------
 
 /**
- * 6 → 2·3 (tap a number to split it into factors) — to find what terms
- * share (2x + 6 → 2x + 2·3 → 2(x + 3)) or what cancels in a fraction. Works
- * on a number in a fraction, a term of a sum, or a factor of a product.
+ * 8 → 4·2 (tap a number to split it, the useful factor first): what it
+ * shares across the fraction bar, when it's a factor of a whole top or
+ * bottom (8x/12 → (4·2·x)/12, ready for the 4s to cancel once 12 is 4·3);
+ * else what it shares with the other terms of its sum (15x + 10 → 5·3x + 10,
+ * ready to take the 5 out); else its smallest prime (6 → 2·3). Works on a
+ * number in a fraction, a term of a sum, or a factor of a product.
  */
 export const splitNumber: Rule = {
   id: "split-number",
@@ -56,8 +60,10 @@ export const splitNumber: Rule = {
     const inPlace = holder?.parent?.kind === "frac" || termOfSum || c.parent?.kind === "prod";
     if (!inPlace) return [];
     const n = c.node.value;
-    const p = smallestPrime(n);
-    if (n < 4 || p === n) return [];
+    if (!Number.isInteger(n) || n < 4) return [];
+    // What it shares first, else its smallest prime (a power of a base, before that, is taps.ts's to choose).
+    const p = sharedFactor(state, id, n) ?? smallestPrime(n);
+    if (p === n) return [];
     return [{ rule: "split-number", state: replaceIn(state, c.loc, prod([num(p), num(n / p)], c.node.id)) }];
   },
 };
@@ -178,6 +184,8 @@ export const multiplyFractions: Rule = {
     const parts = (e: Expr) => (e.kind === "frac" ? { top: e.num, bottom: e.den as Expr | null } : { top: e, bottom: null });
     return factors.flatMap((G, j): Candidate[] => {
       if (j === c.index || (G.kind !== "frac" && c.node.kind !== "frac")) return [];
+      // Onto a bracket (or a bracket onto it), a fraction goes into every term: that's distributing.
+      if (G.kind === "sum" || c.node.kind === "sum") return [];
       // A number dropped on a log goes *into* it (½·ln x → ln(x^½)), not over it.
       if (G.kind === "log" || c.node.kind === "log") return [];
       const [a, b] = j < c.index ? [parts(G), parts(c.node)] : [parts(c.node), parts(G)];

@@ -15,7 +15,7 @@ import { parseState } from "../../expr/parse";
 import { build, draftOf, type Step } from "../generate/back";
 import { ex, overBottom, productIsZero, restate, rootBoth, rowsAs, squaredRows, writeAs } from "../generate/unmove";
 import { gcd, one, type Draft, type Level, type Rng, type Shape, letter as anyLetter } from "../generate/write";
-import { d } from "../generate/drill";
+import { d, showing } from "../generate/drill";
 import { answersText, fromAnswers, fromCoefs, linear, mul, teacherWrites, written, type Poly } from "../generate/poly";
 import { writesWay, type Stage } from "../generate/way";
 import { rulesOf } from "../puzzles";
@@ -169,7 +169,8 @@ const shapes: Shape[] = [
       const [d, x0] = [r.int(1, 4), r.int(-1, 6)];
       const k = 2 * d * x0 + d * d;
       if (k <= 0 || x0 < -d) return null;
-      const steps: Step[] = [row(`${x}^2 + ${k} = ${written(mul(linear(1, d, x), linear(1, d, x)))}`), side(`(${x} + ${d})^2`, "expand", 1), rootedBoth()];
+      // (The squares gone, the letter's number is divided away: isolate's moves.)
+      const steps: Step[] = [row(`${x}^2 + ${k} = ${written(mul(linear(1, d, x), linear(1, d, x)))}`, "isolate"), side(`(${x} + ${d})^2`, "expand", 1), rootedBoth()];
       return made("root-cancels", `${x} = ${x0}`, steps, r);
     },
   },
@@ -244,7 +245,7 @@ export const quadratic: Chapter = {
   title: "Quadratic equations",
   blurb: "An equation with x² can have two answers. Make one side 0 and write the other as a product: a product is 0 only when one of its factors is. Or get the square on its own: x² = 9 means x = 3 or x = −3.",
   after: ["simultaneous"],
-  unlocks: ["zero-product", "move-letter-denominator"],
+  unlocks: ["zero-product", "move-letter-denominator", "move-letter-factor"],
   // x² = 9: x may be −3 as well (unlike the chapters where letters stand for positive numbers).
   positive: false,
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
@@ -289,13 +290,18 @@ export const quadratic: Chapter = {
       ].map((v) => v + where);
       return { start: `√(x + ${c}) = x + ${dd}${where}`, via, goal: `x = ${p} or x = ${q}${where}` };
     }, "root-notation"),
-    // A fraction equal to 0: its bottom (never 0, the condition says) carried across, 0 times it is 0.
-    d("fraction-zero", (r) => {
-      const [a, b] = [r.int(1, 6), r.int(1, 6)];
-      const where = ` where x ≠ -${b}`;
+    // A fraction equal to 0: its bottom (never 0, the condition says) picked up by its + or − and carried across, 0 times it is 0.
+    showing(["operator-grab"], d("fraction-zero", (r) => {
+      const [a, b] = [r.int(1, 6), r.signed(1, 6)];
+      const where = ` where x ≠ ${-b}`;
       // 0 times the bottom worked out first (0 gets rid of what it multiplies), then the number moved across.
-      return { start: `(x - ${a})/(x + ${b}) = 0${where}`, via: [`x - ${a} = 0${where}`], goal: `x = ${a}${where}` };
-    }, "move-letter-denominator"),
+      return { start: `(x - ${a})/(x ${b < 0 ? "-" : "+"} ${Math.abs(b)}) = 0${where}`, via: [`x - ${a} = 0${where}`], goal: `x = ${a}${where}` };
+    }, "move-letter-denominator")),
+    // Dividing both sides by a letter: one that can't be 0, and not x itself (x² = 3x divided by x loses x = 0).
+    d("letter-factor", (r) => {
+      const [k, a] = [r.int(2, 9), anyLetter(r) === "a" ? "b" : "a"];
+      return { start: `${a}x = ${k}${a} where ${a} ≠ 0`, goal: `x = ${k} where ${a} ≠ 0` };
+    }, "move-letter-factor"),
   ],
   levels,
 };

@@ -1,6 +1,7 @@
 import type { Expr } from "../expr/types";
 import { cloneFresh, frac, neg, negate, num, pow, prod, sum, variable } from "../expr/build";
-import { adopt, dragCtx, mergeInto, replaceIn, signOwner, type Candidate, type Rule } from "./types";
+import { adopt, dragCtx, mergeInto, replaceIn, type Candidate, type Rule } from "./types";
+import { signOwner } from "./handles";
 import { nodeAt, type Loc } from "../expr/tree";
 import { key } from "../expr/key";
 import { divideOut, powerOf, rebuildTerm, roleOf, viewTerm, wholePower, type Taken } from "./view";
@@ -276,12 +277,11 @@ function writeTerm(k: number, x: string, n: number, id?: string): Expr {
 export const splitTerm: Rule = {
   id: "split-term",
   name: "Split the middle term",
-  gesture: "Tap the middle term of something like x² + 5x + 6: it splits in two (2x + 3x), ready to factor in pairs.",
+  gesture: "Tap the middle term of something like x² + 5x + 6 (its letter, not its number): it splits in two (2x + 3x), ready to factor in pairs.",
   tap: true,
-  // Before splitting a number: the 8 of y² + 8y + 15 tapped splits its term, as the y does.
-  tapOrder: -0.5,
   apply(state, id) {
-    const r = roleOf(state, termHolding(state, id));
+    // The term itself (tapped on its letter): its number tapped splits the number.
+    const r = roleOf(state, id);
     if (!r || r.part !== "term" || r.terms.length !== 3) return [];
     const ms = r.terms.map(monomial);
     if (ms.some((m) => m === null)) return [];
@@ -305,14 +305,6 @@ export const splitTerm: Rule = {
   },
 };
 
-/** The term a number in front belongs to (the 8y of the 8, through a minus), else `id` itself. */
-function termHolding(state: MathState, id: string): string {
-  let c = dragCtx(state, id);
-  if (c?.node.kind !== "num") return id;
-  while (c?.parent && (c.parent.kind === "prod" || c.parent.kind === "neg")) c = dragCtx(state, c.parent.id);
-  return c?.node.id ?? id;
-}
-
 /** √ of a term k·xⁿ, when it's a whole square (9 → 3, 4x² → 2x, x⁴ → x²). */
 function rootOf(m: { k: number; n: number }): { k: number; n: number } | null {
   const s = Math.round(Math.sqrt(m.k));
@@ -323,7 +315,7 @@ function rootOf(m: { k: number; n: number }): { k: number; n: number } | null {
 export const differenceOfSquares: Rule = {
   id: "difference-of-squares",
   name: "Difference of two squares",
-  gesture: "Tap the minus between two squares: a² − b² = (a − b)(a + b).",
+  gesture: "Tap the minus between two squares: a² − b² = (a − b)(a + b) (once nothing else is shared to take out first).",
   tap: true,
   apply(state, id) {
     const owner = signOwner(id);

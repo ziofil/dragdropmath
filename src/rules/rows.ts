@@ -11,11 +11,11 @@ import { partner, rowCount, rowOf } from "../expr/rows";
 /**
  * y = 2x and x + y = 9 → x + 2x = 9: a letter that one equation gives alone
  * can be swapped, everywhere else, for what it equals. Drag the letter onto
- * one of its uses in another equation.
+ * one of its uses in another equation (one way only: the letter alone is the
+ * one carried).
  */
 export const substitute: Rule = {
   id: "substitute",
-  either: true,
   name: "Substitute",
   gesture: "In y = 2x, drag the y onto a y in the other equation: it becomes 2x there.",
   apply(state, id) {

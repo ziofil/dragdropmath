@@ -19,6 +19,7 @@ import { allNodes, children, mapTree, withChildren } from "../../expr/tree";
 import type { RuleId } from "../../rules";
 import type { Rng } from "./write";
 import type { Stage } from "./way";
+import { ARITH as WORK, SIMPLIFY } from "./families";
 import { differ, envs } from "../answers";
 import { evaluate } from "../../expr/eval";
 import { rowAt, rowOf, rows, withRow, withRows, type Row } from "../../expr/rows";
@@ -128,7 +129,8 @@ function onRow(s: MathState, row: number, f: (l: Expr, r: Expr) => [Expr, Expr, 
   return { ...withRow(s, row, [out[0], out[1]]), ...(rel ? { rel } : {}) };
 }
 
-const ARITH: RuleId[] = ["combine", "multiply-numbers", "evaluate-fraction", "divide-numbers"];
+/** Working out, and fractions of numbers worked out (12/3 → (3·4)/3 → 4): what undoes a number written the long way. */
+const ARITH: RuleId[] = [...WORK, ...SIMPLIFY];
 
 /**
  * a·(side `at`), the other side times a: x = 3 → 2x = 6; x + 1 = 4 →
@@ -403,7 +405,7 @@ export const plainlyPositive = (e: Expr): boolean => allNodes(e).every((k) => k.
 
 /** Side 0 under a root (k = 2: √, 3: ∛); the value side its root. An inequality's side must be positive. */
 export const rootOf = (k: 2 | 3, row = 0): UnMove => ({
-  rules: ["root-across", "evaluate-power", "tap-power", "root-notation"],
+  rules: ["root-across", "evaluate-power", "root-notation"],
   positive: true,
   wants: (v) => (k === 2 ? isSquare(v) : isCube(v)) && v > 1,
   on: (s, _r, need) =>
@@ -417,7 +419,7 @@ export const rootOf = (k: 2 | 3, row = 0): UnMove => ({
 
 /** Side 0 squared, the value side too. */
 export const squareOf = (row = 0): UnMove => ({
-  rules: ["root-across", "power-of-power", "evaluate-power", "tap-power", "evaluate-root", "root-notation"],
+  rules: ["root-across", "power-of-power", "evaluate-power", "root-notation"],
   positive: true,
   wants: (v) => v >= 2 && v <= 9,
   on: (s, _r, need) =>
@@ -430,7 +432,7 @@ export const squareOf = (row = 0): UnMove => ({
 
 /** log_b of side 0, the value side its log (a power of b). */
 export const logOfSide = (row = 0): UnMove => ({
-  rules: ["log-across", "power-of-base", "evaluate-power", "tap-power", "evaluate-log"],
+  rules: ["log-across", "power-of-base", "evaluate-power", "evaluate-log"],
   positive: true,
   wants: (v) => v > 1 && LOG_BASES.some((b) => (logOf(b, v) ?? 0) >= 2),
   on: (s, r, need) =>
@@ -446,7 +448,7 @@ export const logOfSide = (row = 0): UnMove => ({
 
 /** b to the power side 0, the value side bᵛ. */
 export const expOfSide = (row = 0): UnMove => ({
-  rules: ["exp-across", "evaluate-log", "power-of-base", "log-of-power", "evaluate-power", "tap-power"],
+  rules: ["exp-across", "evaluate-log", "power-of-base", "log-of-power", "evaluate-power"],
   positive: true,
   wants: (v) => v >= 2 && v <= 5,
   on: (s, r, need) =>
@@ -501,7 +503,7 @@ function exponentOf(b: Expr, v: Expr): Expr | null {
 
 /** log_b of both sides: x = 8 → log₂(x) = 3; x = e³ → ln(x) = 3. */
 export const logBoth = (b: number | "e", row = 0): UnMove => ({
-  rules: ["log-across", "exp-across", "power-of-base", "evaluate-power", "tap-power", "evaluate-log"],
+  rules: ["log-across", "exp-across", "power-of-base", "evaluate-power", "evaluate-log"],
   positive: true,
   on: (s) =>
     onRow(s, row, (L, R) => {
@@ -513,7 +515,7 @@ export const logBoth = (b: number | "e", row = 0): UnMove => ({
 
 /** b to the power of both sides: x = 2 → 3ˣ = 9; 2x = ln(5) → e^(2x) = 5. */
 export const expBoth = (b: number | "e", row = 0): UnMove => ({
-  rules: ["exp-across", "log-across", "exp-of-log", "evaluate-log", "power-of-base", "log-of-power", "evaluate-power", "tap-power"],
+  rules: ["exp-across", "log-across", "exp-of-log", "evaluate-log", "power-of-base", "log-of-power", "evaluate-power"],
   positive: true,
   on: (s) =>
     onRow(s, row, (L, R) => {
@@ -524,7 +526,8 @@ export const expBoth = (b: number | "e", row = 0): UnMove => ({
 
 // ---------- disguises: a piece written the long way, undone by one or two moves ----------
 
-type Disguise = { rule: RuleId; on: (e: Expr, parent: Expr | null, r: Rng) => Expr | null };
+/** `rule` undoes it (and `then`, when it takes a second move: √25 → 25^(1/2) → 5). */
+type Disguise = { rule: RuleId; then?: RuleId; on: (e: Expr, parent: Expr | null, r: Rng) => Expr | null };
 
 const factorPairs = (v: number) => [2, 3, 4, 5, 6].filter((p) => v % p === 0 && v / p >= 2);
 const pickOf = <T,>(r: Rng, xs: readonly T[]): T => xs[r.int(0, xs.length - 1)];
@@ -534,10 +537,10 @@ const DISGUISES: Disguise[] = [
   { rule: "multiply-numbers", on: (e, parent, r) => (e.kind === "num" && parent?.kind !== "prod" && factorPairs(e.value).length ? ((p) => prod([num(p), num(e.value / p)]))(pickOf(r, factorPairs(e.value))) : null) },
   // 7 → 3 + 4 (where a sum needs no brackets)
   { rule: "combine", on: (e, parent, r) => (e.kind === "num" && e.value >= 3 && (parent === null || parent.kind === "sum") ? ((p) => sum([num(p), num(e.value - p)]))(r.int(1, e.value - 1)) : null) },
-  // 4 → 12/3 (on its own, not inside a sum: x − 10/2 reads as a trick)
-  { rule: "evaluate-fraction", on: (e, parent, r) => (e.kind === "num" && e.value >= 2 && e.value <= 10 && parent === null ? ((k) => frac(num(e.value * k), num(k)))(r.int(2, 3)) : null) },
-  // 5 → √25
-  { rule: "evaluate-root", on: (e, parent) => (e.kind === "num" && e.value >= 2 && e.value <= 6 && parent?.kind !== "pow" && parent?.kind !== "prod" ? root(num(e.value * e.value)) : null) },
+  // 4 → 12/3 (on its own, not inside a sum: x − 10/2 reads as a trick); undone by splitting 12 → 3·4 and cancelling the 3s
+  { rule: "split-number", then: "cancel-factor", on: (e, parent, r) => (e.kind === "num" && e.value >= 2 && e.value <= 10 && parent === null ? ((k) => frac(num(e.value * k), num(k)))(r.int(2, 3)) : null) },
+  // 5 → √25 (tapped, 25^(1/2); its ½ dropped on the 25)
+  { rule: "root-notation", then: "evaluate-power", on: (e, parent) => (e.kind === "num" && e.value >= 2 && e.value <= 6 && parent?.kind !== "pow" && parent?.kind !== "prod" ? root(num(e.value * e.value)) : null) },
   // 3 → log₂ 8
   {
     rule: "power-of-base",
@@ -600,7 +603,7 @@ const DISGUISES: Disguise[] = [
 export const disguise = (rules: ReadonlySet<RuleId>, done: Set<string> = new Set(), row?: number): UnMove => {
   const ds = DISGUISES.filter((d) => rules.has(d.rule));
   return {
-    rules: [...new Set(ds.map((d) => d.rule)), ...ARITH],
+    rules: [...new Set(ds.flatMap((d) => [d.rule, ...(d.then ? [d.then] : [])])), ...ARITH],
     on: (s, r) => {
       const spots: { side: number; e: Expr; d: Disguise; parent: Expr | null }[] = [];
       s.sides.forEach((side, i) => {
@@ -666,7 +669,7 @@ function ratio(e: Expr): [number, number] | null {
  * Undone by pulling a factor off the product, then solving each row.
  */
 export const productIsZero = (): UnMove => ({
-  rules: ["zero-product", "move-term", "move-factor", "divide-numbers", "cancel-factor", ...ARITH],
+  rules: ["zero-product", "move-term", "move-factor", ...ARITH],
   on: (s) => {
     const rows = answerRows(s);
     if (!rows || rows.some(([l]) => l.kind !== "var" || key(l) !== key(rows[0][0]))) return null;
@@ -697,7 +700,7 @@ function squared(v: Expr): Expr | null {
  * (an even power has two roots).
  */
 export const squaredRows = (): UnMove => ({
-  rules: ["root-across", "evaluate-power", "tap-power", "evaluate-root", "evaluate-fraction", "split-square", ...ARITH],
+  rules: ["root-across", "evaluate-power", "split-square", ...ARITH],
   on: (s) => {
     const rows = answerRows(s);
     if (!rows || rows.length !== 2) return null;
@@ -713,7 +716,7 @@ export const squaredRows = (): UnMove => ({
  * 2x + 1 = 5 or 2x + 1 = −5). Undone by solving each row.
  */
 export const rowsAs = (E: Expr): UnMove => ({
-  rules: ["move-term", "move-factor", "divide-numbers", "evaluate-fraction", ...ARITH],
+  rules: ["move-term", "move-factor", ...ARITH],
   on: (s) => {
     const rows = answerRows(s);
     if (!rows) return null;
@@ -734,7 +737,7 @@ export const rowsAs = (E: Expr): UnMove => ({
  * root across (squaring both sides).
  */
 export const rootBoth = (row = 0): UnMove => ({
-  rules: ["root-notation", "root-across", "power-of-power", "evaluate-power", "tap-power", ...ARITH],
+  rules: ["root-notation", "root-across", "power-of-power", "evaluate-power", ...ARITH],
   on: (s) =>
     onRow(s, row, (L, R) => {
       if (R.kind !== "pow" || R.exp.kind !== "num" || R.exp.value !== 2) return null;

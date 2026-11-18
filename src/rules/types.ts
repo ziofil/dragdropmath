@@ -1,6 +1,6 @@
 import type { Expr, MathState } from "../expr/types";
 import { normalize } from "../expr/build";
-import { allNodes, children, locate, nodeAt, parentLoc, replaceAt, type Loc } from "../expr/tree";
+import { children, locate, nodeAt, parentLoc, replaceAt, type Loc } from "../expr/tree";
 import { without } from "../util/array";
 
 export type RuleId =
@@ -21,18 +21,16 @@ export type RuleId =
   | "move-letter-factor"
   | "move-letter-denominator"
   | "move-sign"
-  | "divide-numbers"
-  | "evaluate-fraction"
   | "cancel-factor"
   | "power-of-power"
   | "zero-power"
   | "evaluate-power"
-  | "tap-power"
   | "divide-powers"
   | "flip-across-bar"
   | "times-one"
   | "numbers-first"
   | "multiply-out"
+  | "times-zero"
   | "split-number"
   | "expand-fraction"
   | "add-fractions"
@@ -40,7 +38,6 @@ export type RuleId =
   | "multiply-fractions"
   | "divide-by-fraction"
   | "root-notation"
-  | "evaluate-root"
   | "split-square"
   | "root-across"
   | "power-one"
@@ -88,15 +85,8 @@ export type Rule = {
   name: string;
   /** One line telling a learner what gesture does this. */
   gesture: string;
-  /** Tap (click) the node instead of dragging it. A tap rule yields at most one candidate. */
+  /** Made by tapping, not dragging (which tap a piece makes: taps.ts). A tap rule yields at most one candidate. */
   tap?: true;
-  /**
-   * A merge onto the piece's neighbour that tapping the piece makes too (the 0
-   * of x⁰ tapped: x⁰ → 1), as dropping it would. Taught as a tap.
-   */
-  tapsToo?: true;
-  /** When several taps apply, the lowest order wins (default 0). */
-  tapOrder?: number;
   /** How carrying the piece towards this move feels (see Feel). Merges (with a target) always blend in. */
   feel?: Feel;
   /**
@@ -192,18 +182,6 @@ export { isEquation, partner } from "../expr/rows";
 
 export function setSides(sides: Expr[]): MathState {
   return { sides: sides.map(normalize) };
-}
-
-/**
- * A minus sign can be its own drag handle, separate from the term it negates:
- * in −x = 6 you carry just the −. Its handle id is derived from the neg node's.
- */
-export const signId = (negId: string) => `${negId}-sign`;
-export const signOwner = (id: string): string | null => (id.endsWith("-sign") ? id.slice(0, -"-sign".length) : null);
-
-/** Every handle a learner could press: each node, plus each minus sign. */
-export function handles(state: MathState): string[] {
-  return state.sides.flatMap(allNodes).flatMap((n) => (n.kind === "neg" ? [n.id, signId(n.id)] : [n.id]));
 }
 
 /** Give a node a different id, so it takes over the identity of e.g. the dragged node. */

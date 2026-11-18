@@ -21,7 +21,7 @@ import { cloneFresh, frac, neg, num, pow, prod, root, sum } from "../expr/build"
 import { key } from "../expr/key";
 import { locate, nodeAt, parentLoc, type Loc } from "../expr/tree";
 import { without } from "../util/array";
-import { signOwner } from "./types";
+import { signOwner } from "./handles";
 
 /** The terms of a side, or of anything else read as a sum: a non-sum is one term. */
 export const termsOf = (e: Expr): Expr[] => (e.kind === "sum" ? e.terms : [e]);

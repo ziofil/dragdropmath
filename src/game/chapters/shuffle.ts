@@ -8,7 +8,7 @@ import type { Chapter } from "../puzzles";
 import { type Walk, walked } from "../generate/walk";
 import { productCoef, splitLike, termMoved } from "../generate/backs";
 import { one, poly, type Rng, type Level, type Shape, letter } from "../generate/write";
-import { d } from "../generate/drill";
+import { carrying, d, showing } from "../generate/drill";
 
 const BACK = [splitLike(12, true), productCoef()];
 
@@ -49,19 +49,31 @@ export const shuffle: Chapter = {
   title: "Rearranging terms",
   blurb: "Terms can be added in any order, and plain numbers can be worked out.",
   after: [],
-  unlocks: ["commute", "combine", "multiply-numbers", "numbers-first", "multiply-out"],
+  unlocks: ["commute", "combine", "multiply-numbers", "multiply-out", "times-zero"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
     // Now and then with a minus: it goes along with its term (7 − x → −x + 7).
     d("commute", (r) => `${r.int(2, 9)} ${r.next() < 0.4 ? "-" : "+"} ${letter(r)}`),
     d("combine", (r) => `${r.int(2, 9)} + ${letter(r)} + ${r.int(2, 9)}`),
+    // The same, by tapping the + between the two numbers.
+    showing(["operator-tap"], carrying("operator", d("tap-operator", (r) => {
+      const [a, b, x] = [r.int(2, 9), r.int(2, 9), letter(r)];
+      return { start: `${a} + ${b} + ${x}`, goal: `${a + b} + ${x}` };
+    }, "combine"))),
     // The number on the right carried onto the one on the left: numbers first (9n, not n·9).
     d("multiply-numbers", (r) => {
       const [a, x, b] = [r.int(2, 5), letter(r), r.int(2, 5)];
       return { start: `${a}·${x}·${b}`, goal: `${a * b}${x}` };
     }),
-    d("numbers-first", (r) => `${letter(r)}·${r.int(2, 9)}`),
-    d("multiply-out", (r) => `${r.int(2, 6)}·${r.int(2, 6)} + ${letter(r)}`),
+    // Tapping the · of a product multiplies all its numbers, a letter between them or not: 4x·3 → 12x.
+    showing(["operator-tap"], d("multiply-out", (r) => {
+      const [a, b, x] = [r.int(2, 6), r.int(2, 6), letter(r)];
+      return { start: `${a}${x}·${b}`, goal: `${a * b}${x}` };
+    })),
+    d("times-zero", (r) => {
+      const [a, b, x] = [r.int(1, 9), r.int(2, 9), letter(r)];
+      return { start: `0(${x} + ${a}) + ${b}`, goal: `${b}` };
+    }),
   ],
   stepsBack: () => [splitLike(12, true), productCoef()],
   levels,

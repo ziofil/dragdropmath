@@ -16,8 +16,10 @@ import { relOf } from "../expr/build";
 import { isEquation } from "../expr/rows";
 import { corpus } from "../game/testing/corpus";
 import { allNodes, children } from "../expr/tree";
-import { ALL_RULES, candidatesFor, movesFor, signId, type RuleId } from ".";
+import { ALL_RULES, candidatesFor, dotBetween, movesFor, signId, type RuleId } from ".";
 import { termsOf, viewTerm } from "./view";
+import { assumeOf, isPositive } from "./signs";
+import { conditionOn, says } from "../expr/conditions";
 
 const SHAPES = [
   "x + 2 = -6",
@@ -55,12 +57,8 @@ const STATES: [string, MathState][] = [
 const value = (e: Expr) => evaluate(e, {});
 /** A factor worth carrying across = (dividing or multiplying both sides by it). */
 const crossable = (f: Expr, s: MathState) => (isConstant(f) ? value(f) !== 0 && value(f) !== 1 && !(f.kind === "num" && f.explicit) : relOf(s) === "=");
-/** `f` shares no letter with the other factors of its side (dividing by it loses no answer). */
-const apart = (f: Expr, top: Expr[]) => {
-  const names = (e: Expr) => allNodes(e).flatMap((n) => (n.kind === "var" ? [n.name] : []));
-  const mine = new Set(names(f));
-  return !top.some((g) => g !== f && names(g).some((n) => mine.has(n)));
-};
+/** `f` can't be 0 (dividing by it loses no answer): the letters are positive, or a condition says it isn't 0. */
+const nonzero = (f: Expr, s: MathState) => isPositive(f, assumeOf(s)) || (s.conditions ?? []).some((c) => says(c, conditionOn(f, "≠")));
 const across = (f: Expr): [RuleId, RuleId] => (isConstant(f) ? ["move-factor", "move-denominator"] : ["move-letter-factor", "move-letter-denominator"]);
 
 /** Every promise this state makes: [what, the piece to drag, the rule that must offer something]. */
@@ -71,11 +69,13 @@ function promises(s: MathState): [string, string, RuleId][] {
     if (side.kind === "neg") out.push([`the minus of side ${i} crosses`, signId(side.id), "move-sign"]);
     for (const term of terms) {
       const t = viewTerm(term);
-      if (!(term.kind === "num" && term.value === 0)) out.push([`term ${print(term)} crosses`, term.id, "move-term"]);
+      // (A product alone on its side, with no · drawn, has nothing to grab it by as a whole: its factors cross instead.)
+      const unheld = terms.length === 1 && term.kind === "prod" && !term.factors.some((f, k) => k > 0 && dotBetween(term.factors[k - 1], f));
+      if (!(term.kind === "num" && term.value === 0) && !unheld) out.push([`term ${print(term)} crosses`, term.id, "move-term"]);
       // Dividing both sides: a factor of a side that is a single term.
       // (Not by a factor sharing a letter with the rest of its side: dividing by what could be 0 loses answers.)
       if (terms.length === 1 && t.top.length >= 2)
-        for (const f of t.top) if (crossable(f, s) && (isConstant(f) || apart(f, t.top))) out.push([`factor ${print(f)} of ${print(term)} divides both sides`, f.id, across(f)[0]]);
+        for (const f of t.top) if (crossable(f, s) && (isConstant(f) || nonzero(f, s))) out.push([`factor ${print(f)} of ${print(term)} divides both sides`, f.id, across(f)[0]]);
       // Multiplying both sides: a bottom factor of any term, however many terms there are.
       for (const f of t.bottom) if (crossable(f, s)) out.push([`bottom ${print(f)} of ${print(term)} multiplies both sides`, f.id, across(f)[1]]);
     }

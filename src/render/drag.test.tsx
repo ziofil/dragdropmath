@@ -234,13 +234,14 @@ describe("a copy made by distributing is an ordinary piece afterwards", () => {
 });
 
 describe("a term carried across = changes sign on the piece itself", () => {
+  // (Over there no like term to pass over: carried onto one, it would combine with it.)
   it.each([
     // −5 crosses: its − fades into a +.
-    ["x - 5 = 2", "-5", "x = 2 + 5", "−", "+"],
+    ["x - 5 = y", "-5", "x = y + 5", "−", "+"],
     // 5 crosses (its + stays in the row): a − fades in on it.
-    ["x + 5 = 2", "5", "x = 2 - 5", null, "−"],
+    ["x + 5 = y", "5", "x = y - 5", null, "−"],
     // From the right side to the left.
-    ["2 = x - 5", "-5", "2 + 5 = x", "−", "+"],
+    ["y = x - 5", "-5", "y + 5 = x", "−", "+"],
   ] as const)("%s: carrying %s across", (src, what, moved, oldSign, newSign) => {
     const h = harness(src);
     const piece = h.find(what);
@@ -275,8 +276,21 @@ describe("a term carried across = changes sign on the piece itself", () => {
   });
 });
 
+describe("a whole side carried across to swap the sides keeps its sign", () => {
+  // 15 = x: the 15 heading past the far end swaps the sides, so no − shows on it on the way (only carried as a term would it change).
+  it.each(["15 = x", "x = 15"])("%s", (src) => {
+    const h = harness(src);
+    const piece = h.find("15");
+    const swap = h.candidates(piece.id).find((c) => c.rule === "swap-sides")!;
+    const grip = h.grab(piece.id);
+    const frames = grip.path(grip.start.add(h.aimOf(piece.id, swap).sub(h.centreOf(piece.id))), 30);
+    expect(frames.at(-1)!.drops).toBe(show(swap.state));
+    for (const f of frames.filter((f) => f.drops === show(swap.state))) expect(f.keyOpacity("carry-sign", piece.id)).toBe(0);
+  });
+});
+
 describe("the sign changes exactly while the cursor crosses the = sign", () => {
-  it.each(["x - 5 = 2", "2 = x - 5"])("%s", (src) => {
+  it.each(["x - 5 = y", "y = x - 5"])("%s", (src) => {
     const h = harness(src);
     const piece = h.find("-5");
     const grip = h.grab(piece.id);
@@ -361,10 +375,13 @@ describe("multiplying brackets: the carried bracket goes in, a copy splits off",
 });
 
 describe("a bracket onto the same bracket", () => {
-  // (x + 1)(x + 1): carried to the first term inside, it multiplies out; carried right over its twin, it's a square.
+  // (x + 1)(x + 1): carried onto its twin, it multiplies out, as any bracket onto a bracket does (one meaning: not a square).
+  it("has no square to make", () => {
+    const h = harness("(x + 1)(x + 1)");
+    expect(h.candidates(h.find("x + 1", 0).id).some((c) => c.rule === "merge-powers")).toBe(false);
+  });
   it.each([
     ["distribute", "((x + 1)*x + (x + 1)*1)"],
-    ["merge-powers", "(x + 1)^2"],
   ] as const)("%s: carried to where that move completes, it drops as %s", (rule, result) => {
     const h = harness("(x + 1)(x + 1)");
     const piece = h.find("x + 1", 0);

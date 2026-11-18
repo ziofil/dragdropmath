@@ -3,19 +3,30 @@
  * practice — two letters, solved by substituting (../generate/systems.ts).
  * About half of each level is composed: one equation is one from the
  * earlier chapters — at Medium with a root, a log or a power in it; at Hard
- * a root, a log or a power, and a fraction.
+ * a root, a log or a power, and a fraction; and the hardest as the book has
+ * them (simultaneousBook.ts).
  */
 import { type Chapter, rulesOf } from "../puzzles";
 import { composedSystem, SYSTEMS as S } from "../generate/systems";
 import type { Level, Shape } from "../generate/write";
 import { carrying, d } from "../generate/drill";
+import { writesWay } from "../generate/way";
+import { SIMULTANEOUS_BOOK } from "./simultaneousBook";
 
 const rules = () => rulesOf("simultaneous");
 
 const levels = (): Record<Level, Shape[]> => ({
   easy: [S.knownX, S.knownY, S.multiple, S.linear, S.takeAway, composedSystem({ first: "easy" }, "easy", rules, 5)],
   medium: [S.sumDifference, S.sumAndOther, S.bracketSub, S.minusBracket, composedSystem({ first: "medium", sub: "easy" }, "medium", rules, 4)],
-  hard: [S.tidyFactor, S.tidyBracket, S.minusBracketSub, S.nestedThenSubstitute, composedSystem({ first: "hard", sub: "hard" }, "hard", rules, 4)],
+  // As the book's hardest (simultaneousBook.ts): both equations tidied first, one over numbers, the other with squares or
+  // a product of the letters that cancel.
+  hard: [
+    ...SIMULTANEOUS_BOOK.map((s) => ({ ...s, check: writesWay(rules), pool: 4, weight: 4 })),
+    S.tidyBracket,
+    S.minusBracketSub,
+    S.nestedThenSubstitute,
+    composedSystem({ first: "hard", sub: "hard" }, "hard", rules, 4),
+  ],
 });
 
 export const simultaneous: Chapter = {

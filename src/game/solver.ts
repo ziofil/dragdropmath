@@ -1,7 +1,7 @@
 import type { MathState } from "../expr/types";
 import { withFlippedRel } from "../expr/build";
 import { tidied } from "./tidy";
-import { stateKey, type Ordering } from "../expr/key";
+import { key, stateKey, type Ordering } from "../expr/key";
 import { allNodes } from "../expr/tree";
 import { rowCount, rowsOf } from "../expr/rows";
 import { forgetMoves, stepsFrom, type RuleId } from "../rules";
@@ -106,13 +106,42 @@ export function search(
 const sizeOf = (s: MathState) => s.sides.reduce((n, e) => n + allNodes(e).length, 0);
 
 /**
+ * How far a state is from `target`: the pieces (every sub-expression, in any
+ * order) one has that the other hasn't. Multiplying out makes a state bigger,
+ * so smallest-first would look at nearly everything else first; heading for
+ * the checkpoint's pieces, it goes the way the checkpoint went.
+ */
+export function farFrom(target: MathState): (s: MathState) => number {
+  const pieces = (s: MathState) => {
+    const n = new Map<string, number>();
+    for (const side of s.sides) for (const e of allNodes(side)) n.set(key(e), (n.get(key(e)) ?? 0) + 1);
+    return n;
+  };
+  const want = pieces(target);
+  return (s) => {
+    const have = pieces(s);
+    let d = 0;
+    for (const [k, c] of want) d += Math.max(0, c - (have.get(k) ?? 0));
+    for (const [k, c] of have) d += Math.max(0, c - (want.get(k) ?? 0));
+    return d;
+  };
+}
+
+/**
  * A way from start to a state that is `done`, found best-first: fewest moves
  * plus smallest states first (simplifying and solving mostly make a state
  * smaller). Not always the shortest way, but where an exercise takes ten
  * moves it finds one after a few hundred states, where breadth-first gives
- * up after tens of thousands. Null if none within `maxStates`.
+ * up after tens of thousands. Null if none within `maxStates`. `cost` puts
+ * another measure in place of the size (how far a state is from a
+ * checkpoint the search is heading for: farFrom).
  */
-export function searchBest(start: MathState, done: (s: MathState) => boolean, rules: readonly RuleId[], { ordered = "exact" as Ordering, maxStates = 15_000 } = {}): MathState[] | null {
+export function searchBest(
+  start: MathState,
+  done: (s: MathState) => boolean,
+  rules: readonly RuleId[],
+  { ordered = "exact" as Ordering, maxStates = 15_000, cost = sizeOf as (s: MathState) => number } = {},
+): MathState[] | null {
   type Node = { s: MathState; g: number; f: number; parent: Node | null };
   // A binary heap on f.
   const heap: Node[] = [];
@@ -142,7 +171,7 @@ export function searchBest(start: MathState, done: (s: MathState) => boolean, ru
     }
     return top;
   };
-  push({ s: start, g: 0, f: sizeOf(start), parent: null });
+  push({ s: start, g: 0, f: cost(start), parent: null });
   const seen = new Set([stateKey(start, ordered, true)]);
   while (heap.length) {
     const at = pop();
@@ -158,7 +187,7 @@ export function searchBest(start: MathState, done: (s: MathState) => boolean, ru
       if (seen.has(k)) continue;
       seen.add(k);
       if (seen.size > maxStates) return null;
-      push({ s: n, g: at.g + 1, f: at.g + 1 + sizeOf(n), parent: at });
+      push({ s: n, g: at.g + 1, f: at.g + 1 + cost(n), parent: at });
     }
   }
   return null;
