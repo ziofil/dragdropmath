@@ -302,6 +302,10 @@ describe("rules do what they say", () => {
     ["-ln(a) - ln(b)", "combine-logs", "-ln(b)", ["-ln(a*b)"]],
     ["log_2(8)", "evaluate-log", "log_2(8)", []], // no shortcut: tap 8 → 2³ first
     ["log_2(8)", "power-of-base", "8", ["log_2(2^3)"]],
+    // Part of the argument too: log₂(1/64) → log₂(1/2⁶), then 2⁶ across the bar is 2⁻⁶, whose −6 comes out in front.
+    ["log_2(1/64)", "power-of-base", "64", ["log_2(1/2^6)"]],
+    ["log_2(1/2^6)", "flip-across-bar", "2^6", ["log_2(2^(-6))"]],
+    ["log_2(2^(-6))", "log-of-power", "-6", ["-6*log_2(2)"]],
     ["log_2(2)", "evaluate-log", "log_2(2)", ["1"]],
     ["3log_2(2)", "evaluate-log", "log_2(2)", ["3*1"]], // the 1 stays for the learner to simplify
     ["ln(1)", "evaluate-log", "ln(1)", ["0"]],

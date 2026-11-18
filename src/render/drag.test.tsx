@@ -18,7 +18,7 @@ import { checkAllMovesReachable } from "./testing/checks";
 
 describe("moves inside small superscripts can be reached too", () => {
   // Mid-puzzle states the puzzle starts don't cover: combining exponents in place.
-  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)", "(x + 1)(2x + 3)", "(2x - 3)(2x + 3)", "(3 + 2x)(3 - 2x)", "a(a - 3) + 4a - 12"])("%s", (src) => {
+  it.each(["x^(3 + 2)", "x^(5 - 2)", "x^(2·3)", "x^(1 + 2) + 3x", "2^(1/2 + 1/2)", "(2·2)^(1/2)", "3^((1 + 1)/2)", "x = 3^2", "x^(1/2) = 3", "(3·3)^(1/2)", "3ln(x) - ln(x)", "x - (y + 1) = 3", "-x = 0", "(x - 2)/2", "x·x + x·2 - 2x", "2·(3/4)", "x = -(2 - 7)", "3 > x", "7 = x", "3 ≤ x + 1", "√2·√2", "√x·√x·3", "-x/2 > 1", "-2x ≤ 6", "√(x^4)", "(x + 1)(2x + 3)", "(2x - 3)(2x + 3)", "(3 + 2x)(3 - 2x)", "a(a - 3) + 4a - 12", "x = log_2(2^(-6))"])("%s", (src) => {
     expect(checkAllMovesReachable(src, ALL_RULES)).toEqual([]);
   }, 60_000);
 });
