@@ -42,15 +42,15 @@ class FlipSign extends Modifier<MathState> {
   /** The row the piece is carried along (its symbol's middle), and how far off it still counts as in it. */
   private readonly rowY: number;
   private readonly rowBand: number;
-  /** What letting go into a merge would give: then it's not crossing. */
-  private readonly merges: Set<string>;
+  /** What letting go where the piece keeps its sign would give (a merge on its own side, the sides swapped). */
+  private readonly keeps: Set<string>;
 
   constructor(
     ctx: DragInitContext<MathState>,
     inner: DragSpecData<MathState>,
     readonly rc: RenderCtx,
     readonly result: MathState,
-    merges: readonly MathState[] = [],
+    keeps: readonly MathState[] = [],
   ) {
     super(ctx, inner);
     const id = ctx.draggedId!;
@@ -63,7 +63,7 @@ class FlipSign extends Modifier<MathState> {
     const size = rc.fontSizes!.get(id)!;
     this.rowY = canvasBox(rc, id).centre.y;
     this.rowBand = 0.5 * size;
-    this.merges = new Set(merges.map((m) => stateKey(m, "exact")));
+    this.keeps = new Set(keeps.map((m) => stateKey(m, "exact")));
     const me = rc.sizes!.get(id)!;
     // The new sign sits where the row will draw it: right before the term's body.
     const L = this.negative ? LEAD.plus : LEAD.minus;
@@ -81,11 +81,10 @@ class FlipSign extends Modifier<MathState> {
     const r = this.inner.run(frame);
     // The sign changes while the cursor crosses the = itself: old sign before it, new sign past it.
     const onMove = r.dropState === this.result;
-    // Only while it's carried along its own row, and letting go would cross
-    // it or put it back: heading anywhere else (into a merge, into another
-    // equation) the piece keeps its own sign.
+    // Only while it's carried along its own row, and letting go wouldn't merge
+    // it on its own side or swap the sides: then the piece keeps its own sign.
     const inRow = Math.abs(carriedCentre(this.rc, this.ctx, frame.pointer).y - this.rowY) < this.rowBand;
-    const crossing = inRow && (onMove || !this.merges.has(stateKey(r.dropState, "exact")));
+    const crossing = inRow && (onMove || !this.keeps.has(stateKey(r.dropState, "exact")));
     const t = (this.t = crossing ? clamp01((frame.pointer.x - this.from) / (this.to - this.from)) : 0);
     return { ...r, preview: () => this.dress(r.preview(), t, onMove) };
   }

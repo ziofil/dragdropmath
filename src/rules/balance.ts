@@ -1,11 +1,13 @@
 import type { Expr, MathState } from "../expr/types";
-import { allNodes } from "../expr/tree";
 import { cloneFresh, frac, isNum, neg, prod, relOf, sum, withFlippedRel } from "../expr/build";
 import { evaluate, isConstant } from "../expr/eval";
-import { adopt, dragCtx, isEquation, partner, setSides, signOwner, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { adopt, dragCtx, isEquation, partner, setSides, without, type Candidate, type DragCtx, type Rule } from "./types";
+import { signOwner } from "./handles";
 import { fromTerms, rebuildTerm, roleOf, termsOf, viewTerm, type Role } from "./view";
 import { visibleOne } from "./shapes";
 import { assumeOf, isNegative, isPositive } from "./signs";
+import { conditionOn, says } from "../expr/conditions";
+import { combine } from "./rearrange";
 
 /**
  * Multiplying or dividing both sides by a negative number turns an
@@ -67,7 +69,7 @@ function onSide(state: MathState, id: string): (Role & { other: number }) | null
 /**
  * x + 3 = 10 → x = 10 − 3 (drag a term across; its sign flips). Any term of
  * either side: one in a long sum, or one alone on its side (x + 2 = −6 →
- * x + 2 + 6 = 0).
+ * x + 2 + 6 = 0). Dropped onto a like term over there, it combines with it.
  */
 export const moveTerm: Rule = {
   id: "move-term",
@@ -94,7 +96,15 @@ export const moveTerm: Rule = {
     const remaining = fromTerms(without(r.terms, r.index), mine);
     const other = state.sides[r.other];
     const target = sum([...termsOf(other), flipped], other.kind === "sum" ? other.id : undefined);
-    return [{ rule: "move-term", state: withSides(state, r.side, remaining, target) }];
+    const moved = withSides(state, r.side, remaining, target);
+    // Carried on onto a like term over there, it combines with it as it arrives (its sign already flipped):
+    // 3x + 5 = 2x + 1, the 2x dropped on the 3x → 3x − 2x + 5 = 1 at once, worked out as combining does.
+    // (Not a term that is all of its side: carried across whole, a side swaps places instead.)
+    if (r.terms.length === 1) return [{ rule: "move-term", state: moved }];
+    const arrived = termsOf(moved.sides[r.other]).at(-1)!;
+    const there = new Set(termsOf(other).map((o) => o.id));
+    const onto = combine.apply(moved, arrived.id).flatMap((c): Candidate[] => (c.targetId && there.has(c.targetId) ? [{ rule: "move-term", state: c.state, targetId: c.targetId }] : []));
+    return [{ rule: "move-term", state: moved }, ...onto];
   },
 };
 
@@ -107,14 +117,14 @@ export const moveTerm: Rule = {
  * of its own, and a press on it could then no longer pick up the term 2x.
  * (Factor out first: 2x + 4 = 10 → 2(x + 2) = 10.)
  */
-function moveFactorRule(id: "move-factor" | "move-letter-factor", allowed: (e: Expr, state: MathState, rest: Expr[]) => boolean, gesture: string): Rule {
+function moveFactorRule(id: "move-factor" | "move-letter-factor", allowed: (e: Expr, state: MathState) => boolean, gesture: string): Rule {
   return {
     id,
     name: "Divide both sides",
     gesture,
     apply(state, dragged) {
       const r = onSide(state, dragged);
-      if (!r || r.part !== "top-factor" || r.terms.length !== 1 || !allowed(r.node, state, [...r.term.top, ...r.term.bottom].filter((f) => f.id !== r.node.id))) return [];
+      if (!r || r.part !== "top-factor" || r.terms.length !== 1 || !allowed(r.node, state)) return [];
       const t = r.term;
       const remaining = rebuildTerm(t, t.top.filter((f) => f.id !== r.node.id), t.bottom);
       const other = state.sides[r.other];
@@ -164,23 +174,22 @@ function moveDenominatorRule(id: "move-denominator" | "move-letter-denominator",
 const letterFactor = (e: Expr, state: MathState) => !isConstant(e) && (relOf(state) === "=" || isPositive(e, assumeOf(state)));
 
 /**
- * Dividing both sides by something with letters loses the answers that make it
- * 0: x(x − 3) = 0 divided by x is x − 3 = 0, and x = 0 is gone. So not by a
- * factor sharing a letter with the rest of its side — what's left would still
- * hold the unknown it could be 0 for. (A formula's other quantities are fine:
- * x(a − 2) = b − a divided by a − 2, v − u = at by a.)
+ * Dividing both sides by something with letters loses the answers that make
+ * it 0: x(x − 3) = 0 divided by x is x − 3 = 0, and x = 0 is gone; so is it
+ * from 9x² = −15x divided by x. So only by what can't be 0: what the letters
+ * being positive makes positive, or what a condition says isn't 0
+ * (ax = 3a where a ≠ 0, divided by a).
  */
-const letterDivisor = (e: Expr, state: MathState, rest: Expr[]) => {
+const letterDivisor = (e: Expr, state: MathState) => {
   if (!letterFactor(e, state)) return false;
-  const names = (x: Expr) => allNodes(x).flatMap((n) => (n.kind === "var" ? [n.name] : []));
-  const mine = new Set(names(e));
-  return !rest.some((f) => names(f).some((n) => mine.has(n)));
+  if (isPositive(e, assumeOf(state))) return true;
+  return (state.conditions ?? []).some((c) => says(c, conditionOn(e, "≠")));
 };
 
 export const moveFactor = moveFactorRule("move-factor", usefulFactor, "Drag a number multiplying a whole side across = — it divides the other side.");
 export const moveDenominator = moveDenominatorRule("move-denominator", nonzeroConstant, "Drag the bottom of a fraction across = — it multiplies the other side.");
-/** Formulas: v − u = at → (v − u)/a = t. */
-export const moveLetterFactor = moveFactorRule("move-letter-factor", letterDivisor, "Drag a letter multiplying a whole side across = — it divides the other side.");
+/** ax = 3a where a ≠ 0 → x = 3a/a: a letter that can't be 0 (see letterDivisor). */
+export const moveLetterFactor = moveFactorRule("move-letter-factor", letterDivisor, "Drag a letter that can't be 0 (a condition says so) multiplying a whole side across = — it divides the other side.");
 /** Formulas: P = F/A → PA = F. */
 export const moveLetterDenominator = moveDenominatorRule("move-letter-denominator", letterFactor, "Drag a letter on the bottom of a fraction across = — it multiplies the other side.");
 

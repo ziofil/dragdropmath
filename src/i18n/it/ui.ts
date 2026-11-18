@@ -104,16 +104,6 @@ export const it: Translation = {
       how: "Trascina il numero a destra sull'altro numero che moltiplica.",
       text: ["Anche nella moltiplicazione l'ordine non conta: `2·x·5` è `2·5·x`. Quindi il 2 e il 5 si possono moltiplicare tra loro, e si ottiene `10x`."],
     },
-    "numbers-first": {
-      name: "Il numero davanti",
-      how: "Tocca un prodotto come `x·3` per scriverlo nel modo solito, `3x`.",
-      text: ["Si scrive prima il numero e si omette il puntino: `x·3` si scrive `3x`. È così semplice che d'ora in poi succede da solo."],
-    },
-    "multiply-out": {
-      name: "Calcolare un prodotto",
-      how: "Tocca un prodotto di numeri, come `2·3`, per calcolarlo.",
-      text: ["Un prodotto di soli numeri si può calcolare: `2·3` fa 6."],
-    },
     collect: {
       name: "Sommare i termini simili",
       how: "Trascina un termine su un termine simile, cioè con le stesse lettere con gli stessi esponenti. Si sommano.",
@@ -166,19 +156,6 @@ export const it: Translation = {
       how: "Tocca il ² per scrivere la parentesi due volte. Poi sviluppa il prodotto come nell'esempio precedente (per spostare un fattore da solo, tienilo premuto: con un tocco rapido prendi tutto il termine) e somma i termini simili.",
       text: ["`(x + 1)²` è `(x + 1)(x + 1)`, quindi si sviluppa allo stesso modo."],
     },
-    "move-term": {
-      name: "Portare un termine dall'altra parte",
-      how: "Trascina il numero dall'altra parte dell'=. Strada facendo cambia segno. Poi tocca il − per fare il calcolo.",
-      text: [
-        "Un'equazione dice che due membri sono uguali. Se fai la stessa cosa a entrambi i membri, restano uguali.",
-        "Portare un termine dall'altra parte dell'`=` fa proprio questo. Da `x + 3 = 10`, togli 3 a entrambi i membri: `x = 10 − 3`. Ecco perché `+3` diventa `−3` nell'altro membro.",
-      ],
-    },
-    "move-factor": {
-      name: "Dividere entrambi i membri",
-      how: "Trascina il numero davanti alla lettera dall'altra parte dell'=. Divide l'altro membro. Poi tocca la linea di frazione per fare il calcolo.",
-      text: ["Un numero che moltiplica un intero membro, quando passa dall'altra parte, divide l'altro membro. Da `2x = 8`, dividi entrambi i membri per 2: `x = 8/2`."],
-    },
     "move-denominator": {
       name: "Moltiplicare entrambi i membri",
       how: "Trascina il denominatore dall'altra parte dell'=. Moltiplica l'altro membro. Poi tocca il · per fare il calcolo.",
@@ -194,88 +171,15 @@ export const it: Translation = {
       how: "Trascina un membro dall'altra parte dell'=, fino in fondo. I due membri si scambiano di posto.",
       text: ["`7 = x` e `x = 7` dicono la stessa cosa, quindi i due membri si possono scambiare di posto."],
     },
-    "evaluate-fraction": {
-      name: "Calcolare una frazione",
-      how: "Tocca la linea di frazione per calcolarla.",
-      text: ["Una frazione che dà un numero intero si può calcolare: `12/3` fa 4."],
-    },
-    "divide-numbers": {
-      name: "Semplificare una frazione",
-      how: "Tocca la linea di frazione. Numeratore e denominatore vengono divisi per il loro fattore comune.",
-      text: ["Una frazione si semplifica dividendo numeratore e denominatore per lo stesso numero: `6/8 = 3/4`. Il suo valore non cambia."],
-    },
     "letter-in": {
       name: "Una lettera per una parentesi",
       how: "Trascina la lettera davanti sulla parentesi. Poi tieni premuta una delle due lettere vicine e lasciala sull'altra: `x·x` è `x²`. (Con un tocco rapido prenderesti tutto il termine.)",
       text: ["La lettera moltiplica ogni termine dentro la parentesi, proprio come farebbe un numero: `x(x + 3) = x·x + x·3`. E `x·x` è una potenza, `x²`, come hai visto nel capitolo Potenze."],
     },
-    "factor-then-cancel": {
-      name: "Raccogliere, poi semplificare",
-      how: "Tieni premuto il numero in un termine del numeratore e trascinalo fuori, davanti a tutto, oltre l'estremità sinistra. Poi tocca la linea di frazione: si semplifica.",
-      text: [
-        "Puoi semplificare solo un fattore di tutto il numeratore. In `(2x + 6)/2` il 2 è un fattore di ciascun termine, quindi prima raccoglilo: `(2(x + 3))/2`. Ora è un fattore di tutto il numeratore, e si semplifica con il denominatore.",
-      ],
-    },
-    "cancel-factor": {
-      name: "Semplificare un fattore comune",
-      how: "Tocca la linea di frazione. Ciò che numeratore e denominatore hanno in comune si semplifica.",
-      text: ["Un numero che moltiplica tutto il numeratore e tutto il denominatore si semplifica: `(3x)/3` è `x`. In `(3x + 1)/3` invece no: il 3 moltiplica solo una parte del numeratore."],
-    },
     "power-of-power": {
       name: "Potenza di una potenza",
       how: "Trascina l'esponente esterno su quello interno. Si moltiplicano: tocca il · per fare il calcolo.",
       text: ["`(x²)³` è `x²·x²·x²`. Sono 2 + 2 + 2 = 6 x, quindi gli esponenti si moltiplicano."],
-    },
-    "divide-powers": {
-      name: "Stessa base: sottrarre gli esponenti",
-      how: "Tocca la linea di frazione. Le potenze con la stessa base si uniscono e i loro esponenti si sottraggono: tocca il − per fare il calcolo.",
-      text: ["`x⁵/x²` ha cinque x al numeratore e due al denominatore. Se ne semplificano due sopra e due sotto, e sopra ne restano tre: nella divisione gli esponenti si sottraggono."],
-    },
-    "flip-across-bar": {
-      name: "Oltre la linea di frazione",
-      how: "Trascina la potenza in su, oltre la linea di frazione. Il suo esponente cambia segno.",
-      text: ["Se al denominatore ci sono più x, l'esponente diventa negativo: `x⁻²` vuol dire `1/x²`. Quando una potenza passa dall'altra parte della linea di frazione, il suo esponente cambia segno."],
-    },
-    "power-one": {
-      name: "Esponente 1",
-      how: "Trascina l'esponente 1 sulla sua base.",
-      text: ["`x¹` è una x sola: semplicemente `x`. È così semplice che d'ora in poi succede da solo."],
-    },
-    "zero-power": {
-      name: "Esponente 0",
-      how: "Tieni premuto l'esponente 0, poi trascinalo sulla sua base. Poi tocca il + per fare la somma.",
-      text: ["`x³/x³` fa 1 (se x non è 0), ma è anche `x^(3 − 3) = x⁰`. Quindi qualsiasi numero diverso da 0, elevato alla 0, fa 1."],
-    },
-    "tap-power": {
-      name: "Calcolare una potenza",
-      how: "Tocca l'esponente per calcolare la potenza: `2³` diventa 8.",
-      text: ["La potenza di un numero si può calcolare: `2³` è `2·2·2 = 8`."],
-    },
-    "power-of-product": {
-      name: "Esponente dentro la parentesi",
-      how: "Trascina l'esponente dentro la parentesi: ogni fattore al suo interno riceve il suo. Poi tocca l'esponente del numero per calcolarlo.",
-      text: ["`(2x)³` è `2x·2x·2x`, cioè `2³·x³`. Ogni fattore dentro la parentesi viene elevato all'esponente."],
-    },
-    "split-number": {
-      name: "Scomporre un numero",
-      how: "Tocca il numero davanti alla lettera per scomporlo in due fattori. Tocca anche l'altro numero. Poi tocca il + tra i due termini: il fattore comune viene raccolto. (Oppure tienilo premuto e trascinalo fuori, davanti a tutto, oltre l'estremità sinistra.)",
-      text: ["Per trovare un fattore comune, scomponi i numeri in fattori. In `2x + 6`, il 6 è `2·3`, e adesso entrambi i termini hanno un 2."],
-    },
-    "split-term": {
-      name: "Spezzare il termine di mezzo",
-      how: "Tocca il termine di mezzo. Si spezza in due, pronto per il raccoglimento parziale.",
-      text: [
-        "Per scomporre `x² + 5x + 6`, cerca due numeri che sommati diano 5 e moltiplicati diano 6: 2 e 3. Scrivi `5x` come `2x + 3x`.",
-        "Ora i termini sono quattro, e si raccolgono a due a due: `x(x + 2) + 3(x + 2)`, poi `(x + 2)(x + 3)`.",
-      ],
-    },
-    "difference-of-squares": {
-      name: "Differenza di due quadrati",
-      how: "Tocca il meno tra i due quadrati.",
-      text: [
-        "Un quadrato meno un quadrato si scompone sempre allo stesso modo: `a² − b² = (a − b)(a + b)`. Per verificarlo, sviluppa il prodotto: i termini di mezzo si annullano.",
-        "Funziona solo con una differenza, un quadrato meno un quadrato. Una somma di due quadrati, come `x² + 9`, non si scompone affatto. Un quadrato meno un numero che non è un quadrato perfetto, come `x² − 7`, invece sì, ma con le radici: `(x − √7)(x + √7)`.",
-      ],
     },
     "factor-shared": {
       name: "Mettere in comune un fattore",
@@ -318,42 +222,10 @@ export const it: Translation = {
       how: "Tocca il · tra le frazioni, oppure trascina una frazione sull'altra: si moltiplicano i numeratori tra loro e i denominatori tra loro.",
       text: ["Moltiplicare è più semplice: si moltiplicano i numeratori e si moltiplicano i denominatori. La metà di un terzo è `(1·1)/(2·3) = 1/6`."],
     },
-    "divide-by-fraction": {
-      name: "Dividere per una frazione",
-      how: "Trascina in su il denominatore della frazione più in basso, fino al numeratore principale: lo moltiplica. Poi tocca il · e la linea di frazione per fare il calcolo.",
-      text: [
-        "Quello che fa un numero dipende da quante linee di frazione ha sopra. In `4/(3/5)` il 5 sta sotto due linee: diviso una divisione, moltiplica. Quindi può salire al numeratore senza cambiare nulla: `(4·5)/3`.",
-        "Ecco perché dividere per una frazione vuol dire moltiplicare per la sua reciproca, cioè la frazione capovolta: `4/(3/5) = 4·5/3`.",
-      ],
-    },
     "split-fraction": {
       name: "Spezzare una frazione",
       how: "Tira fuori un termine dal numeratore. Si porta dietro una copia del denominatore.",
       text: ["Una somma al numeratore si può spezzare in una frazione per ogni termine, tutte con lo stesso denominatore: `(x + 5)/6 = x/6 + 5/6`."],
-    },
-    "times-one": {
-      name: "Per 1",
-      how: "Tieni premuto l'1, poi trascinalo su ciò che moltiplica.",
-      text: ["Moltiplicare per 1 non cambia niente: `1·x` è semplicemente `x`. È così semplice che d'ora in poi succede da solo."],
-    },
-    substitute: {
-      name: "Sostituire",
-      how: "Trascina la `y` di `y = …` sulla `y` dell'altra equazione: al suo posto arriva ciò a cui `y` è uguale. Poi ricava x, e sostituiscilo nella prima equazione per trovare y.",
-      text: [
-        "`y = 2x` e `x + y = 9` sono due equazioni con le stesse x e y, vere tutte e due contemporaneamente. Un'equazione in due incognite ha infinite soluzioni; due equazioni insieme di solito ne hanno una sola.",
-        "`y = 2x` dice che y e 2x sono uguali, quindi nell'altra equazione y si può sostituire con 2x. Resta un'equazione in una sola lettera, che sai già risolvere.",
-        "Se in nessuna equazione c'è una lettera già isolata, prima isolane una: in `x − y = 1`, porta il −y dall'altra parte e ottieni `x = 1 + y`.",
-      ],
-    },
-    "evaluate-root": {
-      name: "Calcolare una radice",
-      how: "Tocca la radice per calcolarla.",
-      text: ["`√9` è il numero positivo che, moltiplicato per se stesso, dà 9: cioè 3, perché `3·3 = 9` (anche −3 lo dà, ma √ indica quello positivo). Allo stesso modo `∛8 = 2`, perché `2·2·2 = 8`."],
-    },
-    "split-square": {
-      name: "Scomporre sotto radice",
-      how: "Tocca il numero sotto la radice: si separa un quadrato (un cubo, sotto una radice cubica). Poi portalo fuori dalla radice e tocca la sua radice per calcolarla.",
-      text: ["Una radice che non dà un numero intero si può comunque semplificare. Scomponi il numero sotto radice in modo da separare un quadrato: `√12 = √(4·3)`."],
     },
     "join-powers": {
       name: "Unire le radici",
@@ -363,30 +235,15 @@ export const it: Translation = {
         "Lo stesso vale per qualsiasi esponente in comune: `x³y³` è xxx·yyy, cioè xy·xy·xy, quindi `(xy)³`.",
       ],
     },
-    "pull-out-of-power": {
-      name: "Spezzare una radice",
-      how: "Porta il numero fuori dalla radice: avrà una radice tutta sua. Poi tocca quella radice per calcolarla.",
-      text: ["La radice di un prodotto è il prodotto delle radici: `√(4x) = √4·√x = 2√x`."],
-    },
     "root-notation": {
       name: "Una radice come potenza",
       how: "Tocca la radice per scriverla come potenza: √ è una potenza con esponente ½, ∛ con esponente ⅓.",
       text: ["Ogni radice è una potenza: `√x = x^(1/2)`, `∛x = x^(1/3)`, e la radice n-esima di x è `x^(1/n)`. Quindi tutte le proprietà delle potenze valgono anche per le radici: `√x·√x = x^(1/2 + 1/2) = x`."],
     },
-    "root-of-power": {
-      name: "Radice di una potenza",
-      how: "Tocca la radice per scriverla come potenza. Poi trascina l'esponente esterno su quello interno e calcola il prodotto.",
-      text: ["Una radice è una potenza, quindi la radice di una potenza è una potenza di potenza: `∛(x⁶) = (x⁶)^(1/3) = x^(6·1/3) = x²`. Gli esponenti si moltiplicano, come hai visto nel capitolo Potenze."],
-    },
     "fraction-power": {
       name: "Radici e potenze insieme",
       how: "Trascina la radice sulla potenza: gli esponenti si sommano. Poi scrivi il numero intero come frazione con denominatore 2: trascina il denominatore di ½ sul numero, e tocca il · per fare il calcolo. Poi somma le frazioni, e tocca il + al numeratore.",
       text: ["`√x` è `x^(1/2)`, quindi `√x·x² = x^(1/2 + 2) = x^(5/2)`. Un esponente frazionario funziona come tutti gli altri: per moltiplicare potenze con la stessa base, si sommano gli esponenti."],
-    },
-    "root-across": {
-      name: "L'esponente della radice oltre l'=",
-      how: "Tocca la radice per scriverla come potenza (con esponente ½, oppure ⅓ o ¼), poi trascina l'esponente dall'altra parte dell'=: nell'altro membro diventa un quadrato (o un cubo, o una quarta potenza). Poi tocca l'esponente per calcolarla.",
-      text: ["Per risolvere `√x = 3`, eleva al quadrato entrambi i membri. Scritta come potenza, `x^(1/2) = 3`, il ½ passa dall'altra parte e diventa un quadrato: `x = 3²`."],
     },
     "exp-of-log": {
       name: "La potenza annulla il logaritmo",
@@ -441,11 +298,6 @@ export const it: Translation = {
       how: "Trascina la base dall'altra parte dell'=. Nell'altro membro diventa un logaritmo.",
       text: ["Per tirare fuori x da un esponente, si applica il logaritmo a entrambi i membri. Da `e^x = 5`, la e passa dall'altra parte e diventa ln: `x = ln(5)`."],
     },
-    "log-across": {
-      name: "Logaritmo dall'altra parte dell'=",
-      how: "Trascina il logaritmo dall'altra parte dell'=. Nell'altro membro diventa una potenza. Se è la potenza di un numero, tocca l'esponente per calcolarla.",
-      text: ["Un logaritmo si annulla con una potenza. Da `ln(x) = 2`, il ln passa dall'altra parte e diventa e: `x = e²`."],
-    },
     "bracket-times-bracket": {
       name: "Parentesi per parentesi",
       how: "Trascina una parentesi sull'altra: moltiplica entrambi i termini al suo interno. Poi sviluppa allo stesso modo ogni nuovo termine: tieni premuto uno dei suoi fattori e lascialo sull'altro (con un tocco rapido prendi tutto il termine). Infine tieni premuta una delle x di `x·x`, lasciala sull'altra e somma i termini simili.",
@@ -459,16 +311,6 @@ export const it: Translation = {
       how: "Entrambi i termini hanno la stessa parentesi. Tienila premuta in uno dei due termini, poi trascinala fuori, davanti a tutto, oltre l'estremità sinistra.",
       text: ["Anche un'intera parentesi può essere un fattore comune. In `x(x + 2) + 3(x + 2)` entrambi i termini hanno `(x + 2)`, quindi si raccoglie davanti come qualsiasi altro fattore: `(x + 2)(x + 3)`."],
     },
-    "ineq-move-factor": {
-      name: "Dividere entrambi i membri",
-      how: "Trascina il numero davanti alla lettera dall'altra parte del simbolo. Divide l'altro membro, e il verso resta lo stesso. Poi tocca la linea di frazione.",
-      text: ["Anche se moltiplichi o dividi entrambi i membri per un numero positivo, il verso resta lo stesso: da `2x < 8`, `x < 8/2`."],
-    },
-    rationalise: {
-      name: "Razionalizzare il denominatore",
-      how: "Trascina in su la radice del denominatore, sul numeratore: numeratore e denominatore vengono moltiplicati entrambi per lei. Poi tocca il · al denominatore.",
-      text: ["Se moltiplichi numeratore e denominatore per lo stesso numero, la frazione non cambia. Scegli la radice che è già al denominatore: `√3·√3 = 3`, quindi `1/√3 = √3/(√3·√3) = √3/3`. Ora sotto la linea di frazione non c'è più nessuna radice."],
-    },
     "zero-product": {
       name: "Legge di annullamento del prodotto",
       how: "Trascina in giù una parentesi, fuori dal prodotto: l'equazione si spezza in due, o è 0 quella parentesi o è 0 l'altra. Poi risolvile una alla volta.",
@@ -476,11 +318,6 @@ export const it: Translation = {
         "Un prodotto è 0 solo quando uno dei suoi fattori è 0: `3·0 = 0`, ma `3·2` no. Quindi `(x − 2)(x + 3) = 0` vuol dire `x − 2 = 0` oppure `x + 3 = 0`: due soluzioni.",
         "Per questo non si dividono mai entrambi i membri per qualcosa che potrebbe valere 0: qui si perderebbe una soluzione.",
       ],
-    },
-    "plus-minus": {
-      name: "Le due radici di un quadrato",
-      how: "Trascina il 2 dall'altra parte dell'=. Un quadrato ha due radici: l'equazione si spezza in due, una con il + e una con il −.",
-      text: ["`3² = 9`, ma anche `(−3)² = 9`. Quindi `x² = 9` vuol dire `x = 3` oppure `x = −3`. Se ti dimentichi il meno, perdi una soluzione."],
     },
     "take-out-then-split": {
       name: "Raccogliere la lettera, poi separare",
@@ -492,15 +329,195 @@ export const it: Translation = {
       how: "Tocca il termine centrale: si spezza in due. Raccogli un fattore da ciascuna coppia, poi la parentesi che hanno in comune. Infine trascina in giù una parentesi, fuori dal prodotto.",
       text: ["`x² + x − 6` è il prodotto di due parentesi: `(x + 3)(x − 2)`. I due numeri hanno prodotto `−6` e somma `1`, il coefficiente della x. Quando hai un prodotto uguale a 0, ogni parentesi ti dà una soluzione."],
     },
+    "tap-operator": {
+      name: "Toccare il segno tra i due",
+      how: "Tocca il + tra i due numeri: si sommano, proprio come quando trascini uno sull'altro.",
+      text: ["Se tocchi il segno tra due parti, fai il calcolo: un + le somma, un − sottrae l'una dall'altra, un · le moltiplica. È come trascinarne una sull'altra: usa il modo più rapido."],
+    },
+    "multiply-out": {
+      name: "Moltiplicare i numeri di un prodotto",
+      how: "Tocca il ·: tutti i numeri del prodotto vengono moltiplicati, e `4x·3` diventa `12x`.",
+      text: ["Nella moltiplicazione l'ordine non conta, quindi `4x·3` è `4·3·x`. I numeri si possono moltiplicare anche se in mezzo c'è una lettera."],
+    },
+    "times-zero": {
+      name: "Per zero",
+      how: "Tocca lo 0: tutto il prodotto diventa 0. Poi tocca il + per fare la somma.",
+      text: ["Qualsiasi cosa per 0 fa 0. Quindi `0·(x + 4)` fa 0, qualunque sia x."],
+    },
+    "evaluate-power": {
+      name: "Calcolare una potenza",
+      how: "Trascina l'esponente sul numero: `2³` diventa 8.",
+      text: ["`2³` vuol dire `2·2·2`: il numero piccolo, l'esponente, conta quante volte si moltiplica il 2. Quindi la potenza di un numero si può calcolare: `2³ = 8`.", "Se invece tocchi l'esponente, la potenza viene scritta per esteso: `2³` diventa `2·2·2`."],
+    },
+    "divide-powers": {
+      name: "Stessa base: sottrarre gli esponenti",
+      how: "Trascina la potenza al denominatore sulla potenza con la stessa base al numeratore. Gli esponenti si sottraggono: tocca il − per fare il calcolo.",
+      text: ["`x⁵/x²` ha cinque x al numeratore e due al denominatore. Se ne semplificano due sopra e due sotto, e al numeratore ne restano tre: nella divisione tra potenze con la stessa base, gli esponenti si sottraggono."],
+    },
+    "flip-across-bar": {
+      name: "Oltre la linea di frazione",
+      how: "Trascina la potenza oltre la linea di frazione, in su dal denominatore o in giù dal numeratore. Il suo esponente cambia segno.",
+      text: ["Se le x al denominatore sono di più, l'esponente diventa negativo: `x²/x⁵` è `x^(2 − 5) = x⁻³`, ma è anche `1/x³`. Quindi `x⁻³` vuol dire `1/x³`: quando una potenza passa dall'altra parte della linea di frazione, in un senso o nell'altro, il suo esponente cambia segno."],
+    },
+    "power-of-product": {
+      name: "Esponente dentro la parentesi",
+      how: "Trascina l'esponente dentro la parentesi: ogni fattore al suo interno ne riceve una copia. Poi trascina l'esponente del numero sul numero per calcolarlo.",
+      text: ["`(2x)³` è `2x·2x·2x`, cioè `2³·x³`. Ogni fattore dentro la parentesi viene elevato all'esponente."],
+    },
+    "minus-bracket": {
+      name: "Meno davanti alla parentesi, in una somma",
+      how: "Trascina il − davanti alla parentesi sulla parentesi: tutti i segni al suo interno cambiano. (Dove può spostarsi tutta la somma, con un tocco rapido sul − prendi la somma: tienilo premuto per prendere solo il meno.)",
+      text: ["`5 − (x + 2)` toglie tutto `x + 2`, sia la x sia il 2. Quindi il meno cambia tutti i segni all'interno: `5 − x − 2`."],
+    },
+    "split-number": {
+      name: "Scomporre un numero",
+      how: "Tocca il numero davanti alla lettera: si scompone in due fattori, e per primo c'è quello in comune con l'altro numero. Tocca anche l'altro numero. Poi tocca il + tra i termini: il fattore comune viene raccolto.",
+      text: ["Un fattore comune non sempre si vede. In `6x + 9` entrambi i termini sono divisibili per 3, ma in `6x` non c'è nessun 3 da raccogliere.", "Tocca il 6: diventa `3·2`, con per primo il 3 che ha in comune con il 9. Ora il 3 c'è: `3·2x + 9 = 3(2x + 3)`."],
+    },
+    "split-term": {
+      name: "Spezzare il termine centrale",
+      how: "Tocca la lettera del termine centrale: il termine si spezza in due. (Se tocchi il numero, invece, si scompone il numero.) Poi raccogli a coppie, come nell'esempio precedente: tocca il + tra i primi due termini, poi quello tra gli ultimi due, poi quello tra i due prodotti.",
+      text: ["Per scomporre `x² + 5x + 6`, cerca due numeri che abbiano somma 5 e prodotto 6: 2 e 3. Scrivi `5x` come `2x + 3x`.", "Ora i termini sono quattro, e si raccolgono a coppie: `x(x + 2) + 3(x + 2)`, poi `(x + 2)(x + 3)`."],
+    },
+    "difference-of-squares": {
+      name: "Differenza di due quadrati",
+      how: "Entrambi i termini sono quadrati, e uno viene sottratto all'altro: tocca il meno tra i due. (Se i due termini hanno un numero in comune, con il tocco prima si raccoglie quello, `4x² − 4 = 4(x² − 1)`: poi tocca di nuovo il meno.)",
+      text: ["Un quadrato meno un quadrato si scompone sempre allo stesso modo: `a² − b² = (a − b)(a + b)`. Per verificarlo, sviluppa il prodotto: i termini centrali si annullano.", "Funziona solo con una differenza, un quadrato meno un quadrato. Una somma di due quadrati, come `x² + 9`, non si scompone affatto. Un quadrato meno un numero che non è un quadrato perfetto, come `x² − 7`, invece sì, ma con le radici: `(x − √7)(x + √7)`."],
+    },
+    "cancel-factor": {
+      name: "Semplificare un fattore comune",
+      how: "Trascina il numero al denominatore sullo stesso numero al numeratore (o viceversa): si semplificano.",
+      text: ["Un numero che moltiplica tutto il numeratore e tutto il denominatore si semplifica: `(3x)/3` è `x`, perché `3x` diviso 3 fa x. In `(3x + 1)/3` invece no: il 3 moltiplica solo una parte del numeratore."],
+    },
+    "evaluate-fraction": {
+      name: "Calcolare una frazione",
+      how: "Tocca il numeratore: si scompone, e per primo c'è il denominatore (in 14 fratto 7, il 14 diventa `7·2`). Poi trascina il 7 al denominatore su quel 7: si semplificano.",
+      text: ["Una frazione che dà un numero intero si può calcolare: `12/3` fa 4, perché `12 = 3·4`, e il 3 al numeratore si semplifica con il 3 al denominatore."],
+    },
+    "divide-numbers": {
+      name: "Semplificare una frazione",
+      how: "Tocca il numeratore, poi il denominatore: ognuno si scompone, e per primo c'è il fattore che hanno in comune (8 e 12 diventano `4·2` e `4·3`). Poi trascina un 4 sull'altro: si semplificano.",
+      text: ["Una frazione si semplifica dividendo numeratore e denominatore per lo stesso numero: `8/12 = 2/3`. Il suo valore non cambia.", "Scomponendo i numeri si vede che cosa hanno in comune: `8/12 = (4·2)/(4·3)`, e i 4 si semplificano."],
+    },
+    "factor-then-cancel": {
+      name: "Raccogliere, poi semplificare",
+      how: "Tieni premuto il numero in un termine del numeratore e trascinalo fuori, davanti a tutto, oltre l'estremità sinistra (oppure tocca il + tra i termini). Poi trascinalo sullo stesso numero al denominatore: si semplificano.",
+      text: ["Si può semplificare solo un fattore di tutto il numeratore. In `(2x + 6)/2` il 2 è un fattore di ogni termine, quindi prima raccoglilo: `(2(x + 3))/2`. Ora è un fattore di tutto il numeratore, e si semplifica con il denominatore."],
+    },
+    "divide-by-fraction": {
+      name: "Dividere per una frazione",
+      how: "Trascina il denominatore della frazione che sta sotto fino al numeratore: lì moltiplica il numeratore. Tocca il · per fare il calcolo, poi semplifica ciò che numeratore e denominatore hanno in comune.",
+      text: ["Quello che fa un numero dipende da quante linee di frazione ha sopra. In `4/(3/5)` il 5 sta sotto due linee: divide una divisione, quindi moltiplica. Per questo può salire al numeratore senza che cambi niente: `(4·5)/3`.", "Ecco perché dividere per una frazione vuol dire moltiplicare per la sua reciproca, cioè la frazione capovolta: `4/(3/5) = 4·5/3`."],
+    },
+    "evaluate-root": {
+      name: "Calcolare una radice",
+      how: "Tocca la radice per scriverla come potenza: `√9` è `9^(1/2)`. Poi trascina il ½ sul 9 per calcolarla.",
+      text: ["`√9` è il numero positivo che, moltiplicato per se stesso, dà 9: cioè 3, perché `3·3 = 9` (anche −3, ma √ indica quello positivo). Allo stesso modo `∛8 = 2`, perché `2·2·2 = 8`.", "Come potenza, `√9 = 9^(1/2)`: trascinando il ½ sul 9 la si calcola, come con qualsiasi esponente."],
+    },
+    "pull-out-of-power": {
+      name: "Spezzare una radice",
+      how: "Porta il numero fuori dalla radice: avrà una radice tutta sua. Poi calcola quella radice: toccala, e trascina il ½ sul numero.",
+      text: ["La radice di un prodotto è il prodotto delle radici: `√(4x) = √4·√x = 2√x`."],
+    },
+    "split-square": {
+      name: "Semplificare una radice",
+      how: "Tocca il numero sotto radice: se ne separa un quadrato (un cubo, sotto una radice cubica). Poi portalo fuori dalla radice, come nell'esempio precedente, e calcola la sua radice.",
+      text: ["Anche una radice che non dà un numero intero si può semplificare. Scomponi il numero sotto radice in modo da separare un quadrato: `√12 = √(4·3) = 2√3`."],
+    },
+    "root-of-power": {
+      name: "Radice di una potenza",
+      how: "Tocca la radice per scriverla come potenza. Trascina l'esponente esterno su quello interno, e tocca il · per calcolare il prodotto. Poi semplifica ciò che numeratore e denominatore dell'esponente hanno in comune.",
+      text: ["Una radice è una potenza, quindi la radice di una potenza è una potenza di una potenza: `∛(x⁶) = (x⁶)^(1/3) = x^(6/3) = x²`. Gli esponenti si moltiplicano, come nel capitolo Potenze."],
+    },
+    "rationalise": {
+      name: "Razionalizzare il denominatore",
+      how: "Trascina la radice al denominatore su, fino al numeratore: numeratore e denominatore vengono moltiplicati entrambi per quella radice. Poi tocca il · al denominatore, e semplifica quello che resta, se c'è qualcosa da semplificare.",
+      text: ["Moltiplicando numeratore e denominatore per lo stesso numero, la frazione non cambia. Scegli la radice che c'è già al denominatore: `√3·√3 = 3`, quindi `1/√3 = √3/(√3·√3) = √3/3`. Ora sotto la linea di frazione non ci sono più radici."],
+    },
+    "log-across": {
+      name: "Logaritmo dall'altra parte dell'=",
+      how: "Trascina il logaritmo dall'altra parte dell'=. Nell'altro membro diventa una potenza. Se è la potenza di un numero, trascina l'esponente sul numero per calcolarla.",
+      text: ["Il logaritmo si annulla con una potenza. Da `ln(x) = 2`, il ln passa dall'altra parte e diventa e: `x = e²`."],
+    },
+    "move-term": {
+      name: "Portare un termine dall'altra parte",
+      how: "Trascina il numero dall'altra parte dell'=. Passando, cambia segno. Lascialo sul numero che c'è là e si calcolano insieme; oppure lascialo accanto, e tocca il − per fare il calcolo.",
+      text: ["Un'equazione dice che due membri sono uguali. Se fai la stessa cosa a entrambi i membri, restano uguali.", "Portare un termine dall'altra parte dell'`=` fa proprio questo. Da `x + 3 = 10`, togli 3 a entrambi i membri: `x = 10 − 3`. Ecco perché `+3` dall'altra parte diventa `−3`."],
+    },
+    "move-factor": {
+      name: "Dividere entrambi i membri",
+      how: "Trascina il numero davanti alla lettera dall'altra parte dell'=. Divide l'altro membro. Poi calcola la frazione: tocca il numeratore per scomporlo, e trascina il denominatore sul fattore uguale.",
+      text: ["Un numero che moltiplica tutto un membro, quando passa dall'altra parte, divide l'altro membro. Da `2x = 8`, dividi entrambi i membri per 2: `x = 8/2`, e `8/2 = (2·4)/2 = 4`."],
+    },
+    "two-steps": {
+      name: "In due passaggi",
+      how: "Porta dall'altra parte il numero che viene sommato, e lascialo sul numero che c'è là. Poi porta dall'altra parte il numero davanti alla lettera, e calcola la frazione: scomponi il numeratore e semplifica.",
+      text: ["In `3x + 4 = 19`, la x è stata moltiplicata per 3, poi è stato aggiunto 4. Per ritrovare x, si disfano le operazioni in ordine inverso: prima si toglie il 4, poi si divide per 3.", "Il 3 non può andare per primo: moltiplica solo la x, non tutto il membro."],
+    },
+    "root-across": {
+      name: "Radice dall'altra parte dell'=",
+      how: "Tocca la radice per scriverla come potenza (½, oppure ⅓ per una ∛), poi trascina quell'esponente dall'altra parte dell'=: l'altro membro viene elevato al quadrato (al cubo, per una ∛). Poi trascina l'esponente sul numero per calcolarlo.",
+      text: ["Per risolvere `√x = 3`, eleva al quadrato entrambi i membri: `x = 3²`. Il quadrato annulla la radice, quindi la √ sparisce e l'altro membro viene elevato al quadrato. Il cubo annulla la radice cubica, e così via.", "Scritto come potenza, `x^(1/2) = 3`, è il ½ che passa dall'altra parte e diventa un quadrato: è la stessa mossa."],
+    },
+    "ineq-move-factor": {
+      name: "Dividere entrambi i membri",
+      how: "Trascina il numero davanti alla lettera dall'altra parte del simbolo di disuguaglianza. Divide l'altro membro, e il verso resta lo stesso. Poi calcola la frazione: scomponi il numeratore e semplifica.",
+      text: ["Anche moltiplicando o dividendo entrambi i membri per un numero positivo il verso resta lo stesso: da `2x < 8` si ottiene `x < 8/2`."],
+    },
+    "ineq-negative": {
+      name: "Dividere per un numero negativo",
+      how: "Trascina il numero dall'altra parte e calcola la frazione: il verso resta lo stesso. Poi trascina il meno dall'altra parte: il verso si inverte.",
+      text: ["Dividendo entrambi i membri per un numero negativo il verso si inverte, proprio come moltiplicando per −1: `−2x < 6` vuol dire `x > −3`.", "Qui sono due mosse che conosci già: dividi per 2 (il verso resta lo stesso), poi porta il meno dall'altra parte (il verso si inverte)."],
+    },
+    "plus-minus": {
+      name: "Le due radici di un quadrato",
+      how: "Trascina il 2 dall'altra parte dell'=. Un quadrato ha due radici: l'equazione si spezza in due, una con il + e una con il −. Poi trascina ogni ½ sul numero per calcolarla.",
+      text: ["`3² = 9`, ma anche `(−3)² = 9`. Quindi `x² = 9` vuol dire `x = 3` oppure `x = −3`. Se dimentichi il meno, perdi una soluzione."],
+    },
     "fraction-zero": {
-      name: "Una frazione uguale a 0",
-      how: "Trascina il denominatore della frazione oltre l'= (afferralo dal segno +). Moltiplica l'altro membro: tocca lo 0 per fare il calcolo, perché 0 per qualsiasi numero fa 0. Poi porta il numero dall'altra parte.",
-      text: ["Una frazione vale 0 solo quando il suo numeratore è 0. Il denominatore non può mai essere 0, e lo dice la condizione scritta dopo l'equazione: `x ≠ −2` garantisce che `x + 2` non sia 0.", "Quindi il denominatore può passare dall'altra parte e moltiplicare l'altro membro: `(x − 3)/(x + 2) = 0` diventa `x − 3 = 0·(x + 2)`, cioè `x − 3 = 0`. Se una soluzione non rispetta la condizione, va scartata."],
+      name: "Frazione uguale a 0",
+      how: "Prendi il denominatore della frazione dal suo + o − e trascinalo dall'altra parte dell'=. Moltiplica l'altro membro: tocca lo 0, perché 0 per qualsiasi cosa fa 0. Poi porta il numero dall'altra parte.",
+      text: ["Una frazione vale 0 solo quando il suo numeratore è 0. Il denominatore non può mai valere 0, e lo dice la condizione scritta dopo l'equazione: `x ≠ −2` fa sì che `x + 2` non sia mai 0.", "Quindi il denominatore può passare dall'altra parte e moltiplicare l'altro membro: `(x − 3)/(x + 2) = 0` dà `x − 3 = 0·(x + 2)`, cioè `x − 3 = 0`. Se una soluzione non rispetta la condizione, viene scartata."],
+    },
+    "letter-factor": {
+      name: "Dividere per una lettera",
+      how: "Trascina la lettera davanti alla x dall'altra parte dell'=. Divide l'altro membro. Poi trascinala sulla stessa lettera al numeratore: si semplificano.",
+      text: ["Si possono dividere entrambi i membri per una lettera solo se questa non può valere 0, e lo dice la condizione scritta dopo l'equazione: `a ≠ 0`.", "Non dividere mai per la x stessa: in `x² = 3x`, dividendo per x si ottiene `x = 3` e si perde la soluzione `x = 0`. Porta invece tutto in un membro e scomponi."],
+    },
+    "alone-first": {
+      name: "Il metodo completo",
+      how: "Nessuna lettera è ancora isolata: porta la x della prima equazione dall'altra parte, per ottenere `y = …`. Poi sostituisci y nell'altra equazione, ricava x, e sostituisci x per trovare y.",
+      text: ["Ecco il metodo completo, dall'inizio alla fine:", "1. In una delle equazioni isola una lettera. Scegli quella più comoda: una lettera senza numero davanti. In `x + y = 7`, porta la x dall'altra parte: `y = 7 − x`.", "2. Sostituisci: nell'altra equazione, al posto di quella lettera scrivi ciò a cui è uguale, tra parentesi. Se davanti c'è un meno, tutti i segni all'interno cambiano.", "3. Risolvi l'equazione che resta: ha una sola lettera.", "4. Sostituisci il valore trovato in `y = …` per trovare l'altra lettera."],
+    },
+    "fraction-of-fractions": {
+      name: "Frazione di frazioni",
+      how: "Trascina il denominatore della frazione che sta sotto fino in cima, poi il denominatore della frazione che sta sopra fino in fondo. Poi tocca ogni · per fare i calcoli.",
+      text: ["In `(a/b)/(c/d)`, ognuno dei quattro numeri può passare oltre la linea di frazione principale, nel posto che ha sopra lo stesso numero di linee di frazione, e il valore non cambia (come il 5 nell'esempio precedente): d sale accanto ad a, b scende accanto a c, c sale accanto a b, e a scende accanto a d. (Tranne se a può valere 0: non si può mai dividere per 0.)", "Spostando i due denominatori si ottiene un'unica frazione: `(a·d)/(c·b)`."],
+    },
+    "minus-number-in": {
+      name: "Un numero negativo davanti",
+      how: "Trascina il numero sulla parentesi, e tocca il · per fare il calcolo. Poi trascina il meno sulla parentesi: tutti i segni al suo interno cambiano.",
+      text: ["`−3(x − 2)` vuol dire −1 per 3 per la parentesi. Prima moltiplica per 3: `−(3x − 6)`. Poi il meno cambia tutti i segni all'interno: `−3x + 6`.", "Attento all'ultimo segno: `−3` per `−2` fa `+6`. Meno per meno fa più."],
+    },
+    "substitute-back": {
+      name: "Sostituire all'indietro",
+      how: "Trascina la `x` di `x = …` sulla `x` dell'altra equazione. Poi tocca il · e il + per trovare y.",
+      text: ["Una volta trovata x, l'altra equazione ti dà y: sostituisci a x il suo valore e fai i calcoli. Ora le conosci tutte e due, e la coppia di valori è la soluzione.", "Per verificare, sostituisci entrambi i valori nell'equazione che non hai usato per ultima: i due membri devono dare lo stesso risultato."],
     },
     "square-both-sides": {
       name: "Elevare al quadrato entrambi i membri",
-      how: "Tocca la radice per scriverla come potenza con esponente ½, poi trascina l'esponente ½ dall'altra parte dell'=: l'altro membro viene elevato al quadrato. Poi svolgi i calcoli e risolvi. Sotto ci sono le condizioni: una soluzione che non le rispetta viene scartata.",
-      text: ["Una radice non è mai negativa, quindi `√(x² + 5) = x + 1` vale solo dove `x + 1 ≥ 0`. Elevando al quadrato questa informazione si perde: `x² + 5 = (x + 1)²` varrebbe anche se `x + 1` fosse negativo. Per questo le condizioni si scrivono all'inizio, e restano valide fino alla fine."],
+      how: "Tocca la radice per scriverla come potenza con esponente ½, poi trascina il ½ dall'altra parte dell'=: l'altro membro viene elevato al quadrato. Sviluppa, porta tutto a un membro, scomponi e separa, come nell'esempio precedente. La soluzione che non rispetta una condizione viene barrata.",
+      text: ["Una radice non è mai negativa, quindi `√(x + 7) = x + 1` vale solo dove `x + 1 ≥ 0`, cioè `x ≥ −1`. (E anche il radicando non può essere negativo: `x ≥ −7`.) Queste sono le condizioni, scritte all'inizio: restano valide fino alla fine.", "Elevando al quadrato entrambi i membri, queste informazioni si perdono: `x + 7 = (x + 1)²` è vera anche per `x = −3`, dove `x + 1` è negativo. Quindi l'equazione elevata al quadrato dà `x = 2` oppure `x = −3`, ma −3 non rispetta una condizione: viene barrata. L'unica soluzione è `x = 2`."],
+    },
+    "substitute": {
+      name: "Sostituire",
+      how: "Trascina la `y` di `y = …` sulla `y` dell'altra equazione: al suo posto arriva ciò a cui `y` è uguale. Ora quell'equazione ha solo la x: somma i termini in x e risolvila.",
+      text: ["`y = 2x` e `x + y = 9` sono due equazioni con le stesse x e y, vere tutte e due contemporaneamente. Un'equazione in due incognite ha infinite soluzioni; due equazioni insieme di solito ne hanno una sola.", "`y = 2x` dice che y e 2x sono uguali, quindi nell'altra equazione y si può sostituire con 2x. Resta un'equazione in una sola lettera, che sai già risolvere."],
+    },
+    "zero-power": {
+      name: "Esponente 0",
+      how: "Tocca l'esponente 0: `x⁰` diventa 1. Poi tocca il + per fare la somma.",
+      text: ["`x³/x³` fa 1 (se x non è 0), ma è anche `x^(3 − 3) = x⁰`. Quindi qualsiasi numero diverso da 0, elevato alla 0, fa 1."],
     },
   },
 

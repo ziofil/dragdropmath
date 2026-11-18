@@ -2,19 +2,19 @@ import type { MathState } from "../expr/types";
 import { stateKey } from "../expr/key";
 import { inSetting } from "../expr/setting";
 import { settleCopies, withoutCopies } from "../expr/copies";
-import { allNodes, locate, nodeAt, parentLoc } from "../expr/tree";
-import { dragCtx, handles, replaceIn, signId, signOwner, type Candidate, type Feel, type Rule, type RuleId } from "./types";
+import { allNodes, locate } from "../expr/tree";
+import { dragCtx, replaceIn, type Candidate, type Feel, type Rule, type RuleId } from "./types";
+import { handles, opOwner, pieceAround, rootParts, signId, signOwner, unheld } from "./handles";
 import { num } from "../expr/build";
 import { powerOf, roleOf } from "./view";
-export { handles, signId, signOwner } from "./types";
-import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne } from "./rearrange";
+export { dotBetween, handles, opId, opOwner, signId, signOwner } from "./handles";
+import { combine, commute, mergePowers, multiplyNumbers, multiplyOut, numbersFirst, timesOne, timesZero } from "./rearrange";
 import { differenceOfSquares, distribute, distributeNeg, factorOut, factorShared, splitTerm } from "./distribute";
 import { substitute } from "./rows";
 import { moveDenominator, moveFactor, moveLetterDenominator, moveLetterFactor, moveSign, moveTerm, swapSides } from "./balance";
-import { cancelFactor, divideNumbers, evaluateFraction } from "./fractions";
+import { cancelFactor, dividePowers } from "./fractions";
 import {
   combineLogs,
-  dividePowers,
   evaluateLog,
   evaluatePower,
   powerOfBase,
@@ -35,10 +35,10 @@ import {
   powerToProduct,
   rootAcross,
   rootNotation,
-  evaluateRoot,
   splitSquare,
-  zeroPower, tapPower } from "./powlog";
+  zeroPower } from "./powlog";
 import { zeroProduct } from "./either";
+import { tapsOn } from "./taps";
 import { addFractions, divideByFraction, expandFraction, multiplyFractions, splitFraction, splitNumber } from "./fracs";
 
 export type { Candidate, Feel, Rule, RuleId } from "./types";
@@ -51,6 +51,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     timesOne,
     numbersFirst,
     multiplyOut,
+    timesZero,
     splitNumber,
     expandFraction,
     addFractions,
@@ -73,8 +74,6 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     moveFactor,
     moveDenominator,
     moveSign,
-    divideNumbers,
-    evaluateFraction,
     cancelFactor,
     powerOfPower,
     zeroPower,
@@ -82,7 +81,6 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     pullOutOfPower,
     powerOfProduct,
     evaluatePower,
-    tapPower,
     dividePowers,
     flipAcrossBar,
     expOfLog,
@@ -96,8 +94,7 @@ export const RULES: Record<RuleId, Rule> = Object.fromEntries(
     moveExponentTerm,
     joinPowers,
     rootNotation,
-    evaluateRoot,
-    splitSquare,
+      splitSquare,
     rootAcross,
     zeroProduct,
     expAcross,
@@ -165,9 +162,12 @@ export function stepsFrom(state: MathState, enabled: readonly RuleId[]): Step[] 
  * after it) works out the two on either side, as dropping one on the other
  * would: 3 + 4 → 7, 3x + 2x → 5x, 1/5 + 2/5 → (1 + 2)/5, 2·3 → 6, x²·x³ →
  * x^(2 + 3). A number times a fraction of numbers comes out as one fraction,
- * worked out: 6·(1/12) → 6/12.
+ * worked out: 6·(1/12) → 6/12. When the two don't merge: in a sum, what they
+ * share comes out (x² + 3x → x(x + 3)), else a difference of two squares
+ * factors (x² − 9 → (x − 3)(x + 3)); in a product, its numbers are
+ * multiplied out (4x·3 → 12x).
  */
-export function operatorTap(state: MathState, itemId: string, enabled: readonly RuleId[]): MathState | null {
+export function operatorMove(state: MathState, itemId: string, enabled: readonly RuleId[]): Candidate | null {
   const c = dragCtx(state, itemId);
   const row = c?.parent;
   if (!c || c.index === 0 || (row?.kind !== "sum" && row?.kind !== "prod")) return null;
@@ -175,9 +175,21 @@ export function operatorTap(state: MathState, itemId: string, enabled: readonly 
   const kinds = enabled.filter((r) => RULES[r].operatorTap === (row.kind === "sum" ? "sum" : "product"));
   const moves = movesFor(state, enabled);
   const merge = (from: string, onto: string) => moves.drag(from).find((k) => kinds.includes(k.rule) && k.targetId === onto);
-  const found = merge(itemId, prev.id) ?? merge(prev.id, itemId) ?? (row.kind === "sum" ? shareOut(state, row.terms, prev.id, itemId, enabled) : undefined);
-  if (!found) return null;
-  return found.rule === "multiply-fractions" ? workedOut(found.state, prev.id, itemId) : found.state;
+  const found = merge(itemId, prev.id) ?? merge(prev.id, itemId);
+  if (found) return { rule: found.rule, state: found.rule === "multiply-fractions" ? workedOut(found.state, prev.id, itemId) : found.state };
+  const by = (rule: RuleId, id: string) => (enabled.includes(rule) ? (collect(state, id, [rule])[0] ?? null) : null);
+  if (row.kind === "sum") {
+    // (Only where factoring is a move here: finding what two terms share drags every piece of both.)
+    const shared = enabled.includes("factor-out") || enabled.includes("factor-shared") ? shareOut(state, row.terms, prev.id, itemId, enabled) : undefined;
+    if (shared) return { rule: shared.rule, state: shared.state };
+    return c.node.kind === "neg" ? by("difference-of-squares", signId(itemId)) : null;
+  }
+  return by("multiply-out", row.id);
+}
+
+/** What tapping the operator in front of piece `itemId` gives (see operatorMove), or null. */
+export function operatorTap(state: MathState, itemId: string, enabled: readonly RuleId[]): MathState | null {
+  return operatorMove(state, itemId, enabled)?.state ?? null;
 }
 
 /**
@@ -259,8 +271,8 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   const known = byRules.get(rulesKey);
   if (known) return known;
 
-  const dragRules = enabled.filter((id) => !RULES[id].tap);
-  const tapRules = enabled.filter((id) => RULES[id].tap).sort((a, b) => (RULES[a].tapOrder ?? 0) - (RULES[b].tapOrder ?? 0));
+  // Tidying is done for the learner (game/tidy.ts); what a tap does is decided by the piece (taps.ts).
+  const dragRules = enabled.filter((id) => !RULES[id].tidy && !RULES[id].tap);
   const memo = <T,>(f: (id: string) => T) => {
     const m = new Map<string, T>();
     return (id: string) => {
@@ -272,7 +284,8 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   // the √ (and the 1 and n inside it). A root moves as one piece; its ½ is
   // reached by tapping the root into x^(1/2) first.
   const inert = rootParts(state);
-  const own = memo((id) => (inert.has(id) ? [] : collect(state, id, dragRules)));
+  // A product with nothing to grab it by as a whole (no · drawn, not a term among others) has no moves of its own.
+  const own = memo((id) => (inert.has(id) || unheld(state, id) ? [] : collect(state, id, dragRules)));
   // Two-way merges: dropping B on A does what dropping A on B does (see Rule.either).
   const mirrorable = enabled.filter((id) => RULES[id].either);
   const nodes = state.sides.flatMap(allNodes);
@@ -309,14 +322,18 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
     }
     return [...mine, ...back];
   });
-  // A tap of its own, else a merge that tapping makes too (see Rule.tapsToo).
-  const tapsToo = dragRules.filter((id) => RULES[id].tapsToo);
-  const tap = memo((id) => {
+  // An operator's tap works out its two sides; any other piece's, the first of its taps (taps.ts) the chapter has that applies.
+  const tap = memo((id): Candidate | null => {
     if (inert.has(id)) return null;
-    const t = collect(state, id, tapRules)[0];
-    if (t) return t;
-    const m = tapsToo.length ? own(id).find((c) => RULES[c.rule].tapsToo) : undefined;
-    return m ? { rule: m.rule, state: m.state } : null;
+    const after = opOwner(id);
+    if (after) return operatorMove(state, after, enabled);
+    for (const rule of tapsOn(state, id)) {
+      if (!enabled.includes(rule)) continue;
+      const made = collect(state, id, [rule])[0];
+      // (A merge made by a tap, as x⁰ dropped on its base is: the same result, no target.)
+      if (made) return { rule: made.rule, state: made.state };
+    }
+    return null;
   });
   // Any piece with a real move can be picked up: a quick press takes it when it's
   // a term (or in no sum at all), a press held still takes it out of its term.
@@ -332,13 +349,20 @@ export function movesFor(state: MathState, enabled: readonly RuleId[]): Moves {
   return moves;
 }
 
+/** Every candidate the given rules give for dragging (or tapping) `draggedId`, without the learner's restrictions: tidying uses it. */
+export function applyRules(state: MathState, draggedId: string, rules: readonly RuleId[]): Candidate[] {
+  return collect(state, draggedId, rules);
+}
+
 function collect(withMarks: MathState, draggedId: string, enabled: readonly RuleId[]): Candidate[] {
   // Copies made by the previous move are ordinary pieces now.
   const state = withoutCopies(withMarks);
-  const seen = new Set([stateKey(state, "exact")]);
+  // (The start's key only once a move gives something: most pieces have no move of most rules.)
+  let seen: Set<string> | null = null;
   const out: Candidate[] = [];
   for (const id of enabled) {
     for (const found of RULES[id].apply(state, draggedId)) {
+      seen ??= new Set([stateKey(state, "exact")]);
       // Rules rewrite sides; the relation, how rows go together and what the letters
       // stand for carry over (unless the move sets them: an inequality turned round).
       const cand = { ...found, state: settleCopies(inSetting(found.state, state), state) };
@@ -351,15 +375,6 @@ function collect(withMarks: MathState, draggedId: string, enabled: readonly Rule
   return out;
 }
 
-
-/** A root's exponent (drawn as the √) and everything inside it. */
-function rootParts(state: MathState): Set<string> {
-  const out = new Set<string>();
-  for (const n of state.sides.flatMap(allNodes)) {
-    if (n.kind === "pow" && n.radical) for (const h of allNodes(n.exp)) out.add(h.id);
-  }
-  return out;
-}
 
 /**
  * Swapping factors inside a term that has company (2x in 2x + 3x → x·2)
@@ -384,44 +399,6 @@ export function isCosmetic(state: MathState, draggedId: string, c: Candidate): b
  */
 export function forgetMoves(state: MathState): void {
   cache.delete(state);
-}
-
-/**
- * The bigger piece a quick press on `id` takes instead (holding still takes
- * `id` itself), or null if a quick press takes `id`. The one place this is
- * decided:
- *
- * - In a sum with others, its term: 3xy for the x of 3xy + 2, 2(x + 1) for
- *   its 2 or its bracket (side by side through factors, a minus, and a
- *   power's base: the x of 3x² is part of its term).
- * - A term of a sum that is an exponent (2^(x − 3)): the whole exponent (it
- *   has no brackets to press).
- * - Inside a fraction on top of or under another's bar: that fraction (the
- *   3 of 6/(3/6) takes 3/6).
- * - Set apart on screen — a fraction's top or bottom, an exponent, what a
- *   log or a root holds: nothing; it is pressed directly.
- *
- * Only a piece around that can itself be picked up takes the press (see
- * Moves.pressable).
- */
-function pieceAround(state: MathState, id: string): string | null {
-  let loc = locate(state, id);
-  while (loc && loc.path.length > 0) {
-    const up = parentLoc(loc)!;
-    const P = nodeAt(state, up);
-    if (P.kind === "sum" && P.terms.length >= 2) {
-      const t = nodeAt(state, loc).id;
-      // An exponent written as a sum is pressed as a whole.
-      const holder = up.path.length > 0 ? nodeAt(state, parentLoc(up)!) : null;
-      if (t === id && holder?.kind === "pow" && up.path.at(-1) === 1) return P.id;
-      return t === id ? null : t;
-    }
-    if (P.kind === "frac" && up.path.length > 0 && nodeAt(state, parentLoc(up)!).kind === "frac") return P.id;
-    const besideIt = P.kind === "prod" || P.kind === "neg" || (P.kind === "pow" && !P.radical && loc.path.at(-1) === 0);
-    if (!besideIt) return null;
-    loc = up;
-  }
-  return null;
 }
 
 /** Does a quick press pick this piece up (see Moves.pressable)? */

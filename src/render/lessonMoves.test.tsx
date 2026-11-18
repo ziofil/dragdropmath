@@ -85,7 +85,8 @@ describe("lesson moves, as their words say", () => {
       const good = (s: typeof state) => goals.some((g) => stepDone(state, s, g));
       const plan = planDemo(state, rules, drill.rule, 720, 220, good, (s, id) => carries(s, id, carry));
       expect(plan, ex.start).not.toBeNull();
-      expect(plan!.kind === "drag" && carries(state, plan!.id, carry), `${ex.start}: Show carries ${plan && "id" in plan ? plan.id : "?"}, not the ${carry} its words say`).toBe(true);
+      // Carried, or tapped where the words name a piece whose step is a tap (the 0 of x⁰, the + of 3 + 4).
+      expect(plan !== null && carries(state, plan.id, carry), `${ex.start}: Show uses ${plan && "id" in plan ? plan.id : "?"}, not the ${carry} its words say`).toBe(true);
     }
   });
 });

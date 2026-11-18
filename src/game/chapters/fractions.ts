@@ -266,23 +266,35 @@ export const fractions: Chapter = {
   blurb:
     "To add fractions, first make the bottoms the same. Multiplying the top and bottom by the same number doesn't change a fraction's value.",
   after: ["factor"],
-  unlocks: ["divide-numbers", "evaluate-fraction", "cancel-factor", "expand-fraction", "add-fractions", "split-fraction", "multiply-fractions", "divide-by-fraction", "times-one"],
+  unlocks: ["cancel-factor", "expand-fraction", "add-fractions", "split-fraction", "multiply-fractions", "divide-by-fraction"],
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
-    d("evaluate-fraction", (r) => {
-      const a = r.int(2, 9);
-      return `${a * r.int(2, 9)}/${a} + ${anyLetter(r)}`;
-    }),
-    d("divide-numbers", (r) => {
-      const g = r.int(2, 5);
-      const [p, q] = pick(r, [[2, 3], [3, 2], [3, 4], [4, 3], [2, 5], [5, 2], [3, 5]]);
-      // A letter on top: two plain numbers would just be worked out (evaluate-fraction).
-      return `${g * p}${anyLetter(r)}/${g * q}`;
-    }),
+    // Cancelling: the same factor on top and bottom, dropped one on the other.
     d("cancel-factor", (r) => {
-      const a = r.int(2, 9);
-      return `${a}${anyLetter(r)}/${a}`;
+      const [a, x] = [r.int(2, 9), anyLetter(r)];
+      return { start: `${a}${x}/${a}`, goal: x };
     }),
+    // A number over a number it divides: split to show the bottom in the top (14 → 7·2), then cancel.
+    d(
+      "evaluate-fraction",
+      (r) => {
+        const [a, k] = [r.int(2, 9), r.int(2, 9)];
+        const x = anyLetter(r);
+        return { start: `${a * k}/${a} + ${x}`, goal: `${k} + ${x}` };
+      },
+      "split-number",
+    ),
+    // Numbers that only share a factor: split both to show it (8 → 4·2, 12 → 4·3), then cancel.
+    d(
+      "divide-numbers",
+      (r) => {
+        const g = r.int(2, 5);
+        const [p, q] = pick(r, [[2, 3], [3, 2], [3, 4], [4, 3], [2, 5], [5, 2], [3, 5]]);
+        const x = anyLetter(r);
+        return { start: `${g * p}${x}/${g * q}`, goal: `(${p}${x})/${q}` };
+      },
+      "split-number",
+    ),
     d("add-fractions", (r) => {
       const [q, a, b] = [r.int(5, 9), r.int(1, 2), r.int(1, 2)];
       return { start: `${a}/${q} + ${b}/${q}`, goal: `${a + b}/${q}` };
@@ -314,7 +326,6 @@ export const fractions: Chapter = {
       }
     }, "divide-by-fraction")),
     d("split-fraction", (r) => `(${anyLetter(r)} + ${r.int(1, 9)})/${r.int(2, 9)}`),
-    d("times-one", (r) => `1·${anyLetter(r)} + ${r.int(2, 9)}`),
     // Back to Factoring: take out the factor the top shares with the bottom, then cancel it.
     d("factor-then-cancel", (r) => {
       const [x, k, a] = [anyLetter(r), r.int(2, 5), r.int(1, 7)];

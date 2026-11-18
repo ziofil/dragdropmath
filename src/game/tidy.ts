@@ -10,7 +10,8 @@ import type { Expr, MathState } from "../expr/types";
 import { key, stateKey } from "../expr/key";
 import { allNodes, children, mapTree } from "../expr/tree";
 import { normalize } from "../expr/build";
-import { ALL_RULES, candidatesFor, handles, RULES, signOwner, tapFor } from "../rules";
+import { withoutCopies } from "../expr/copies";
+import { ALL_RULES, applyRules, handles, RULES, signOwner } from "../rules";
 
 /** The moves that are tidying (Rule.tidy). */
 const TIDY_RULES = ALL_RULES.filter((id) => RULES[id].tidy);
@@ -81,7 +82,8 @@ function ungroup(state: MathState): MathState | null {
     if (!g) continue;
     const sides = state.sides.slice();
     sides[i] = normalize(mapTree(sides[i], (e) => (e.id === g.id && e.kind === "sum" ? { kind: "sum", id: e.id, terms: e.terms } : e)));
-    return { ...state, sides };
+    // The copies the move made are ordinary pieces by now (as for every tidying step): marked still, they'd fly out of their source again.
+    return withoutCopies({ ...state, sides });
   }
   return null;
 }
@@ -92,8 +94,7 @@ function nextStep(state: MathState, touched: ReadonlySet<string>, seen: Readonly
   if (open && !seen.has(stateKey(open, "exact"))) return open;
   for (const id of handles(state)) {
     const owner = signOwner(id) ?? id;
-    const tap = tapFor(state, id, TIDY_RULES);
-    for (const c of [...candidatesFor(state, id, TIDY_RULES), ...(tap ? [tap] : [])]) {
+    for (const c of applyRules(state, id, TIDY_RULES)) {
       if (!touched.has(owner) && !(c.targetId && touched.has(c.targetId))) continue;
       if (!seen.has(stateKey(c.state, "exact"))) return c.state;
     }

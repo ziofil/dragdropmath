@@ -239,7 +239,7 @@ const nthRoot = (k: number, n: number): number | null => {
 
 /** x³y³ → (xy)³, 8x³ → (2x)³: factors to the same power, as one power of their product. Undone by the power of a product (then working out the number's power). */
 export const groupPower = (): UnMove => ({
-  rules: ["power-of-product", "tap-power", "evaluate-power"],
+  rules: ["power-of-product", "evaluate-power"],
   trusted: true,
   on: (s, r) =>
     many(() => {
@@ -290,9 +290,12 @@ export const splitLog = (): UnMove => ({
 const rootOrderOf = (m: Expr): number | null =>
   m.kind === "pow" && m.radical && m.exp.kind === "frac" && m.exp.num.kind === "num" && m.exp.num.value === 1 && m.exp.den.kind === "num" && m.base.kind === "num" ? m.exp.den.value : null;
 
-/** 3√2 → √18, 2∛3 → ∛24: a number in front taken under its root. Undone by splitting off the power, pulling it out, and working out its root. */
+/**
+ * 3√2 → √18, 2∛3 → ∛24: a number in front taken under its root. Undone by splitting off the power, pulling it out,
+ * and working out its root (√9 written as 9^(1/2), its ½ dropped on the 9).
+ */
 export const rootIn = (): UnMove => ({
-  rules: ["split-square", "pull-out-of-power", "evaluate-root", "multiply-numbers"],
+  rules: ["split-square", "pull-out-of-power", "root-notation", "evaluate-power", "multiply-numbers"],
   trusted: true,
   on: (s, r) =>
     many(() =>
@@ -309,14 +312,14 @@ export const rootIn = (): UnMove => ({
 
 /** x² → ∛(x⁶): a letter's power written as a root of a bigger power. Undone by writing the root as a power, the power of a power, and working out the exponent. */
 export const rootOfPower = (): UnMove =>
-  atPower(["root-notation", "power-of-power", "multiply-numbers", "multiply-fractions", "evaluate-fraction", "divide-numbers"], (p, n, r) => {
+  atPower(["root-notation", "power-of-power", "multiply-numbers", "multiply-fractions", "split-number", "cancel-factor"], (p, n, r) => {
     const k = one(r, [2, 3, 3, 4].filter((k) => n * k <= 12));
     return k ? root(pow({ ...p.base }, num(n * k)), k) : null;
   });
 
 /** x^(5/2) → x²·√x: a fraction power split into a whole power and a root. Undone by merging them, and adding the fractions in the exponent. */
 export const splitFractionPower = (): UnMove => ({
-  rules: ["merge-powers", "root-notation", "add-fractions", "expand-fraction", "multiply-numbers", "combine", "evaluate-fraction"],
+  rules: ["merge-powers", "root-notation", "add-fractions", "expand-fraction", "multiply-numbers", "combine", "split-number", "cancel-factor"],
   trusted: true,
   on: (s, r) =>
     many(() => {

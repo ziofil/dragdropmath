@@ -13,7 +13,7 @@ import { one, type Rng, type Level, type Shape, letter, one as pick } from "../g
 import { d, carrying } from "../generate/drill";
 
 const BACK = [splitLike(6), rootIn(), rootOfPower(), splitFractionPower(), "root-notation", "pull-out-of-power", "join-powers"] as const;
-const ROOTS = ["pull-out-of-power", "join-powers", "split-square", "evaluate-root", "root-notation"] as const;
+const ROOTS = ["pull-out-of-power", "join-powers", "split-square", "root-notation"] as const;
 
 /** More than writing a root as a power: a root to split, work out, or join. */
 const REAL = ROOTS.filter((x) => x !== "root-notation");
@@ -65,12 +65,20 @@ export const roots: Chapter = {
   title: "Roots",
   blurb: "√x is x to the power ½, and ∛x is x to the power ⅓, so the rules for powers work for roots too.",
   after: ["fractions"],
-  unlocks: ["root-notation", "split-square", "evaluate-root", "pull-out-of-power", "join-powers"],
+  unlocks: ["root-notation", "split-square", "pull-out-of-power", "join-powers"],
   positive: true,
   // The lesson: one board per move, in the order a learner meets them (words in i18n `drills`).
   drills: [
     // Square roots mostly, now and then a cube or fourth root.
-    d("evaluate-root", (r) => (r.next() < 0.6 ? `√${pick(r, [4, 9, 16, 25, 36, 49, 64, 81, 100])}` : pick(r, ["root_3(8)", "root_3(27)", "root_3(64)", "root_4(16)", "root_4(81)"]))),
+    // Worked out as a power: tapped, √9 is 9^(1/2); its ½ dropped on the 9 gives 3.
+    d(
+      "evaluate-root",
+      (r) => {
+        const [n, k] = r.next() < 0.6 ? [2, pick(r, [2, 3, 4, 5, 6, 7, 8, 9, 10])] : pick(r, [[3, 2], [3, 3], [3, 4], [4, 2], [4, 3]] as const);
+        return { start: n === 2 ? `√${k ** n}` : `root_${n}(${k ** n})`, goal: String(k) };
+      },
+      "root-notation",
+    ),
     d("pull-out-of-power", (r) => {
       const x = letter(r);
       if (r.next() < 0.6) {

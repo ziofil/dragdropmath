@@ -7,7 +7,7 @@
 import type { Chapter } from "../puzzles";
 import { composedExpression, expression, lin, nested, P, product, term, times, type Piece } from "../generate/composeExpr";
 import { gcd, one, type Level, type Rng, type Shape, letter as anyLetter, one as pick } from "../generate/write";
-import { d } from "../generate/drill";
+import { d, showing } from "../generate/drill";
 
 const letter = (r: Rng) => one(r, ["x", "y", "a", "b"]);
 const pair = (r: Rng) => one(r, [["x", "y"], ["a", "b"]] as const);
@@ -181,7 +181,12 @@ export const distribute: Chapter = {
       const [a, b, x] = [r.int(2, 6), r.int(1, 9), anyLetter(r)];
       return { start: `${a}(${x} + ${b})`, goal: `${a}${x} + ${a * b}` };
     }),
-    d("distribute-neg", (r) => `-(${anyLetter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`),
+    showing(["minus-alone"], d("distribute-neg", (r) => `-(${anyLetter(r)} ${pick(r, ["+", "-"])} ${r.int(1, 9)})`)),
+    // A minus before a bracket, in the middle of a sum: carried alone onto the bracket.
+    showing(["minus-alone"], d("minus-bracket", (r) => {
+      const [a, b, x] = [r.int(5, 9), r.int(1, 4), anyLetter(r)];
+      return { start: `${a} - (${x} + ${b})`, goal: `${a - b} - ${x}` };
+    }, "distribute-neg")),
     // A negative number in front: its number, then its minus (minus times minus is plus).
     d("minus-number-in", (r) => {
       const [a, b, x] = [r.int(2, 5), r.int(1, 9), anyLetter(r)];

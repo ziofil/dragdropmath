@@ -41,7 +41,7 @@ describe("rules do what they say", () => {
     ["x^2 + 3x", "power-to-product", "2", ["x*x + 3*x"]], // a square is something times itself
     ["(x + 2)^2", "power-to-product", "2", ["(x + 2)*(x + 2)"], 1], // the exponent (the first 2 is in the brackets)
     ["x^3", "power-to-product", "3", ["x*x*x"]],
-    ["2^3", "power-to-product", "3", []], // numbers are worked out instead
+    ["2^3", "power-to-product", "3", ["2*2*2"]], // a number's too (dropping the 3 on the 2 works it out)
     ["x·x + 2x + 3x + 6", "factor-shared", "x", ["x*(x + 2) + 3*x + 6", "x*(x + 3) + 2*x + 6"]], // the first x, onto 2x or 3x
     ["x(x + 2) + 3x + 3·2", "factor-shared", "3", ["x*(x + 2) + 3*(x + 2)"]],
     ["x·x - 3x + 1", "factor-shared", "x", ["x*(x - 3) + 1"]],
@@ -58,12 +58,12 @@ describe("rules do what they say", () => {
     ["9x + 3y", "factor-out", "3", ["3*(3*x + y)"]], // a number out of a number it divides, as by hand
     ["6 + 3x", "factor-out", "3", ["3*(2 + x)"]],
     ["5x + 3y", "factor-out", "3", []],
-    ["x + 3 = 10", "move-term", "3", ["x = 10 - 3"]],
-    ["x - 5 = 2", "move-term", "-5", ["x = 2 + 5"]],
+    ["x + 3 = 10", "move-term", "3", ["x = 10 - 3", "x = 7"]], // …or dropped onto the 10: it combines as it arrives
+    ["x - 5 = 2", "move-term", "-5", ["x = 2 + 5", "x = 7"]],
     ["2x = 8", "move-factor", "2", ["x = 8/2"]],
     ["xy = 8", "move-factor", "x", []], // never divide by something that might be 0
     ["x/3 = 4", "move-denominator", "3", ["x = 4*3"]],
-    ["x + 2 = -6", "move-term", "-6", ["x + 2 + 6 = 0"]], // a term alone on its side is a term too
+    ["x + 2 = -6", "move-term", "-6", ["x + 2 + 6 = 0"]], // a term alone on its side is a term too (it swaps the sides rather than combine as it arrives)
     ["x/3 + 1 = 5", "move-denominator", "3", ["x + 1*3 = 5*3"]], // every term on its side is multiplied
     ["1 - x/3 = 5 - x", "move-denominator", "3", ["1*3 - x = (5 - x)*3"]],
     ["x/3 = y/2 + 1", "move-denominator", "2", ["(x/3)*2 = y + 1*2"]],
@@ -73,16 +73,22 @@ describe("rules do what they say", () => {
     ["-x = 6", "move-sign", "sign:-x", ["x = -6"]], // carry just the −…
     ["-x = 6", "move-sign", "-x", []], // …not the whole −x
     // Simplifying is a tap on the bar.
-    ["8/2", "divide-numbers", "8/2", ["4"]],
-    ["6/4", "divide-numbers", "6/4", ["3/2"]],
-    ["6x/3", "divide-numbers", "(6*x)/3", ["2*x"]],
-    ["ab/b", "cancel-factor", "(a*b)/b", ["a"]],
-    ["(2·3)/(2·5)", "cancel-factor", "(2*3)/(2*5)", ["3/5"]],
-    ["(x + 1)/(2(x + 1))", "cancel-factor", "(x + 1)/(2*(x + 1))", ["1/2"]],
-    ["(0·x)/(0·3)", "cancel-factor", "(0*x)/(0*3)", []], // 0/0 isn't 1
+    // A number tapped splits off what it shares across the bar, the shared factor first…
+    ["8/2", "split-number", "8", ["(2*4)/2"]],
+    ["6/4", "split-number", "6", ["(2*3)/4"]],
+    ["6x/3", "split-number", "6", ["(3*2*x)/3"]],
+    ["7/3", "split-number", "7", []], // nothing shared, and 7 is prime
+    // …and equal factors across the bar, one dropped on the other, cancel.
+    ["(2·4)/2", "cancel-factor", "2", ["4"]],
+    ["ab/b", "cancel-factor", "b", ["a"]],
+    ["ab/b", "cancel-factor", "b", ["a"], 1], // the bottom one dropped on the top one
+    ["(2·3)/(2·5)", "cancel-factor", "2", ["3/5"]],
+    ["(x + 1)/(2(x + 1))", "cancel-factor", "x + 1", ["1/2"]],
+    ["(3x + 1)/3", "cancel-factor", "3", []], // the 3 multiplies only part of the top
+    ["(0·x)/(0·3)", "cancel-factor", "0", []], // 0/0 isn't 1
     // A fraction is read with what multiplies it, and its bottom may have letters too.
-    ["3·(x/3)", "cancel-factor", "x/3", ["x"]], // what multiplies the fraction counts as its top
-    ["6x/(3y)", "divide-numbers", "(6*x)/(3*y)", ["(2*x)/y"]],
+    ["3·(x/3)", "cancel-factor", "3", ["x"]], // what multiplies the fraction counts as its top
+    ["6x/(3y)", "split-number", "6", ["(3*2*x)/(3*y)"]],
     // A power of a common factor comes out of a higher power.
     ["x^3 + x^2", "factor-out", "x^2", ["x^2*(x + 1)"]],
     ["x^3 + x^2", "factor-out", "x", ["x*(x^2 + x)"]],
@@ -105,13 +111,13 @@ describe("rules do what they say", () => {
     ["(1/2)/(3/4)", "divide-by-fraction", "4", ["((1*4)/2)/3"]],
     ["6/(3/6)", "divide-by-fraction", "6", ["(6*6)/3"], 1],
     ["(a/b)/(c/d)", "divide-by-fraction", "c", ["(a/(b*c))/(1/d)"]],
-    ["√9", "evaluate-power", "1/2", []], // no jump: √9 is worked out step by step…
-    ["√9", "split-square", "9", ["√(3*3)"]], // …starting with 9 → 3·3
-    ["√9", "evaluate-root", "√(9)", ["3"]], // or tap the root: it comes out whole
-    ["root_3(8)", "evaluate-root", "root_3(8)", ["2"]],
-    ["√(3·3)", "evaluate-root", "√(3*3)", ["3"]],
-    ["√12", "evaluate-root", "√(12)", []], // not whole: split it instead
-    ["√x", "evaluate-root", "√(x)", []],
+    ["√9", "evaluate-power", "1/2", []], // the √ is no handle: tapped, √9 is 9^(1/2)…
+    ["9^(1/2)", "evaluate-power", "1/2", ["3"]], // …whose ½ dropped on the 9 gives 3
+    ["8^(2/3)", "evaluate-power", "2/3", ["4"]],
+    ["12^(1/2)", "evaluate-power", "1/2", []], // not whole: split it instead
+    ["(9/4)^(1/2)", "evaluate-power", "1/2", ["3/2"]], // a fraction in lowest terms: top and bottom each
+    ["(6/2)^2", "evaluate-power", "2", []], // 6/2 is made 3 first
+    ["√9", "split-square", "9", ["√(3*3)"]],
     ["root_3(8)", "split-square", "8", ["root_3(2*2*2)"]],
     ["x^1", "power-one", "1", ["x"]],
     ["3^1", "evaluate-power", "1", ["3"]],
@@ -139,7 +145,7 @@ describe("rules do what they say", () => {
     // A negative exponent with no bar to cross: it goes under one of its own, or works out to one over the power.
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
-    ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    ["2^(-6)", "evaluate-power", "-6", ["1/64"]],
     // A minus in front of a fraction goes into its top or its bottom, flipping every sign there.
     ["-4/(2 - ln(2))", "distribute-neg", "sign:-4/(2 - ln(2))", ["4/(-2 + ln(2))"]],
     ["-(x - 1)/3", "distribute-neg", "sign:-(x - 1)/3", ["(-x + 1)/3"]],
@@ -156,8 +162,9 @@ describe("rules do what they say", () => {
     ["x^4 - x^2", "factor-out", "x^2", ["x^2*(x^2 - 1)"]],
     ["x - √x - 8√x + 8", "factor-shared", "√(x)", ["√(x)*(√(x) - 1) - 8*√(x) + 8"]],
     // Its number tapped splits the whole term (not the 8 into 2·4).
-    ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
-    ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
+    ["y^2 + 8y + 15", "split-term", "8*y", ["y^2 + 3*y + 5*y + 15"]],
+    ["y^2 - 8y + 15", "split-term", "-8*y", ["y^2 - 3*y - 5*y + 15"]],
+    ["y^2 + 8y + 15", "split-term", "8", []], // its number tapped splits the number
     // A difference of two squares: tap the minus.
     ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
     ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
@@ -169,8 +176,10 @@ describe("rules do what they say", () => {
     // Dividing by something that could be 0 loses answers: never by a factor sharing a letter with the rest of its side.
     ["(x - 2)(x + 3) = 0", "move-letter-factor", "x - 2", []],
     ["x(x - 3) = 0", "move-letter-factor", "x", []],
-    ["v - u = a*t", "move-letter-factor", "a", ["(v - u)/a = t"]],
-    ["x(a - 2) = b - a", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
+    ["9x^2 = -15x", "move-letter-factor", "x", []], // dividing by x would lose x = 0
+    ["v - u = a*t", "move-letter-factor", "a", []], // a might be 0…
+    ["v - u = a*t where a ≠ 0", "move-letter-factor", "a", ["(v - u)/a = t"]], // …unless a condition says it isn't
+    ["x(a - 2) = b - a where a ≠ 2", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
     // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
     ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
     ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
@@ -209,8 +218,13 @@ describe("rules do what they say", () => {
     ["(x^2/y)^3", "pull-out-of-power", "y", ["x^(2*3)/y^3"]], // a fraction under a power splits too
     ["x^0 + 4", "zero-power", "0", ["1 + 4"]],
     ["2^3", "evaluate-power", "3", ["8"]],
-    ["x^5/x^2", "divide-powers", "x^5/x^2", ["x^(5 - 2)"]],
+    ["x^5/x^2", "divide-powers", "x^2", ["x^(5 - 2)"]], // the bottom's power onto the top's: it lands there
+    ["x^5/x^2", "divide-powers", "x^5", ["1/x^(2 - 5)"]], // the other way round: it lands underneath
+    ["x^2/x^2", "divide-powers", "x^2", []], // the very same power cancels instead
     ["1/x^3", "flip-across-bar", "x^3", ["x^(-3)"]],
+    ["x^2/y^3", "flip-across-bar", "x^2", ["1/(y^3*x^(-2))"]], // down from the top too
+    ["x^5/x^2", "flip-across-bar", "x^2", []], // a power of the same base across: dropped on it, they merge instead
+    ["(x + 1)/y", "flip-across-bar", "x + 1", []], // a bracket doesn't flip into (x + 1)⁻¹
     ["x^-2·x^5", "merge-powers", "x^5", ["x^(-2 + 5)"]],
     ["x^2·x^3", "merge-powers", "x^2", ["x^(2 + 3)"]], // order kept whichever is carried
     ["x·2", "numbers-first", "x*2", ["2*x"]], // tap the product (a press on a factor falls through to it)
@@ -234,7 +248,7 @@ describe("rules do what they say", () => {
     // A negative exponent with no bar to cross: it goes under one of its own, or works out to one over the power.
     ["2^(-6)", "flip-across-bar", "2^(-6)", ["1/2^6"]],
     ["3x^(-2)", "flip-across-bar", "x^(-2)", ["3/x^2"]],
-    ["2^(-6)", "tap-power", "-6", ["1/64"]],
+    ["2^(-6)", "evaluate-power", "-6", ["1/64"]],
     // A minus in front of a fraction goes into its top or its bottom, flipping every sign there.
     ["-4/(2 - ln(2))", "distribute-neg", "sign:-4/(2 - ln(2))", ["4/(-2 + ln(2))"]],
     ["-(x - 1)/3", "distribute-neg", "sign:-(x - 1)/3", ["(-x + 1)/3"]],
@@ -251,8 +265,9 @@ describe("rules do what they say", () => {
     ["x^4 - x^2", "factor-out", "x^2", ["x^2*(x^2 - 1)"]],
     ["x - √x - 8√x + 8", "factor-shared", "√(x)", ["√(x)*(√(x) - 1) - 8*√(x) + 8"]],
     // Its number tapped splits the whole term (not the 8 into 2·4).
-    ["y^2 + 8y + 15", "split-term", "8", ["y^2 + 3*y + 5*y + 15"]],
-    ["y^2 - 8y + 15", "split-term", "8", ["y^2 - 3*y - 5*y + 15"]],
+    ["y^2 + 8y + 15", "split-term", "8*y", ["y^2 + 3*y + 5*y + 15"]],
+    ["y^2 - 8y + 15", "split-term", "-8*y", ["y^2 - 3*y - 5*y + 15"]],
+    ["y^2 + 8y + 15", "split-term", "8", []], // its number tapped splits the number
     // A difference of two squares: tap the minus.
     ["x^2 - 9", "difference-of-squares", "sign:-9", ["(x - 3)*(x + 3)"]],
     ["4x^2 - 25", "difference-of-squares", "sign:-25", ["(2*x - 5)*(2*x + 5)"]],
@@ -264,8 +279,10 @@ describe("rules do what they say", () => {
     // Dividing by something that could be 0 loses answers: never by a factor sharing a letter with the rest of its side.
     ["(x - 2)(x + 3) = 0", "move-letter-factor", "x - 2", []],
     ["x(x - 3) = 0", "move-letter-factor", "x", []],
-    ["v - u = a*t", "move-letter-factor", "a", ["(v - u)/a = t"]],
-    ["x(a - 2) = b - a", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
+    ["9x^2 = -15x", "move-letter-factor", "x", []], // dividing by x would lose x = 0
+    ["v - u = a*t", "move-letter-factor", "a", []], // a might be 0…
+    ["v - u = a*t where a ≠ 0", "move-letter-factor", "a", ["(v - u)/a = t"]], // …unless a condition says it isn't
+    ["x(a - 2) = b - a where a ≠ 2", "move-letter-factor", "a - 2", ["x = (b - a)/(a - 2)"]],
     // Both sides powers of the same base: a term of one exponent moves to the other, flipping sign.
     ["2^(x - 3) = 2^4", "move-exponent-term", "-3", ["2^x = 2^(4 + 3)"]],
     ["2^(x - 3) = 3^4", "move-exponent-term", "-3", []], // different bases
@@ -275,7 +292,7 @@ describe("rules do what they say", () => {
     ["2^x = -8", "exp-across", "2", []], // no solution: no log of −8
     ["log_(1/3)(x) > 2", "log-across", "log_(1/3)(x)", ["x < (1/3)^2"]],
     ["y/√x", "flip-across-bar", "√(x)", ["y*x^(-1/2)"]],
-    ["6/0", "divide-numbers", "6/0", []],
+    ["6/0", "split-number", "6", ["(2*3)/0"]], // nothing shared with 0: its smallest prime
     ["ln(x^3)", "log-of-power", "3", ["3*ln(x)"]],
     ["3ln(x)", "power-into-log", "3", ["ln(x^3)"]],
     ["ln(a) + ln(b)", "combine-logs", "ln(b)", ["ln(a*b)"]],
@@ -292,7 +309,7 @@ describe("rules do what they say", () => {
     ["e^x = 5", "exp-across", "e", ["x = ln(5)"]],
     ["ln(x) = 2", "log-across", "ln(x)", ["x = e^2"]],
     ["ln(x) = 2", "log-across", "e", ["x = e^2"]], // carried by its "ln" label (the base e)
-    ["x + 3 = 10", "move-term", "3", ["x = 10 - 3"]],
+    ["x + 3 = 10", "move-term", "3", ["x = 10 - 3", "x = 7"]], // …or dropped onto the 10: it combines as it arrives
   ])("%s  [%s on %s]", (src, rule, node, expected, occurrence = 0) => {
     expect(results(src, rule, node, occurrence)).toEqual(expected);
   });
@@ -439,9 +456,9 @@ describe("what a press picks up", () => {
     // In a sum, a quick press takes the whole term; holding takes a piece with a move of its own.
     ["3x + 2x", SHUFFLE, ["3*x", "2*x"], ["3*x", "2*x"]],
     ["3·y·2 + 1 + x", SHUFFLE, ["3*y*2", "1", "x"], ["3*y*2", "3", "2", "1", "x"]],
-    // In no sum, a press takes the piece itself: the 2 can cross the =, each whole side
-    // can (swapping the sides), and with formulas' moves so can the x (dividing by a letter).
-    ["2x = 8", ALL_RULES, ["2*x", "2", "x", "8"], ["2*x", "2", "x", "8"]],
+    // In no sum, a press takes the piece itself: the 2 can cross the = (the x can't: it might be 0). The
+    // product 2x has nothing to grab it by as a whole: it has no moves.
+    ["2x = 8", ALL_RULES, ["2", "8"], ["2", "8"]],
     ["x·x + x·2 - 2x", ["commute", "combine", "multiply-numbers", "numbers-first", "merge-powers"], ["x*x", "x*2", "-2*x"], ["x*x", "x", "x", "x*2", "-2*x"]],
     // Set apart on screen, a piece is pressed directly: a fraction's bottom, an exponent.
     ["2^((2x + 4)/2 - 5) = 2^4", ALL_RULES, ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "4", "2", "-5", "2^4", "2", "4"], ["2^((2*x + 4)/2 - 5)", "2", "(2*x + 4)/2", "2*x", "2", "4", "2", "-5", "2^4", "2", "4"]], // the 2 of 2x comes out of 2x + 4
@@ -503,9 +520,9 @@ describe("√9 step by step", () => {
     expect(printState(s)).toBe("3^((1 + 1)/2)");
     s = step(s, "combine", "1", 1);
     expect(printState(s)).toBe("3^(2/2)");
-    s = step(s, "divide-numbers", "2/2");
+    s = step(s, "cancel-factor", "2");
     expect(printState(s)).toBe("3^1");
-    s = step(s, "power-one", "1");
+    s = step(s, "power-one", "1"); // tidying, done for the learner
     expect(printState(s)).toBe("3");
   });
 });
@@ -587,25 +604,21 @@ describe("tapping a root", () => {
     const c = tapFor(s, root.id, ALL_RULES);
     return c && `${c.rule}: ${printState(c.state)}`;
   };
-  it("works it out when it comes out whole, else shows it as a power", () => {
-    expect(tap("√9 + x")).toBe("evaluate-root: 3 + x");
+  it("writes it as a power (worked out by dropping the exponent on the number)", () => {
+    expect(tap("√9 + x")).toBe("root-notation: 9^(1/2) + x");
     expect(tap("√12 + x")).toBe("root-notation: 12^(1/2) + x");
   });
 });
 
-describe("tapping a fraction's bar", () => {
+describe("the fraction bar", () => {
   const tap = (src: string) => {
     const s = parseState(src);
     const f = s.sides.flatMap(allNodes).find((n) => n.kind === "frac")!;
     const c = tapFor(s, f.id, ALL_RULES);
     return c && `${c.rule}: ${printState(c.state)}`;
   };
-  it("works it out when it comes out whole, else simplifies it", () => {
-    expect(tap("x = 8/2")).toBe("evaluate-fraction: x = 4");
-    expect(tap("x = 12/3 + 1")).toBe("evaluate-fraction: x = 4 + 1");
-    expect(tap("x = 6/4")).toBe("evaluate-fraction: x = 3/2");
-    expect(tap("x = 3/5")).toBeNull();
-    expect(tap("x = 6x/3")).toBe("divide-numbers: x = 2*x"); // the bar simplifies what it can
+  it("has no tap: simplifying is done by hand, a factor at a time", () => {
+    for (const src of ["x = 8/2", "x = 12/3 + 1", "x = 6/4", "x = 3/5", "x = 6x/3", "x^5/x^2", "(2x)/2"]) expect(tap(src)).toBeNull();
   });
 });
 
@@ -624,6 +637,11 @@ describe("tapping the +, − or · between two pieces", () => {
     expect(tap("2·3·x", "3")).toBe("6*x");
     expect(tap("x^2·x^3", "x^3")).toBe("x^(2 + 3)");
     expect(tap("x + 2", "2")).toBeNull();
+    // A product's numbers multiply out, the letters between them or not.
+    expect(tap("4x·3", "3")).toBe("12*x");
+    // Common factor first, then a difference of two squares.
+    expect(tap("4x^2 - 4", "-4")).toBe("4*(x^2 - 1)");
+    expect(tap("x^2 - 9", "-9")).toBe("(x - 3)*(x + 3)");
     // What two terms share comes out, the highest power of it: x², not x.
     expect(tap("x^4 - x^2", "-x^2")).toBe("x^2*(x^2 - 1)");
     // Nothing else shared: the minus comes out (as dropping it on the other term would).
@@ -642,15 +660,15 @@ describe("tapping a number's exponent", () => {
     const c = tapFor(s, (p as { exp: { id: string } }).exp.id, ALL_RULES);
     return c && `${c.rule}: ${printState(c.state)}`;
   };
-  it("works it out when the base is a number, else writes the power out", () => {
-    expect(tap("2^3 + x")).toBe("tap-power: 8 + x");
-    expect(tap("x = 3^2")).toBe("tap-power: x = 9");
+  it("writes the power out, a number's too (dropping it on the number works it out)", () => {
+    expect(tap("2^3 + x")).toBe("power-to-product: 2*2*2 + x");
+    expect(tap("x = 3^2")).toBe("power-to-product: x = 3*3");
     expect(tap("x^2")).toBe("power-to-product: x*x");
   });
-  it("an exponent of 0 or 1 does what dropping it on its base does", () => {
+  it("an exponent of 0 does what dropping it on its base does", () => {
     expect(tap("x^0 + 4")).toBe("zero-power: 1 + 4");
-    expect(tap("3x^1")).toBe("power-one: 3*x");
-    expect(tap("x^1")).toBe("power-one: x");
+    // x¹ is tidied for the learner (game/tidy.ts): no tap of its own.
+    expect(tap("x^1")).toBeNull();
   });
 });
 

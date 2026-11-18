@@ -57,20 +57,31 @@ export function replaceAt(root: Expr, path: number[], f: (e: Expr) => Expr): Exp
   return withChildren(root, cs);
 }
 
-function findPath(e: Expr, id: string): number[] | null {
-  if (e.id === id) return [];
-  const cs = children(e);
-  for (let i = 0; i < cs.length; i++) {
-    const p = findPath(cs[i], id);
-    if (p) return [i, ...p];
-  }
-  return null;
+/**
+ * Where each id is in a side, worked out once per side (an expression never
+ * changes): moves find pieces by id again and again, and walking the tree each
+ * time made finding them the most of a search's time.
+ */
+const paths = new WeakMap<Expr, Map<string, number[]>>();
+
+function pathsIn(root: Expr): Map<string, number[]> {
+  let found = paths.get(root);
+  if (found) return found;
+  found = new Map();
+  const walk = (e: Expr, path: number[]) => {
+    // The first one met, as a walk from the top would find it.
+    if (!found!.has(e.id)) found!.set(e.id, path);
+    children(e).forEach((c, i) => walk(c, [...path, i]));
+  };
+  walk(root, []);
+  paths.set(root, found);
+  return found;
 }
 
 export function locate(state: MathState, id: string): Loc | null {
   for (let side = 0; side < state.sides.length; side++) {
-    const path = findPath(state.sides[side], id);
-    if (path) return { side, path };
+    const path = pathsIn(state.sides[side]).get(id);
+    if (path) return { side, path: path.slice() };
   }
   return null;
 }

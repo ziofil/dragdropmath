@@ -144,6 +144,8 @@ export const mergePowers: Rule = {
     const factors = c.parent.factors;
     return factors.flatMap((f, j): Candidate[] => {
       if (j === c.index || f.kind === "num") return [];
+      // Two equal brackets multiply out (distribute), as any bracket onto a bracket does.
+      if (f.kind === "sum" && c.node.kind === "sum") return [];
       const theirs = asPower(f);
       if (key(theirs.base) !== key(mine.base)) return [];
       // A square root times itself gives back what's inside: √2·√2 → 2. That's
@@ -178,8 +180,9 @@ export const mergePowers: Rule = {
 /** x·1 → x (drop a 1 onto anything it multiplies). */
 export const timesOne: Rule = {
   id: "times-one",
+  // Tidying: done for the learner after a move (game/tidy.ts).
+  tidy: true,
   either: true,
-  tapsToo: true,
   name: "Times one",
   gesture: "Tap a 1 that multiplies something, or drop it onto what it multiplies — multiplying by 1 changes nothing.",
   apply(state, id) {
@@ -204,8 +207,6 @@ export const timesOne: Rule = {
 export const numbersFirst: Rule = {
   id: "numbers-first",
   tidy: true,
-  // Tidies a whole product, so a more specific tap on the thing tapped (log₂2 → 1 in log₂2·3) comes first.
-  tapOrder: 1,
   name: "Numbers in front",
   gesture: "Tap something like x·2 to write it the usual way, 2x.",
   tap: true,
@@ -230,14 +231,33 @@ export const numbersFirst: Rule = {
 
 const isOne = (f: Expr) => f.kind === "num" && f.value === 1;
 
+/**
+ * 0·(x − 3) → 0, 5·0·x → 0, 0/13 → 0 (tap a 0 that multiplies something, or
+ * that is a fraction's top: anything times 0 is 0, and 0 divided by anything
+ * else is 0).
+ */
+export const timesZero: Rule = {
+  id: "times-zero",
+  name: "Times zero",
+  gesture: "Tap a 0 that multiplies something, or that is a fraction's top: the product, or the fraction, is 0.",
+  tap: true,
+  apply(state, id) {
+    const c = dragCtx(state, id);
+    if (c?.node.kind !== "num" || c.node.value !== 0 || !c.parentLoc) return [];
+    const zero = num(0, c.node.id);
+    if (c.parent?.kind === "prod") return [{ rule: "times-zero", state: replaceIn(state, c.parentLoc, zero) }];
+    // 0 over something: the whole fraction (its bottom isn't 0: a bottom never is).
+    if (c.parent?.kind === "frac" && c.index === 0 && !(c.parent.den.kind === "num" && c.parent.den.value === 0)) return [{ rule: "times-zero", state: replaceIn(state, c.parentLoc, zero) }];
+    return [];
+  },
+};
+
 /** 2·3 → 6, 3·2·x → 6x (tap the product, or one of its numbers: the numbers in it are multiplied out). */
 export const multiplyOut: Rule = {
   id: "multiply-out",
   undoneBy: ["split-number"],
-  // After tidying: x·2·3 is first written 2·3·x.
-  tapOrder: 2,
   name: "Multiply out",
-  gesture: "Tap a product of numbers, like 2·3, to work it out (anything times 0 is 0).",
+  gesture: "Tap a · in a product to multiply all its numbers together: 4x·3 → 12x (anything times 0 is 0).",
   tap: true,
   apply(state, id) {
     const c = dragCtx(state, id);

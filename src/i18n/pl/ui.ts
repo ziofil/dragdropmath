@@ -103,16 +103,6 @@ export const pl: Translation = {
       how: "Upuść liczbę z prawej na drugą liczbę, przez którą jest mnożona.",
       text: ["Przy mnożeniu kolejność też nie ma znaczenia: `2·x·5` to `2·5·x`. Dlatego 2 i 5 można pomnożyć i wychodzi `10x`."],
     },
-    "numbers-first": {
-      name: "Liczba na początek",
-      how: "Dotknij iloczynu takiego jak `x·3`, żeby zapisać go tak jak zwykle: `3x`.",
-      text: ["Liczbę piszemy na początku i pomijamy kropkę: `x·3` zapisujemy jako `3x`. To tak proste, że od teraz dzieje się samo."],
-    },
-    "multiply-out": {
-      name: "Obliczanie iloczynu",
-      how: "Dotknij iloczynu liczb, np. `2·3`, żeby go obliczyć.",
-      text: ["Iloczyn samych liczb można obliczyć: `2·3` to 6."],
-    },
     collect: {
       name: "Redukcja wyrazów podobnych",
       how: "Upuść wyraz na wyraz podobny, czyli z tymi samymi literami w tych samych potęgach. Dodają się.",
@@ -167,19 +157,6 @@ export const pl: Translation = {
       how: "Dotknij ², żeby zapisać nawias dwa razy. Potem wymnóż nawiasy jak w poprzednim przykładzie (przytrzymaj czynnik, żeby przenieść go osobno: krótkie dotknięcie bierze cały wyraz) i zredukuj wyrazy podobne.",
       text: ["`(x + 1)²` to `(x + 1)(x + 1)`, więc wymnaża się go tak samo."],
     },
-    "move-term": {
-      name: "Przenoszenie wyrazu",
-      how: "Przenieś liczbę na drugą stronę =. Po drodze zmienia znak. Potem dotknij −, żeby obliczyć różnicę.",
-      text: [
-        "Równanie mówi, że dwie strony są równe. Jeśli z obiema stronami zrobisz to samo, dalej będą równe.",
-        "Przeniesienie wyrazu na drugą stronę `=` robi właśnie to. Z `x + 3 = 10` odejmij 3 od obu stron: `x = 10 − 3`. Dlatego `+3` po drugiej stronie staje się `−3`.",
-      ],
-    },
-    "move-factor": {
-      name: "Dzielenie obu stron",
-      how: "Przenieś liczbę sprzed litery na drugą stronę =. Dzieli drugą stronę. Potem dotknij kreski ułamkowej, żeby obliczyć ułamek.",
-      text: ["Liczba, która mnoży całą stronę, po przeniesieniu dzieli drugą stronę. Z `2x = 8` podziel obie strony przez 2: `x = 8/2`."],
-    },
     "move-denominator": {
       name: "Mnożenie obu stron",
       how: "Przenieś mianownik ułamka na drugą stronę =. Mnoży drugą stronę. Potem dotknij ·, żeby obliczyć iloczyn.",
@@ -195,16 +172,6 @@ export const pl: Translation = {
       how: "Przeciągnij jedną stronę przez = i dalej, za drugi koniec. Strony zamieniają się miejscami.",
       text: ["`7 = x` i `x = 7` mówią to samo, więc strony mogą zamienić się miejscami."],
     },
-    "evaluate-fraction": {
-      name: "Obliczanie ułamka",
-      how: "Dotknij kreski ułamkowej, żeby obliczyć ułamek.",
-      text: ["Ułamek, który daje liczbę całkowitą, można obliczyć: `12/3` to 4."],
-    },
-    "divide-numbers": {
-      name: "Skracanie ułamka",
-      how: "Dotknij kreski ułamkowej. Licznik i mianownik dzielą się przez swój wspólny dzielnik.",
-      text: ["Ułamek można skrócić, dzieląc licznik i mianownik przez tę samą liczbę: `6/8 = 3/4`. Jego wartość się nie zmienia."],
-    },
     "letter-in": {
       name: "Litera razy nawias",
       how: "Upuść literę sprzed nawiasu na nawias. Potem przytrzymaj jedną z dwóch liter stojących obok siebie i upuść ją na drugą: `x·x` to `x²`. (Krótkie dotknięcie wzięłoby cały wyraz.)",
@@ -212,77 +179,10 @@ export const pl: Translation = {
         "Litera mnoży każdy wyraz w nawiasie, tak samo jak liczba: `x(x + 3) = x·x + x·3`. A `x·x` to potęga, `x²`, jak w rozdziale „Potęgi”.",
       ],
     },
-    "factor-then-cancel": {
-      name: "Wyłącz, a potem skróć",
-      how: "Przytrzymaj liczbę w wyrazie z licznika i wyciągnij ją na początek, za lewy koniec. Potem dotknij kreski ułamkowej: czynnik się skraca.",
-      text: [
-        "Skrócić można tylko czynnik całego licznika. W `(2x + 6)/2` dwójka jest czynnikiem każdego wyrazu, więc najpierw wyłącz ją przed nawias: `(2(x + 3))/2`. Teraz jest czynnikiem całego licznika i skraca się z mianownikiem.",
-      ],
-    },
-    "cancel-factor": {
-      name: "Skracanie wspólnego czynnika",
-      how: "Dotknij kreski ułamkowej. To, co licznik i mianownik mają wspólne, się skraca.",
-      text: ["Liczba, która mnoży cały licznik i cały mianownik, się skraca: `(3x)/3` to `x`. W `(3x + 1)/3` już nie: tam 3 mnoży tylko część licznika."],
-    },
     "power-of-power": {
       name: "Potęga potęgi",
       how: "Upuść zewnętrzny wykładnik na wewnętrzny. Mnożą się: dotknij ·, żeby obliczyć iloczyn.",
       text: ["`(x²)³` to `x²·x²·x²`. To 2 + 2 + 2 = 6 iksów, więc wykładniki się mnożą."],
-    },
-    "divide-powers": {
-      name: "Ta sama podstawa: odejmij wykładniki",
-      how: "Dotknij kreski ułamkowej. Potęgi o tej samej podstawie łączą się, a ich wykładniki się odejmują: dotknij −, żeby obliczyć różnicę.",
-      text: [
-        "W `x⁵/x²` jest pięć iksów w liczniku i dwa w mianowniku. Dwa iksy z licznika skracają się z dwoma z mianownika i w liczniku zostają trzy: przy dzieleniu wykładniki się odejmuje.",
-      ],
-    },
-    "flip-across-bar": {
-      name: "Przez kreskę ułamkową",
-      how: "Przeciągnij potęgę w górę przez kreskę ułamkową. Jej wykładnik zmienia znak.",
-      text: [
-        "Gdy w mianowniku jest więcej iksów, wykładnik schodzi poniżej zera: `x⁻²` oznacza `1/x²`. Przeniesienie potęgi przez kreskę ułamkową zmienia znak jej wykładnika.",
-      ],
-    },
-    "power-one": {
-      name: "Wykładnik 1",
-      how: "Upuść wykładnik 1 na jego podstawę.",
-      text: ["`x¹` to jeden x, czyli po prostu `x`. To tak proste, że od teraz dzieje się samo."],
-    },
-    "zero-power": {
-      name: "Wykładnik 0",
-      how: "Naciśnij i przytrzymaj wykładnik 0, a potem upuść go na jego podstawę. Potem dotknij +, żeby dodać.",
-      text: ["`x³/x³` to 1 (gdy x jest różne od 0), ale to także `x^(3 − 3) = x⁰`. Dlatego każda liczba (różna od zera) do potęgi 0 daje 1."],
-    },
-    "tap-power": {
-      name: "Obliczanie potęgi",
-      how: "Dotknij wykładnika, żeby obliczyć potęgę: `2³` zmienia się w 8.",
-      text: ["Potęgę liczby można obliczyć: `2³` to `2·2·2 = 8`."],
-    },
-    "power-of-product": {
-      name: "Wykładnik do nawiasu",
-      how: "Przeciągnij wykładnik do nawiasu: każdy czynnik w środku dostaje swój własny. Potem dotknij wykładnika przy liczbie, żeby obliczyć potęgę.",
-      text: ["`(2x)³` to `2x·2x·2x`, czyli `2³·x³`. Każdy czynnik w nawiasie dostaje wykładnik."],
-    },
-    "split-number": {
-      name: "Rozkład liczby",
-      how: "Dotknij liczby przed literą, żeby rozłożyć ją na dwa czynniki. Dotknij też drugiej liczby. Potem dotknij + między wyrazami: wspólny czynnik zostaje wyłączony przed nawias. (Albo przytrzymaj go i przeciągnij na początek, za lewy koniec.)",
-      text: ["Żeby znaleźć wspólny czynnik, rozkładaj liczby na czynniki. W `2x + 6` liczba 6 to `2·3` i teraz oba wyrazy mają 2."],
-    },
-    "split-term": {
-      name: "Rozbijanie środkowego wyrazu",
-      how: "Dotknij środkowego wyrazu. Rozpada się na dwa i można już rozkładać parami.",
-      text: [
-        "Żeby rozłożyć `x² + 5x + 6`, szukamy dwóch liczb, które w sumie dają 5, a w iloczynie 6: to 2 i 3. Zapisz `5x` jako `2x + 3x`.",
-        "Teraz są cztery wyrazy i rozkładają się parami: `x(x + 2) + 3(x + 2)`, a potem `(x + 2)(x + 3)`.",
-      ],
-    },
-    "difference-of-squares": {
-      name: "Różnica kwadratów",
-      how: "Dotknij minusa między dwoma kwadratami.",
-      text: [
-        "Kwadrat minus kwadrat zawsze rozkłada się tak samo: `a² − b² = (a − b)(a + b)`. Wymnóż, żeby sprawdzić: środkowe wyrazy się redukują.",
-        "Działa to tylko dla różnicy: kwadrat minus kwadrat. Sumy dwóch kwadratów, jak `x² + 9`, w ogóle nie da się rozłożyć na czynniki. Kwadrat minus liczba, która nie jest kwadratem liczby całkowitej, jak `x² − 7`, rozkłada się, ale z pierwiastkami: `(x − √7)(x + √7)`.",
-      ],
     },
     "factor-shared": {
       name: "Grupowanie wyrazów",
@@ -331,34 +231,12 @@ export const pl: Translation = {
       how: "Dotknij · między ułamkami albo upuść jeden na drugi: liczniki się mnożą, mianowniki też.",
       text: ["Mnożenie jest prostsze: mnożymy liczniki i mnożymy mianowniki. Połowa jednej trzeciej to `(1·1)/(2·3) = 1/6`."],
     },
-    "divide-by-fraction": {
-      name: "Dzielenie przez ułamek",
-      how: "Przeciągnij mianownik dolnego ułamka w górę, do licznika: mnoży licznik. Potem dotknij · i kreski ułamkowej, żeby to obliczyć.",
-      text: [
-        "To, co robi liczba, zależy od tego, pod iloma kreskami ułamkowymi stoi. W `4/(3/5)` piątka jest pod dwiema kreskami: dzieli przez dzielenie, czyli mnoży. Dlatego można ją przenieść w górę, do licznika, i wartość się nie zmieni: `(4·5)/3`.",
-        "Właśnie dlatego dzielenie przez ułamek to mnożenie przez jego odwrotność: `4/(3/5) = 4·5/3`.",
-      ],
-    },
-    rationalise: {
-      name: "Usuwanie niewymierności z mianownika",
-      how: "Przeciągnij pierwiastek z mianownika w górę, do licznika: licznik i mianownik mnożą się przez niego. Potem dotknij · w mianowniku.",
-      text: [
-        "Pomnożenie licznika i mianownika przez tę samą liczbę nie zmienia wartości ułamka. Wybierz pierwiastek, który już stoi w mianowniku: `√3·√3 = 3`, więc `1/√3 = √3/(√3·√3) = √3/3`. Teraz pod kreską ułamkową nie ma już pierwiastka.",
-      ],
-    },
     "zero-product": {
       name: "Iloczyn równy 0",
       how: "Ściągnij jeden nawias w dół, poza iloczyn: równanie rozpada się na dwa, ten nawias jest równy 0 albo drugi. Potem rozwiąż każde z nich.",
       text: [
         "Iloczyn jest równy 0 tylko wtedy, gdy któryś z czynników jest równy 0: `3·0 = 0`, ale `3·2` już nie. Zatem `(x − 2)(x + 3) = 0` oznacza, że `x − 2 = 0` lub `x + 3 = 0`: są dwa rozwiązania.",
         "Dlatego nigdy nie dzielimy obu stron przez coś, co może być zerem: tutaj zgubilibyśmy jedno rozwiązanie.",
-      ],
-    },
-    "plus-minus": {
-      name: "Dwa pierwiastki kwadratowe",
-      how: "Przeciągnij dwójkę na drugą stronę =. Liczba ma dwa pierwiastki kwadratowe: równanie rozpada się na dwa, jedno z +, drugie z −.",
-      text: [
-        "`3² = 9`, ale też `(−3)² = 9`. Zatem `x² = 9` oznacza, że `x = 3` lub `x = −3`. Kto zapomni o minusie, gubi jedno rozwiązanie.",
       ],
     },
     "take-out-then-split": {
@@ -375,49 +253,11 @@ export const pl: Translation = {
         "`x² + x − 6` to iloczyn dwóch nawiasów: `(x + 3)(x − 2)`. Te dwie liczby dają w iloczynie `−6`, a w sumie `1`, czyli współczynnik przy x. Gdy mamy iloczyn równy 0, każdy nawias daje jedno rozwiązanie.",
       ],
     },
-    "fraction-zero": {
-      name: "Ułamek równy 0",
-      how: "Przeciągnij mianownik ułamka na drugą stronę = (chwyć go za znak +). Mnoży on drugą stronę: dotknij 0, żeby to obliczyć, bo 0 razy cokolwiek to 0. Potem przenieś liczbę na drugą stronę.",
-      text: ["Ułamek jest równy 0 tylko wtedy, gdy jego licznik jest równy 0. Mianownik nigdy nie może być zerem, i mówi o tym założenie zapisane po równaniu: `x ≠ −2` sprawia, że `x + 2` nie jest 0.", "Dlatego mianownik może przejść na drugą stronę i ją pomnożyć: z `(x − 3)/(x + 2) = 0` mamy `x − 3 = 0·(x + 2)`, czyli `x − 3 = 0`. Rozwiązanie, które nie spełnia założenia, odrzucamy."],
-    },
-    "square-both-sides": {
-      name: "Podnoszenie obu stron do kwadratu",
-      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę o wykładniku ½, i przeciągnij ½ na drugą stronę =: druga strona zostaje podniesiona do kwadratu. Potem wymnóż i rozwiąż. Pod spodem są założenia: rozwiązanie, które któregoś z nich nie spełnia, zostaje skreślone.",
-      text: [
-        "Pierwiastek nigdy nie jest ujemny, więc `√(x² + 5) = x + 1` może zachodzić tylko wtedy, gdy `x + 1 ≥ 0`. Po podniesieniu obu stron do kwadratu ta informacja ginie: `x² + 5 = (x + 1)²` byłoby prawdziwe także wtedy, gdyby `x + 1` było ujemne. Dlatego założenia podaje się na początku i obowiązują przez całe rozwiązanie.",
-      ],
-    },
     "split-fraction": {
       name: "Rozbijanie ułamka",
       how: "Wyciągnij wyraz z licznika. Zabiera ze sobą kopię mianownika.",
       text: [
         "Ułamek z sumą w liczniku można rozbić na osobny ułamek dla każdego wyrazu, wszystkie o tym samym mianowniku: `(x + 5)/6 = x/6 + 5/6`.",
-      ],
-    },
-    "times-one": {
-      name: "Razy 1",
-      how: "Naciśnij i przytrzymaj 1, a potem upuść ją na to, co mnoży.",
-      text: ["Mnożenie przez 1 niczego nie zmienia: `1·x` to po prostu `x`. To tak proste, że od teraz dzieje się samo."],
-    },
-    substitute: {
-      name: "Podstawianie",
-      how: "Przeciągnij `y` z `y = …` na `y` w drugim równaniu: w jego miejsce wchodzi to, ile wynosi `y`. Potem wyznacz x i wstaw je do pierwszego równania, żeby obliczyć y.",
-      text: [
-        "`y = 2x` i `x + y = 9` to dwa równania o tych samych x i y, prawdziwe jednocześnie. Jedno równanie z dwiema niewiadomymi ma wiele rozwiązań, a dwa razem zwykle tylko jedno.",
-        "`y = 2x` mówi, że y i 2x są równe, więc w drugim równaniu można zastąpić y przez 2x. Zostaje jedno równanie z jedną literą, a takie już umiesz rozwiązać.",
-        "Jeśli w żadnym równaniu litera nie stoi sama, najpierw ją wyznacz: w `x − y = 1` przenieś −y na drugą stronę i dostaniesz `x = 1 + y`.",
-      ],
-    },
-    "evaluate-root": {
-      name: "Obliczanie pierwiastka",
-      how: "Dotknij pierwiastka, żeby go obliczyć.",
-      text: ["`√9` to liczba dodatnia, która pomnożona przez siebie daje 9: to 3, bo `3·3 = 9` (−3 też, ale √ oznacza tę dodatnią). Tak samo `∛8 = 2`, bo `2·2·2 = 8`."],
-    },
-    "split-square": {
-      name: "Rozkład pod pierwiastkiem",
-      how: "Dotknij liczby pod pierwiastkiem: wydziela się z niej kwadrat (a pod pierwiastkiem sześciennym sześcian). Potem wyciągnij go spod pierwiastka i dotknij jego pierwiastka, żeby go obliczyć.",
-      text: [
-        "Pierwiastek, który nie wychodzi całkowity, nadal można uprościć. Rozłóż liczbę pod nim na czynniki tak, żeby wydzielić kwadrat: `√12 = √(4·3)`.",
       ],
     },
     "join-powers": {
@@ -428,11 +268,6 @@ export const pl: Translation = {
         "Tak samo jest z każdym wspólnym wykładnikiem: `x³y³` to xxx·yyy, czyli xy·xy·xy, a więc `(xy)³`.",
       ],
     },
-    "pull-out-of-power": {
-      name: "Rozbijanie pierwiastka",
-      how: "Wyciągnij liczbę spod pierwiastka: dostaje swój własny pierwiastek. Potem dotknij tego pierwiastka, żeby go obliczyć.",
-      text: ["Pierwiastek z iloczynu to iloczyn pierwiastków: `√(4x) = √4·√x = 2√x`."],
-    },
     "root-notation": {
       name: "Pierwiastek jako potęga",
       how: "Dotknij pierwiastka, żeby zapisać go jako potęgę: √ to potęga o wykładniku ½, a ∛ o wykładniku ⅓.",
@@ -440,25 +275,11 @@ export const pl: Translation = {
         "Każdy pierwiastek jest potęgą: `√x = x^(1/2)`, `∛x = x^(1/3)`, a pierwiastek stopnia n z x to `x^(1/n)`. Dlatego wszystkie prawa działań na potęgach działają też dla pierwiastków: `√x·√x = x^(1/2 + 1/2) = x`.",
       ],
     },
-    "root-of-power": {
-      name: "Pierwiastek z potęgi",
-      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę. Potem upuść zewnętrzny wykładnik na wewnętrzny i oblicz iloczyn.",
-      text: [
-        "Pierwiastek to potęga, więc pierwiastek z potęgi to potęga potęgi: `∛(x⁶) = (x⁶)^(1/3) = x^(6·1/3) = x²`. Wykładniki się mnożą, jak w rozdziale „Potęgi”.",
-      ],
-    },
     "fraction-power": {
       name: "Pierwiastki i potęgi razem",
       how: "Upuść pierwiastek na potęgę: wykładniki się dodają. Potem zamień liczbę całkowitą na połówki: upuść na nią mianownik ułamka ½ i dotknij ·, żeby to obliczyć. Następnie dodaj ułamki i dotknij + w liczniku.",
       text: [
         "`√x` to `x^(1/2)`, więc `√x·x² = x^(1/2 + 2) = x^(5/2)`. Wykładnik ułamkowy działa jak każdy inny: przy mnożeniu potęg wykładniki się dodaje.",
-      ],
-    },
-    "root-across": {
-      name: "Potęga pierwiastka na drugą stronę =",
-      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę (o wykładniku ½, ⅓ albo ¼), i przenieś ten wykładnik na drugą stronę =. Tam zmienia się w kwadrat (albo sześcian, albo czwartą potęgę). Potem dotknij wykładnika, żeby obliczyć potęgę.",
-      text: [
-        "Żeby rozwiązać `√x = 3`, podnieś obie strony do kwadratu. Gdy zapiszesz to jako potęgę, `x^(1/2) = 3`, ½ przechodzi na drugą stronę i staje się kwadratem: `x = 3²`.",
       ],
     },
     "exp-of-log": {
@@ -516,11 +337,6 @@ export const pl: Translation = {
       how: "Przenieś podstawę na drugą stronę =. Tam zmienia się w logarytm.",
       text: ["Żeby wydostać x z wykładnika, zlogarytmuj obie strony. Z `e^x = 5` e przechodzi na drugą stronę i staje się logarytmem ln: `x = ln(5)`."],
     },
-    "log-across": {
-      name: "Logarytm na drugą stronę =",
-      how: "Przenieś logarytm na drugą stronę =. Tam zmienia się w potęgę. Jeśli to potęga liczby, dotknij jej wykładnika, żeby ją obliczyć.",
-      text: ["Logarytm znosi potęga. Z `ln(x) = 2` ln przechodzi na drugą stronę i staje się potęgą e: `x = e²`."],
-    },
     "bracket-times-bracket": {
       name: "Nawias razy nawias",
       how: "Upuść jeden nawias na drugi: mnoży oba wyrazy w środku. Potem tak samo wymnóż każdy nowy wyraz: przytrzymaj jeden z jego czynników i upuść go na drugi (krótkie dotknięcie bierze cały wyraz). Następnie przytrzymaj jedno x z `x·x`, upuść je na drugie i zredukuj wyrazy podobne.",
@@ -536,10 +352,195 @@ export const pl: Translation = {
         "Cały nawias też może być wspólnym czynnikiem. W `x(x + 2) + 3(x + 2)` oba wyrazy mają `(x + 2)`, więc wychodzi on przed nawias jak każdy inny czynnik: `(x + 2)(x + 3)`.",
       ],
     },
+    "tap-operator": {
+      name: "Dotknij znaku między nimi",
+      how: "Dotknij + między dwiema liczbami: dodają się, tak samo jak po upuszczeniu jednej na drugą.",
+      text: ["Dotknięcie znaku między dwoma elementami wykonuje działanie: + dodaje, − odejmuje, · mnoży. Daje to samo co upuszczenie jednego na drugi, więc wybierz, co jest szybsze."],
+    },
+    "multiply-out": {
+      name: "Mnożenie liczb w iloczynie",
+      how: "Dotknij ·: wszystkie liczby w iloczynie się mnożą i `4x·3` zmienia się w `12x`.",
+      text: ["Przy mnożeniu kolejność nie ma znaczenia, więc `4x·3` to `4·3·x`. Liczby można pomnożyć, nawet jeśli stoi między nimi litera."],
+    },
+    "times-zero": {
+      name: "Razy zero",
+      how: "Dotknij 0: cały iloczyn staje się zerem. Potem dotknij +, żeby dodać.",
+      text: ["Cokolwiek razy 0 daje 0. Zatem `0·(x + 4)` to 0, niezależnie od tego, ile wynosi x."],
+    },
+    "evaluate-power": {
+      name: "Obliczanie potęgi",
+      how: "Upuść wykładnik na liczbę: `2³` zmienia się w 8.",
+      text: ["`2³` oznacza `2·2·2`: mała liczba, czyli wykładnik, mówi, ile razy mnożymy 2. Potęgę liczby można więc obliczyć: `2³ = 8`.", "Dotknięcie wykładnika zamiast tego rozpisuje potęgę: `2³` zmienia się w `2·2·2`."],
+    },
+    "divide-powers": {
+      name: "Ta sama podstawa: odejmij wykładniki",
+      how: "Upuść potęgę z mianownika na potęgę o tej samej podstawie w liczniku. Wykładniki się odejmują: dotknij −, żeby obliczyć różnicę.",
+      text: ["W `x⁵/x²` jest pięć iksów w liczniku i dwa w mianowniku. Dwa skracają się z każdej strony i w liczniku zostają trzy: przy dzieleniu potęg wykładniki się odejmuje."],
+    },
+    "flip-across-bar": {
+      name: "Przez kreskę ułamkową",
+      how: "Przeciągnij potęgę przez kreskę ułamkową, z mianownika do góry albo z licznika w dół. Jej wykładnik zmienia znak.",
+      text: ["Gdy w mianowniku jest więcej iksów, wykładnik schodzi poniżej zera: `x²/x⁵` to `x^(2 − 5) = x⁻³`, a zarazem `1/x³`. Zatem `x⁻³` oznacza `1/x³`: potęga przeniesiona przez kreskę ułamkową zmienia znak wykładnika, w którąkolwiek stronę idzie."],
+    },
+    "power-of-product": {
+      name: "Wykładnik do nawiasu",
+      how: "Przeciągnij wykładnik do nawiasu: każdy czynnik w środku dostaje własną kopię. Potem upuść wykładnik liczby na tę liczbę, żeby obliczyć potęgę.",
+      text: ["`(2x)³` to `2x·2x·2x`, czyli `2³·x³`. Każdy czynnik w nawiasie zostaje podniesiony do potęgi."],
+    },
+    "minus-bracket": {
+      name: "Minus przed nawiasem w sumie",
+      how: "Przeciągnij − sprzed nawiasu na nawias: każdy znak w środku zmienia się na przeciwny. (Gdy można przesunąć całą sumę, krótkie naciśnięcie − bierze całą sumę: naciśnij i przytrzymaj, żeby wziąć sam minus.)",
+      text: ["`5 − (x + 2)` odejmuje całe `x + 2`, czyli i x, i 2. Dlatego minus zmienia każdy znak w nawiasie: `5 − x − 2`."],
+    },
+    "split-number": {
+      name: "Rozkładanie liczby",
+      how: "Dotknij liczby przed literą: rozkłada się na dwa czynniki, a na pierwszym miejscu jest ten wspólny z drugą liczbą. Dotknij też drugiej liczby. Potem dotknij + między wyrazami: wspólny czynnik wychodzi przed nawias.",
+      text: ["Wspólnego czynnika nie zawsze widać od razu. W `6x + 9` oba wyrazy dzielą się przez 3, ale w `6x` nie ma trójki, którą dałoby się wyłączyć.", "Dotknij 6: rozkłada się na `3·2`, z trójką wspólną z 9 na początku. Teraz trójka jest widoczna: `3·2x + 9 = 3(2x + 3)`."],
+    },
+    "split-term": {
+      name: "Rozbijanie środkowego wyrazu",
+      how: "Dotknij litery w środkowym wyrazie: rozbija się na dwa wyrazy. (Dotknięcie liczby rozkłada zamiast tego liczbę.) Potem grupuj wyrazy parami jak w poprzednim przykładzie: dotknij + między dwoma pierwszymi wyrazami, potem między dwoma ostatnimi, a na koniec między dwoma iloczynami.",
+      text: ["Żeby rozłożyć `x² + 5x + 6` na czynniki, szukamy dwóch liczb, które w sumie dają 5, a w iloczynie 6: to 2 i 3. Zapisz `5x` jako `2x + 3x`.", "Teraz są cztery wyrazy i rozkładamy je parami: `x(x + 2) + 3(x + 2)`, a potem `(x + 2)(x + 3)`."],
+    },
+    "difference-of-squares": {
+      name: "Różnica kwadratów",
+      how: "Oba wyrazy są kwadratami i jeden odejmujemy od drugiego: dotknij minusa między nimi. (Jeśli oba wyrazy mają wspólną liczbę, dotknięcie najpierw wyłącza ją przed nawias, `4x² − 4 = 4(x² − 1)`: wtedy dotknij minusa jeszcze raz.)",
+      text: ["Kwadrat minus kwadrat zawsze rozkłada się tak samo: `a² − b² = (a − b)(a + b)`. Wymnóż, żeby sprawdzić: środkowe wyrazy się zredukują.", "To działa tylko dla różnicy, kwadratu minus kwadrat. Suma dwóch kwadratów, na przykład `x² + 9`, w ogóle nie rozkłada się na czynniki. Kwadrat minus liczba, która nie jest kwadratem liczby całkowitej, na przykład `x² − 7`, rozkłada się, ale z pierwiastkami: `(x − √7)(x + √7)`."],
+    },
+    "cancel-factor": {
+      name: "Skracanie wspólnego czynnika",
+      how: "Przeciągnij liczbę z mianownika na taką samą liczbę w liczniku (albo odwrotnie): skracają się.",
+      text: ["Liczba, która mnoży cały licznik i cały mianownik, się skraca: `(3x)/3` to `x`, bo `3x` podzielone przez 3 daje x. W `(3x + 1)/3` już nie: tu 3 mnoży tylko część licznika."],
+    },
+    "evaluate-fraction": {
+      name: "Obliczanie ułamka",
+      how: "Dotknij licznika: rozkłada się na czynniki, z mianownikiem na początku (14 przez 7 zmienia się w `7·2`). Potem upuść 7 z mianownika na tę siódemkę: skracają się.",
+      text: ["Ułamek, który daje liczbę całkowitą, można obliczyć: `12/3` to 4, bo `12 = 3·4`, a 3 w liczniku skraca się z 3 w mianowniku."],
+    },
+    "divide-numbers": {
+      name: "Skracanie ułamka",
+      how: "Dotknij licznika, a potem mianownika: każdy rozkłada się na czynniki, ze wspólnym czynnikiem na początku (8 i 12 zmieniają się w `4·2` i `4·3`). Potem upuść jedną czwórkę na drugą: skracają się.",
+      text: ["Ułamek można skrócić, dzieląc licznik i mianownik przez tę samą liczbę: `8/12 = 2/3`. Jego wartość się nie zmienia.", "Rozkład liczb na czynniki pokazuje, co mają wspólnego: `8/12 = (4·2)/(4·3)`, a czwórki się skracają."],
+    },
+    "factor-then-cancel": {
+      name: "Wyłącz, a potem skróć",
+      how: "Naciśnij i przytrzymaj liczbę w jednym z wyrazów licznika i wyciągnij ją na sam początek, za lewy koniec (albo dotknij + między wyrazami). Potem upuść ją na taką samą liczbę w mianowniku: skracają się.",
+      text: ["Skracać można tylko czynnik całego licznika. W `(2x + 6)/2` dwójka jest czynnikiem każdego wyrazu, więc najpierw wyłącz ją przed nawias: `(2(x + 3))/2`. Teraz jest czynnikiem całego licznika i skraca się z mianownikiem."],
+    },
+    "divide-by-fraction": {
+      name: "Dzielenie przez ułamek",
+      how: "Przeciągnij mianownik dolnego ułamka w górę, do licznika. Mnoży licznik. Dotknij ·, żeby obliczyć iloczyn, a potem skróć to, co licznik i mianownik mają wspólnego.",
+      text: ["To, co robi liczba, zależy od tego, pod iloma kreskami ułamkowymi stoi. W `4/(3/5)` piątka jest pod dwiema kreskami: dzielenie przez dzielenie to mnożenie. Można ją więc przenieść do licznika i nic się nie zmieni: `(4·5)/3`.", "Dlatego dzielenie przez ułamek to mnożenie przez jego odwrotność: `4/(3/5) = 4·5/3`."],
+    },
+    "evaluate-root": {
+      name: "Obliczanie pierwiastka",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę: `√9` to `9^(1/2)`. Potem upuść ½ na 9, żeby obliczyć wynik.",
+      text: ["`√9` to liczba dodatnia, która pomnożona przez siebie daje 9: to 3, bo `3·3 = 9` (−3 też, ale √ oznacza tę dodatnią). Tak samo `∛8 = 2`, bo `2·2·2 = 8`.", "Jako potęga `√9 = 9^(1/2)`: ½ upuszczone na 9 oblicza wynik, jak każdy wykładnik."],
+    },
+    "pull-out-of-power": {
+      name: "Rozbijanie pierwiastka",
+      how: "Wyciągnij liczbę spod pierwiastka: dostaje własny pierwiastek. Potem oblicz ten pierwiastek: dotknij go i upuść ½ na liczbę.",
+      text: ["Pierwiastek z iloczynu to iloczyn pierwiastków: `√(4x) = √4·√x = 2√x`."],
+    },
+    "split-square": {
+      name: "Upraszczanie pierwiastka",
+      how: "Dotknij liczby pod pierwiastkiem: wydziela się z niej kwadrat (sześcian, gdy to pierwiastek trzeciego stopnia). Potem wyciągnij go spod pierwiastka jak w poprzednim przykładzie i oblicz jego pierwiastek.",
+      text: ["Pierwiastek, który nie daje liczby całkowitej, też można uprościć. Rozłóż liczbę pod nim tak, żeby wydzielić kwadrat: `√12 = √(4·3) = 2√3`."],
+    },
+    "root-of-power": {
+      name: "Pierwiastek z potęgi",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę. Upuść zewnętrzny wykładnik na wewnętrzny i dotknij ·, żeby obliczyć iloczyn. Potem skróć to, co mają wspólnego licznik i mianownik wykładnika.",
+      text: ["Pierwiastek jest potęgą, więc pierwiastek z potęgi to potęga potęgi: `∛(x⁶) = (x⁶)^(1/3) = x^(6/3) = x²`. Wykładniki się mnożą, jak w rozdziale „Potęgi”."],
+    },
+    "rationalise": {
+      name: "Usuwanie niewymierności z mianownika",
+      how: "Przeciągnij pierwiastek z mianownika w górę, do licznika: licznik i mianownik mnożą się przez niego. Potem dotknij · w mianowniku i skróć to, co zostało, jeśli coś się skraca.",
+      text: ["Pomnożenie licznika i mianownika przez tę samą liczbę nie zmienia ułamka. Wybierz pierwiastek, który już jest w mianowniku: `√3·√3 = 3`, więc `1/√3 = √3/(√3·√3) = √3/3`. Teraz pod kreską ułamkową nie ma pierwiastka."],
+    },
+    "log-across": {
+      name: "Logarytm na drugą stronę =",
+      how: "Przenieś logarytm na drugą stronę =. Tam zmienia się w potęgę. Jeśli to potęga liczby, upuść wykładnik na liczbę, żeby ją obliczyć.",
+      text: ["Logarytm znosi się potęgą. Z `ln(x) = 2` ln przechodzi na drugą stronę i staje się e: `x = e²`."],
+    },
+    "move-term": {
+      name: "Przenoszenie wyrazu",
+      how: "Przenieś liczbę na drugą stronę =. Po drodze zmienia znak. Upuść ją na liczbę po tamtej stronie, a od razu się z nią połączy; albo puść ją obok i dotknij −, żeby obliczyć różnicę.",
+      text: ["Równanie mówi, że dwie strony są równe. Jeśli zrobisz to samo z obiema stronami, dalej będą równe.", "Przeniesienie wyrazu na drugą stronę `=` robi właśnie to. Z `x + 3 = 10` odejmij 3 od obu stron: `x = 10 − 3`. Dlatego `+3` po drugiej stronie staje się `−3`."],
+    },
+    "move-factor": {
+      name: "Dzielenie obu stron",
+      how: "Przenieś liczbę sprzed litery na drugą stronę =. Dzieli drugą stronę. Potem oblicz ułamek: dotknij licznika, żeby go rozłożyć, i upuść mianownik na taki sam czynnik.",
+      text: ["Liczba, która mnoży całą stronę, po przeniesieniu na drugą stronę ją dzieli. Z `2x = 8` podziel obie strony przez 2: `x = 8/2`, a `8/2 = (2·4)/2 = 4`."],
+    },
+    "two-steps": {
+      name: "Dwa kroki",
+      how: "Przenieś dodawaną liczbę na drugą stronę i upuść ją na liczbę, która tam jest. Potem przenieś liczbę sprzed litery i oblicz ułamek: rozłóż licznik i skróć.",
+      text: ["W `3x + 4 = 19` x zostało pomnożone przez 3, a potem dodano 4. Żeby odzyskać x, cofnij te działania w odwrotnej kolejności: najpierw odejmij 4, potem podziel przez 3.", "Trójka nie może pójść pierwsza: mnoży tylko x, a nie całą stronę."],
+    },
+    "root-across": {
+      name: "Pierwiastek na drugą stronę =",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę (½ albo ⅓ dla ∛), a potem przenieś ten wykładnik na drugą stronę =: druga strona zostaje podniesiona do kwadratu (do sześcianu przy ∛). Potem upuść wykładnik na liczbę, żeby obliczyć potęgę.",
+      text: ["Żeby rozwiązać `√x = 3`, podnieś obie strony do kwadratu: `x = 3²`. Kwadrat znosi pierwiastek, więc √ znika, a druga strona zostaje podniesiona do kwadratu. Sześcian znosi pierwiastek trzeciego stopnia i tak dalej.", "W zapisie potęgowym, `x^(1/2) = 3`, to ½ przechodzi na drugą stronę i zamienia się w kwadrat: to ten sam ruch."],
+    },
     "ineq-move-factor": {
       name: "Dzielenie obu stron",
-      how: "Przenieś liczbę sprzed litery na drugą stronę znaku nierówności. Dzieli drugą stronę, a zwrot nierówności zostaje ten sam. Potem dotknij kreski ułamkowej.",
-      text: ["Mnożenie lub dzielenie obu stron przez liczbę dodatnią też nie zmienia zwrotu nierówności: z `2x < 8` dostajemy `x < 8/2`."],
+      how: "Przenieś liczbę sprzed litery na drugą stronę znaku nierówności. Dzieli drugą stronę, a zwrot nierówności zostaje ten sam. Potem oblicz ułamek: rozłóż licznik i skróć.",
+      text: ["Mnożenie lub dzielenie obu stron przez liczbę dodatnią też nie zmienia zwrotu nierówności: z `2x < 8` mamy `x < 8/2`."],
+    },
+    "ineq-negative": {
+      name: "Dzielenie przez liczbę ujemną",
+      how: "Przenieś liczbę na drugą stronę i oblicz ułamek: zwrot nierówności zostaje ten sam. Potem przenieś minus: nierówność zmienia zwrot.",
+      text: ["Dzielenie obu stron przez liczbę ujemną zmienia zwrot nierówności, tak samo jak mnożenie przez −1: `−2x < 6` oznacza `x > −3`.", "Tutaj to dwa znane ci ruchy: dzielenie przez 2 (zwrot zostaje) i przeniesienie minusa (zwrot się zmienia)."],
+    },
+    "plus-minus": {
+      name: "Dwa pierwiastki kwadratu",
+      how: "Przenieś 2 na drugą stronę =. Kwadrat ma dwa pierwiastki: równanie rozpada się na dwa, jedno z +, a drugie z −. Potem upuść każde ½ na liczbę, żeby obliczyć wynik.",
+      text: ["`3² = 9`, ale `(−3)² = 9` też. Zatem `x² = 9` oznacza `x = 3` lub `x = −3`. Kto zapomni o minusie, zgubi jedno rozwiązanie."],
+    },
+    "fraction-zero": {
+      name: "Ułamek równy 0",
+      how: "Chwyć mianownik ułamka za jego + lub − i przenieś go na drugą stronę =. Mnoży drugą stronę: dotknij 0, bo 0 razy cokolwiek daje 0. Potem przenieś liczbę na drugą stronę.",
+      text: ["Ułamek jest równy 0 tylko wtedy, gdy jego licznik jest równy 0. Mianownik nigdy nie może być zerem i mówi o tym założenie zapisane przy równaniu: `x ≠ −2` pilnuje, żeby `x + 2` nie było zerem.", "Mianownik można więc przenieść na drugą stronę, gdzie ją mnoży: z `(x − 3)/(x + 2) = 0` mamy `x − 3 = 0·(x + 2)`, czyli `x − 3 = 0`. Rozwiązanie, które nie spełnia założenia, zostaje skreślone."],
+    },
+    "letter-factor": {
+      name: "Dzielenie przez literę",
+      how: "Przenieś literę sprzed x na drugą stronę =. Dzieli drugą stronę. Potem upuść ją na taką samą literę w liczniku: skracają się.",
+      text: ["Obie strony można podzielić przez literę tylko wtedy, gdy nie może być ona zerem, i mówi o tym założenie zapisane przy równaniu: `a ≠ 0`.", "Nigdy nie dziel przez samo x: w `x² = 3x` dzielenie przez x daje `x = 3` i gubi rozwiązanie `x = 0`. Zamiast tego przenieś wszystko na jedną stronę i rozłóż na czynniki."],
+    },
+    "alone-first": {
+      name: "Cała metoda",
+      how: "Żadna litera nie stoi jeszcze sama: przenieś x z pierwszego równania na drugą stronę, żeby dostać `y = …`. Potem podstaw y do drugiego równania, wyznacz z niego x i wstaw x z powrotem, żeby obliczyć y.",
+      text: ["Oto cała metoda, od początku do końca:", "1. W jednym z równań wyznacz jedną literę, tak żeby stała sama. Wybierz najłatwiejszą: literę bez liczby przed nią. W `x + y = 7` przenieś x na drugą stronę: `y = 7 − x`.", "2. Podstaw: w drugim równaniu zastąp tę literę tym, ile wynosi, w nawiasie. Minus przed nawiasem zmienia każdy znak w środku na przeciwny.", "3. Rozwiąż równanie, które zostało: ma już tylko jedną literę.", "4. Wstaw obliczoną wartość do `y = …`, żeby obliczyć drugą literę."],
+    },
+    "fraction-of-fractions": {
+      name: "Ułamek piętrowy",
+      how: "Przeciągnij mianownik dolnego ułamka w górę, do licznika, a potem mianownik górnego ułamka w dół, do mianownika. Następnie dotknij każdej kropki ·, żeby obliczyć iloczyny.",
+      text: ["W `(a/b)/(c/d)` każda z czterech liczb może przejść przez główną kreskę ułamkową na miejsce, nad którym jest tyle samo kresek ułamkowych, a wartość się nie zmieni (tak jak piątka w poprzednim przykładzie): d idzie w górę obok a, b w dół obok c, c w górę obok b, i wreszcie a w dół obok d. (Chyba że a może być zerem: przez 0 nie można dzielić.)", "Przeniesienie obu mianowników daje jeden ułamek: `(a·d)/(c·b)`."],
+    },
+    "minus-number-in": {
+      name: "Liczba ujemna przed nawiasem",
+      how: "Upuść liczbę na nawias i dotknij ·, żeby obliczyć iloczyn. Potem upuść minus na nawias: każdy znak w środku zmienia się na przeciwny.",
+      text: ["`−3(x − 2)` oznacza −1 razy 3 razy nawias. Najpierw pomnóż przez 3: `−(3x − 6)`. Potem minus zmienia każdy znak w nawiasie na przeciwny: `−3x + 6`.", "Uważaj na ostatni znak: `−3` razy `−2` to `+6`. Minus razy minus daje plus."],
+    },
+    "substitute-back": {
+      name: "Wstawianie z powrotem",
+      how: "Przeciągnij `x` z `x = …` na `x` w drugim równaniu. Potem dotknij · i +, żeby obliczyć y.",
+      text: ["Gdy znasz już x, drugie równanie powie ci, ile wynosi y: wstaw w nim za x jego wartość i oblicz. Masz teraz obie liczby, a ta para jest rozwiązaniem układu.", "Żeby sprawdzić wynik, wstaw obie wartości do równania, z którego na końcu nie korzystaliśmy: obie strony powinny wyjść takie same."],
+    },
+    "square-both-sides": {
+      name: "Podnoszenie obu stron do kwadratu",
+      how: "Dotknij pierwiastka, żeby zapisać go jako potęgę o wykładniku ½, a potem przeciągnij ½ na drugą stronę =: druga strona zostaje podniesiona do kwadratu. Wymnóż, przenieś wszystko na jedną stronę, rozłóż na czynniki i rozbij, jak w poprzednim przykładzie. Rozwiązanie, które nie spełnia któregoś z założeń, zostaje skreślone.",
+      text: ["Pierwiastek nigdy nie jest ujemny, więc `√(x + 7) = x + 1` może zachodzić tylko wtedy, gdy `x + 1 ≥ 0`, czyli `x ≥ −1`. (Liczba pod pierwiastkiem też nie może być ujemna: `x ≥ −7`.) To są założenia, podane na początku: obowiązują przez całe rozwiązanie.", "Po podniesieniu obu stron do kwadratu ta informacja ginie: `x + 7 = (x + 1)²` zachodzi także dla `x = −3`, a wtedy `x + 1` jest ujemne. Równanie po podniesieniu do kwadratu daje więc `x = 2` lub `x = −3`, ale −3 nie spełnia założenia, więc zostaje skreślone. Jedynym rozwiązaniem jest `x = 2`."],
+    },
+    "substitute": {
+      name: "Podstawianie",
+      how: "Przeciągnij `y` z `y = …` na `y` w drugim równaniu: w jego miejsce wchodzi to, ile wynosi `y`. Teraz w tym równaniu jest tylko x: zredukuj wyrazy z x i rozwiąż je.",
+      text: ["`y = 2x` i `x + y = 9` to dwa równania o tych samych x i y, prawdziwe jednocześnie. Jedno równanie z dwiema niewiadomymi ma wiele rozwiązań, a dwa razem zwykle tylko jedno.", "`y = 2x` mówi, że y i 2x są równe, więc w drugim równaniu można zastąpić y przez 2x. Zostaje jedno równanie z jedną literą, a takie już umiesz rozwiązać."],
+    },
+    "zero-power": {
+      name: "Wykładnik 0",
+      how: "Dotknij wykładnika 0: `x⁰` zmienia się w 1. Potem dotknij +, żeby dodać.",
+      text: ["`x³/x³` to 1 (gdy x jest różne od 0), ale to także `x^(3 − 3) = x⁰`. Dlatego każda liczba różna od 0 podniesiona do potęgi 0 daje 1."],
     },
   },
 

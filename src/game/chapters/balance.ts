@@ -13,7 +13,7 @@ import { type Chapter, rulesOf } from "../puzzles";
 import { composed } from "../generate/compose";
 import { fractionCoefficient, rootCoefficient } from "../generate/coefficients";
 import { letter, type Level, type Shape, one as pick } from "../generate/write";
-import { d, carrying } from "../generate/drill";
+import { d, carrying, showing } from "../generate/drill";
 import { writesWay } from "../generate/way";
 import { BALANCE_BOOK } from "./balanceBook";
 
@@ -67,7 +67,7 @@ export const balance: Chapter = {
       const [x, a, k, b] = [letter(r), r.int(2, 5), r.int(2, 6), r.int(1, 9)];
       return { start: `${a}${x} + ${b} = ${a * k + b}`, via: [`${a}${x} = ${a * k + b} - ${b}`, `${a}${x} = ${a * k}`, `${x} = ${a * k}/${a}`], goal: `${x} = ${k}` };
     }, "move-term"),
-    d("move-sign", (r) => `-${letter(r)} = ${r.int(2, 9)}`),
+    showing(["minus-alone"], d("move-sign", (r) => `-${letter(r)} = ${r.int(2, 9)}`)),
     d("swap-sides", (r) => `${r.int(2, 20)} = ${letter(r)}`),
     d("root-across", (r) => {
       const [x, n, b] = [letter(r), pick(r, [2, 2, 3, 4]), r.int(2, 4)];

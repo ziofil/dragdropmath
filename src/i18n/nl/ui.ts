@@ -104,16 +104,6 @@ export const nl: Translation = {
       how: "Sleep het getal rechts op het andere getal waarmee het vermenigvuldigd wordt.",
       text: ["Ook bij vermenigvuldigen maakt de volgorde niet uit: `2·x·5` is `2·5·x`. Je kunt de 2 en de 5 dus met elkaar vermenigvuldigen, en dan krijg je `10x`."],
     },
-    "numbers-first": {
-      name: "Getal vooraan",
-      how: "Tik op een product zoals `x·3` om het op de gewone manier te schrijven: `3x`.",
-      text: ["We zetten het getal vooraan en laten de punt weg: `x·3` schrijven we als `3x`. Dit is zo eenvoudig dat het vanaf nu vanzelf gebeurt."],
-    },
-    "multiply-out": {
-      name: "Product uitrekenen",
-      how: "Tik op een product van getallen, zoals `2·3`, om het uit te rekenen.",
-      text: ["Een product van gewone getallen kun je uitrekenen: `2·3` is 6."],
-    },
     collect: {
       name: "Gelijksoortige termen samennemen",
       how: "Sleep een term op een gelijksoortige term, dus een met dezelfde letters met dezelfde exponenten. Ze worden opgeteld.",
@@ -166,19 +156,6 @@ export const nl: Translation = {
       how: "Tik op de ² om de haakjes twee keer op te schrijven. Werk ze daarna weg zoals bij het vorige voorbeeld (houd een factor ingedrukt om hem los te slepen: kort tikken pakt de hele term) en neem gelijksoortige termen samen.",
       text: ["`(x + 1)²` is `(x + 1)(x + 1)`, dus die werk je op dezelfde manier uit."],
     },
-    "move-term": {
-      name: "Term naar de overkant",
-      how: "Sleep het getal naar de andere kant van het =. Onderweg verandert het teken. Tik daarna op de − om het uit te rekenen.",
-      text: [
-        "Een vergelijking zegt dat twee kanten gelijk zijn. Doe je aan beide kanten hetzelfde, dan blijven ze gelijk.",
-        "Een term naar de andere kant van het `=` brengen doet precies dat. Bij `x + 3 = 10` haal je aan beide kanten 3 weg: `x = 10 − 3`. Daarom wordt `+3` aan de andere kant `−3`.",
-      ],
-    },
-    "move-factor": {
-      name: "Beide kanten delen",
-      how: "Sleep het getal voor de letter naar de andere kant van het =. Daar ga je erdoor delen. Tik daarna op de breukstreep om het uit te rekenen.",
-      text: ["Een getal dat een hele kant vermenigvuldigt, gaat delen als het naar de overkant gaat. Bij `2x = 8` deel je beide kanten door 2: `x = 8/2`."],
-    },
     "move-denominator": {
       name: "Beide kanten vermenigvuldigen",
       how: "Sleep de noemer van de breuk naar de andere kant van het =. Daar gaat hij vermenigvuldigen. Tik daarna op de · om het uit te rekenen.",
@@ -194,25 +171,10 @@ export const nl: Translation = {
       how: "Sleep een kant over het = en voorbij het andere uiteinde. De twee kanten wisselen van plaats.",
       text: ["`7 = x` en `x = 7` zeggen hetzelfde, dus de twee kanten mogen van plaats wisselen."],
     },
-    "evaluate-fraction": {
-      name: "Breuk uitrekenen",
-      how: "Tik op de breukstreep om de breuk uit te rekenen.",
-      text: ["Een breuk die op een heel getal uitkomt, kun je uitrekenen: `12/3` is 4."],
-    },
-    "divide-numbers": {
-      name: "Breuk vereenvoudigen",
-      how: "Tik op de breukstreep. De getallen in de teller en de noemer worden gedeeld door hun gemeenschappelijke factor.",
-      text: ["Je vereenvoudigt een breuk door teller en noemer door hetzelfde getal te delen: `6/8 = 3/4`. De waarde van de breuk blijft hetzelfde."],
-    },
     "letter-in": {
       name: "Letter keer haakjes",
       how: "Sleep de letter voor de haakjes op de haakjes. Houd daarna een van de twee letters naast elkaar ingedrukt en sleep hem op de andere: `x·x` is `x²`. (Kort tikken zou de hele term pakken.)",
       text: ["De letter vermenigvuldigt elke term tussen de haakjes, net als een getal: `x(x + 3) = x·x + x·3`. En `x·x` is een macht, `x²`, zoals bij Machten."],
-    },
-    "factor-then-cancel": {
-      name: "Eerst buiten haakjes, dan wegdelen",
-      how: "Houd het getal in een term in de teller ingedrukt en sleep het naar voren, voorbij het linkeruiteinde. Tik daarna op de breukstreep: de factor valt weg.",
-      text: ["Je mag alleen een factor van de hele teller wegdelen. In `(2x + 6)/2` is de 2 een factor van elke term, dus breng je die eerst buiten haakjes: `(2(x + 3))/2`. Nu is het een factor van de hele teller, en valt hij weg tegen de noemer."],
     },
     "zero-product": {
       name: "Een product gelijk aan 0",
@@ -221,11 +183,6 @@ export const nl: Translation = {
         "Een product is alleen 0 als een van de factoren 0 is: `3·0 = 0`, maar `3·2` niet. Dus `(x − 2)(x + 3) = 0` betekent `x − 2 = 0` of `x + 3 = 0`: twee oplossingen.",
         "Daarom deel je nooit beide kanten door iets dat 0 kan zijn: hier zou je dan een oplossing kwijtraken.",
       ],
-    },
-    "plus-minus": {
-      name: "Twee wortels van een kwadraat",
-      how: "Sleep de 2 over het =. Een kwadraat heeft twee wortels: de vergelijking splitst in tweeën, één met + en één met −.",
-      text: ["`3² = 9`, maar ook `(−3)² = 9`. Dus `x² = 9` betekent `x = 3` of `x = −3`. Vergeet je het minteken, dan raak je een oplossing kwijt."],
     },
     "take-out-then-split": {
       name: "Letter buiten haakjes, dan splitsen",
@@ -237,76 +194,10 @@ export const nl: Translation = {
       how: "Tik op de middelste term: hij splitst in tweeën. Haal uit elk tweetal een factor buiten haakjes, en daarna de haakjes die ze gemeen hebben. Trek dan één paar haakjes omlaag, los van het product.",
       text: ["`x² + x − 6` is een product van twee paar haakjes: `(x + 3)(x − 2)`. De twee getallen geven vermenigvuldigd `−6` en opgeteld `1`, het getal voor de x. Is het eenmaal een product gelijk aan 0, dan levert elk paar haakjes een oplossing op."],
     },
-    "fraction-zero": {
-      name: "Een breuk gelijk aan 0",
-      how: "Sleep de noemer van de breuk naar de andere kant van het = (pak hem bij de +). Hij vermenigvuldigt de andere kant: tik op de 0 om het uit te rekenen, want 0 keer iets is 0. Breng daarna het getal naar de andere kant.",
-      text: ["Een breuk is alleen 0 als de teller 0 is. De noemer mag nooit 0 zijn, en dat zegt de voorwaarde achter de vergelijking: `x ≠ −2` zorgt dat `x + 2` niet 0 is.", "Dus mag de noemer naar de andere kant en vermenigvuldigt die: `(x − 3)/(x + 2) = 0` wordt `x − 3 = 0·(x + 2)`, dus `x − 3 = 0`. Voldoet een oplossing niet aan de voorwaarde, dan valt ze af."],
-    },
-    "square-both-sides": {
-      name: "Beide kanten kwadrateren",
-      how: "Tik op de wortel om hem als macht met exponent ½ te schrijven, en sleep de ½ over het =: de andere kant wordt gekwadrateerd. Werk daarna de haakjes uit en los op. Eronder staan de voorwaarden: een oplossing die daar niet aan voldoet, wordt doorgestreept.",
-      text: ["Een wortel is nooit negatief, dus `√(x² + 5) = x + 1` klopt alleen als `x + 1 ≥ 0`. Door beide kanten te kwadrateren raak je dat kwijt: `x² + 5 = (x + 1)²` zou ook kloppen als `x + 1` negatief was. Daarom staan de voorwaarden er vanaf het begin bij, en blijven ze de hele tijd gelden."],
-    },
-    "cancel-factor": {
-      name: "Gemeenschappelijke factor wegdelen",
-      how: "Tik op de breukstreep. Wat teller en noemer gemeen hebben, valt tegen elkaar weg.",
-      text: ["Een getal dat de hele teller en de hele noemer vermenigvuldigt, valt tegen elkaar weg: `(3x)/3` is `x`. Bij `(3x + 1)/3` niet: daar vermenigvuldigt de 3 maar een deel van de teller."],
-    },
     "power-of-power": {
       name: "Macht van een macht",
       how: "Sleep de buitenste exponent op de binnenste. Ze worden vermenigvuldigd: tik op de · om het uit te rekenen.",
       text: ["`(x²)³` is `x²·x²·x²`. Dat zijn 2 + 2 + 2 = 6 x'en, dus de exponenten worden vermenigvuldigd."],
-    },
-    "divide-powers": {
-      name: "Zelfde grondtal: exponenten aftrekken",
-      how: "Tik op de breukstreep. Machten met hetzelfde grondtal worden samengenomen en hun exponenten van elkaar afgetrokken: tik op de − om het uit te rekenen.",
-      text: ["`x⁵/x²` heeft vijf x'en in de teller en twee in de noemer. Boven en onder vallen er twee weg, en er blijven er drie over in de teller: bij delen trek je de exponenten van elkaar af."],
-    },
-    "flip-across-bar": {
-      name: "Over de breukstreep",
-      how: "Sleep de macht omhoog over de breukstreep. Het teken van de exponent verandert.",
-      text: ["Staan er meer x'en in de noemer, dan wordt de exponent kleiner dan nul: `x⁻²` betekent `1/x²`. Breng je een macht naar de andere kant van de breukstreep, dan verandert het teken van de exponent."],
-    },
-    "power-one": {
-      name: "Tot de macht 1",
-      how: "Sleep de exponent 1 op zijn grondtal.",
-      text: ["`x¹` is één x: gewoon `x`. Dit is zo eenvoudig dat het vanaf nu vanzelf gebeurt."],
-    },
-    "zero-power": {
-      name: "Tot de macht 0",
-      how: "Houd de exponent 0 ingedrukt en sleep hem op zijn grondtal. Tik daarna op de + om op te tellen.",
-      text: ["`x³/x³` is 1 (als x niet 0 is), en het is ook `x^(3 − 3) = x⁰`. Elk getal behalve 0 tot de macht 0 is dus 1."],
-    },
-    "tap-power": {
-      name: "Macht uitrekenen",
-      how: "Tik op de exponent om de macht uit te rekenen: `2³` wordt 8.",
-      text: ["Een macht van een getal kun je uitrekenen: `2³` is `2·2·2 = 8`."],
-    },
-    "power-of-product": {
-      name: "Exponent tussen de haakjes",
-      how: "Sleep de exponent naar binnen, tussen de haakjes: elke factor daar krijgt zijn eigen exponent. Tik daarna op de exponent van het getal om hem uit te rekenen.",
-      text: ["`(2x)³` is `2x·2x·2x`, en dat is `2³·x³`. Elke factor tussen de haakjes krijgt de exponent."],
-    },
-    "split-number": {
-      name: "Getal splitsen",
-      how: "Tik op het getal voor de letter om het in twee factoren te splitsen. Tik ook op het andere getal. Tik daarna op de + tussen de termen: de gemeenschappelijke factor komt buiten haakjes. (Of houd hem ingedrukt en sleep hem naar voren, voorbij het linkeruiteinde.)",
-      text: ["Om een gemeenschappelijke factor te vinden, splits je getallen in factoren. In `2x + 6` is de 6 gelijk aan `2·3`, en nu hebben beide termen een 2."],
-    },
-    "split-term": {
-      name: "Middelste term splitsen",
-      how: "Tik op de middelste term. Hij splitst in tweeën, zodat je per paar kunt ontbinden.",
-      text: [
-        "Om `x² + 5x + 6` te ontbinden, zoek je twee getallen die opgeteld 5 zijn en vermenigvuldigd 6: 2 en 3. Schrijf `5x` als `2x + 3x`.",
-        "Nu heb je vier termen, en die ontbind je per paar: `x(x + 2) + 3(x + 2)`, en dan `(x + 2)(x + 3)`.",
-      ],
-    },
-    "difference-of-squares": {
-      name: "Verschil van twee kwadraten",
-      how: "Tik op het minteken tussen de twee kwadraten.",
-      text: [
-        "Een kwadraat min een kwadraat ontbind je altijd op dezelfde manier: `a² − b² = (a − b)(a + b)`. Werk de haakjes weg om het te controleren: de middelste termen vallen tegen elkaar weg.",
-        "Het werkt alleen bij een verschil, een kwadraat min een kwadraat. Een som van twee kwadraten, zoals `x² + 9`, kun je helemaal niet ontbinden. Een kwadraat min een getal dat geen kwadraat is, zoals `x² − 7`, wel, maar dan met wortels: `(x − √7)(x + √7)`.",
-      ],
     },
     "factor-shared": {
       name: "Samen buiten haakjes",
@@ -336,11 +227,6 @@ export const nl: Translation = {
       how: "De noemers zijn gelijk: sleep de ene breuk op de andere, of tik op de + ertussen. Tik daarna op de + in de teller om de tellers op te tellen.",
       text: ["`3/4` betekent drie vierde. Zijn de noemers gelijk, dan tel je gewoon de tellers op: één vijfde plus twee vijfde is drie vijfde, dus `1/5 + 2/5 = 3/5`."],
     },
-    "rationalise": {
-      name: "Een geheel getal in de noemer",
-      how: "Sleep de wortel uit de noemer omhoog, naar de teller: teller en noemer worden er allebei mee vermenigvuldigd. Tik daarna op de · in de noemer.",
-      text: ["Teller en noemer met hetzelfde getal vermenigvuldigen verandert de waarde van een breuk niet. Neem de wortel die al in de noemer staat: `√3·√3 = 3`, dus `1/√3 = √3/(√3·√3) = √3/3`. Nu staat er geen wortel meer onder de breukstreep."],
-    },
     "expand-fraction": {
       name: "Gelijknamig maken",
       how: "Houd de noemer van de ene breuk ingedrukt en sleep hem op de andere breuk, en daarna andersom: nu hebben ze dezelfde noemer. Tik op elke · om de tellers en noemers uit te rekenen, en tel dan de breuken op.",
@@ -354,42 +240,10 @@ export const nl: Translation = {
       how: "Tik op de · tussen de breuken, of sleep de ene breuk op de andere: teller keer teller, en noemer keer noemer.",
       text: ["Vermenigvuldigen is eenvoudiger: vermenigvuldig de tellers met elkaar, en de noemers met elkaar. De helft van een derde is `(1·1)/(2·3) = 1/6`."],
     },
-    "divide-by-fraction": {
-      name: "Delen door een breuk",
-      how: "Sleep de noemer van de onderste breuk omhoog, naar de teller. Daar gaat hij de teller vermenigvuldigen. Tik daarna op de · en op de breukstreep om het uit te rekenen.",
-      text: [
-        "Wat een getal doet, hangt af van het aantal breukstrepen erboven. In `4/(3/5)` staat de 5 onder twee breukstrepen: je deelt door een deling, dus hij vermenigvuldigt. Je mag hem dus naar de teller brengen zonder dat de waarde verandert: `(4·5)/3`.",
-        "Daarom is delen door een breuk hetzelfde als vermenigvuldigen met het omgekeerde: `4/(3/5) = 4·5/3`.",
-      ],
-    },
     "split-fraction": {
       name: "Breuk splitsen",
       how: "Haal een term uit de teller. Hij neemt een kopie van de noemer mee.",
       text: ["Een som in de teller kun je splitsen in een aparte breuk voor elke term, allemaal met dezelfde noemer: `(x + 5)/6 = x/6 + 5/6`."],
-    },
-    "times-one": {
-      name: "Keer 1",
-      how: "Houd de 1 ingedrukt en sleep hem op wat hij vermenigvuldigt.",
-      text: ["Keer 1 verandert niets: `1·x` is gewoon `x`. Dit is zo eenvoudig dat het vanaf nu vanzelf gebeurt."],
-    },
-    substitute: {
-      name: "Substitueren",
-      how: "Sleep de `y` van `y = …` op de `y` in de andere vergelijking: die wordt vervangen door waar `y` gelijk aan is. Los daarna x op, en vul x in de eerste vergelijking in om y te vinden.",
-      text: [
-        "`y = 2x` en `x + y = 9` zijn twee vergelijkingen over dezelfde x en y, die allebei tegelijk kloppen. Eén vergelijking met twee onbekenden heeft veel oplossingen; twee samen hebben er meestal maar één.",
-        "`y = 2x` zegt dat y en 2x gelijk zijn, dus in de andere vergelijking mag je y vervangen door 2x. Dan houd je één vergelijking met één letter over, en die kun je al oplossen.",
-        "Staat er in geen enkele vergelijking een letter in zijn eentje, maak er dan eerst een vrij: in `x − y = 1` breng je −y naar de overkant, en dan krijg je `x = 1 + y`.",
-      ],
-    },
-    "evaluate-root": {
-      name: "Wortel uitrekenen",
-      how: "Tik op de wortel om hem uit te rekenen.",
-      text: ["`√9` is het positieve getal dat 9 oplevert als je het met zichzelf vermenigvuldigt: 3, want `3·3 = 9` (−3 ook, maar met √ bedoel je altijd het positieve getal). Zo is ook `∛8 = 2`, want `2·2·2 = 8`."],
-    },
-    "split-square": {
-      name: "Splitsen onder de wortel",
-      how: "Tik op het getal onder de wortel: er wordt een kwadraat afgesplitst (onder een derdemachtswortel een derde macht). Haal het daarna uit de wortel en tik op zijn wortel om die uit te rekenen.",
-      text: ["Een wortel die niet mooi uitkomt, kun je toch vereenvoudigen. Splits het getal eronder zo dat er een kwadraat afkomt: `√12 = √(4·3)`."],
     },
     "join-powers": {
       name: "Wortels samenvoegen",
@@ -399,30 +253,15 @@ export const nl: Translation = {
         "Dat geldt voor elke exponent die ze gemeen hebben: `x³y³` is xxx·yyy, en dat is xy·xy·xy, dus `(xy)³`.",
       ],
     },
-    "pull-out-of-power": {
-      name: "Wortel splitsen",
-      how: "Haal het getal uit de wortel: het krijgt zijn eigen wortel. Tik daarna op die wortel om hem uit te rekenen.",
-      text: ["De wortel van een product is het product van de wortels: `√(4x) = √4·√x = 2√x`."],
-    },
     "root-notation": {
       name: "Een wortel als macht",
       how: "Tik op de wortel om hem als macht te schrijven: √ is een macht ½, ∛ een macht ⅓.",
       text: ["Elke wortel is een macht: `√x = x^(1/2)`, `∛x = x^(1/3)`, en de n-demachtswortel uit x is `x^(1/n)`. Alle rekenregels voor machten gelden dus ook voor wortels: `√x·√x = x^(1/2 + 1/2) = x`."],
     },
-    "root-of-power": {
-      name: "Wortel uit een macht",
-      how: "Tik op de wortel om hem als macht te schrijven. Sleep daarna de buitenste exponent op de binnenste en reken het product uit.",
-      text: ["Een wortel is een macht, dus een wortel uit een macht is een macht van een macht: `∛(x⁶) = (x⁶)^(1/3) = x^(6·1/3) = x²`. De exponenten worden vermenigvuldigd, net als bij Machten."],
-    },
     "fraction-power": {
       name: "Wortels en machten samen",
       how: "Sleep de wortel op de macht: de exponenten worden opgeteld. Schrijf daarna het hele getal als halven: sleep de noemer van de ½ erop en tik op de · om het uit te rekenen. Tel dan de breuken op en tik op de + in de teller.",
       text: ["`√x` is `x^(1/2)`, dus `√x·x² = x^(1/2 + 2) = x^(5/2)`. Een breuk als exponent werkt net als elke andere exponent: vermenigvuldig je machten, dan tel je de exponenten op."],
-    },
-    "root-across": {
-      name: "Wortel als macht naar de overkant",
-      how: "Tik op de wortel om hem als macht te schrijven (met exponent ½, ⅓ of ¼), en sleep die exponent naar de andere kant van het =. Daar wordt het een kwadraat (of een derde macht, of een vierde macht). Tik daarna op de exponent om het uit te rekenen.",
-      text: ["Om `√x = 3` op te lossen, kwadrateer je beide kanten. Schrijf je het als macht, `x^(1/2) = 3`, dan gaat de ½ naar de overkant en wordt daar een kwadraat: `x = 3²`."],
     },
     "exp-of-log": {
       name: "Macht heft logaritme op",
@@ -477,11 +316,6 @@ export const nl: Translation = {
       how: "Sleep het grondtal naar de andere kant van het =. Daar wordt het een logaritme.",
       text: ["Om x uit een exponent te halen, neem je van beide kanten de logaritme. Bij `e^x = 5` gaat de e naar de overkant en wordt daar ln: `x = ln(5)`."],
     },
-    "log-across": {
-      name: "Logaritme naar de overkant",
-      how: "Sleep de logaritme naar de andere kant van het =. Daar wordt het een macht. Is dat een macht van een getal, tik dan op de exponent om hem uit te rekenen.",
-      text: ["Een logaritme hef je op met een macht. Bij `ln(x) = 2` gaat de ln naar de overkant en wordt daar e: `x = e²`."],
-    },
     "bracket-times-bracket": {
       name: "Haakjes keer haakjes",
       how: "Sleep de ene haakjes op de andere: ze vermenigvuldigen beide termen ertussen. Werk daarna elke nieuwe term op dezelfde manier uit: houd een van de factoren ingedrukt en sleep hem op de andere (kort tikken pakt de hele term). Houd dan een x van `x·x` ingedrukt, sleep hem op de andere en neem gelijksoortige termen samen.",
@@ -495,10 +329,195 @@ export const nl: Translation = {
       how: "Beide termen hebben dezelfde haakjes. Houd ze in een van de termen ingedrukt en sleep ze naar voren, voorbij het linkeruiteinde.",
       text: ["Ook een heel stuk tussen haakjes kan een gemeenschappelijke factor zijn. In `x(x + 2) + 3(x + 2)` hebben beide termen `(x + 2)`, dus dat komt naar voren zoals elke andere factor: `(x + 2)(x + 3)`."],
     },
+    "tap-operator": {
+      name: "Tik op het teken ertussen",
+      how: "Tik op de + tussen de twee getallen: ze worden opgeteld, net als wanneer je het ene op het andere sleept.",
+      text: ["Tik je op het teken tussen twee stukjes, dan reken je ze uit: een + telt ze op, een − trekt er een af, een · vermenigvuldigt. Het werkt hetzelfde als het ene op het andere slepen: kies wat het snelst gaat."],
+    },
+    "multiply-out": {
+      name: "De getallen in een product vermenigvuldigen",
+      how: "Tik op de ·: alle getallen in het product worden vermenigvuldigd, en `4x·3` wordt `12x`.",
+      text: ["Bij vermenigvuldigen maakt de volgorde niet uit, dus `4x·3` is `4·3·x`. Ook met een letter ertussen kun je de getallen met elkaar vermenigvuldigen."],
+    },
+    "times-zero": {
+      name: "Keer nul",
+      how: "Tik op de 0: het hele product wordt 0. Tik daarna op de + om op te tellen.",
+      text: ["Alles keer 0 is 0. Dus `0·(x + 4)` is 0, wat x ook is."],
+    },
+    "evaluate-power": {
+      name: "Een macht uitrekenen",
+      how: "Sleep de exponent op het getal: `2³` wordt 8.",
+      text: ["`2³` betekent `2·2·2`: het kleine getal, de exponent, telt hoe vaak je 2 met zichzelf vermenigvuldigt. Een macht van een getal kun je dus uitrekenen: `2³ = 8`.", "Tik je op de exponent, dan schrijf je de macht juist uit: `2³` wordt `2·2·2`."],
+    },
+    "divide-powers": {
+      name: "Zelfde grondtal: exponenten aftrekken",
+      how: "Sleep de macht in de noemer op de macht met hetzelfde grondtal in de teller. Hun exponenten worden van elkaar afgetrokken: tik op de − om het uit te rekenen.",
+      text: ["In `x⁵/x²` staan vijf x'en boven en twee onder. Twee ervan vallen boven en onder tegen elkaar weg, en er blijven er drie boven over: bij delen trek je de exponenten af."],
+    },
+    "flip-across-bar": {
+      name: "Over de breukstreep",
+      how: "Sleep de macht over de breukstreep, van onder naar boven of van boven naar onder. Het teken van zijn exponent verandert.",
+      text: ["Staan er onder meer x'en, dan wordt de exponent kleiner dan nul: `x²/x⁵` is `x^(2 − 5) = x⁻³`, en het is ook `1/x³`. Dus `x⁻³` betekent `1/x³`: breng je een macht naar de andere kant van de breukstreep, dan verandert het teken van de exponent, welke kant je ook op gaat."],
+    },
+    "power-of-product": {
+      name: "Exponent tussen de haakjes",
+      how: "Sleep de exponent tussen de haakjes: elke factor daar krijgt zijn eigen exponent. Sleep daarna de exponent van het getal op het getal om het uit te rekenen.",
+      text: ["`(2x)³` is `2x·2x·2x`, en dat is `2³·x³`. Elke factor tussen de haakjes krijgt de exponent."],
+    },
+    "minus-bracket": {
+      name: "Minteken voor de haakjes, in een som",
+      how: "Sleep het minteken voor de haakjes op de haakjes: alle tekens ertussen veranderen. (Kan de hele som bewegen, dan pak je met kort drukken op de − de hele som: houd hem ingedrukt om alleen het minteken te pakken.)",
+      text: ["`5 − (x + 2)` trekt heel `x + 2` af, de x en de 2. Het minteken verandert dus alle tekens ertussen: `5 − x − 2`."],
+    },
+    "split-number": {
+      name: "Een getal splitsen",
+      how: "Tik op het getal voor de letter: het splitst in twee factoren, met voorop de factor die het met het andere getal gemeen heeft. Tik ook op het andere getal. Tik daarna op de + tussen de termen: de gemeenschappelijke factor komt buiten haakjes.",
+      text: ["Een gemeenschappelijke factor zie je niet altijd meteen. In `6x + 9` zijn beide termen deelbaar door 3, maar in `6x` staat geen 3 die je buiten haakjes kunt brengen.", "Tik op de 6: die splitst in `3·2`, met voorop de 3 die hij met 9 gemeen heeft. Nu staat er wel een 3: `3·2x + 9 = 3(2x + 3)`."],
+    },
+    "split-term": {
+      name: "De middelste term splitsen",
+      how: "Tik op de letter van de middelste term: hij splitst in tweeën. (Tik je op het getal, dan splitst juist het getal.) Ontbind daarna per tweetal, zoals bij het vorige voorbeeld: tik op de + tussen de eerste twee termen, dan tussen de laatste twee, en dan tussen de twee producten.",
+      text: ["Om `x² + 5x + 6` te ontbinden, zoek je twee getallen die opgeteld 5 en vermenigvuldigd 6 geven: 2 en 3. Schrijf `5x` als `2x + 3x`.", "Nu heb je vier termen, en die ontbind je per tweetal: `x(x + 2) + 3(x + 2)`, en dan `(x + 2)(x + 3)`."],
+    },
+    "difference-of-squares": {
+      name: "Verschil van twee kwadraten",
+      how: "Beide termen zijn kwadraten, en de ene wordt van de andere afgetrokken: tik op het minteken ertussen. (Hebben de twee termen een getal gemeen, dan brengt de tik dat eerst buiten haakjes, `4x² − 4 = 4(x² − 1)`: tik dan nog een keer op het minteken.)",
+      text: ["Een kwadraat min een kwadraat ontbind je altijd op dezelfde manier: `a² − b² = (a − b)(a + b)`. Werk de haakjes weg om het te controleren: de middelste termen vallen tegen elkaar weg.", "Het werkt alleen bij een verschil, een kwadraat min een kwadraat. Een som van twee kwadraten, zoals `x² + 9`, kun je helemaal niet ontbinden. Een kwadraat min een getal dat geen kwadraat is, zoals `x² − 7`, wel, maar dan met wortels: `(x − √7)(x + √7)`."],
+    },
+    "cancel-factor": {
+      name: "Een gemeenschappelijke factor wegdelen",
+      how: "Sleep het getal in de noemer op hetzelfde getal in de teller (of andersom): ze vallen tegen elkaar weg.",
+      text: ["Een getal dat de hele teller en de hele noemer vermenigvuldigt, kun je wegdelen: `(3x)/3` is `x`, want `3x` gedeeld door 3 is x. In `(3x + 1)/3` kan dat niet: de 3 vermenigvuldigt maar een deel van de teller."],
+    },
+    "evaluate-fraction": {
+      name: "Een breuk uitrekenen",
+      how: "Tik op de teller: die splitst, met het getal uit de noemer voorop (14 gedeeld door 7 wordt `7·2`). Sleep daarna de 7 uit de noemer op die 7: ze vallen tegen elkaar weg.",
+      text: ["Komt er bij een breuk een heel getal uit, dan kun je hem uitrekenen: `12/3` is 4, want `12 = 3·4`, en de 3 in de teller valt weg tegen de 3 in de noemer."],
+    },
+    "divide-numbers": {
+      name: "Een breuk vereenvoudigen",
+      how: "Tik op de teller en daarna op de noemer: ze splitsen allebei, met de factor die ze gemeen hebben voorop (8 en 12 worden `4·2` en `4·3`). Sleep daarna de ene 4 op de andere: ze vallen tegen elkaar weg.",
+      text: ["Je vereenvoudigt een breuk door teller en noemer door hetzelfde getal te delen: `8/12 = 2/3`. De waarde verandert niet.", "Door de getallen te splitsen zie je wat ze gemeen hebben: `8/12 = (4·2)/(4·3)`, en de 4'en vallen tegen elkaar weg."],
+    },
+    "factor-then-cancel": {
+      name: "Eerst buiten haakjes, dan wegdelen",
+      how: "Houd het getal in een term in de teller ingedrukt en sleep het naar voren, voorbij het linkeruiteinde (of tik op de + tussen de termen). Sleep het daarna op hetzelfde getal in de noemer: ze vallen tegen elkaar weg.",
+      text: ["Je kunt alleen een factor van de hele teller wegdelen. In `(2x + 6)/2` is de 2 een factor van elke term, dus breng hem eerst buiten haakjes: `(2(x + 3))/2`. Nu is hij een factor van de hele teller, en valt hij weg tegen de noemer."],
+    },
+    "divide-by-fraction": {
+      name: "Delen door een breuk",
+      how: "Sleep de noemer van de onderste breuk omhoog naar de teller. Daar gaat hij de teller vermenigvuldigen. Tik op de · om het uit te rekenen, en deel dan weg wat teller en noemer gemeen hebben.",
+      text: ["Wat een getal doet, hangt af van hoeveel breukstrepen erboven staan. In `4/(3/5)` staat de 5 onder twee breukstrepen: je deelt door een deling, dus hij vermenigvuldigt. Hij mag dus naar de teller, zonder dat de waarde verandert: `(4·5)/3`.", "Daarom is delen door een breuk hetzelfde als vermenigvuldigen met het omgekeerde: `4/(3/5) = 4·5/3`."],
+    },
+    "evaluate-root": {
+      name: "Een wortel uitrekenen",
+      how: "Tik op de wortel om hem als macht te schrijven: `√9` is `9^(1/2)`. Sleep daarna de ½ op de 9 om het uit te rekenen.",
+      text: ["`√9` is het positieve getal dat keer zichzelf 9 geeft: 3, want `3·3 = 9` (−3 ook, maar √ betekent het positieve getal). Zo is ook `∛8 = 2`, want `2·2·2 = 8`.", "Als macht is `√9 = 9^(1/2)`: sleep je de ½ op de 9, dan reken je het uit, net als bij elke andere exponent."],
+    },
+    "pull-out-of-power": {
+      name: "Een wortel splitsen",
+      how: "Haal het getal onder de wortel vandaan: het krijgt zijn eigen wortel. Reken die wortel daarna uit: tik erop, en sleep de ½ op het getal.",
+      text: ["De wortel van een product is het product van de wortels: `√(4x) = √4·√x = 2√x`."],
+    },
+    "split-square": {
+      name: "Een wortel vereenvoudigen",
+      how: "Tik op het getal onder de wortel: er splitst een kwadraat af (bij een derdemachtswortel een derde macht). Haal dat onder de wortel vandaan, zoals bij het vorige voorbeeld, en reken zijn wortel uit.",
+      text: ["Ook een wortel waar geen heel getal uitkomt, kun je soms vereenvoudigen. Splits het getal eronder zo dat er een kwadraat afsplitst: `√12 = √(4·3) = 2√3`."],
+    },
+    "root-of-power": {
+      name: "De wortel van een macht",
+      how: "Tik op de wortel om hem als macht te schrijven. Sleep de buitenste exponent op de binnenste, en tik op de · om het product uit te rekenen. Deel daarna weg wat teller en noemer van de exponent gemeen hebben.",
+      text: ["Een wortel is een macht, dus de wortel van een macht is een macht van een macht: `∛(x⁶) = (x⁶)^(1/3) = x^(6/3) = x²`. De exponenten worden vermenigvuldigd, zoals bij Machten."],
+    },
+    "rationalise": {
+      name: "Een heel getal in de noemer",
+      how: "Sleep de wortel in de noemer omhoog naar de teller: teller en noemer worden er allebei mee vermenigvuldigd. Tik daarna op de · in de noemer, en deel weg wat er nog weg kan.",
+      text: ["Teller en noemer met hetzelfde getal vermenigvuldigen verandert een breuk niet. Neem de wortel die al in de noemer staat: `√3·√3 = 3`, dus `1/√3 = √3/(√3·√3) = √3/3`. Nu staat er geen wortel meer onder de breukstreep."],
+    },
+    "log-across": {
+      name: "Logaritme naar de overkant",
+      how: "Sleep de logaritme naar de andere kant van het =. Daar wordt hij een macht. Is dat een macht van een getal, sleep dan de exponent op het getal om het uit te rekenen.",
+      text: ["Een logaritme hef je op met een macht. Bij `ln(x) = 2` gaat de ln naar de overkant en wordt daar e: `x = e²`."],
+    },
+    "move-term": {
+      name: "Een term naar de overkant",
+      how: "Sleep het getal naar de andere kant van het =. Onderweg verandert zijn teken. Sleep het op het getal aan de overkant, dan worden ze samen uitgerekend; of laat het ernaast los en tik op de − om het uit te rekenen.",
+      text: ["Een vergelijking zegt dat twee kanten gelijk zijn. Doe je aan beide kanten hetzelfde, dan blijven ze gelijk.", "Een term naar de andere kant van het `=` brengen doet precies dat. Bij `x + 3 = 10` trek je aan beide kanten 3 af: `x = 10 − 3`. Daarom wordt `+3` aan de overkant `−3`."],
+    },
+    "move-factor": {
+      name: "Beide kanten delen",
+      how: "Sleep het getal voor de letter naar de andere kant van het =. Daar gaat het delen. Reken daarna de breuk uit: tik op de teller om hem te splitsen, en sleep de noemer op de factor die erbij past.",
+      text: ["Een getal dat een hele kant vermenigvuldigt, gaat delen als het naar de overkant gaat. Bij `2x = 8` deel je beide kanten door 2: `x = 8/2`, en `8/2 = (2·4)/2 = 4`."],
+    },
+    "two-steps": {
+      name: "In twee stappen",
+      how: "Breng het getal dat erbij wordt opgeteld naar de overkant, en sleep het op het getal dat daar staat. Breng daarna het getal voor de letter naar de overkant, en reken de breuk uit: splits de teller, en deel weg.",
+      text: ["In `3x + 4 = 19` is x eerst met 3 vermenigvuldigd, en is er daarna 4 bij opgeteld. Om x terug te krijgen, maak je dat in omgekeerde volgorde ongedaan: eerst de 4 eraf, dan delen door 3.", "De 3 kan niet als eerste: die vermenigvuldigt alleen de x, niet de hele kant."],
+    },
+    "root-across": {
+      name: "Een wortel naar de overkant",
+      how: "Tik op de wortel om hem als macht te schrijven (½, of ⅓ bij een ∛), en sleep die exponent naar de andere kant van het =: de andere kant wordt gekwadrateerd (bij een ∛ tot de derde macht verheven). Sleep daarna de exponent op het getal om het uit te rekenen.",
+      text: ["Om `√x = 3` op te lossen, kwadrateer je beide kanten: `x = 3²`. Een kwadraat heft een wortel op, dus de √ verdwijnt en de andere kant wordt gekwadrateerd. Een derde macht heft een derdemachtswortel op, enzovoort.", "Schrijf je het als macht, `x^(1/2) = 3`, dan is het de ½ die naar de overkant gaat en daar een kwadraat wordt: dezelfde zet."],
+    },
     "ineq-move-factor": {
       name: "Beide kanten delen",
-      how: "Sleep het getal voor de letter naar de andere kant van het teken. Daar ga je erdoor delen, en het teken blijft staan. Tik daarna op de breukstreep.",
-      text: ["Vermenigvuldig je beide kanten met een positief getal, of deel je ze erdoor, dan blijft het teken ook staan: bij `2x < 8` krijg je `x < 8/2`."],
+      how: "Sleep het getal voor de letter naar de andere kant van het ongelijkheidsteken. Daar gaat het delen, en het ongelijkheidsteken blijft staan. Reken daarna de breuk uit: splits de teller, en deel weg.",
+      text: ["Vermenigvuldig of deel je beide kanten door een positief getal, dan blijft het teken ook staan: bij `2x < 8` krijg je `x < 8/2`."],
+    },
+    "ineq-negative": {
+      name: "Delen door een negatief getal",
+      how: "Sleep het getal naar de overkant en reken de breuk uit: het ongelijkheidsteken blijft staan. Sleep daarna het minteken naar de overkant: het ongelijkheidsteken klapt om.",
+      text: ["Deel je beide kanten door een negatief getal, dan klapt het ongelijkheidsteken om, net als bij vermenigvuldigen met −1: `−2x < 6` betekent `x > −3`.", "Hier zijn het twee zetten die je al kent: delen door 2 (het teken blijft staan), en dan het minteken naar de overkant (het teken klapt om)."],
+    },
+    "plus-minus": {
+      name: "De twee wortels van een kwadraat",
+      how: "Sleep de 2 naar de andere kant van het =. Een kwadraat heeft twee wortels: de vergelijking splitst in tweeën, een met + en een met −. Sleep daarna elke ½ op het getal om het uit te rekenen.",
+      text: ["`3² = 9`, maar `(−3)² = 9` ook. Dus `x² = 9` betekent `x = 3` of `x = −3`. Vergeet je het minteken, dan raak je een oplossing kwijt."],
+    },
+    "fraction-zero": {
+      name: "Een breuk gelijk aan 0",
+      how: "Pak de noemer van de breuk bij zijn + of − en sleep hem naar de andere kant van het =. Daar gaat hij vermenigvuldigen: tik op de 0, want 0 keer iets is 0. Breng daarna het getal naar de overkant.",
+      text: ["Een breuk is alleen 0 als de teller 0 is. De noemer mag nooit 0 zijn, en dat staat in de voorwaarde achter de vergelijking: `x ≠ −2` zorgt dat `x + 2` niet 0 wordt.", "De noemer mag dus naar de overkant en daar vermenigvuldigen: `(x − 3)/(x + 2) = 0` geeft `x − 3 = 0·(x + 2)`, dus `x − 3 = 0`. Voldoet een oplossing niet aan de voorwaarde, dan wordt hij doorgestreept."],
+    },
+    "letter-factor": {
+      name: "Delen door een letter",
+      how: "Sleep de letter voor x naar de andere kant van het =. Daar gaat hij delen. Sleep hem daarna op dezelfde letter in de teller: ze vallen tegen elkaar weg.",
+      text: ["Je mag beide kanten alleen door een letter delen als die niet 0 kan zijn, en dat staat in de voorwaarde achter de vergelijking: `a ≠ 0`.", "Deel nooit door x zelf: als je in `x² = 3x` door x deelt, krijg je `x = 3` en raak je de oplossing `x = 0` kwijt. Breng alles naar één kant en ontbind in factoren."],
+    },
+    "alone-first": {
+      name: "De hele aanpak",
+      how: "Nog geen enkele letter staat alleen: breng de x van de eerste vergelijking naar de overkant, zodat je `y = …` krijgt. Vul y daarna in in de andere vergelijking, los die op naar x, en vul x weer in om y te vinden.",
+      text: ["Dit is de hele aanpak, van begin tot eind:", "1. Maak in één vergelijking een letter vrij. Kies de makkelijkste: een letter zonder getal ervoor. In `x + y = 7` breng je de x naar de overkant: `y = 7 − x`.", "2. Substitueer: vervang die letter in de andere vergelijking door waar hij gelijk aan is, tussen haakjes. Staat er een minteken voor, dan veranderen alle tekens ertussen.", "3. Los de vergelijking op die overblijft: daar zit nog maar één letter in.", "4. Vul de gevonden waarde in in `y = …` om de andere letter te vinden."],
+    },
+    "fraction-of-fractions": {
+      name: "Een breuk van twee breuken",
+      how: "Sleep de noemer van de onderste breuk omhoog naar de teller, en daarna de noemer van de bovenste breuk omlaag naar de noemer. Tik dan op elke · om het uit te rekenen.",
+      text: ["In `(a/b)/(c/d)` mag elk van de vier getallen over de hoofdbreukstreep naar de plek met evenveel breukstrepen erboven, zonder dat de waarde verandert (zoals de 5 bij het vorige voorbeeld): d gaat omhoog naast a, b gaat omlaag naast c, c gaat omhoog naast b, en a gaat omlaag naast d. (Behalve als a 0 kan zijn: door 0 kun je niet delen.)", "Verplaats je de twee noemers, dan wordt het één breuk: `(a·d)/(c·b)`."],
+    },
+    "minus-number-in": {
+      name: "Een negatief getal voor de haakjes",
+      how: "Sleep het getal op de haakjes en tik op de · om het uit te rekenen. Sleep daarna het minteken op de haakjes: alle tekens ertussen veranderen.",
+      text: ["`−3(x − 2)` betekent −1 keer 3 keer de haakjes. Vermenigvuldig eerst met 3: `−(3x − 6)`. Daarna verandert het minteken alle tekens ertussen: `−3x + 6`.", "Let op het laatste teken: `−3` keer `−2` is `+6`. Min keer min is plus."],
+    },
+    "substitute-back": {
+      name: "Terug invullen",
+      how: "Sleep de `x` van `x = …` op de `x` in de andere vergelijking. Tik daarna op de · en de + om y uit te rekenen.",
+      text: ["Weet je x, dan vind je y met de andere vergelijking: vul daar de waarde van x in en reken het uit. Nu heb je ze allebei, en dat paar is de oplossing.", "Controleer het door beide waarden in te vullen in de vergelijking die je het laatst niet hebt gebruikt: aan beide kanten moet hetzelfde uitkomen."],
+    },
+    "square-both-sides": {
+      name: "Beide kanten kwadrateren",
+      how: "Tik op de wortel om hem als macht met exponent ½ te schrijven, en sleep de ½ over het =: de andere kant wordt gekwadrateerd. Werk de haakjes weg, breng alles naar één kant, ontbind in factoren en splits, zoals bij het vorige voorbeeld. Een oplossing die niet aan een voorwaarde voldoet, wordt doorgestreept.",
+      text: ["Een wortel is nooit negatief, dus `√(x + 7) = x + 1` klopt alleen als `x + 1 ≥ 0`, dus als `x ≥ −1`. (En wat onder de wortel staat, mag ook niet negatief zijn: `x ≥ −7`.) Dat zijn de voorwaarden, die er vanaf het begin bij staan: ze blijven de hele tijd gelden.", "Door beide kanten te kwadrateren raak je ze kwijt: `x + 7 = (x + 1)²` klopt ook bij `x = −3`, waar `x + 1` negatief is. De gekwadrateerde vergelijking geeft dus `x = 2` of `x = −3`, en −3 voldoet niet aan een voorwaarde: die wordt doorgestreept. De enige oplossing is `x = 2`."],
+    },
+    "substitute": {
+      name: "Substitueren",
+      how: "Sleep de `y` van `y = …` op de `y` in de andere vergelijking: die wordt vervangen door waar `y` gelijk aan is. Nu staat er in die vergelijking alleen nog x: neem de x'en samen en los hem op.",
+      text: ["`y = 2x` en `x + y = 9` zijn twee vergelijkingen over dezelfde x en y, die allebei tegelijk kloppen. Eén vergelijking met twee onbekenden heeft veel oplossingen; twee samen hebben er meestal maar één.", "`y = 2x` zegt dat y en 2x gelijk zijn, dus in de andere vergelijking mag je y vervangen door 2x. Dan houd je één vergelijking met één letter over, en die kun je al oplossen."],
+    },
+    "zero-power": {
+      name: "Tot de macht 0",
+      how: "Tik op de exponent 0: `x⁰` wordt 1. Tik daarna op de + om op te tellen.",
+      text: ["`x³/x³` is 1 (als x niet 0 is), en het is ook `x^(3 − 3) = x⁰`. Elk getal behalve 0 tot de macht 0 is dus 1."],
     },
   },
 

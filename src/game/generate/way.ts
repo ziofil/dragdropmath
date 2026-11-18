@@ -17,44 +17,45 @@
  */
 import type { MathState } from "../../expr/types";
 import type { RuleId } from "../../rules";
+import { ARITH, SIMPLIFY } from "./families";
 import { parseState } from "../../expr/parse";
 import { printState } from "../../expr/key";
 import { allNodes } from "../../expr/tree";
+import { rowAt, rowCount, withRow } from "../../expr/rows";
 import { assuming } from "../../expr/setting";
-import { atCheckpoint, search, searchBest } from "../solver";
+import { atCheckpoint, farFrom, search, searchBest } from "../solver";
 import { isDone } from "../task";
 import { undoneBy } from "./back";
 import type { Draft } from "./write";
 
 /** What kind of work a stretch is: its stage names the moves it takes. */
-export type Stage = "arith" | "expand" | "gather" | "factor" | "split" | "square" | "isolate" | "clear" | "solve";
-
-/** The numbers worked out as they come (in every stage). */
-const ARITH: RuleId[] = ["combine", "multiply-numbers", "numbers-first", "multiply-out", "evaluate-fraction", "divide-numbers", "times-one", "power-one", "evaluate-power", "tap-power", "evaluate-root"];
+export type Stage = "arith" | "expand" | "gather" | "factor" | "split" | "square" | "isolate" | "clear" | "substitute" | "solve";
 
 /**
  * The moves of each stage, in one place (an un-move names its stage, rather
  * than listing moves that can go stale).
  */
 export const STAGES: Record<Stage, readonly RuleId[]> = {
-  arith: ARITH,
+  arith: [...ARITH, ...SIMPLIFY],
   // Brackets and powers of sums multiplied out, x·x as x², like terms collected.
   expand: [...ARITH, "power-to-product", "distribute", "distribute-neg", "merge-powers", "root-notation", "power-of-power", "commute"],
   // Every term on one side (the other 0), or terms moved to where they're wanted; sides swapped.
   gather: [...ARITH, "move-term", "swap-sides", "move-sign", "commute", "distribute-neg"],
   // A sum made a product: the middle term split, what pairs share taken out, a difference of squares; a number shared by
   // every term divided away (2x² − 14x + 24 = 0 → x² − 7x + 12 = 0).
-  factor: [...ARITH, "split-term", "factor-out", "factor-shared", "split-number", "difference-of-squares", "move-factor", "commute"],
+  factor: [...ARITH, ...SIMPLIFY, "split-term", "factor-out", "factor-shared", "split-number", "difference-of-squares", "move-factor", "commute"],
   // A product equal to 0 pulled apart, and each row solved.
-  split: [...ARITH, "zero-product", "move-term", "move-factor", "move-sign", "cancel-factor", "swap-sides"],
+  split: [...ARITH, ...SIMPLIFY, "zero-product", "move-term", "move-factor", "move-sign", "swap-sides"],
   // A root on its own carried across (squared), and the square worked out.
-  square: [...ARITH, "root-notation", "root-across", "power-of-power", "split-square"],
+  square: [...ARITH, ...SIMPLIFY, "root-notation", "root-across", "power-of-power", "split-square"],
   // A root (or the piece wanted) got on its own on one side: what's beside it carried across, and what that leaves
   // worked out ((6x + 6)/6 = x + 1, once 6√(…) = 6x + 6 is divided by 6).
-  isolate: [...ARITH, "move-term", "move-factor", "move-sign", "swap-sides", "commute", "split-fraction", "cancel-factor"],
+  isolate: [...ARITH, ...SIMPLIFY, "move-term", "move-factor", "move-sign", "swap-sides", "commute", "split-fraction"],
   // Bottoms carried across (each multiplying the other side), and what cancels cancelled; terms moved across first
   // where that lets a bottom go with them (5/(x − 2) + 6/(x − 2)² = −1).
-  clear: [...ARITH, "move-denominator", "move-letter-denominator", "cancel-factor", "divide-powers", "split-fraction", "distribute", "merge-powers", "move-term"],
+  clear: [...ARITH, ...SIMPLIFY, "move-denominator", "move-letter-denominator", "divide-powers", "split-fraction", "distribute", "merge-powers", "move-term"],
+  // A letter on its own in one row put into another (y = 3x + 2 into 4x + 3y = 10), or a value found put back.
+  substitute: [...ARITH, "substitute"],
   // Anything the chapter has (the last stretch to the answer).
   solve: [],
 };
@@ -101,8 +102,10 @@ function unexpanded(s: MathState): number {
  * out three brackets is three short searches, not one long one). Null if
  * none within the budget.
  */
-function stretch(from: MathState, done: (s: MathState) => boolean, moves: readonly RuleId[]): MathState[] | null {
-  const direct = searchBest(from, done, moves, { ordered: false, maxStates: BUDGET }) ?? search(from, done, moves, { ordered: false, maxDepth: 6, maxStates: BUDGET });
+function stretch(from: MathState, done: (s: MathState) => boolean, moves: readonly RuleId[], target?: MathState): MathState[] | null {
+  // Heading for a checkpoint: the states nearest it first (farFrom).
+  const near = target && { cost: farFrom(target) };
+  const direct = searchBest(from, done, moves, { ordered: false, maxStates: BUDGET, ...near }) ?? search(from, done, moves, { ordered: false, maxDepth: 6, maxStates: BUDGET });
   if (direct) return direct;
   // A bracket at a time: each short search ends where there's one bracket less.
   const way = [from];
@@ -110,12 +113,47 @@ function stretch(from: MathState, done: (s: MathState) => boolean, moves: readon
     const at = way[way.length - 1];
     const left = unexpanded(at);
     if (left === 0) break;
-    const less = searchBest(at, (s) => unexpanded(s) < left, moves, { ordered: false, maxStates: BUDGET });
+    const less = searchBest(at, (s) => unexpanded(s) < left, moves, { ordered: false, maxStates: BUDGET, ...near });
     if (!less) return null;
     way.push(...less.slice(1));
   }
-  const rest = searchBest(way[way.length - 1], done, moves, { ordered: false, maxStates: BUDGET });
+  const rest = searchBest(way[way.length - 1], done, moves, { ordered: false, maxStates: BUDGET, ...near });
   return rest && [...way, ...rest.slice(1)];
+}
+
+/** Moves that take another row to make (a letter put in from the other equation): a row on its own can't. */
+const ACROSS_ROWS: RuleId[] = ["substitute"];
+
+/** Row k of a board as a board of its own, in the board's setting. */
+const ownRow = (s: MathState, k: number): MathState => ({ ...s, sides: rowAt(s, k), join: undefined });
+
+/**
+ * The way from `from` to the checkpoint `to`, with `moves`. Where only one row
+ * of a system changes on the way (one equation tidied while the other waits),
+ * that row is searched on its own and the others kept as they are: a search
+ * of the whole board would spend itself on rows it isn't to touch. (Not when
+ * the moves include one that takes another row: ACROSS_ROWS.)
+ */
+function towards(from: MathState, to: MathState, moves: readonly RuleId[]): MathState[] | null {
+  const k = moves.some((m) => ACROSS_ROWS.includes(m)) ? null : changedRow(from, to);
+  if (k === null) return stretch(from, (s) => atCheckpoint(s, to), moves, to);
+  const toRow = ownRow(to, k.to);
+  const way = stretch(ownRow(from, k.from), (s) => atCheckpoint(s, toRow), moves, toRow);
+  return way && way.map((s) => withRow(from, k.from, rowAt(s, 0)));
+}
+
+/** The one row of `from` that isn't a row of `to` (rows in any order), and the row of `to` it becomes; null if not one. */
+function changedRow(from: MathState, to: MathState): { from: number; to: number } | null {
+  const n = rowCount(from);
+  if (from.join !== "and" || n < 2 || rowCount(to) !== n || to.join !== "and") return null;
+  const left = [...Array(n).keys()];
+  const unmatched: number[] = [];
+  for (let j = 0; j < n; j++) {
+    const i = left.findIndex((i) => atCheckpoint(ownRow(from, i), ownRow(to, j)));
+    if (i < 0) unmatched.push(j);
+    else left.splice(i, 1);
+  }
+  return left.length === 1 && unmatched.length === 1 ? { from: left[0], to: unmatched[0] } : null;
 }
 
 /**
@@ -139,7 +177,8 @@ export function writeWay(d: Draft, rules: readonly RuleId[]): Draft | null {
     const at = states[states.length - 1];
     if (done(at)) continue;
     const stages = d.stages?.[i] ?? ["solve"];
-    const way = stretch(at, done, movesOf(stages, rules)) ?? (stages.includes("solve") ? null : stretch(at, done, rules));
+    const go = (moves: readonly RuleId[]) => (last ? stretch(at, done, moves) : towards(at, stops[i], moves));
+    const way = go(movesOf(stages, rules)) ?? (stages.includes("solve") ? null : go(rules));
     if (!way) return null;
     states.push(...way.slice(1));
     if (!last) coarse.add(states.length - 1);
@@ -184,5 +223,5 @@ export const writesWay = (rules: () => readonly RuleId[]) => (d: Draft) => write
 
 /** One stretch, as writeWay searches it: every state from `from` to one matching `to` (terms in any order), with its stages' moves. */
 export function wayThrough(from: MathState, to: MathState, stages: Stage | readonly Stage[], rules: readonly RuleId[]): MathState[] | null {
-  return stretch(from, (s) => atCheckpoint(s, to), movesOf(typeof stages === "string" ? [stages] : stages, rules));
+  return towards(from, to, movesOf(typeof stages === "string" ? [stages] : stages, rules));
 }

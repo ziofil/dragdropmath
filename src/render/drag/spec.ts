@@ -1,7 +1,7 @@
 import type { DragSpec, DragSpecBuilder } from "dragology";
 import type { MathState } from "../../expr/types";
 import { children, locate } from "../../expr/tree";
-import { feelOf, movesFor, operatorTap, type Candidate, type RuleId } from "../../rules";
+import { feelOf, movesFor, type Candidate, type RuleId } from "../../rules";
 import { dragCtx } from "../../rules/types";
 import type { RenderCtx } from "../typeset";
 import { below, farEnd, landing, outInFront, overOtherSide, pullOut, rowSlot, SLIDE } from "./carry";
@@ -36,7 +36,6 @@ export function interactive(opts: {
     interact: {
       grabbable: moves.grabbable,
       pressable: moves.pressable,
-      opTap: (termId) => operatorTap(state, termId, rules),
       tap: (id) => moves.tap(id)?.state ?? null,
       onTap,
       drag: (id) => {
@@ -101,7 +100,9 @@ export function dragSpec(env: DragEnv, id: string): DragSpec<MathState> {
   const flips = away.find((c) => feelOf(c).wears === "flip-sign");
   if (grows) moves = moves.with(growLog(rc, grows.state));
   else if (sheds.length) moves = moves.with(shedLog(rc, sheds));
-  else if (flips) moves = moves.with(flipSign(rc, flips.state, candidates.filter((c) => c.targetId).map((c) => c.state)));
+  // It keeps its sign where letting go would merge it on its own side, or swap the sides. (Carried into a like
+  // term across the =, it crosses: its sign flips on the way; along its own row, the = itself says when.)
+  else if (flips) moves = moves.with(flipSign(rc, flips.state, candidates.filter((c) => c.rule !== flips.rule && carry(c) !== "reorder").map((c) => c.state)));
 
   // Switching between moves (staying in the row, across the =, out in front …) slides too.
   moves = moves.withBranchTransition(SLIDE);

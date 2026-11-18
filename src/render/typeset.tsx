@@ -2,7 +2,7 @@ import { translate, type DragSpec, type Svgx } from "dragology";
 import type { Expr, Frac, MathState, Rel } from "../expr/types";
 import { relOf } from "../expr/build";
 import { rootIndex } from "../expr/key";
-import { signId } from "../rules";
+import { dotBetween, signId } from "../rules";
 import { allNodes } from "../expr/tree";
 import { textWidth } from "./measure";
 import { t } from "../i18n";
@@ -59,8 +59,6 @@ export type Interact = {
   grabbable(id: string): boolean;
   /** Does a quick press pick it up (else it goes through to its term)? */
   pressable(id: string): boolean;
-  /** What tapping the + or − in front of this term does (two plain numbers: add them up). */
-  opTap(termId: string): MathState | null;
   /** What tapping it gives, if anything. */
   tap(id: string): MathState | null;
   /** Apply a tap's result. */
@@ -188,8 +186,6 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
   const desc = DESC * size;
   const grabbable = rc.interact!.grabbable(id);
   const pressable = grabbable && rc.interact!.pressable(id);
-  // 10 − 4: tapping the − works it out (dragging still carries the term). Found by position (OP_TAP).
-  const tappable = hasOpTap(rc, negId);
   return (
     <g
       id={id}
@@ -198,7 +194,7 @@ function signHandle(rc: RenderCtx, negId: string, L: { glyph: string; left: numb
       style={{ pointerEvents: pressable ? "auto" : "none" }}
       {...(grabbable ? { dragologyOnDrag: () => rc.interact!.drag(id), dragologyZIndex: rc.draggedId === id ? "/1" : false } : {})}
     >
-      <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" {...(tappable ? { [OP_TAP]: negId } : {})} />
+      <rect key={named("hit")} dragologyKey="hit" transform={translate(0, -asc)} width={w} height={asc + desc} className="m-hit" />
       {glyph("t-sign", L.glyph, 0, 0, size, "m-op")}
     </g>
   );
@@ -239,33 +235,26 @@ function rootSign(e: Frac, size: number, g: RootGeometry): Content {
 
 /**
  * An operator glyph that belongs to its row (keyed by the item after it, so
- * it moves with that slot). `tapFor`: the term whose + this is, when tapping
- * it works the operation out (3 + 4 → 7): marked for the canvas to find
- * (OP_TAP), as taps go by position.
+ * it moves with that slot). What pressing or tapping it does is decided by
+ * position (render/press.ts).
  */
-function separator(kind: "plus" | "dot", key: string, size: number, tapFor?: string | null): Box {
+function separator(kind: "plus" | "dot", key: string, size: number): Box {
   const L = LEAD[kind];
   const w = (L.left + L.right) * size + textWidth(L.glyph, size);
   return {
     w,
     asc: ASC * size,
     desc: DESC * size,
-    // Always in its own group, tappable or not, so the glyph sits at the same
+    // Always in its own group, so the glyph sits at the same
     // path in every state and slides along when terms reorder.
     draw: (x, y) => (
       <g key={named(`tap-${key}`)} dragologyKey={`tap-${key}`}>
-        {tapFor && <rect key={named(`hit-${key}`)} dragologyKey={`hit-${key}`} transform={translate(x, y - ASC * size)} width={w} height={(ASC + DESC) * size} className="m-hit" {...{ [OP_TAP]: tapFor }} />}
         {glyph(key, L.glyph, x + L.left * size, y, size, "m-op")}
       </g>
     ),
   };
 }
 
-/** Does tapping the +, − or · in front of `termId` (a term or a factor) do something? */
-const hasOpTap = (rc: RenderCtx, termId: string) => !!rc.interact?.opTap(termId);
-
-/** Marks the + or − whose tap works out the sum in front of a term (the term's id). */
-export const OP_TAP = "data-optap";
 
 function withParens(c: Content, size: number, parens: boolean): Content {
   if (!parens) return c;
@@ -285,16 +274,8 @@ function withParens(c: Content, size: number, parens: boolean): Content {
   };
 }
 
-/**
- * Where writing factors side by side would misread, show a ·: before a number
- * (x·5), before or after a fraction (2·¾ is not 2¾), and before a power of a
- * number (2·3ˣ is not 23ˣ). A root reads fine without one (2√3).
- */
-const needsDot = (left: Expr, right: Expr) =>
-  right.kind === "num" ||
-  right.kind === "frac" ||
-  left.kind === "frac" ||
-  (right.kind === "pow" && !right.radical && right.base.kind === "num");
+/** Where writing factors side by side would misread, a · is shown (rules/types.ts dotBetween). */
+const needsDot = dotBetween;
 
 function row(boxes: Box[], gap = 0): Content {
   const xs: number[] = [];
@@ -349,7 +330,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.terms.flatMap((t, i) =>
           i > 0 && t.kind !== "neg"
-            ? [separator("plus", plusOf(t), size, hasOpTap(rc, t.id) ? t.id : null), layoutNode(t, rc, size, null, { parens: t.kind === "sum" })]
+            ? [separator("plus", plusOf(t), size), layoutNode(t, rc, size, null, { parens: t.kind === "sum" })]
             : [layoutNode(t, rc, size, i > 0 ? "minus" : null, { parens: t.kind === "sum" })],
         ),
       );
@@ -359,7 +340,7 @@ function layoutContent(e: Expr, rc: RenderCtx, size: number, asLn: boolean, root
       return row(
         e.factors.flatMap((f, i) => {
           const factor = layoutNode(f, rc, size, null, { parens: f.kind === "sum" || f.kind === "neg" });
-          return i > 0 && needsDot(e.factors[i - 1], f) ? [separator("dot", `dot-${f.id}`, size, hasOpTap(rc, f.id) ? f.id : null), factor] : [factor];
+          return i > 0 && needsDot(e.factors[i - 1], f) ? [separator("dot", `dot-${f.id}`, size), factor] : [factor];
         }),
         0.03 * size,
       );

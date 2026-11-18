@@ -105,16 +105,6 @@ export const tr: Translation = {
       how: "Sağdaki sayıyı, çarpıldığı öbür sayının üstüne bırak.",
       text: ["Çarpmada da sıranın önemi yoktur: `2·x·5`, `2·5·x` ile aynıdır. Bu yüzden 2 ile 5 çarpılabilir ve `10x` elde edilir."],
     },
-    "numbers-first": {
-      name: "Sayı başa",
-      how: "`x·3` gibi bir çarpıma dokun; alışılmış biçimde, `3x` olarak yazılsın.",
-      text: ["Sayıyı başa yazar, çarpma noktasını da yazmayız: `x·3`, `3x` olarak yazılır. Bu o kadar basit ki bundan sonra kendiliğinden yapılacak."],
-    },
-    "multiply-out": {
-      name: "Çarpımı hesapla",
-      how: "`2·3` gibi sayılardan oluşan bir çarpımı hesaplamak için ona dokun.",
-      text: ["Yalnızca sayılardan oluşan bir çarpım hesaplanabilir: `2·3`, 6 eder."],
-    },
     collect: {
       name: "Benzer terimleri topla",
       how: "Bir terimi, harfleri ve üsleri aynı olan benzer bir terimin üstüne bırak. Toplanırlar.",
@@ -167,19 +157,6 @@ export const tr: Translation = {
       how: "Parantezi iki kez yazmak için üsteki ²'ye dokun. Sonra parantezleri önceki örnekteki gibi çarp (bir çarpanı tek başına taşımak için basılı tut: kısa dokunuş bütün terimi alır) ve benzer terimleri topla.",
       text: ["`(x + 1)²`, `(x + 1)(x + 1)` demektir; bu yüzden parantezler aynı yolla çarpılır."],
     },
-    "move-term": {
-      name: "Terimi karşıya geçir",
-      how: "Sayıyı = işaretinin karşı tarafına sürükle. Geçerken işareti değişir. Sonra hesaplamak için − işaretine dokun.",
-      text: [
-        "Denklem, iki tarafın birbirine eşit olduğunu söyler. İki tarafa da aynı işlemi yaparsan eşitlik bozulmaz.",
-        "Bir terimi `=` işaretinin karşı tarafına geçirmek tam olarak bunu yapar. `x + 3 = 10` denkleminde iki taraftan da 3 çıkar: `x = 10 − 3`. `+3` karşı tarafa bu yüzden `−3` olarak geçer.",
-      ],
-    },
-    "move-factor": {
-      name: "İki tarafı böl",
-      how: "Harfin önündeki sayıyı = işaretinin karşı tarafına sürükle. Öbür tarafı böler. Sonra hesaplamak için kesir çizgisine dokun.",
-      text: ["Bir tarafın tamamını çarpan sayı, karşı tarafa geçince öbür tarafı böler. `2x = 8` denkleminde iki tarafı da 2'ye böl: `x = 8/2`."],
-    },
     "move-denominator": {
       name: "İki tarafı çarp",
       how: "Kesrin paydasını = işaretinin karşı tarafına sürükle. Öbür tarafla çarpılır. Sonra hesaplamak için · işaretine dokun.",
@@ -195,85 +172,15 @@ export const tr: Translation = {
       how: "Taraflardan birini = işaretinin karşısına, en uca kadar sürükle. İki taraf yer değiştirir.",
       text: ["`7 = x` ile `x = 7` aynı şeyi söyler, bu yüzden iki taraf yer değiştirebilir."],
     },
-    "evaluate-fraction": {
-      name: "Kesri hesapla",
-      how: "Hesaplamak için kesir çizgisine dokun.",
-      text: ["Sonucu tam sayı çıkan bir kesir hesaplanabilir: `12/3`, 4 eder."],
-    },
-    "divide-numbers": {
-      name: "Kesri sadeleştir",
-      how: "Kesir çizgisine dokun. Paydaki ve paydadaki sayılar ortak çarpanlarına bölünür.",
-      text: ["Bir kesrin payı ve paydası aynı sayıya bölünerek sadeleştirilebilir: `6/8 = 3/4`. Kesrin değeri değişmez."],
-    },
     "letter-in": {
       name: "Harfle parantezi çarp",
       how: "Öndeki harfi parantezin üstüne bırak. Sonra yan yana duran iki harften birini basılı tut ve öbürünün üstüne bırak: `x·x`, `x²` demektir. (Kısa dokunuş bütün terimi alırdı.)",
       text: ["Harf de tıpkı bir sayı gibi içerideki her terimle çarpılır: `x(x + 3) = x·x + x·3`. `x·x` de bir kuvvettir: Üslü ifadeler bölümündeki gibi `x²`."],
     },
-    "factor-then-cancel": {
-      name: "Önce dışarı al, sonra sadeleştir",
-      how: "Paydaki bir terimin sayısını basılı tut ve en soldan dışarı, öne sürükle. Sonra kesir çizgisine dokun: sadeleşir.",
-      text: [
-        "Yalnızca payın tamamının çarpanı olan bir sayı sadeleştirilebilir. `(2x + 6)/2` ifadesinde 2, terimlerin her birinin çarpanıdır; bu yüzden önce onu dışarı al: `(2(x + 3))/2`. Artık 2 payın tamamının çarpanıdır ve paydadaki 2 ile sadeleşir.",
-      ],
-    },
-    "cancel-factor": {
-      name: "Ortak çarpanı sadeleştir",
-      how: "Kesir çizgisine dokun. Pay ile paydanın ortak çarpanı sadeleşir.",
-      text: ["Payın tamamını ve paydanın tamamını çarpan bir sayı sadeleşir: `(3x)/3`, `x` olur. `(3x + 1)/3` ifadesinde sadeleşmez: 3, payın yalnızca bir kısmını çarpıyor."],
-    },
     "power-of-power": {
       name: "Üssün üssü",
       how: "Dıştaki üssü içteki üssün üstüne bırak. Üsler çarpılır: hesaplamak için · işaretine dokun.",
       text: ["`(x²)³`, `x²·x²·x²` demektir. Bu da 2 + 2 + 2 = 6 tane x eder; yani üsler çarpılır."],
-    },
-    "divide-powers": {
-      name: "Aynı taban: üsleri çıkar",
-      how: "Kesir çizgisine dokun. Tabanı aynı olan kuvvetler birleşir, üsleri çıkarılır: hesaplamak için − işaretine dokun.",
-      text: ["`x⁵/x²` ifadesinde üstte beş, altta iki x var. Her birinden ikişer tane sadeleşir ve üstte üç x kalır: bölmede üsler çıkarılır."],
-    },
-    "flip-across-bar": {
-      name: "Kesir çizgisinin öbür tarafına",
-      how: "Kuvveti yukarı, kesir çizgisinin öbür tarafına sürükle. Üssünün işareti değişir.",
-      text: ["Paydada daha çok x varsa üs sıfırın altına iner: `x⁻²`, `1/x²` demektir. Bir kuvvet kesir çizgisinin öbür tarafına geçince üssünün işareti değişir."],
-    },
-    "power-one": {
-      name: "Birinci kuvvet",
-      how: "1 üssünü tabanının üstüne bırak.",
-      text: ["`x¹`, bir tane x demektir: yalnızca `x`. Bu o kadar basit ki bundan sonra kendiliğinden yapılacak."],
-    },
-    "zero-power": {
-      name: "Sıfırıncı kuvvet",
-      how: "0 üssünü basılı tut, sonra tabanının üstüne bırak. Ardından toplamak için + işaretine dokun.",
-      text: ["`x³/x³` 1'e eşittir (x, 0 değilse), ama aynı zamanda `x^(3 − 3) = x⁰` demektir. Demek ki 0 dışındaki her sayının sıfırıncı kuvveti 1'dir."],
-    },
-    "tap-power": {
-      name: "Kuvveti hesapla",
-      how: "Kuvveti hesaplamak için üsse dokun: `2³`, 8 olur.",
-      text: ["Bir sayının kuvveti hesaplanabilir: `2³`, `2·2·2 = 8` demektir."],
-    },
-    "power-of-product": {
-      name: "Üssü parantezin içine al",
-      how: "Üssü parantezin içine sürükle: içerideki her çarpan bu üssü ayrı ayrı alır. Sonra hesaplamak için sayının üssüne dokun.",
-      text: ["`(2x)³`, `2x·2x·2x` demektir; bu da `2³·x³` eder. İçerideki her çarpan üssü alır."],
-    },
-    "split-number": {
-      name: "Sayıyı çarpanlarına ayır",
-      how: "Harfin önündeki sayıyı iki çarpana ayırmak için ona dokun. Öbür sayıya da dokun. Sonra terimlerin arasındaki +'ya dokun: ortak çarpan parantez dışına alınır. (Ya da onu basılı tut ve en soldan dışarı, öne sürükle.)",
-      text: ["Ortak çarpanı bulmak için sayıları çarpanlarına ayır. `2x + 6` ifadesinde 6, `2·3` demektir; artık iki terimde de 2 var."],
-    },
-    "split-term": {
-      name: "Ortadaki terimi ayır",
-      how: "Ortadaki terime dokun. İkiye ayrılır ve terimleri ikişerli gruplayarak çarpanlarına ayırmaya hazır olur.",
-      text: [
-        "`x² + 5x + 6` ifadesini çarpanlarına ayırmak için toplamı 5, çarpımı 6 olan iki sayı ara: 2 ve 3. `5x` yerine `2x + 3x` yaz.",
-        "Artık dört terim var ve ikişer ikişer çarpanlarına ayrılırlar: `x(x + 2) + 3(x + 2)`, sonra da `(x + 2)(x + 3)`.",
-      ],
-    },
-    "difference-of-squares": {
-      name: "İki kare farkı",
-      how: "İki karenin arasındaki eksiye dokun.",
-      text: ["Bir kareden bir kare çıkarılınca her zaman aynı şekilde çarpanlarına ayrılır: `a² − b² = (a − b)(a + b)`. Kontrol etmek için parantezleri çarp: ortadaki terimler birbirini götürür."],
     },
     "factor-shared": {
       name: "Ortak çarpan bul",
@@ -316,42 +223,10 @@ export const tr: Translation = {
       how: "Kesirlerin arasındaki · işaretine dokun ya da birini öbürünün üstüne bırak: paylar çarpılır, paydalar da.",
       text: ["Çarpma daha kolaydır: payları çarp, paydaları da çarp. Üçte birin yarısı `(1·1)/(2·3) = 1/6` eder."],
     },
-    "divide-by-fraction": {
-      name: "Kesre böl",
-      how: "Alttaki kesrin paydasını yukarı, payın üstüne sürükle. Payla çarpılır. Sonra hesaplamak için · işaretine ve kesir çizgisine dokun.",
-      text: [
-        "Bir sayının ne yaptığı, üstünde kaç kesir çizgisi olduğuna bağlıdır. `4/(3/5)` ifadesinde 5 iki kesir çizgisinin altında: bir bölmeye bölündüğü için çarpma yapar. Bu yüzden anlamı değişmeden yukarı, paya çıkabilir: `(4·5)/3`.",
-        "Bir kesre bölmenin, o kesrin tersiyle çarpmak olması da bundandır: `4/(3/5) = 4·5/3`.",
-      ],
-    },
     "split-fraction": {
       name: "Kesri ayır",
       how: "Paydaki bir terimi dışarı çek. Paydanın bir kopyasını da yanında götürür.",
       text: ["Payı bir toplam olan kesir, her terim için ayrı bir kesre ayrılabilir; hepsinin paydası aynı kalır: `(x + 5)/6 = x/6 + 5/6`."],
-    },
-    "times-one": {
-      name: "1 ile çarpma",
-      how: "1'i basılı tut, sonra çarptığı şeyin üstüne bırak.",
-      text: ["1 ile çarpmak hiçbir şeyi değiştirmez: `1·x`, yalnızca `x` demektir. Bu o kadar basit ki bundan sonra kendiliğinden yapılacak."],
-    },
-    substitute: {
-      name: "Yerine koy",
-      how: "`y` harfini `y = …` denkleminden alıp öbür denklemdeki `y` harfinin üstüne sürükle: o harf, `y` neye eşitse ona dönüşür. Sonra x'i bul; y'yi bulmak için de x'i birinci denklemde yerine koy.",
-      text: [
-        "`y = 2x` ve `x + y = 9`, aynı x ve y hakkında iki denklemdir ve ikisi de aynı anda doğrudur. İki bilinmeyenli tek bir denklemin pek çok çözümü vardır; iki denklemin birlikte ise genellikle tek bir çözümü vardır.",
-        "`y = 2x`, y ile 2x'in eşit olduğunu söyler; bu yüzden öbür denklemde y yerine 2x yazılabilir. Geriye tek harfli tek bir denklem kalır, onu nasıl çözeceğini de biliyorsun.",
-        "Hiçbir denklemde yalnız duran bir harf yoksa önce bir harfi yalnız bırak: `x − y = 1` denkleminde −y'yi karşıya geçirerek `x = 1 + y` elde et.",
-      ],
-    },
-    "evaluate-root": {
-      name: "Kökü hesapla",
-      how: "Hesaplamak için köke dokun.",
-      text: ["`√9`, kendisiyle çarpılınca 9 eden pozitif sayıdır: 3, çünkü `3·3 = 9` (−3 için de bu doğru, ama √ pozitif olanı gösterir). Aynı şekilde `∛8 = 2`, çünkü `2·2·2 = 8`."],
-    },
-    "split-square": {
-      name: "Kökün içini ayır",
-      how: "Kökün içindeki sayıya dokun: içinden bir tam kare ayrılır (küpkökte bir tam küp). Sonra onu kökün dışına çek ve hesaplamak için köküne dokun.",
-      text: ["Tam çıkmayan bir kök de sadeleştirilebilir. İçindeki sayıyı, bir tam kare ayrılacak şekilde çarpanlarına ayır: `√12 = √(4·3)`."],
     },
     "join-powers": {
       name: "Kökleri birleştir",
@@ -361,11 +236,6 @@ export const tr: Translation = {
         "Ortak olan her üs için de aynısı geçerlidir: `x³y³`, xxx·yyy demektir; bu da xy·xy·xy, yani `(xy)³` eder.",
       ],
     },
-    "pull-out-of-power": {
-      name: "Kökü ayır",
-      how: "Sayıyı kökün içinden dışarı çek: ona ayrı bir kök gelir. Sonra hesaplamak için o köke dokun.",
-      text: ["Bir çarpımın kökü, köklerin çarpımıdır: `√(4x) = √4·√x = 2√x`."],
-    },
     "root-notation": {
       name: "Kökü kuvvet olarak yaz",
       how: "Kökü kuvvet olarak yazmak için ona dokun: √, ½ kuvveti; ∛ ise ⅓ kuvveti demektir.",
@@ -373,20 +243,10 @@ export const tr: Translation = {
         "Her kök bir kuvvettir: `√x = x^(1/2)`, `∛x = x^(1/3)`; x'in n'inci dereceden kökü de `x^(1/n)` olur. Bu yüzden kuvvetlerin bütün kuralları kökler için de geçerlidir: `√x·√x = x^(1/2 + 1/2) = x`.",
       ],
     },
-    "root-of-power": {
-      name: "Kuvvetin kökü",
-      how: "Kökü kuvvet olarak yazmak için ona dokun. Sonra dıştaki üssü içteki üssün üstüne bırak ve çarpımı hesapla.",
-      text: ["Kök bir kuvvet olduğuna göre, bir kuvvetin kökü de kuvvetin kuvvetidir: `∛(x⁶) = (x⁶)^(1/3) = x^(6·1/3) = x²`. Üsler, Üslü ifadeler bölümündeki gibi çarpılır."],
-    },
     "fraction-power": {
       name: "Kökler ve kuvvetler bir arada",
       how: "Kökü kuvvetin üstüne bırak: üsler toplanır. Sonra üsteki kesirleri topla.",
       text: ["`√x`, `x^(1/2)` demektir; bu yüzden `√x·x² = x^(1/2 + 2) = x^(5/2)`. Kesirli bir üs de öbür üsler gibi davranır: kuvvetler çarpılırken üsler toplanır."],
-    },
-    "root-across": {
-      name: "Kökün üssünü karşıya geçir",
-      how: "Kökü kuvvet olarak yazmak için ona dokun (½, ⅓ ya da ¼ üssüyle), sonra bu üssü = işaretinin karşı tarafına sürükle. Karşı tarafta kare (ya da küp, dördüncü kuvvet) olur. Sonra hesaplamak için üsse dokun.",
-      text: ["`√x = 3` denklemini çözmek için iki tarafın karesini al. Kuvvet olarak yazınca `x^(1/2) = 3` olur; ½ karşı tarafa geçer ve kareye dönüşür: `x = 3²`."],
     },
     "exp-of-log": {
       name: "Kuvvet, logaritmayı geri alır",
@@ -443,11 +303,6 @@ export const tr: Translation = {
       how: "Tabanı = işaretinin karşı tarafına sürükle. Karşı tarafta logaritma olur.",
       text: ["x'i üsten kurtarmak için iki tarafın logaritmasını al. `e^x = 5` denkleminde e karşı tarafa geçer ve ln olur: `x = ln(5)`."],
     },
-    "log-across": {
-      name: "Logaritmayı karşıya geçir",
-      how: "Logaritmayı = işaretinin karşı tarafına sürükle. Karşı tarafta kuvvet olur. Bu bir sayının kuvvetiyse, hesaplamak için üssüne dokun.",
-      text: ["Logaritmayı kuvvet geri alır. `ln(x) = 2` denkleminde ln karşı tarafa geçer ve e olur: `x = e²`."],
-    },
     "bracket-times-bracket": {
       name: "İki parantezi çarp",
       how: "Bir parantezi öbürünün üstüne bırak: içerideki iki terimle de çarpılır. Sonra her yeni terimi aynı şekilde aç: çarpanlarından birini basılı tut ve öbürünün üstüne bırak (kısa dokunuş bütün terimi alır). Ardından `x·x` içindeki x'lerden birini basılı tut, öbürünün üstüne bırak ve benzer terimleri topla.",
@@ -461,16 +316,6 @@ export const tr: Translation = {
       how: "İki terimde de aynı parantez var. Terimlerden birinde onu basılı tut, sonra en soldan dışarı, öne sürükle.",
       text: ["Bir parantezin tamamı da ortak çarpan olabilir. `x(x + 2) + 3(x + 2)` ifadesinde iki terimde de `(x + 2)` var; bu yüzden o da her çarpan gibi öne alınır: `(x + 2)(x + 3)`."],
     },
-    "ineq-move-factor": {
-      name: "İki tarafı böl",
-      how: "Harfin önündeki sayıyı eşitsizlik işaretinin karşı tarafına sürükle. Öbür tarafı böler, eşitsizliğin yönü ise aynı kalır. Sonra kesir çizgisine dokun.",
-      text: ["İki tarafı pozitif bir sayıyla çarpmak ya da bölmek de eşitsizliğin yönünü değiştirmez: `2x < 8` ise `x < 8/2` olur."],
-    },
-    "rationalise": {
-      name: "Paydada tam sayı",
-      how: "Paydadaki kökü yukarı, payın üstüne sürükle: pay da payda da onunla çarpılır. Sonra paydadaki · işaretine dokun.",
-      text: ["Pay ile paydayı aynı sayıyla çarpmak kesrin değerini değiştirmez. Zaten paydada olan kökü seç: `√3·√3 = 3`, yani `1/√3 = √3/(√3·√3) = √3/3`. Artık kesir çizgisinin altında kök kalmadı."],
-    },
     "zero-product": {
       name: "Sıfıra eşit bir çarpım",
       how: "Parantezlerden birini aşağı, çarpımın dışına çek: denklem ikiye ayrılır; ya bu parantez 0'dır ya da öbürü. Sonra ikisini de ayrı ayrı çöz.",
@@ -478,11 +323,6 @@ export const tr: Translation = {
         "Bir çarpım ancak çarpanlarından biri 0 ise 0 olur: `3·0 = 0` ama `3·2` öyle değil. Yani `(x − 2)(x + 3) = 0` ise `x − 2 = 0` ya da `x + 3 = 0` olur: iki kök.",
         "Bu yüzden iki tarafı asla 0 olabilecek bir şeye bölmeyiz: burada bir kökü kaybederdik.",
       ],
-    },
-    "plus-minus": {
-      name: "Karenin iki kökü",
-      how: "2'yi = işaretinin karşısına sürükle. Karenin iki kökü vardır: denklem ikiye ayrılır, biri + ile, öbürü − ile.",
-      text: ["`3² = 9`, ama `(−3)² = 9` de doğru. Yani `x² = 9` ise `x = 3` ya da `x = −3` olur. Eksiyi unutursan bir kökü kaybedersin."],
     },
     "take-out-then-split": {
       name: "Harfi dışarı al, sonra ayır",
@@ -494,15 +334,195 @@ export const tr: Translation = {
       how: "Ortadaki terime dokun: ikiye ayrılır. Her ikiliden bir çarpanı dışarı al, sonra ortak parantezi. Ardından parantezlerden birini aşağı, çarpımın dışına çek.",
       text: ["`x² + x − 6` iki parantezin çarpımıdır: `(x + 3)(x − 2)`. Bu iki sayının çarpımı `−6`, toplamı da x'in katsayısı olan `1`. Sıfıra eşit bir çarpım elde edince her parantez bir kök verir."],
     },
+    "tap-operator": {
+      name: "Aradaki işarete dokun",
+      how: "İki sayının arasındaki + işaretine dokun: toplanırlar, tıpkı birini öbürünün üstüne bıraktığında olduğu gibi.",
+      text: ["İki parçanın arasındaki işarete dokunursan işlem yapılır: + toplar, − çıkarır, · çarpar. Bu, birini öbürünün üstüne bırakmakla aynı işi görür: hangisi daha hızlıysa onu kullan."],
+    },
+    "multiply-out": {
+      name: "Çarpımdaki sayıları çarp",
+      how: "· işaretine dokun: çarpımdaki bütün sayılar çarpılır ve `4x·3`, `12x` olur.",
+      text: ["Çarpmada sıranın önemi yoktur, bu yüzden `4x·3`, `4·3·x` demektir. Aralarında bir harf olsa bile sayılar çarpılabilir."],
+    },
+    "times-zero": {
+      name: "Sıfırla çarpma",
+      how: "0'a dokun: çarpımın tamamı 0 olur. Sonra toplamak için + işaretine dokun.",
+      text: ["0 ile çarpılan her şey 0 eder. Bu yüzden `0·(x + 4)` ifadesi, x ne olursa olsun 0'dır."],
+    },
+    "evaluate-power": {
+      name: "Kuvveti hesapla",
+      how: "Üssü sayının üstüne bırak: `2³`, 8 olur.",
+      text: ["`2³`, `2·2·2` demektir: küçük sayı, yani üs, 2'nin kaç kez çarpıldığını sayar. Bu yüzden bir sayının kuvveti hesaplanabilir: `2³ = 8`.", "Üsse dokunursan kuvvet bunun yerine çarpım olarak açık açık yazılır: `2³`, `2·2·2` olur."],
+    },
+    "divide-powers": {
+      name: "Aynı taban: üsleri çıkar",
+      how: "Paydadaki kuvveti, paydaki aynı tabanlı kuvvetin üstüne bırak. Üsler çıkarılır: hesaplamak için − işaretine dokun.",
+      text: ["`x⁵/x²` ifadesinin payında beş, paydasında iki x var. Pay ve paydadan ikişer x sadeleşir, payda üç x kalır: bölmede üsler çıkarılır."],
+    },
+    "flip-across-bar": {
+      name: "Kesir çizgisinin öbür yanına",
+      how: "Kuvveti kesir çizgisinin öbür yanına sürükle: paydadan paya ya da paydan paydaya. Üssünün işareti değişir.",
+      text: ["Paydada daha çok x varsa üs sıfırın altına iner: `x²/x⁵`, `x^(2 − 5) = x⁻³` demektir, aynı zamanda da `1/x³`. Yani `x⁻³`, `1/x³` demektir: bir kuvvet kesir çizgisinin öbür yanına geçince, hangi yöne giderse gitsin, üssünün işareti değişir."],
+    },
+    "power-of-product": {
+      name: "Üssü parantezin içine al",
+      how: "Üssü parantezin içine sürükle: içerideki her çarpan üssün bir kopyasını alır. Sonra sayının üssünü sayının üstüne bırakarak hesapla.",
+      text: ["`(2x)³`, `2x·2x·2x` demektir; bu da `2³·x³` eder. İçerideki her çarpan üssü alır."],
+    },
+    "minus-bracket": {
+      name: "Bir toplamda parantezin önünde eksi",
+      how: "Parantezin önündeki eksiyi parantezin üstüne sürükle: içerideki bütün işaretler değişir. (Toplamın tamamı hareket edebiliyorsa eksiye kısa dokunuş bütün toplamı alır: yalnızca eksiyi almak için onu basılı tut.)",
+      text: ["`5 − (x + 2)` ifadesinde `x + 2` toplamının tamamı, yani hem x hem 2 çıkarılır. Bu yüzden eksi içerideki her işareti değiştirir: `5 − x − 2`."],
+    },
+    "split-number": {
+      name: "Sayıyı ayır",
+      how: "Harfin önündeki sayıya dokun: iki çarpana ayrılır, öbür sayıyla ortak olan çarpan önde. Öbür sayıya da dokun. Sonra terimlerin arasındaki + işaretine dokun: ortak çarpan dışarı çıkar.",
+      text: ["Ortak çarpan her zaman göze çarpmaz. `6x + 9` ifadesinde iki terim de 3'e bölünebilir, ama `6x` teriminde dışarı alınacak bir 3 görünmüyor.", "6'ya dokun: `3·2` olarak ayrılır, 9 ile ortak olan 3 önde. Artık bir 3 var: `3·2x + 9 = 3(2x + 3)`."],
+    },
+    "split-term": {
+      name: "Ortadaki terimi ayır",
+      how: "Ortadaki terimin harfine dokun: terim ikiye ayrılır. (Sayısına dokunursan sayı ayrılır.) Sonra önceki örnekteki gibi ikişerli çarpanlarına ayır: önce ilk iki terimin arasındaki + işaretine, sonra son iki terimin arasındakine, ardından iki çarpımın arasındakine dokun.",
+      text: ["`x² + 5x + 6` ifadesini çarpanlarına ayırmak için toplamı 5, çarpımı 6 olan iki sayı ara: 2 ve 3. `5x` terimini `2x + 3x` olarak yaz.", "Artık dört terim var ve ikişerli çarpanlarına ayrılıyorlar: `x(x + 2) + 3(x + 2)`, sonra `(x + 2)(x + 3)`."],
+    },
+    "difference-of-squares": {
+      name: "İki kare farkı",
+      how: "İki terim de bir kare ve biri öbüründen çıkarılıyor: aradaki eksiye dokun. (İki terimin ortak bir sayısı varsa dokunuş önce onu dışarı alır, `4x² − 4 = 4(x² − 1)`: sonra eksiye yeniden dokun.)",
+      text: ["Bir kareden bir kare çıkarılınca ifade her zaman aynı şekilde çarpanlarına ayrılır: `a² − b² = (a − b)(a + b)`. Kontrol etmek için çarpımı aç: ortadaki terimler birbirini götürür.", "Bu yalnızca fark için, yani bir kareden bir kare çıkarıldığında işe yarar. `x² + 9` gibi iki karenin toplamı hiç çarpanlarına ayrılmaz. `x² − 7` gibi bir kareden tam kare olmayan bir sayı çıkarıldığında ise ayrılır, ama köklerle: `(x − √7)(x + √7)`."],
+    },
+    "cancel-factor": {
+      name: "Ortak çarpanı sadeleştir",
+      how: "Paydadaki sayıyı, paydaki aynı sayının üstüne sürükle (ya da tersini yap): sadeleşirler.",
+      text: ["Payın tamamını ve paydanın tamamını çarpan bir sayı sadeleşir: `(3x)/3`, `x` eder, çünkü `3x` bölü 3, x eder. `(3x + 1)/3` ifadesinde ise sadeleşmez: 3, payın yalnızca bir kısmını çarpar."],
+    },
+    "evaluate-fraction": {
+      name: "Kesri hesapla",
+      how: "Paydaki sayıya dokun: paydadaki sayı önde olacak şekilde ayrılır (14 bölü 7'de 14, `7·2` olur). Sonra paydadaki 7'yi bu 7'nin üstüne bırak: sadeleşirler.",
+      text: ["Sonucu tam sayı çıkan bir kesir hesaplanabilir: `12/3`, 4 eder, çünkü `12 = 3·4` ve paydaki 3, paydadaki 3 ile sadeleşir."],
+    },
+    "divide-numbers": {
+      name: "Kesri sadeleştir",
+      how: "Önce paydaki, sonra paydadaki sayıya dokun: ikisi de ortak çarpan önde olacak şekilde ayrılır (8 ile 12, `4·2` ve `4·3` olur). Sonra 4'lerden birini öbürünün üstüne bırak: sadeleşirler.",
+      text: ["Bir kesrin payı ve paydası aynı sayıya bölünerek kesir sadeleştirilebilir: `8/12 = 2/3`. Kesrin değeri değişmez.", "Sayıları ayırınca ortak çarpan ortaya çıkar: `8/12 = (4·2)/(4·3)` ve 4'ler sadeleşir."],
+    },
+    "factor-then-cancel": {
+      name: "Dışarı al, sonra sadeleştir",
+      how: "Paydaki bir terimin sayısını basılı tut ve en soldan dışarı, öne sürükle (ya da terimlerin arasındaki + işaretine dokun). Sonra onu paydadaki aynı sayının üstüne bırak: sadeleşirler.",
+      text: ["Yalnızca payın tamamının çarpanı sadeleşebilir. `(2x + 6)/2` ifadesinde 2 her terimin çarpanıdır, bu yüzden önce onu dışarı al: `(2(x + 3))/2`. Artık payın tamamının çarpanıdır ve paydayla sadeleşir."],
+    },
+    "divide-by-fraction": {
+      name: "Kesre bölme",
+      how: "Alttaki kesrin paydasını yukarı, payın üstüne sürükle. Payla çarpılır. Hesaplamak için · işaretine dokun, sonra pay ile paydanın ortak çarpanlarını sadeleştir.",
+      text: ["Bir sayının ne iş yaptığı, üstünde kaç kesir çizgisi olduğuna bağlıdır. `4/(3/5)` ifadesinde 5 iki çizginin altında: bir bölmeye bölündüğü için çarpar. Bu yüzden yukarı, paya çıkabilir ve anlam değişmez: `(4·5)/3`.", "Bir kesre bölmenin, o kesrin ters çevrilmişiyle çarpmak olmasının nedeni budur: `4/(3/5) = 4·5/3`."],
+    },
+    "evaluate-root": {
+      name: "Kökü hesapla",
+      how: "Kökü kuvvet olarak yazmak için ona dokun: `√9`, `9^(1/2)` demektir. Sonra hesaplamak için ½'yi 9'un üstüne bırak.",
+      text: ["`√9`, kendisiyle çarpılınca 9 eden pozitif sayıdır: 3, çünkü `3·3 = 9` (−3 de 9 verir, ama √ pozitif olanı gösterir). Aynı şekilde `∛8 = 2`, çünkü `2·2·2 = 8`.", "Kuvvet olarak yazınca `√9 = 9^(1/2)`: 9'un üstüne bırakılan ½, her üs gibi onu hesaplar."],
+    },
+    "pull-out-of-power": {
+      name: "Kökü ayır",
+      how: "Sayıyı kökün dışına çek: ona ayrı bir kök gelir. Sonra o kökü hesapla: ona dokun ve ½'yi sayının üstüne bırak.",
+      text: ["Bir çarpımın kökü, köklerin çarpımıdır: `√(4x) = √4·√x = 2√x`."],
+    },
+    "split-square": {
+      name: "Kökü sadeleştir",
+      how: "Kökün içindeki sayıya dokun: içinden bir tam kare ayrılır (küp kökte bir tam küp). Sonra önceki örnekteki gibi onu kökün dışına çek ve kökünü hesapla.",
+      text: ["Sonucu tam sayı çıkmayan bir kök de sadeleştirilebilir. İçindeki sayıyı, çarpanlardan biri tam kare olacak şekilde ayır: `√12 = √(4·3) = 2√3`."],
+    },
+    "root-of-power": {
+      name: "Kuvvetin kökü",
+      how: "Kökü kuvvet olarak yazmak için ona dokun. Dıştaki üssü içteki üssün üstüne bırak ve çarpımı hesaplamak için · işaretine dokun. Sonra üssün payı ile paydasının ortak çarpanlarını sadeleştir.",
+      text: ["Kök bir kuvvettir, bu yüzden bir kuvvetin kökü de bir kuvvetin kuvvetidir: `∛(x⁶) = (x⁶)^(1/3) = x^(6/3) = x²`. Üslü ifadeler bölümündeki gibi üsler çarpılır."],
+    },
+    "rationalise": {
+      name: "Paydayı kökten kurtar",
+      how: "Paydadaki kökü yukarı, payın üstüne sürükle: hem pay hem payda onunla çarpılır. Sonra paydadaki · işaretine dokun ve sadeleşen bir şey kalırsa sadeleştir.",
+      text: ["Bir kesrin payını ve paydasını aynı sayıyla çarpmak kesrin değerini değiştirmez. Zaten paydada duran kökü seç: `√3·√3 = 3`, yani `1/√3 = √3/(√3·√3) = √3/3`. Artık kesir çizgisinin altında kök yok."],
+    },
+    "log-across": {
+      name: "Logaritmayı karşıya geçir",
+      how: "Logaritmayı = işaretinin karşı tarafına sürükle. Karşı tarafta kuvvet olur. Bu bir sayının kuvvetiyse, hesaplamak için üssü sayının üstüne bırak.",
+      text: ["Logaritmayı kuvvet geri alır. `ln(x) = 2` denkleminde ln karşı tarafa geçer ve e olur: `x = e²`."],
+    },
+    "move-term": {
+      name: "Terimi karşıya geçir",
+      how: "Sayıyı = işaretinin karşı tarafına sürükle. Geçerken işareti değişir. Oradaki sayının üstüne bırakırsan birlikte hesaplanırlar; ya da yanına bırak ve hesaplamak için − işaretine dokun.",
+      text: ["Bir denklem, iki tarafın eşit olduğunu söyler. İki tarafa da aynı işlemi yaparsan eşit kalırlar.", "Bir terimi `=` işaretinin karşı tarafına geçirmek tam olarak bunu yapar. `x + 3 = 10` denkleminde iki taraftan da 3 çıkar: `x = 10 − 3`. `+3` karşı tarafta bu yüzden `−3` olur."],
+    },
+    "move-factor": {
+      name: "İki tarafı böl",
+      how: "Harfin önündeki sayıyı = işaretinin karşı tarafına sürükle. Öbür tarafı böler. Sonra kesri hesapla: ayırmak için paydaki sayıya dokun ve paydayı ona uyan çarpanın üstüne bırak.",
+      text: ["Bir tarafın tamamını çarpan sayı karşıya geçince öbür tarafı böler. `2x = 8` denkleminde iki tarafı da 2'ye böl: `x = 8/2` ve `8/2 = (2·4)/2 = 4`."],
+    },
+    "two-steps": {
+      name: "İki adım",
+      how: "Eklenen sayıyı karşıya geçir ve oradaki sayının üstüne bırak. Sonra harfin önündeki sayıyı karşıya geçir ve kesri hesapla: payı ayır ve sadeleştir.",
+      text: ["`3x + 4 = 19` denkleminde x önce 3 ile çarpılmış, sonra 4 eklenmiş. x'e geri dönmek için bu işlemleri ters sırayla geri al: önce 4'ü çıkar, sonra 3'e böl.", "3 önce gidemez: o, tarafın tamamını değil, yalnızca x'i çarpar."],
+    },
+    "root-across": {
+      name: "Kökü karşıya geçir",
+      how: "Kökü kuvvet olarak yazmak için ona dokun (½; ∛ içinse ⅓), sonra bu üssü = işaretinin karşı tarafına sürükle: öbür tarafın karesi (∛ içinse küpü) alınır. Ardından hesaplamak için üssü sayının üstüne bırak.",
+      text: ["`√x = 3` denklemini çözmek için iki tarafın karesini al: `x = 3²`. Kare almak kökü geri alır; bu yüzden √ gider ve öbür tarafın karesi alınır. Küp almak da küp kökü geri alır, öbürleri de böyle.", "Kuvvet olarak yazınca, `x^(1/2) = 3`, karşıya geçen ½'dir ve kareye dönüşür: aynı hamle."],
+    },
+    "ineq-move-factor": {
+      name: "İki tarafı böl",
+      how: "Harfin önündeki sayıyı eşitsizlik işaretinin karşı tarafına sürükle. Öbür tarafı böler, eşitsizliğin yönü ise aynı kalır. Sonra kesri hesapla: payı ayır ve sadeleştir.",
+      text: ["İki tarafı pozitif bir sayıyla çarpmak ya da pozitif bir sayıya bölmek de eşitsizliğin yönünü değiştirmez: `2x < 8` ise `x < 8/2`."],
+    },
+    "ineq-negative": {
+      name: "Negatif bir sayıya bölme",
+      how: "Sayıyı karşıya sürükle ve kesri hesapla: eşitsizliğin yönü aynı kalır. Sonra eksiyi karşıya sürükle: eşitsizliğin yönü değişir.",
+      text: ["İki tarafı negatif bir sayıya bölmek, tıpkı −1 ile çarpmak gibi, eşitsizliğin yönünü değiştirir: `−2x < 6`, `x > −3` demektir.", "Burada bildiğin iki hamle var: 2'ye böl (yön aynı kalır), sonra eksiyi karşıya geçir (yön değişir)."],
+    },
+    "plus-minus": {
+      name: "Bir karenin iki kökü",
+      how: "Üsteki 2'yi = işaretinin karşı tarafına sürükle. Bir karenin iki kökü vardır: denklem ikiye ayrılır, biri + ile, öbürü − ile. Sonra hesaplamak için her ½'yi sayının üstüne bırak.",
+      text: ["`3² = 9`, ama `(−3)² = 9` da. Yani `x² = 9` ise `x = 3` ya da `x = −3`. Eksiyi unutursan bir kökü kaybedersin."],
+    },
     "fraction-zero": {
-      name: "0'a eşit bir kesir",
-      how: "Kesrin paydasını ='in öbür tarafına sürükle (onu + işaretinden tut). Öbür tarafı çarpar: hesaplamak için 0'a dokun, çünkü 0 çarpı herhangi bir sayı 0'dır. Sonra sayıyı öbür tarafa geçir.",
-      text: ["Bir kesir yalnızca payı 0 olduğunda 0'dır. Paydası asla 0 olamaz ve denklemden sonra yazılan koşul bunu söyler: `x ≠ −2`, `x + 2`'nin 0 olmamasını sağlar.", "Bu yüzden payda öbür tarafa geçip orayı çarpabilir: `(x − 3)/(x + 2) = 0`, `x − 3 = 0·(x + 2)` olur, yani `x − 3 = 0`. Koşulu sağlamayan bir çözüm elenir."],
+      name: "Sıfıra eşit bir kesir",
+      how: "Kesrin paydasını + ya da − işaretinden tutup = işaretinin karşı tarafına sürükle. Öbür tarafla çarpılır: 0'a dokun, çünkü 0 çarpı her şey 0'dır. Sonra sayıyı karşıya geçir.",
+      text: ["Bir kesir ancak payı 0 olduğunda 0 olur. Paydası ise asla 0 olamaz; denklemin altındaki koşul da bunu söyler: `x ≠ −2`, `x + 2` ifadesinin 0 olmasını engeller.", "Bu yüzden payda karşıya geçip öbür tarafı çarpabilir: `(x − 3)/(x + 2) = 0` denkleminden `x − 3 = 0·(x + 2)`, yani `x − 3 = 0` elde edilir. Koşulu sağlamayan bir kök çıkarsa üstü çizilir."],
+    },
+    "letter-factor": {
+      name: "Bir harfe bölme",
+      how: "x'in önündeki harfi = işaretinin karşı tarafına sürükle. Öbür tarafı böler. Sonra onu paydaki aynı harfin üstüne bırak: sadeleşirler.",
+      text: ["İki taraf ancak 0 olamayan bir harfe bölünebilir; denklemin altındaki koşul da bunu söyler: `a ≠ 0`.", "x'in kendisine asla bölme: `x² = 3x` denkleminde x'e bölersen `x = 3` bulursun ve `x = 0` kökünü kaybedersin. Bunun yerine her şeyi bir tarafa topla ve çarpanlarına ayır."],
+    },
+    "alone-first": {
+      name: "Baştan sona yöntem",
+      how: "Henüz hiçbir harf yalnız değil: `y = …` elde etmek için birinci denklemdeki x'i karşıya geçir. Sonra y'yi öbür denklemde yerine koy, x'i bul ve y'yi bulmak için x'i geri yerine koy.",
+      text: ["İşte yöntemin tamamı, baştan sona:", "1. Denklemlerden birinde bir harfi yalnız bırak. En kolayını seç: önünde sayı olmayan bir harf. `x + y = 7` denkleminde x'i karşıya geçir: `y = 7 − x`.", "2. Yerine koy: öbür denklemde o harfin yerine, neye eşitse onu parantez içinde yaz. Önünde eksi varsa içerideki bütün işaretler değişir.", "3. Geriye kalan denklemi çöz: içinde tek bir harf var.", "4. Öbür harfi bulmak için bulduğun değeri `y = …` denkleminde yerine koy."],
+    },
+    "fraction-of-fractions": {
+      name: "İki kesrin kesri",
+      how: "Alttaki kesrin paydasını yukarı, payın üstüne sürükle; sonra üstteki kesrin paydasını aşağı, paydanın üstüne sürükle. Ardından hesaplamak için her · işaretine dokun.",
+      text: ["`(a/b)/(c/d)` ifadesinde dört sayının her biri ana kesir çizgisini geçip, üstünde aynı sayıda kesir çizgisi olan yere gidebilir ve anlam değişmez (önceki örnekte 5'in yaptığı gibi): d yukarı, a'nın yanına; b aşağı, c'nin yanına; c yukarı, b'nin yanına; a da aşağı, d'nin yanına gider. (a'nın 0 olabileceği durum hariç: hiçbir şey 0'a bölünemez.)", "İki paydayı taşıyınca tek bir kesir elde edilir: `(a·d)/(c·b)`."],
+    },
+    "minus-number-in": {
+      name: "Önde negatif bir sayı",
+      how: "Sayıyı parantezin üstüne bırak ve hesaplamak için · işaretine dokun. Sonra eksiyi parantezin üstüne bırak: içerideki bütün işaretler değişir.",
+      text: ["`−3(x − 2)`, −1 çarpı 3 çarpı parantez demektir. Önce 3 ile çarp: `−(3x − 6)`. Sonra eksi, içerideki bütün işaretleri değiştirir: `−3x + 6`.", "Son işarete dikkat: `−3` çarpı `−2`, `+6` eder. Eksi çarpı eksi artıdır."],
+    },
+    "substitute-back": {
+      name: "Geri yerine koy",
+      how: "`x = …` denklemindeki `x` harfini öbür denklemdeki `x` harfinin üstüne sürükle. Sonra y'yi bulmak için · ve + işaretlerine dokun.",
+      text: ["x'i bulduktan sonra öbür denklem sana y'yi verir: orada x'in yerine değerini yaz ve hesapla. Artık ikisini de biliyorsun; bu ikili, sistemin çözümüdür.", "Doğrulamak için iki değeri de en son kullanmadığın denklemde yerine koy: iki taraf da aynı sonucu vermeli."],
     },
     "square-both-sides": {
       name: "İki tarafın karesini al",
-      how: "Kökü ½ üslü bir kuvvet olarak yazmak için ona dokun, sonra ½'yi = işaretinin karşısına sürükle: öbür tarafın karesi alınır. Ardından parantezi aç ve çöz. Altta koşullar var: birini sağlamayan kök üstü çizilir.",
-      text: ["Karekök hiçbir zaman negatif değildir; bu yüzden `√(x² + 5) = x + 1` ancak `x + 1 ≥ 0` olduğunda geçerlidir. İki tarafın karesini alınca bu bilgi kaybolur: `x² + 5 = (x + 1)²`, `x + 1` negatif olsaydı da geçerli olurdu. Koşullar bu yüzden en başta verilir ve çözüm boyunca geçerli kalır."],
+      how: "Kökü ½ üslü bir kuvvet olarak yazmak için ona dokun, sonra ½'yi = işaretinin karşısına sürükle: öbür tarafın karesi alınır. Önceki örnekteki gibi parantezi aç, her şeyi bir tarafa topla, çarpanlarına ayır, sonra çarpımı parantezlere ayır. Bir koşulu sağlamayan kökün üstü çizilir.",
+      text: ["Karekök hiçbir zaman negatif değildir; bu yüzden `√(x + 7) = x + 1` ancak `x + 1 ≥ 0`, yani `x ≥ −1` olduğunda geçerlidir. (Kökün içi de negatif olamaz: `x ≥ −7`.) Bunlar koşullardır; en başta verilirler ve çözüm boyunca geçerli kalırlar.", "İki tarafın karesini alınca bu bilgi kaybolur: `x + 7 = (x + 1)²` denklemi, `x + 1` ifadesinin negatif olduğu `x = −3` için de sağlanır. Bu yüzden karesi alınmış denklem `x = 2` ya da `x = −3` verir; −3 bir koşulu sağlamaz, üstü çizilir. Tek kök `x = 2`'dir."],
+    },
+    "substitute": {
+      name: "Yerine koy",
+      how: "`y` harfini `y = …` denkleminden alıp öbür denklemdeki `y` harfinin üstüne sürükle: o harf, `y` neye eşitse ona dönüşür. Artık o denklemde yalnızca x var: x'li terimleri topla ve denklemi çöz.",
+      text: ["`y = 2x` ve `x + y = 9`, aynı x ve y hakkında iki denklemdir ve ikisi de aynı anda doğrudur. İki bilinmeyenli tek bir denklemin pek çok çözümü vardır; iki denklemin birlikte ise genellikle tek bir çözümü vardır.", "`y = 2x`, y ile 2x'in eşit olduğunu söyler; bu yüzden öbür denklemde y yerine 2x yazılabilir. Geriye tek harfli tek bir denklem kalır, onu nasıl çözeceğini de biliyorsun."],
+    },
+    "zero-power": {
+      name: "Sıfırıncı kuvvet",
+      how: "0 üssüne dokun: `x⁰`, 1 olur. Sonra toplamak için + işaretine dokun.",
+      text: ["`x³/x³` 1'e eşittir (x, 0 değilse), ama aynı zamanda `x^(3 − 3) = x⁰` demektir. Demek ki 0 dışındaki her sayının sıfırıncı kuvveti 1'dir."],
     },
   },
 

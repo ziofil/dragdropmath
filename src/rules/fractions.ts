@@ -1,106 +1,75 @@
-import { frac, num } from "../expr/build";
+/**
+ * Simplifying a fraction is done by hand, a factor at a time: a factor of the
+ * whole top dropped onto an equal factor of the whole bottom (or the other
+ * way round) cancels with it; dropped onto a power of the same base, the
+ * exponents subtract. Numbers that only share a factor are split first
+ * (tapping 8 of 8x/12 shows 4·2: split-number), so the 4s can cancel.
+ * Nothing simplifies by tapping the bar.
+ */
+import { negate, pow, sum } from "../expr/build";
 import { key } from "../expr/key";
 import type { Expr, MathState } from "../expr/types";
-import { dragCtx, replaceIn, type Rule } from "./types";
+import { replaceIn, type Candidate, type Rule } from "./types";
+import { asPower } from "./shapes";
 import { fractionOf, rebuildTerm } from "./view";
 
-const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
-
-/** The fraction tapped (its bar), seen whole: with whatever multiplies it (6·(x/3) is 6x over 3). */
-function tappedFraction(state: MathState, id: string) {
-  const c = dragCtx(state, id);
-  if (c?.node.kind !== "frac") return null;
-  return fractionOf(state, c.node.num.id);
+/** Piece `id` as one factor of a whole top or bottom, with the fraction it's in and the factors across the bar. */
+function acrossBar(state: MathState, id: string) {
+  const h = fractionOf(state, id);
+  if (!h) return null;
+  const { view, onTop } = h;
+  const mine = onTop ? view.top : view.bottom;
+  const i = mine.findIndex((f) => f.id === id);
+  if (i < 0 || !view.frac) return null;
+  return { ...h, node: mine[i], others: onTop ? view.bottom : view.top };
 }
 
-/**
- * 6x/(3y) → 2x/y, 16x/12 → 4x/3 (tap the fraction bar: numbers on top and
- * bottom are divided by what they share). Simplifying is always a tap on the
- * bar; dropping a piece across it multiplies top and bottom (expand-fraction).
- */
-export const divideNumbers: Rule = {
-  id: "divide-numbers",
-  name: "Divide numbers",
-  gesture: "Tap the fraction bar: numbers on top and bottom are divided by what they share.",
-  tap: true,
-  tapOrder: 0.4,
-  apply(state, id) {
-    const h = tappedFraction(state, id);
-    if (!h) return [];
-    const { view } = h;
-    const top = [...view.top];
-    const bottom = [...view.bottom];
-    let any = false;
-    for (let j = 0; j < bottom.length; j++) {
-      const d = bottom[j];
-      if (d.kind !== "num" || d.value === 0) continue;
-      for (let i = 0; i < top.length; i++) {
-        const t = top[i];
-        if (t.kind !== "num") continue;
-        const g = gcd(t.value, (bottom[j] as Extract<Expr, { kind: "num" }>).value);
-        if (g <= 1) continue;
-        top[i] = num(t.value / g, t.id);
-        bottom[j] = num((bottom[j] as Extract<Expr, { kind: "num" }>).value / g, d.id);
-        any = true;
-      }
-    }
-    if (!any) return [];
-    // A number that came out 1 goes (unless it's all there is on top: 1/2).
-    const ones = (xs: Expr[], keepOne: boolean) => {
-      const out = xs.filter((x) => !(x.kind === "num" && x.value === 1));
-      return out.length || !keepOne ? out : [num(1)];
-    };
-    return [{ rule: "divide-numbers", state: replaceIn(state, h.loc, rebuildTerm(view, ones(top, true), ones(bottom, false))) }];
-  },
-};
-
-/** 8/2 → 4, 2/4 → 1/2: tap the fraction bar to work it out, or to simplify it when it doesn't come out whole. */
-export const evaluateFraction: Rule = {
-  id: "evaluate-fraction",
-  name: "Work out a fraction",
-  gesture: "Tap the bar of a fraction of two numbers to work it out (8/2 → 4), or to simplify it (2/4 → 1/2).",
-  tap: true,
-  apply(state, id) {
-    const c = dragCtx(state, id);
-    const f = c?.node;
-    if (!c || f?.kind !== "frac" || f.num.kind !== "num" || f.den.kind !== "num" || f.den.value === 0) return [];
-    const [p, q] = [f.num.value, f.den.value];
-    if (Number.isInteger(p / q)) return [{ rule: "evaluate-fraction", state: replaceIn(state, c.loc, num(p / q, f.id)) }];
-    const g = gcd(p, q);
-    if (g <= 1) return [];
-    return [{ rule: "evaluate-fraction", state: replaceIn(state, c.loc, frac(num(p / g, f.num.id), num(q / g, f.den.id), f.id)) }];
-  },
-};
+const isZero = (e: Expr) => e.kind === "num" && e.value === 0;
 
 /**
- * ab/b → a, (2·3)/(2·5) → 3/5, 3·(x/3) → x, (x + 1)/(2(x + 1)) → 1/2 (tap the
- * fraction bar: whatever the top and bottom share cancels).
+ * (3x)/3 → x, (x + 1)/(2(x + 1)) → 1/2, 3·(x/3) → x (drop a factor of the
+ * whole top onto an equal factor of the whole bottom, or the other way round:
+ * both go). In (3x + 1)/3 the 3 multiplies only part of the top: nothing cancels.
  */
 export const cancelFactor: Rule = {
   id: "cancel-factor",
   name: "Cancel a common factor",
-  gesture: "Tap the fraction bar: the factors the top and bottom share cancel.",
-  tap: true,
-  tapOrder: 0.2,
+  gesture: "Drop a factor of the whole top onto the same factor of the whole bottom (or the other way round): both cancel.",
   apply(state, id) {
-    const h = tappedFraction(state, id);
-    if (!h) return [];
-    const { view } = h;
-    const top = [...view.top];
-    const bottom = [...view.bottom];
-    let any = false;
-    for (let i = 0; i < top.length; i++) {
-      // 0/0 isn't 1: a 0 never cancels.
-      const ti = top[i];
-      if (ti.kind === "num" && ti.value === 0) continue;
-      const j = bottom.findIndex((b) => key(b) === key(top[i]));
-      if (j < 0) continue;
-      top.splice(i, 1);
-      bottom.splice(j, 1);
-      i--;
-      any = true;
-    }
-    if (!any) return [];
-    return [{ rule: "cancel-factor", state: replaceIn(state, h.loc, rebuildTerm(view, top, bottom)) }];
+    const a = acrossBar(state, id);
+    if (!a || isZero(a.node)) return [];
+    const { view, onTop, node } = a;
+    return a.others.flatMap((o): Candidate[] => {
+      if (key(o) !== key(node)) return [];
+      const top = view.top.filter((f) => f.id !== (onTop ? node.id : o.id));
+      const bottom = view.bottom.filter((f) => f.id !== (onTop ? o.id : node.id));
+      return [{ rule: "cancel-factor", state: replaceIn(state, a.loc, rebuildTerm(view, top, bottom)), targetId: o.id }];
+    });
+  },
+};
+
+/**
+ * x⁵/x² → x^(5 − 2) (drop a power on the bottom onto one of the same base on
+ * top: the exponents subtract, and the learner works 5 − 2 out). Dropped the
+ * other way, onto the bottom's power, it lands there: x^(2 − 5) underneath.
+ * The very same power cancels instead (cancel-factor).
+ */
+export const dividePowers: Rule = {
+  id: "divide-powers",
+  name: "Same base: subtract exponents",
+  gesture: "Drop a power across the fraction bar onto a power of the same base: the exponents subtract.",
+  apply(state, id) {
+    const a = acrossBar(state, id);
+    if (!a) return [];
+    const { view, node } = a;
+    const mine = asPower(node);
+    return a.others.flatMap((o): Candidate[] => {
+      const theirs = asPower(o);
+      if (key(theirs.base) !== key(mine.base) || key(o) === key(node) || (o.kind !== "pow" && node.kind !== "pow") || o.kind === "num") return [];
+      // What it's dropped on keeps its place: its exponent less the carried one.
+      const merged = o.kind === "pow" ? pow(o.base, sum([theirs.exp, negate(mine.exp)]), o.id) : pow(o, sum([theirs.exp, negate(mine.exp)]));
+      const swap = (fs: Expr[]) => fs.flatMap((f) => (f.id === node.id ? [] : f.id === o.id ? [merged] : [f]));
+      return [{ rule: "divide-powers", state: replaceIn(state, a.loc, rebuildTerm(view, swap(view.top), swap(view.bottom))), targetId: o.id }];
+    });
   },
 };
