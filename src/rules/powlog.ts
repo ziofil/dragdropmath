@@ -390,7 +390,16 @@ export const evaluateLog: Rule = {
   },
 };
 
-/** log₂(8): tap the 8 to write it as 2³ (a power of the log's base). */
+/** The base of the nearest log whose argument piece `loc` is in (log₂(1/64): the 64's is 2), if any. */
+function logBaseAround(state: MathState, loc: { side: number; path: number[] }): Expr | null {
+  for (let n = loc.path.length - 1; n >= 0; n--) {
+    const up = nodeAt(state, { side: loc.side, path: loc.path.slice(0, n) });
+    if (up.kind === "log") return loc.path[n] === 1 ? up.base : null;
+  }
+  return null;
+}
+
+/** log₂(8), log₂(1/64): tap the 8 to write it as 2³ (a power of the base of the log it's in). */
 export const powerOfBase: Rule = {
   id: "power-of-base",
   name: "Write as a power of the base",
@@ -399,8 +408,9 @@ export const powerOfBase: Rule = {
   apply(state, id) {
     const c = dragCtx(state, id);
     if (c?.node.kind !== "num") return [];
-    // The base it goes with: its log's, or else one a power on the board is raised from (2^(x − 3) = 16).
-    const inLog = c.parent?.kind === "log" && c.index === 1 ? c.parent.base : null;
+    // The base it goes with: the log's it's inside (the whole argument or part of it), or else one a power on the board
+    // is raised from (2^(x − 3) = 16).
+    const inLog = logBaseAround(state, c.loc);
     const bases = inLog
       ? [inLog]
       : state.sides.flatMap(allNodes).flatMap((e) => (e.kind === "pow" && !e.radical && e.base.kind === "num" && !isConstant(e.exp) ? [e.base] : []));

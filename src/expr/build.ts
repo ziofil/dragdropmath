@@ -87,18 +87,22 @@ function normalizeNode(e: Expr): Expr {
     }
     case "prod": {
       let negative = false;
+      // The minus lifted out in front, when there's one: the same sign, so it keeps its id (−6 carried out of
+      // log₂(2⁻⁶) is still the piece in hand in −6·log₂2).
+      const lifted: string[] = [];
       let factors = e.factors
         .flatMap((f) => (f.kind === "prod" ? f.factors : [f]))
         .map((f) => {
           if (f.kind !== "neg") return f;
           negative = !negative;
+          lifted.push(f.id);
           return f.arg;
         })
         .flatMap((f) => (f.kind === "prod" ? f.factors : [f]));
       if (factors.length > 1) factors = factors.filter((f) => !isNum(f, 1) || (f.kind === "num" && f.explicit));
       const core: Expr =
         factors.length === 0 ? num(1) : factors.length === 1 ? factors[0] : { ...e, factors };
-      return negative ? (neg(core) as Neg) : core;
+      return negative ? (neg(core, lifted.length === 1 ? lifted[0] : undefined) as Neg) : core;
     }
     case "frac": {
       let negative = false;
