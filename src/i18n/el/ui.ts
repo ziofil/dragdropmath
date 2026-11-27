@@ -42,7 +42,7 @@ export const el: Translation = {
   saveProgress: "Εξαγωγή της προόδου σε αρχείο",
   loadProgress: "Φόρτωση της προόδου από αρχείο",
   progressSaved: "Αποθηκεύτηκε. Φόρτωσε αυτό το αρχείο εδώ ή σε οποιοδήποτε πρόγραμμα περιήγησης για να πάρεις πίσω την πρόοδό σου.",
-  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Με επιφύλαξη παντός δικαιώματος.`,
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Ανοιχτό λογισμικό με άδεια MIT.`,
   aboutLink: "Σχετικά",
   about: {
     title: "Σχετικά με το DragDropMath",

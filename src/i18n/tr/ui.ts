@@ -45,7 +45,7 @@ export const tr: Translation = {
   saveProgress: "İlerlemeni dosyaya aktar",
   loadProgress: "İlerlemeni dosyadan yükle",
   progressSaved: "Kaydedildi. İlerlemene yeniden kavuşmak için bu dosyayı burada ya da herhangi bir tarayıcıda yükle.",
-  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Tüm hakları saklıdır.`,
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. MIT Lisansı ile açık kaynak.`,
   aboutLink: "Hakkında",
   about: {
     title: "DragDropMath hakkında",

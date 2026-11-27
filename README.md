@@ -47,4 +47,4 @@ Turn on debug mode with `?debug` in the address or Shift+D. Dragology's overlay 
 
 ## License
 
-Proprietary: © 2026 Filippo Miatto, all rights reserved (see `LICENSE`). Open-source packages keep their own licenses; `npm run build` collects their notices into `third-party-licenses.txt`, published with the site. Before adding a dependency, check that its license allows closed commercial use (MIT, BSD, ISC, Apache are fine; GPL/AGPL are not).
+MIT: © 2026 Filippo Miatto (see `LICENSE`). That covers everything here: the code, the lessons, exercises, translations and artwork. Open-source packages keep their own licenses; `npm run build` collects their notices into `third-party-licenses.txt`, published with the site. Before adding a dependency, check that its license lets the whole stay MIT (MIT, BSD, ISC, Apache are fine; GPL/AGPL are not).

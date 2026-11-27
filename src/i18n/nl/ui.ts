@@ -42,7 +42,7 @@ export const nl: Translation = {
   saveProgress: "Voortgang exporteren naar een bestand",
   loadProgress: "Voortgang laden uit een bestand",
   progressSaved: "Opgeslagen. Laad dat bestand hier, of in een andere browser, en je hebt je voortgang terug.",
-  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Alle rechten voorbehouden.`,
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Open source onder de MIT-licentie.`,
   aboutLink: "Over",
   about: {
     title: "Over DragDropMath",

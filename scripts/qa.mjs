@@ -203,7 +203,7 @@ await go("#/", 400);
 check("no copyright line outside About", !(await p.textContent("body")).includes("©"));
 await p.click(".topbar a[href='#/about']");
 await p.waitForTimeout(300);
-check("…and leads to About, which says it in full", (await p.textContent("h1")).includes("About") && (await p.textContent(".about-rights")).includes("All rights reserved"));
+check("…and leads to About, which says it in full", (await p.textContent("h1")).includes("About") && (await p.textContent(".about-rights")).includes("MIT License"));
 
 // Bug 9: every skin draws every framed box and every button the same way.
 for (const skin of ["modern", "codex", "paper", "blackboard"]) {

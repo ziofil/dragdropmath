@@ -50,7 +50,7 @@ export const en = {
   loadProgress: "Load progress from a file",
   progressSaved: "Saved. Load that file here, or in any browser, to get your progress back.",
   /** At the end of About (and only there). */
-  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. All rights reserved.`,
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Open source under the MIT License.`,
   aboutLink: "About",
   /** The About page: who made the site, why, and what happens to what learners do. */
   about: {

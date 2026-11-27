@@ -42,7 +42,7 @@ export const it: Translation = {
   saveProgress: "Esporta i progressi in un file",
   loadProgress: "Carica i progressi da un file",
   progressSaved: "Salvato. Carica quel file qui, o in qualsiasi altro browser, per ritrovare i tuoi progressi.",
-  rightsReserved: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Tutti i diritti riservati.`,
+  copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Open source con licenza MIT.`,
   aboutLink: "Informazioni",
   about: {
     title: "Informazioni su DragDropMath",
