@@ -7,8 +7,6 @@
 /** What a backup file is: tagged, so loading something else is caught. */
 type Backup = { app: typeof APP; version: 1; saved: string; data: Record<string, string> };
 const APP = "dragdropmath";
-/** The site's earlier name: its backups still load. */
-const APPS: string[] = [APP, "math-by-hand"];
 
 /** The app's own keys (older ones from when it had another name too); not the debug switch. */
 const OURS = (key: string) => (key.startsWith("mathbyhand.") || key.startsWith("graspable.")) && key !== "mathbyhand.debug";
@@ -49,7 +47,7 @@ export function readBackup(text: string): { saved: string; entries: [string, str
     return null;
   }
   const v = b as Backup;
-  if (typeof v !== "object" || v === null || !APPS.includes(v.app) || v.version !== 1 || typeof v.data !== "object" || v.data === null || Array.isArray(v.data)) return null;
+  if (typeof v !== "object" || v === null || v.app !== APP || v.version !== 1 || typeof v.data !== "object" || v.data === null || Array.isArray(v.data)) return null;
   const entries = Object.entries(v.data).filter(([k]) => OURS(k));
   // Every value the app stores is JSON: one that isn't means the file was damaged or edited.
   for (const [, value] of entries) {
