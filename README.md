@@ -12,6 +12,8 @@ npm run test:quick # the same without the per-exercise drag and solvability chec
 npm run typecheck
 ```
 
+Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## How it fits together
 
 ```
