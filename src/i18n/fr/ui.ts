@@ -46,6 +46,11 @@ export const fr: Translation = {
   progressSaved: "C'est enregistré. Charge ce fichier ici, ou dans n'importe quel navigateur, pour retrouver ta progression.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Logiciel libre sous licence MIT.`,
   aboutLink: "À propos",
+  support: {
+    heading: "Soutenir le projet",
+    text: "DragDropMath est gratuit et sans publicité, et le restera. S'il t'a été utile, à toi ou à ta classe, tu peux l'aider à continuer avec un petit don.",
+    button: "Soutenir sur Ko-fi",
+  },
   about: {
     title: "À propos de DragDropMath",
     sections: [

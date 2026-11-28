@@ -52,6 +52,12 @@ export const en = {
   /** At the end of About (and only there). */
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Open source under the MIT License.`,
   aboutLink: "About",
+  /** On About: a link to donate (Ko-fi). */
+  support: {
+    heading: "Support it",
+    text: "DragDropMath is free, with no ads, and it will stay that way. If it has helped you or your class, you can help keep it going with a small donation.",
+    button: "Support it on Ko-fi",
+  },
   /** The About page: who made the site, why, and what happens to what learners do. */
   about: {
     title: "About DragDropMath",

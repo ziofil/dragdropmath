@@ -44,6 +44,11 @@ export const el: Translation = {
   progressSaved: "Αποθηκεύτηκε. Φόρτωσε αυτό το αρχείο εδώ ή σε οποιοδήποτε πρόγραμμα περιήγησης για να πάρεις πίσω την πρόοδό σου.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Ανοιχτό λογισμικό με άδεια MIT.`,
   aboutLink: "Σχετικά",
+  support: {
+    heading: "Στήριξέ το",
+    text: "Το DragDropMath είναι δωρεάν και χωρίς διαφημίσεις, και θα μείνει έτσι. Αν βοήθησε εσένα ή την τάξη σου, μπορείς να το στηρίξεις με μια μικρή δωρεά.",
+    button: "Στήριξέ το στο Ko-fi",
+  },
   about: {
     title: "Σχετικά με το DragDropMath",
     sections: [

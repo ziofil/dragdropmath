@@ -44,6 +44,11 @@ export const nl: Translation = {
   progressSaved: "Opgeslagen. Laad dat bestand hier, of in een andere browser, en je hebt je voortgang terug.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Open source onder de MIT-licentie.`,
   aboutLink: "Over",
+  support: {
+    heading: "Steun het project",
+    text: "DragDropMath is gratis en zonder advertenties, en dat blijft zo. Heb je er zelf of met je klas iets aan gehad? Met een kleine donatie help je het verder.",
+    button: "Steunen via Ko-fi",
+  },
   about: {
     title: "Over DragDropMath",
     sections: [

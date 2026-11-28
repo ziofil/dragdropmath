@@ -43,6 +43,11 @@ export const pl: Translation = {
   progressSaved: "Zapisano. Wczytaj ten plik tutaj albo w dowolnej przeglądarce, żeby odzyskać swoje postępy.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. Otwarte oprogramowanie na licencji MIT.`,
   aboutLink: "O stronie",
+  support: {
+    heading: "Wesprzyj projekt",
+    text: "DragDropMath jest bezpłatny i bez reklam – i tak zostanie. Jeśli pomógł tobie albo twojej klasie, możesz wesprzeć jego rozwój niewielką darowizną.",
+    button: "Wesprzyj na Ko-fi",
+  },
   about: {
     title: "O DragDropMath",
     sections: [

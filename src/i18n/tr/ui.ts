@@ -47,6 +47,11 @@ export const tr: Translation = {
   progressSaved: "Kaydedildi. İlerlemene yeniden kavuşmak için bu dosyayı burada ya da herhangi bir tarayıcıda yükle.",
   copyright: (year: number) => `© ${year > 2026 ? `2026–${year}` : "2026"} Filippo Miatto. MIT Lisansı ile açık kaynak.`,
   aboutLink: "Hakkında",
+  support: {
+    heading: "Projeye destek ol",
+    text: "DragDropMath ücretsiz ve reklamsız, hep de öyle kalacak. Sana ya da sınıfına faydalı olduysa, küçük bir bağışla devam etmesine yardım edebilirsin.",
+    button: "Ko-fi'de destek ol",
+  },
   about: {
     title: "DragDropMath hakkında",
     sections: [

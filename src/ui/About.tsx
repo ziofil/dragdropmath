@@ -15,6 +15,13 @@ export function About() {
           ))}
         </section>
       ))}
+      <section>
+        <h2>{t().support.heading}</h2>
+        <p>{t().support.text}</p>
+        <a className="button" href={KOFI} target="_blank" rel="noopener">
+          {t().support.button}
+        </a>
+      </section>
       <a className="button primary" href={href({ page: "home" })}>
         {t().learningPathButton}
       </a>
@@ -22,6 +29,9 @@ export function About() {
     </main>
   );
 }
+
+/** Where donations go. */
+const KOFI = "https://ko-fi.com/ziofil";
 
 const AUTHOR = "Filippo Miatto";
 const AUTHOR_SITE = "https://filippomiatto.com";
